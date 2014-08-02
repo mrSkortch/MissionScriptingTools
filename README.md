@@ -1,4 +1,4 @@
-Mission Scripting Tools
+Mission Scripting Tools blah blah
 =====================
 
 Mission Scripting Tools for Digital Combat Simulator
