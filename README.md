@@ -1,4 +1,4 @@
-MissionScriptingTools
+Mission Scripting Tools
 =====================
 
 Mission Scripting Tools for Digital Combat Simulator
