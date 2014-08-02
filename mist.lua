@@ -5,7 +5,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 3
 mist.minorVersion = 4
-mist.build = 27 
+mist.build = 26 
 
 --------------------------------------------------------------------------------------------------------------
 -- the main area
