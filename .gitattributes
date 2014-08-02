@@ -24,3 +24,4 @@
 .gitattributes export-ignore
 .gitignore export-ignore
 README.md export-ignore
+mist_doc_file.doc export-ignore
