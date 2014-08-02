@@ -21,6 +21,9 @@
 *.rtf	 diff=astextplain
 *.RTF	 diff=astextplain
 
+* text=auto
+
+
 .gitattributes export-ignore
 .gitignore export-ignore
 README.md export-ignore
