@@ -1,10 +1,17 @@
+--[[
+v27
+added mist.flagFunc.group_alive
+added mist.flagFunc.group_dead
+added mist.flagFunc.group_alive_less_than
+added mist.flagFunc.group_dead_less_than
+]]
 
 --MiST Mission Scripting Tools
 mist = {}
 
 -- don't change these
 mist.majorVersion = 3
-mist.minorVersion = 4
+mist.minorVersion = 5
 mist.build = 27 
 
 --------------------------------------------------------------------------------------------------------------
@@ -2420,6 +2427,178 @@ toggle = boolean or nil
 	end
 end
 
+mist.flagFunc.group_alive = function(vars)
+--[[vars
+groupName
+flag
+toggle
+interval
+stopFlag
+
+]]
+	local type_tbl = {
+	[{'group', 'groupname', 'gp', 'groupName'}] = 'string', 
+	flag = 'number', 
+	stopflag = {'number', 'nil'}, 
+	interval = {'number', 'nil'}, 
+	toggle = {'boolean', 'nil'},
+	}
+	
+	local err, errmsg = mist.utils.typeCheck('mist.flagFunc.group_alive', type_tbl, vars)
+	assert(err, errmsg)
+	
+	local groupName = vars.groupName or vars.group or vars.gp or vars.Groupname
+	local flag = vars.flag
+	local stopflag = vars.stopflag or -1
+	local interval = vars.interval or 1
+	local toggle = vars.toggle or nil
+	
+	
+	if stopflag == -1 or (type(trigger.misc.getUserFlag(stopflag)) == 'number' and trigger.misc.getUserFlag(stopflag) == 0) or (type(trigger.misc.getUserFlag(stopflag)) == 'boolean' and trigger.misc.getUserFlag(stopflag) == false) then
+		if Group.getByName(groupName) and Group.getByName(groupName):isActive() then
+			if trigger.misc.getUserFlag(flag) == 0 then
+				trigger.action.setUserFlag(flag, true)
+			end
+		else
+			if toggle then
+				trigger.action.setUserFlag(flag, false)
+			end
+		end
+	end
+		
+	if (type(trigger.misc.getUserFlag(stopflag)) == 'number' and trigger.misc.getUserFlag(stopflag) == 0) or (type(trigger.misc.getUserFlag(stopflag)) == 'boolean' and trigger.misc.getUserFlag(stopflag) == false) then
+		mist.scheduleFunction(mist.flagFunc.group_alive, {{groupName = groupName, flag = flag, stopflag = stopflag, interval = interval, toggle = toggle}}, timer.getTime() + interval)
+	end
+
+end
+
+mist.flagFunc.group_dead = function(vars)
+	local type_tbl = {
+	[{'group', 'groupname', 'gp', 'groupName'}] = 'string', 
+	flag = 'number', 
+	stopflag = {'number', 'nil'}, 
+	interval = {'number', 'nil'}, 
+	toggle = {'boolean', 'nil'},
+	}
+	
+	local err, errmsg = mist.utils.typeCheck('mist.flagFunc.group_dead', type_tbl, vars)
+	assert(err, errmsg)
+	
+	local groupName = vars.groupName or vars.group or vars.gp or vars.Groupname
+	local flag = vars.flag
+	local stopflag = vars.stopflag or -1
+	local interval = vars.interval or 1
+	local toggle = vars.toggle or nil
+	
+	
+	if stopflag == -1 or (type(trigger.misc.getUserFlag(stopflag)) == 'number' and trigger.misc.getUserFlag(stopflag) == 0) or (type(trigger.misc.getUserFlag(stopflag)) == 'boolean' and trigger.misc.getUserFlag(stopflag) == false) then
+		if not Group.getByName(groupName) then
+			if trigger.misc.getUserFlag(flag) == 0 then
+				trigger.action.setUserFlag(flag, true)
+			end
+		else
+			if toggle then
+				trigger.action.setUserFlag(flag, false)
+			end
+		end
+	end
+		
+	if (type(trigger.misc.getUserFlag(stopflag)) == 'number' and trigger.misc.getUserFlag(stopflag) == 0) or (type(trigger.misc.getUserFlag(stopflag)) == 'boolean' and trigger.misc.getUserFlag(stopflag) == false) then
+		mist.scheduleFunction(mist.flagFunc.group_dead, {{groupName = groupName, flag = flag, stopflag = stopflag, interval = interval, toggle = toggle}}, timer.getTime() + interval)
+	end
+end
+
+mist.flagFunc.group_alive_less_than = function(vars)
+	env.info('aliveless')
+	local type_tbl = {
+	[{'group', 'groupname', 'gp', 'groupName'}] = 'string',
+	percent = 'number',
+	flag = 'number', 
+	stopflag = {'number', 'nil'}, 
+	interval = {'number', 'nil'}, 
+	toggle = {'boolean', 'nil'},
+	}
+	
+	local err, errmsg = mist.utils.typeCheck('mist.flagFunc.group_alive_less_than', type_tbl, vars)
+	assert(err, errmsg)
+	
+	local groupName = vars.groupName or vars.group or vars.gp or vars.Groupname
+	local flag = vars.flag
+	local percent = vars.percent
+	local stopflag = vars.stopflag or -1
+	local interval = vars.interval or 1
+	local toggle = vars.toggle or nil
+	
+	
+	if stopflag == -1 or (type(trigger.misc.getUserFlag(stopflag)) == 'number' and trigger.misc.getUserFlag(stopflag) == 0) or (type(trigger.misc.getUserFlag(stopflag)) == 'boolean' and trigger.misc.getUserFlag(stopflag) == false) then
+		if Group.getByName(groupName) and Group.getByName(groupName):isActive() then
+			if Group.getByName(groupName):getSize()/Group.getByName(groupName):getInitialSize() < percent/100 then
+				if trigger.misc.getUserFlag(flag) == 0 then
+					trigger.action.setUserFlag(flag, true)
+				end
+			else
+				if toggle then
+					trigger.action.setUserFlag(flag, false)
+				end
+			end
+		else
+			if trigger.misc.getUserFlag(flag) == 0 then
+				trigger.action.setUserFlag(flag, true)
+			end
+		end
+	end
+		
+	if (type(trigger.misc.getUserFlag(stopflag)) == 'number' and trigger.misc.getUserFlag(stopflag) == 0) or (type(trigger.misc.getUserFlag(stopflag)) == 'boolean' and trigger.misc.getUserFlag(stopflag) == false) then
+		mist.scheduleFunction(mist.flagFunc.group_alive_less_than, {{groupName = groupName, flag = flag, stopflag = stopflag, interval = interval, toggle = toggle, percent = percent}}, timer.getTime() + interval)
+	end
+end
+
+mist.flagFunc.group_alive_more_than = function(vars)
+	local type_tbl = {
+	[{'group', 'groupname', 'gp', 'groupName'}] = 'string',
+	percent = 'number',
+	flag = 'number', 
+	stopflag = {'number', 'nil'}, 
+	interval = {'number', 'nil'}, 
+	toggle = {'boolean', 'nil'},
+	}
+	
+	local err, errmsg = mist.utils.typeCheck('mist.flagFunc.group_alive_more_than', type_tbl, vars)
+	assert(err, errmsg)
+	
+	local groupName = vars.groupName or vars.group or vars.gp or vars.Groupname
+	local flag = vars.flag
+	local percent = vars.percent
+	local stopflag = vars.stopflag or -1
+	local interval = vars.interval or 1
+	local toggle = vars.toggle or nil
+	
+	
+	if stopflag == -1 or (type(trigger.misc.getUserFlag(stopflag)) == 'number' and trigger.misc.getUserFlag(stopflag) == 0) or (type(trigger.misc.getUserFlag(stopflag)) == 'boolean' and trigger.misc.getUserFlag(stopflag) == false) then
+		if Group.getByName(groupName) and Group.getByName(groupName):isActive() then
+			if Group.getByName(groupName):getSize()/Group.getByName(groupName):getInitialSize() > percent/100 then
+				if trigger.misc.getUserFlag(flag) == 0 then
+					trigger.action.setUserFlag(flag, true)
+				end
+			else
+				if toggle and trigger.misc.getUserFlag(flag) == 1 then
+					trigger.action.setUserFlag(flag, false)
+				end
+			end
+		else --- just in case
+			if toggle and trigger.misc.getUserFlag(flag) == 1 then
+				trigger.action.setUserFlag(flag, false)
+			end
+		end
+	end
+		
+	if (type(trigger.misc.getUserFlag(stopflag)) == 'number' and trigger.misc.getUserFlag(stopflag) == 0) or (type(trigger.misc.getUserFlag(stopflag)) == 'boolean' and trigger.misc.getUserFlag(stopflag) == false) then
+		mist.scheduleFunction(mist.flagFunc.group_alive_more_than, {{groupName = groupName, flag = flag, stopflag = stopflag, interval = interval, toggle = toggle, percent = percent}}, timer.getTime() + interval)
+	end
+end
+
+
+
 --Gets the average position of a group of units (by name)
 mist.getAvgPos = function(unitNames)
 	local avgX, avgY, avgZ, totNum = 0, 0, 0, 0
@@ -2732,9 +2911,9 @@ mist.fixedWing.buildWP = function(point, WPtype, speed, alt, altType)
 	
 	if altType then
 		altType = string.lower(altType)
-		if altType == 'radio' or 'agl' then
+		if altType == 'radio' or altType == 'agl' then
 			wp.alt_type = 'RADIO'
-		elseif altType == 'baro' or 'asl' then
+		elseif altType == 'baro' or altType == 'asl' then
 			wp.alt_type = 'BARO'
 		end
 	else
@@ -2791,9 +2970,9 @@ mist.heli.buildWP = function(point, WPtype, speed, alt, altType)
 	
 	if altType then
 		altType = string.lower(altType)
-		if altType == 'radio' or 'agl' then
+		if altType == 'radio' or altType == 'agl' then
 			wp.alt_type = 'RADIO'
-		elseif altType == 'baro' or 'asl' then
+		elseif altType == 'baro' or altType == 'asl' then
 			wp.alt_type = 'BARO'
 		end
 	else
