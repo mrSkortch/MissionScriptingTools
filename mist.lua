@@ -1,4 +1,12 @@
 --[[
+v28
+added mist.getUnitSkill
+added mist.stringMatch
+added mist.groupTableCheck
+added mist.spawnRandomizedGroup
+added mist.randomizeGroupOrder
+
+
 v27
 added mist.flagFunc.group_alive
 added mist.flagFunc.group_dead
@@ -12,7 +20,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 3
 mist.minorVersion = 5
-mist.build = 27 
+mist.build = 28 
 
 --------------------------------------------------------------------------------------------------------------
 -- the main area
@@ -871,6 +879,18 @@ mist.getNorthCorrection = function(point)  --gets the correction needed for true
 	local lat, lon = coord.LOtoLL(point)
 	local north_posit = coord.LLtoLO(lat + 1, lon)
 	return math.atan2(north_posit.z - point.z, north_posit.x - point.x)
+end
+
+mist.getUnitSkill = function(unitName)
+	if Unit.getByName(unitName) then
+		local lunit = Unit.getByName(unitName)
+		for name, data in pairs(mist.DBs.unitsByName) do
+			if name == unitName and data.type == lunit:getTypeName() and data.unitId == lunit:getID() and data.skill then
+				return data.skill
+			end
+		end
+	end
+	return false
 end
 
 function mist.getGroupPoints(groupname)   -- if groupname exists in env.mission, then returns table of the group's points in numerical order, such as: { [1] = {x = 299435.224, y = -1146632.6773}, [2] = { x = 663324.6563, y = 322424.1112}}
@@ -4640,6 +4660,30 @@ do -- all function uses of group and unit Ids must be in this do statement
 	return newGroup.name
 	
 	end
+	
+mist.groupTableCheck = function(groupData)
+	local isOk = false
+	
+	if groupData.country then
+		isOk = true
+	end
+	if groupData.category then
+		isOk = true
+	else
+		isOk = false
+	end
+	if groupData.units then
+		for unitId, unitData in pairs(groupData.units) do
+			if unitData.x and unitData.y and unitData.type then
+				isOk = true
+			end
+		end
+	else
+		isOk = false
+	end
+	
+	return isOk
+end	
 
 mist.getCurrentGroupData = function(gpName)
 	if Group.getByName(gpName) then
@@ -4665,7 +4709,7 @@ mist.getCurrentGroupData = function(gpName)
 			newData.units[unitNum]['x'] = unitData:getPosition().p.x
 			newData.units[unitNum]['y'] = unitData:getPosition().p.z
 			newData.units[unitNum]["type"] = unitData:getTypeName()
-			--newData.units[unitNum]["skill"] = unitData.skill
+			newData.units[unitNum]["skill"] = mist.getUnitSkill(unitData:getName())
 			
 			-- get velocity needed
 			newData.units[unitNum]["unitName"] = unitData:getName()
@@ -4974,7 +5018,104 @@ mist.teleportGroup = function(gpName, task)
 	end
 	return newGroup
 end
+
+mist.spawnRandomizedGroup = function(groupName, vars) -- need to debug
+
+	if Group.getByName(groupName) then
+		local gpData = mist.getGroupData(groupName)
+		gpData.units = mist.randomizeGroupOrder(gpData.units, vars)
+		gpData.route = mist.getGroupRoute(groupName, 'task')
+		
+		mist.dynAdd(gpData)
+	end
 	
+	return true
+end
+	
+mist.randomizeGroupOrder = function(units, vars) -- does the heavy lifting
+	
+	local exclude = {}
+	if vars and vars.exclude and type(vars.exclude) == 'table' then
+		exclude = vars.exclude 
+	end
+	
+	local low, hi
+	
+	if vars and vars.lowerLimit and type(vars.lowerLimit) == 'number' then
+		low = mist.utils.round(vars.lowerLimit)
+	else
+		low = 1
+	end
+	
+	if vars and vars.upperLimit and type(vars.upperLimit) == 'number' then
+		hi = mist.utils.round(vars.upperLimit)
+	else
+		hi = #units
+	end
+	
+	local newGroup = {}
+		
+	local randomizedUnits = {}
+	local excludeIndex = {}
+	local size = 0
+	for unitId, unitData in pairs(units) do
+		if unitId >= low and unitId <= hi then -- if within range
+			local found = false
+			if #exclude > 0 then
+				for excludeName, index in pairs(exclude) do -- check if excluded
+					if mist.stringMatch(excludeName, unitData.type) then -- if excluded
+						excludeIndex[unitId] = unitData.unitName
+						newGroup[unitId] = unitData
+						size = size + 1
+						found = true
+					end
+				end
+			end
+			if found == false then
+				table.insert(randomizedUnits, unitData)
+			end
+		else -- unitId is either to low, or to high: added to exclude list 
+			newGroup[unitId] = unitData
+			excludeIndex[unitId] = unitData.unitName
+			size = size + 1
+		end
+	end	
+
+	for unitId, unitData in pairs(randomizedUnits) do
+		local found = false
+		local i = 0
+		while found == false do
+			i = mist.random(#units) -- get random int the size of the group
+			env.info(i)
+			if size > 0 then
+				local noMatch = true
+				for index, data in pairs(excludeIndex) do
+					if i == index then
+						noMatch = false
+						break
+					end
+				end
+				if noMatch == true then
+					excludeIndex[i] = unitData.unitName
+					size = size + 1
+					found = true
+				end
+			else
+				excludeIndex[i] = unitData.unitName
+				size = size + 1
+				found = true
+			end
+		end
+	
+		newGroup[i] = mist.utils.deepCopy(units[i]) -- gets all of the unit data
+		newGroup[i].type = mist.utils.deepCopy(unitData.type)
+		newGroup[i].skill = mist.utils.deepCopy(unitData.skill)
+		newGroup[i].unitName = mist.utils.deepCopy(unitData.unitName)
+		newGroup[i].unitId = mist.utils.deepCopy(unitData.unitId) -- replaces the units data with a new type
+		
+	end	
+	return newGroup
+end	
 
 end
 
@@ -5124,6 +5265,30 @@ mist.random = function(firstNum, secondNum) -- no support for decimals
 	return choices[rtnVal]
 end
 
+mist.stringMatch = function(s1, s2)
+	if type(s1) == 'string' and type(s2) == 'string' then
+		s1 = string.gsub(s1, "%-", '')
+		s1 = string.gsub(s1, "%(", '')
+		s1 = string.gsub(s1, "%)", '')
+		s1 = string.gsub(s1, "%_", '')
+		s1 = string.lower(s1)
+		
+		s2 = string.gsub(s2, "%-", '')
+		s2 = string.gsub(s2, "%(", '')
+		s2 = string.gsub(s2, "%)", '')
+		s2 = string.gsub(s2, "%_", '')
+		s2 = string.lower(s2)
+		
+		if s1 == s2 then
+			return true
+		else
+			return false
+		end
+	else
+		assert('Either the first or second variable were not strings')
+		return false
+	end
+end
 mist.DBs.const = {}
 
 --[[
