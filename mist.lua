@@ -5,6 +5,7 @@ added mist.stringMatch
 added mist.groupTableCheck
 added mist.spawnRandomizedGroup
 added mist.randomizeGroupOrder
+added mist.getUnitsInPolygon
 
 
 v27
@@ -2034,6 +2035,22 @@ function mist.pointInPolygon(point, poly, maxalt) --raycasting point in polygon.
 	end
 end
 
+mist.getUnitsInPolygon = function (unit_names, polyZone, max_alt)
+	local units = {}
+	
+	for i = 1, #unit_names do
+		units[#units + 1] = Unit.getByName(unitNames[i])
+	end
+	
+	local inZoneUnits = {}
+	for i =1, #units do
+		if mist.pointInPolygon(units[i]:getPosition().p, polyZone, max_alt) then
+			inZoneUnits[inZoneUnits + 1] = units[i]
+		end
+	end
+	
+	return inZoneUnits
+end
 
 function mist.flagFunc.units_in_polygon(vars)
 --[[vars needs to be:
