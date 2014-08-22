@@ -1,6 +1,8 @@
 --[[
 v30
 -Optimizations and fixes of refactoring
+-mist.dbUpdate changed to a local dbUpdate function. now no longer accessible globally
+- added mist.matchString because I always get it backwards
 
 v29
 -Refactoring dbUpdate and related functions integration
@@ -55,7 +57,9 @@ writeGroups contains all DB creation code
 do
 	local coroutines = {}
 	
-	
+	local tempSpawnedUnits = {} -- birth events added here
+	local mistAddedObjects = {} -- mist.dynAdd added here
+	local writeGroups = {}
 	
 	local function update_alive_units()  -- coroutine function
 		local lalive_units = mist.DBs.aliveUnits -- local references for faster execution
@@ -103,65 +107,199 @@ do
 		end
 	end
 	
-	local tempSpawnedUnits = {} -- birth events added here
-	local addToDBs = {} -- mist.dynAdd added here
-	local sizeTempSpawnUnits = 0
-	local writeGroups = {}
+	local function dbUpdate(event)
+		local newTable = {}
+		
+		local tableSize = #mist.DBs.dynGroupsAdded + 1
+		newTable['startTime'] =  timer.getAbsTime()
+		
+		if type(event) == 'string' then -- if name of an object. 
+			--env.info('event')
+			local newObject
+			local newType = 'group'
+			if Group.getByName(event) then
+				newObject = Group.getByName(event)
+			elseif StaticObject.getByName(event) then
+				newObject = StaticObject.getByName(event)
+				newType = 'static'
+			--	env.info('its static')
+			else
+				env.info('WTF')
+				return false
+			end
+			
+
+			
+			newTable.name = newObject:getName()
+			newTable.groupId = tonumber(newObject:getID())
+
+			local unitOneRef 
+			if newType == 'static' then
+			
+				unitOneRef = newObject	
+				newTable.countryId = tonumber(newObject:getCountry())
+				newTable.coalitionId = tonumber(newObject:getCoalition())
+				newTable.category = 'static'
+			else
+				unitOneRef = newObject:getUnits()
+				newTable.countryId = tonumber(unitOneRef[1]:getCountry())
+				newTable.coalitionId = tonumber(unitOneRef[1]:getCoalition())
+				newTable.category = tonumber(newObject:getCategory())
+			end
+			
+			for countryData, countryId in pairs(country.id) do
+				if newTable.country and string.upper(countryData) == string.upper(newTable.country) or countryId == newTable.countryId then
+					newTable['countryId'] = countryId
+					newTable['country'] = string.lower(countryData)
+					for coaData, coaId in pairs(coalition.side) do
+						if coaId == coalition.getCountryCoalition(countryId) then 
+							newTable['coalition'] = string.lower(coaData)
+						end
+					end
+				end
+			end
+
+			for catData, catId in pairs(Unit.Category) do
+				if Group.getByName(newTable.name):isExist() then
+					if catId == Group.getByName(newTable.name):getCategory() then
+						newTable['category'] = string.lower(catData)
+					end
+				elseif StaticObject.getByName(newTable.name):isExist() then
+					if catId == StaticObject.getByName(newTable.name):getCategory() then
+						newTable['category'] = string.lower(catData)
+					end
+					
+				end
+			end
+			
+			newTable.units = {}
+			if newType == 'group' then
+				for unitId, unitData in pairs(unitOneRef) do
+					newTable.units[unitId] = {}
+					newTable.units[unitId].unitName = unitData:getName()
+					
+					newTable.units[unitId].x = mist.utils.round(unitData:getPosition().p.x)
+					newTable.units[unitId].y = mist.utils.round(unitData:getPosition().p.z)
+					newTable.units[unitId].alt = mist.utils.round(unitData:getPosition().p.y)
+			
+					newTable.units[unitId].heading = mist.getHeading(unitData, true)
+
+					newTable.units[unitId].type = unitData:getTypeName()
+					newTable.units[unitId].unitId = tonumber(unitData:getID())
+					
+					
+					newTable.units[unitId].groupName = newTable.name
+					newTable.units[unitId].groupId = newTable.groupId
+					newTable.units[unitId].countryId = newTable.countryId
+					newTable.units[unitId].coalitionId = newTable.coalitionId
+					newTable.units[unitId].coalition = newTable.coalition
+					newTable.units[unitId].country = newTable.country
+					local found = false
+					for index, data in pairs(mistAddedObjects) do
+						if mist.stringMatch(data.name, newTable.units[unitId].unitName) == true then
+							found = true
+							newTable.units[unitId].livery_id = data.livery_id
+							newTable.units[unitId].skill = data.skill
+							newTable.units[unitId].alt_type = data.alt_type	
+							
+							mistAddedObjects[index] = nil
+						end
+						if found == false then
+							newTable.units[unitId].skill = "High"
+							newTable.units[unitId].alt_type = "BARO"	
+						end
+					end
+					
+				end
+			else -- its a static
+
+				newTable.units[1] = {}
+				newTable.units[1].unitName = newObject:getName()
+				
+				newTable.units[1].x = mist.utils.round(newObject:getPosition().p.x)
+				newTable.units[1].y = mist.utils.round(newObject:getPosition().p.z)
+				newTable.units[1].alt = mist.utils.round(newObject:getPosition().p.y)
+				newTable.units[1].heading = mist.getHeading(newObject, true)
+				newTable.units[1].type = newObject:getTypeName()
+				newTable.units[1].unitId = tonumber(newObject:getID())
+				newTable.units[1].groupName = newTable.name
+				newTable.units[1].groupId = newTable.groupId
+				newTable.units[1].countryId = newTable.countryId
+				newTable.units[1].country = newTable.country
+				newTable.units[1].coalitionId = newTable.coalitionId
+				newTable.units[1].coalition = newTable.coalition
+				
+				----- search mist added objects for extra data if applicable
+				for index, data in pairs(mistAddedObjects) do
+					if mist.stringMatch(data.name, newTable.units[1].unitName) == true then
+						newTable.units[1].shape_name = data.shape_name -- for statics
+						newTable.units[1].livery_id = data.livery_id
+						newTable.units[1].airdromeId = data.airdromeId
+						mistAddedObjects[index] = nil
+					end
+				end
+			end
+		end
+	
+		newTable['timeAdded'] = timer.getAbsTime() -- only on the dynGroupsAdded table. For other reference, see start time
+		--mist.debug.dumpDBs()
+		--end
+		return newTable
+	end
+	
+
 	
 	local function checkSpawnedEvents()
-		if sizeTempSpawnUnits > 0 then
+		if #tempSpawnedUnits > 0 then
 			local groupsToAdd = {}
 			local ltemp = tempSpawnedUnits
 			local ltable = table
-			for index, gpData in pairs(addToDBs) do
-				groupsToAdd[#groupsToAdd + 1] = gpData
-				groupsToAdd[#groupsToAdd].mist = true -- ok now
-				
-				addToDBs[index] = nil
+
+			local updatesPerRun = math.ceil(#tempSpawnedUnits/20)
+			if updatesPerRun < 5 then
+				updatesPerRun = 5
 			end
 			--env.info(#groupsToAdd)
 			--env.info(#tempSpawnedUnits)
-			for eventId, eventData in pairs(ltemp) do
-				if eventData and eventData:isExist() then
-					if eventData:getCategory() == 1 then -- normal groups
-						local match = false
-						if #groupsToAdd > 0 then -- if groups are expected
-							for groupId, groupData in pairs(groupsToAdd) do -- iterate through known groups to add
-								if (type(groupData) == 'string' and groupData == eventData:getGroup():getName()) or (type(groupData) == 'table' and groupData.name == eventData:getGroup():getName()) then -- already added, do nothing
-									match = true
-									break
-								end
+			for x = 1, #tempSpawnedUnits do
+				local spawnedObj = ltemp[x]
+				if spawnedObj and spawnedObj:isExist() then
+					local found = false
+					for index, name in pairs(groupsToAdd) do
+						if spawnedObj:getCategory() == 1 then -- normal groups
+							if mist.stringMatch(spawnedObj:getGroup():getName(), name) == true then
+								found = true
+								break
 							end
-							if match == false then -- hasn't been added
-								groupsToAdd[#groupsToAdd + 1] = eventData:getGroup():getName()
-							end
-						else -- no groups added by mist
-							groupsToAdd[#groupsToAdd + 1] = eventData:getGroup():getName()
-						end
-					elseif  eventData:getCategory() == 3 then -- static objects
-						local name = eventData:getName()
-						local found = false
-						for groupId, groupData in pairs(groupsToAdd) do
-							if type(groupData) == 'string' and groupData == name then
+						elseif spawnedObj:getCategory() == 3 then -- static objects
+							if mist.stringMatch(spawnedObj:getName(), name) == true then
 								found = true
 								break
 							end
 						end
-						if found == false then
-							groupsToAdd[#groupsToAdd + 1] = name
+					end
+					if found == false then
+						if spawnedObj:getCategory() == 1 then -- normal groups
+							groupsToAdd[#groupsToAdd + 1] = spawnedObj:getGroup():getName()
+						elseif  spawnedObj:getCategory() == 3 then -- static objects
+							groupsToAdd[#groupsToAdd + 1] = spawnedObj:getName()
 						end
 					end
 				end
-				ltemp[eventId] = nil
-				sizeTempSpawnUnits = sizeTempSpawnUnits - 1
+				
+
+				table.remove(ltemp, x)
+				if x%updatesPerRun == 0 then  
+					coroutine.yield()
+				end 
+				
 			end
 			
 			
 			if #groupsToAdd > 0 then
-				--env.info('doDBUpdate')
-				for groupId, groupData in pairs(groupsToAdd) do
-					if not mist.DBs.groupsByName[groupData] or mist.DBs.groupsByName[groupData] and mist.DBs.groupsByName[groupData].startTime + 10 < timer.getAbsTime() then
-						writeGroups[#writeGroups + 1] = mist.dbUpdate(groupData)
+				for groupId, groupName in pairs(groupsToAdd) do
+					if not mist.DBs.groupsByName[groupName] or mist.DBs.groupsByName[groupName] and mist.DBs.groupsByName[groupName].startTime + 10 < timer.getAbsTime() then
+						writeGroups[#writeGroups + 1] = dbUpdate(groupName)
 					end
 				end
 			end
@@ -174,7 +312,6 @@ do
 		for index, newTable in pairs(writeGroups) do
 			i = i + 1
 		end
-		env.info(i)
 		local savesPerRun = math.ceil(i/10)
 		if savesPerRun < 5 then
 			savesPerRun = 5
@@ -242,8 +379,7 @@ do
 	
 	local update_alive_units_counter = 0
 	local write_DB_table_counter = 0
-	
-	local writeDBTimer = 1
+	local check_spawn_events_counter = 0
 	
 	-- THE MAIN FUNCTION --   Accessed 100 times/sec.
 	mist.main = function()
@@ -266,7 +402,21 @@ do
 			end
 		end
 
-		
+		check_spawn_events_counter = check_spawn_events_counter + 1
+		if check_spawn_events_counter == 10 then 
+			
+			check_spawn_events_counter = 0
+			
+			if not coroutines.checkSpawnedEvents then
+				coroutines['checkSpawnedEvents'] = coroutine.create(checkSpawnedEvents)
+			end
+			
+			coroutine.resume(coroutines.checkSpawnedEvents)
+			
+			if coroutine.status(coroutines.checkSpawnedEvents) == 'dead' then
+				coroutines.checkSpawnedEvents = nil
+			end
+		end
 		
 		-----------------------------------------------------------------------------------------------------------
 		--updating alive units
@@ -315,167 +465,10 @@ do
 	local function groupSpawned(event)
 		if event.id == world.event.S_EVENT_BIRTH and timer.getTime0() < timer.getAbsTime()then -- dont need to add units spawned in at the start of the mission if mist is loaded in init line
 			table.insert(tempSpawnedUnits,(event.initiator))
-			sizeTempSpawnUnits = sizeTempSpawnUnits + 1
 		end
 	end
 
-	mist.dbUpdate = function(event)
-		local groupData
-
-		if type(event) == 'string' then -- if name of an object. 
-			--env.info('event')
-			local newObject
-			local newType = 'group'
-			if Group.getByName(event) then
-				newObject = Group.getByName(event)
-				--env.info('group')
-			elseif StaticObject.getByName(event) then
-				newObject = StaticObject.getByName(event)
-				newType = 'static'
-			--	env.info('its static')
-			else
-				env.info('WTF')
-				return false
-			end
-			
-			groupData = {}
-			groupData.name = newObject:getName()
-			groupData.groupId = tonumber(newObject:getID())
-
-			local unitOneRef 
-			if newType == 'static' then
-			
-				unitOneRef = newObject	
-				groupData.countryId = tonumber(newObject:getCountry())
-				groupData.coalitionId = tonumber(newObject:getCoalition())
-				groupData.category = 'static'
-			else
-				unitOneRef = newObject:getUnits()
-				groupData.countryId = tonumber(unitOneRef[1]:getCountry())
-				groupData.coalitionId = tonumber(unitOneRef[1]:getCoalition())
-				groupData.category = tonumber(newObject:getCategory())
-			end
-			
-			groupData.units = {}
-			if newType == 'group' then
-				for unitId, unitData in pairs(unitOneRef) do
-					groupData.units[unitId] = {}
-					groupData.units[unitId].name = unitData:getName()
-					
-					groupData.units[unitId].x = mist.utils.round(unitData:getPosition().p.x)
-					groupData.units[unitId].y = mist.utils.round(unitData:getPosition().p.z)
-					groupData.units[unitId].alt = mist.utils.round(unitData:getPosition().p.y)
-					groupData.units[unitId].alt_type = "BARO"				
-					groupData.units[unitId].heading = mist.getHeading(unitData, true)
-
-					groupData.units[unitId].type = unitData:getTypeName()
-					groupData.units[unitId].unitId = tonumber(unitData:getID())
-					groupData.units[unitId].skill = "HIGH" 
-					
-					groupData.units[unitId].groupName = groupData.name
-					groupData.units[unitId].groupId = groupData.groupId
-					groupData.units[unitId].countryId = groupData.countryId
-					groupData.units[unitId].coalitionId = groupData.coalitionId
-					
-				end
-			else -- its a static
-
-				groupData.units[1] = {}
-				groupData.units[1].name = newObject:getName()
-				
-				groupData.units[1].x = mist.utils.round(newObject:getPosition().p.x)
-				groupData.units[1].y = mist.utils.round(newObject:getPosition().p.z)
-				groupData.units[1].alt = mist.utils.round(newObject:getPosition().p.y)
-				groupData.units[1].heading = mist.getHeading(newObject, true)
-				groupData.units[1].type = newObject:getTypeName()
-				groupData.units[1].unitId = tonumber(newObject:getID())
-				groupData.units[1].groupName = groupData.name
-				groupData.units[1].groupId = groupData.groupId
-				groupData.units[1].countryId = groupData.countryId
-				groupData.units[1].coalitionId = groupData.coalitionId
 	
-			
-			end
-
-		
-		else -- its a table
-			groupData = event
-	
-		end
-	
-
-
-		--mist.debug.writeData(mist.utils.serialize,{'DBs', groupData}, 'newUnits.txt')	
-		--for newGroupIndex, newGroupData in pairs(groupData) do
-
-		local newTable = {}
-		
-		local tableSize = #mist.DBs.dynGroupsAdded + 1
-		newTable['name'] = groupData.name
-		newTable['groupId'] = groupData.groupId
-		newTable['startTime'] =  timer.getAbsTime()
-		newTable['task'] = groupData.task
-		
-
-		for countryData, countryId in pairs(country.id) do
-			if groupData.country and string.upper(countryData) == string.upper(groupData.country) or countryId == groupData.countryId then
-				newTable['countryId'] = countryId
-				newTable['country'] = string.lower(countryData)
-				for coaData, coaId in pairs(coalition.side) do
-					if coaId == coalition.getCountryCoalition(countryId) then 
-						newTable['coalition'] = string.lower(coaData)
-					end
-				end
-			end
-		end
-
-		for catData, catId in pairs(Unit.Category) do
-			if Group.getByName(groupData.name):isExist() then
-				if catId == Group.getByName(groupData.name):getCategory() then
-					newTable['category'] = string.lower(catData)
-				end
-			elseif StaticObject.getByName(groupData.name):isExist() then
-				if catId == StaticObject.getByName(groupData.name):getCategory() then
-					newTable['category'] = string.lower(catData)
-				end
-				
-			end
-		end
-		
-
-
-	
-		newTable['units'] = {}
-		for newUnitId, newUnitData in pairs(groupData.units) do
-		
-			newTable['units'][newUnitId] = {}
-			newTable['units'][newUnitId]['unitName'] = newUnitData.name
-			newTable['units'][newUnitId]['groupId'] = tonumber(groupData.groupId)
-			newTable['units'][newUnitId]['heading'] = newUnitData.heading
-			newTable['units'][newUnitId]['point'] = {}
-			newTable['units'][newUnitId]['point']['x'] = newUnitData.x
-			newTable['units'][newUnitId]['point']['y'] = newUnitData.y
-			newTable['units'][newUnitId]['alt'] = newUnitData.alt
-			newTable['units'][newUnitId]['alt_type'] = newUnitData.alt_type
-			newTable['units'][newUnitId]['unitId'] = tonumber(newUnitData.unitId)
-			newTable['units'][newUnitId]['speed'] = newUnitData.speed
-			newTable['units'][newUnitId]['airdromeId'] = newUnitData.airdromeId
-			newTable['units'][newUnitId]['type'] = newUnitData.type
-			newTable['units'][newUnitId]['skill'] = newUnitData.skill
-			newTable['units'][newUnitId]['groupName'] = groupData.name
-			newTable['units'][newUnitId]['livery_id'] = groupData.livery_id
-			newTable['units'][newUnitId]['country'] = string.lower(newTable.country)
-			newTable['units'][newUnitId]['countryId'] = newTable.countryId
-			newTable['units'][newUnitId]['coalition'] = newTable.coalition
-			newTable['units'][newUnitId]['category'] = newTable.category
-			newTable['units'][newUnitId]['shape_name'] = newTable.shape_name -- for statics
-		end
-	
-		newTable['timeAdded'] = timer.getAbsTime() -- only on the dynGroupsAdded table. For other reference, see start time
-		--mist.debug.dumpDBs()
-		--end
-		return newTable
-	end
 	
 	
 	mist.dynAddStatic = function(staticObj)
@@ -689,7 +682,7 @@ do
 				newGroup.units[unitIndex].payload = mist.getPayload(originalName)
 			end
 		end
-		
+		mistAddedObjects[#mistAddedObjects + 1] = mist.utils.deepCopy(newGroup.units[unitIndex])
 	end
 	if newGroup.route and not newGroup.route.points then
 		if not newGroup.route.points and newGroup.route[1] then
@@ -700,7 +693,7 @@ do
 	end
 	newGroup.country = newCountry
 	
-	addToDBs[#addToDBs + 1] = mist.utils.deepCopy(newGroup)
+	
 	
 	
 	-- sanitize table
@@ -828,7 +821,7 @@ do
 	end	
 
 	mist.addEventHandler(groupSpawned)
-	mist.scheduleFunction(checkSpawnedEvents, {}, timer.getTime() + 5, 1)
+--	mist.scheduleFunction(checkSpawnedEvents, {}, timer.getTime() + 5, 1)
 	
 end
 ------------------------------------------------------------------------------------------------------------
@@ -5333,6 +5326,8 @@ mist.random = function(firstNum, secondNum) -- no support for decimals
 	return choices[rtnVal]
 end
 
+
+
 mist.stringMatch = function(s1, s2)
 	if type(s1) == 'string' and type(s2) == 'string' then
 		s1 = string.gsub(s1, "%-", '')
@@ -5357,6 +5352,9 @@ mist.stringMatch = function(s1, s2)
 		return false
 	end
 end
+
+mist.matchString = mist.stringMatch -- both commands work because order out type of I
+
 mist.DBs.const = {}
 
 --[[
