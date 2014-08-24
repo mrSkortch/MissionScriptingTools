@@ -3187,7 +3187,6 @@ mist.flagFunc.group_dead = function(vars)
 end
 
 mist.flagFunc.group_alive_less_than = function(vars)
-	env.info('aliveless')
 	local type_tbl = {
 	[{'group', 'groupname', 'gp', 'groupName'}] = 'string',
 	percent = 'number',
@@ -5209,12 +5208,18 @@ mist.randomizeNumTable = function(vars)
 	return newTable
 end
 
-mist.randomizeGroupOrder = function(units, vars) 
+mist.randomizeGroupOrder = function(passedUnits, vars) 
 	-- figure out what to exclude, and send data to other func
+	local units = passedUnits
+	
+	if passedUnits.units then
+		units = passUnits.units
+	end
+	
 	local exclude = {}
 	local excludeNum = {}
-	if vars and vars.excludeName and type(vars.excludeName) == 'table' then
-		exclude = vars.excludeName 
+	if vars and vars.excludeType and type(vars.excludeType) == 'table' then
+		exclude = vars.excludeType 
 	end
 	
 	if vars and vars.excludeNum and type(vars.excludeNum) == 'table' then
@@ -5241,8 +5246,8 @@ mist.randomizeGroupOrder = function(units, vars)
 		if unitIndex >= low and unitIndex  <= hi then -- if within range
 			local found = false
 			if #exclude > 0 then
-				for excludeName, index in pairs(exclude) do -- check if excluded
-					if mist.stringMatch(excludeName, unitData.type) then -- if excluded
+				for excludeType, index in pairs(exclude) do -- check if excluded
+					if mist.stringMatch(excludeType, unitData.type) then -- if excluded
 						excludeNum[unitIndex] = unitIndex
 						found = true
 					end
@@ -5259,7 +5264,7 @@ mist.randomizeGroupOrder = function(units, vars)
 	for unitIndex, unitData in pairs(units) do
 		for i = 1, #newOrder do
 			if newOrder[i] == unitIndex then
-					newGroup[i] = mist.utils.deepCopy(units[i]) -- gets all of the unit data
+				newGroup[i] = mist.utils.deepCopy(units[i]) -- gets all of the unit data
 				newGroup[i].type = mist.utils.deepCopy(unitData.type)
 				newGroup[i].skill = mist.utils.deepCopy(unitData.skill)
 				newGroup[i].unitName = mist.utils.deepCopy(unitData.unitName)
