@@ -1,4 +1,11 @@
 --[[
+v31
+- added more special characters to ignore for mist.stringMatch
+- added 3rd variable to mist.string to define if strings are case sensitive
+- added mist.randomizeNumTable
+- modified mist.randomizeGroupOrder to use mist.randomizeNumTable
+- added mist.terrainHeightDiff
+
 v30
 -Optimizations and fixes of refactoring
 -mist.dbUpdate changed to a local dbUpdate function. now no longer accessible globally
@@ -29,7 +36,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 3
 mist.minorVersion = 5
-mist.build = 30 
+mist.build = 31 
 
 
 --[[
@@ -1852,6 +1859,10 @@ for coa_name, coa_data in pairs(env.mission.coalition) do
 										mist.DBs.units[coa_name][countryName][category][group_num]["startTime"] = group_data.start_time
 										mist.DBs.units[coa_name][countryName][category][group_num]["task"] = group_data.task
 										mist.DBs.units[coa_name][countryName][category][group_num]["units"] = {}
+										
+										mist.DBs.units[coa_name][countryName][category][group_num]["radioSet"] = group_data.radioSet
+										mist.DBs.units[coa_name][countryName][category][group_num]["uncontrolled"] = group_data.uncontrolled
+										mist.DBs.units[coa_name][countryName][category][group_num]["frequency"] = group_data.frequency
 															
 										for unit_num, unit_data in pairs(group_data.units) do
 											local units_tbl = mist.DBs.units[coa_name][countryName][category][group_num]["units"]  --pointer to the units table for this group
@@ -1880,6 +1891,10 @@ for coa_name, coa_data in pairs(env.mission.coalition) do
 											end
 											
 											
+											units_tbl[unit_num]["callsign"] = unit_data.callsign
+											units_tbl[unit_num]["onboard_num"] = unit_data.onboard_num
+											units_tbl[unit_num]["hardpoint_racks"] = unit_data.hardpoint_racks
+											units_tbl[unit_num]["psi"] = unit_data.psi
 											units_tbl[unit_num]["shape_name"] = unit_data.shape_name
 											
 											units_tbl[unit_num]["groupName"] = group_data.name
@@ -3829,7 +3844,36 @@ mist.isTerrainValid = function(coord, terrainTypes) -- vec2/3 and enum or table 
 	return false
 end
 
-
+mist.terrainHeightDiff = function(coord, searchSize)
+	local samples = {}
+	local searchRadius = 5
+	if searchSize then
+		searchRadius = searchSize
+	end
+	if type(coord) == 'string' then
+		coord = mist.utils.zoneToVec3(coord)
+	end
+	
+	coord = mist.utils.makeVec2(coord)
+	
+	samples[#samples + 1] = land.getHeight(coord)
+	for i = 0, 360, 30 do
+		samples[#samples + 1] = land.getHeight({x = (coord.x + (math.sin(math.rad(i))*searchRadius)), y = (coord.y + (math.cos(math.rad(i))*searchRadius))})
+		if searchRadius >= 20 then -- if search radius is sorta large, take a sample halfway between center and outer edge
+			samples[#samples + 1] = land.getHeight({x = (coord.x + (math.sin(math.rad(i))*(searchRadius/2))), y = (coord.y + (math.cos(math.rad(i))*(searchRadius/2)))})
+		end
+	end
+	local tMax, tMin = 0, 1000000
+	for index, height in pairs(samples) do
+		if height > tMax then
+			tMax = height
+		end
+		if height < tMin then
+			tMin = height
+		end
+	end
+	return mist.utils.round(tMax - tMin, 2)
+end
 
 
 
@@ -5081,7 +5125,6 @@ mist.teleportGroup = function(gpName, task)
 end
 
 mist.spawnRandomizedGroup = function(groupName, vars) -- need to debug
-
 	if Group.getByName(groupName) then
 		local gpData = mist.getGroupData(groupName)
 		gpData.units = mist.randomizeGroupOrder(gpData.units, vars)
@@ -5093,11 +5136,89 @@ mist.spawnRandomizedGroup = function(groupName, vars) -- need to debug
 	return true
 end
 	
-mist.randomizeGroupOrder = function(units, vars) -- does the heavy lifting
+mist.randomizeNumTable = function(vars)
+	local newTable = {}
 	
-	local exclude = {}
+	local excludeIndex = {}
+	local randomTable = {}
+	
 	if vars and vars.exclude and type(vars.exclude) == 'table' then
-		exclude = vars.exclude 
+		for index, data in pairs(vars.exclude) do
+			excludeIndex[data] = true
+		end		
+	end
+	
+	local low, hi, size
+	
+	if vars.size then
+		size = vars.size
+	end
+	
+	if vars and vars.lowerLimit and type(vars.lowerLimit) == 'number' then
+		low = mist.utils.round(vars.lowerLimit)
+	else
+		low = 1
+	end
+	
+	if vars and vars.upperLimit and type(vars.upperLimit) == 'number' then
+		hi = mist.utils.round(vars.upperLimit)
+	else
+		hi = size
+	end
+
+	local choices = {}
+	-- add to exclude list and create list of what to randomize
+	for i = 1, size do
+		if not (i >= low and i <= hi) then
+
+			excludeIndex[i] = true
+		end
+		if not excludeIndex[i] then
+			table.insert(choices, i)
+		else 
+			newTable[i] = i
+		end
+	end
+
+	for ind, num in pairs(choices) do
+		local found = false
+		local x = 0
+		while found == false do
+			x = mist.random(size) -- get random number from list
+			local addNew = true
+			for index, _ in pairs(excludeIndex) do
+				if index == x then
+					addNew = false
+					break
+				end
+			end
+			if addNew == true then
+				excludeIndex[x] = true
+				found = true
+			end
+			excludeIndex[x] = true
+		
+		end
+		newTable[num] = x
+	end
+	--[[
+	for i = 1, #newTable do
+		env.info(newTable[i])
+	end
+	]]
+	return newTable
+end
+
+mist.randomizeGroupOrder = function(units, vars) 
+	-- figure out what to exclude, and send data to other func
+	local exclude = {}
+	local excludeNum = {}
+	if vars and vars.excludeName and type(vars.excludeName) == 'table' then
+		exclude = vars.excludeName 
+	end
+	
+	if vars and vars.excludeNum and type(vars.excludeNum) == 'table' then
+		excludeNum = vars.excludeNum 
 	end
 	
 	local low, hi
@@ -5114,71 +5235,40 @@ mist.randomizeGroupOrder = function(units, vars) -- does the heavy lifting
 		hi = #units
 	end
 	
-	local newGroup = {}
-		
-	local randomizedUnits = {}
-	local excludeIndex = {}
-	local size = 0
-	for unitId, unitData in pairs(units) do
-		if unitId >= low and unitId <= hi then -- if within range
+
+	local excludeNum = {}
+	for unitIndex, unitData in pairs(units) do
+		if unitIndex >= low and unitIndex  <= hi then -- if within range
 			local found = false
 			if #exclude > 0 then
 				for excludeName, index in pairs(exclude) do -- check if excluded
 					if mist.stringMatch(excludeName, unitData.type) then -- if excluded
-						excludeIndex[unitId] = unitData.unitName
-						newGroup[unitId] = unitData
-						size = size + 1
+						excludeNum[unitIndex] = unitIndex
 						found = true
 					end
 				end
 			end
-			if found == false then
-				table.insert(randomizedUnits, unitData)
-			end
-		else -- unitId is either to low, or to high: added to exclude list 
-			newGroup[unitId] = unitData
-			excludeIndex[unitId] = unitData.unitName
-			size = size + 1
+		else -- unitIndex is either to low, or to high: added to exclude list 
+			excludeNum[unitIndex] = unitId
 		end
 	end	
+	
+	local newGroup = {}
+	local newOrder = mist.randomizeNumTable({exclude = excludeNum, size = #units})
 
-	for unitId, unitData in pairs(randomizedUnits) do
-		local found = false
-		local i = 0
-		while found == false do
-			i = mist.random(#units) -- get random int the size of the group
-			env.info(i)
-			if size > 0 then
-				local noMatch = true
-				for index, data in pairs(excludeIndex) do
-					if i == index then
-						noMatch = false
-						break
-					end
-				end
-				if noMatch == true then
-					excludeIndex[i] = unitData.unitName
-					size = size + 1
-					found = true
-				end
-			else
-				excludeIndex[i] = unitData.unitName
-				size = size + 1
-				found = true
+	for unitIndex, unitData in pairs(units) do
+		for i = 1, #newOrder do
+			if newOrder[i] == unitIndex then
+					newGroup[i] = mist.utils.deepCopy(units[i]) -- gets all of the unit data
+				newGroup[i].type = mist.utils.deepCopy(unitData.type)
+				newGroup[i].skill = mist.utils.deepCopy(unitData.skill)
+				newGroup[i].unitName = mist.utils.deepCopy(unitData.unitName)
+				newGroup[i].unitIndex = mist.utils.deepCopy(unitData.unitIndex) -- replaces the units data with a new type
 			end
 		end
-	
-		newGroup[i] = mist.utils.deepCopy(units[i]) -- gets all of the unit data
-		newGroup[i].type = mist.utils.deepCopy(unitData.type)
-		newGroup[i].skill = mist.utils.deepCopy(unitData.skill)
-		newGroup[i].unitName = mist.utils.deepCopy(unitData.unitName)
-		newGroup[i].unitId = mist.utils.deepCopy(unitData.unitId) -- replaces the units data with a new type
-		
 	end	
 	return newGroup
 end	
-
-end
 
 mist.ground.patrolRoute = function(vars)
 	
@@ -5328,19 +5418,29 @@ end
 
 
 
-mist.stringMatch = function(s1, s2)
+mist.stringMatch = function(s1, s2, bool)
 	if type(s1) == 'string' and type(s2) == 'string' then
 		s1 = string.gsub(s1, "%-", '')
 		s1 = string.gsub(s1, "%(", '')
 		s1 = string.gsub(s1, "%)", '')
 		s1 = string.gsub(s1, "%_", '')
-		s1 = string.lower(s1)
+		s1 = string.gsub(s1, "%[", '')
+		s1 = string.gsub(s1, "%]", '')
+		s1 = string.gsub(s1, "%.", '')
+		
 		
 		s2 = string.gsub(s2, "%-", '')
 		s2 = string.gsub(s2, "%(", '')
 		s2 = string.gsub(s2, "%)", '')
 		s2 = string.gsub(s2, "%_", '')
-		s2 = string.lower(s2)
+		s2 = string.gsub(s1, "%[", '')
+		s2 = string.gsub(s1, "%]", '')
+		s2 = string.gsub(s1, "%.", '')
+		
+		if not bool then
+			s1 = string.lower(s1)
+			s2 = string.lower(s2)
+		end
 		
 		if s1 == s2 then
 			return true
@@ -5348,7 +5448,7 @@ mist.stringMatch = function(s1, s2)
 			return false
 		end
 	else
-		assert('Either the first or second variable were not strings')
+		assert('mist.stringMatch; Either the first or second variable were not strings')
 		return false
 	end
 end
@@ -5462,6 +5562,6 @@ scope examples:
 
 {unitTypes = { blue = {'A-10C'}}}
 ]]
-
+end
 mist.main()
 env.info(('Mist version ' .. mist.majorVersion .. '.' .. mist.minorVersion .. '.' .. mist.build .. ' loaded.'))
