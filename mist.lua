@@ -1,4 +1,7 @@
 --[[
+v32
+- flagfuncs now support string values for flag and stop flags
+
 v31
 - added more special characters to ignore for mist.stringMatch
 - added 3rd variable to mist.string to define if strings are case sensitive
@@ -36,7 +39,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 3
 mist.minorVersion = 5
-mist.build = 31 
+mist.build = 32 
 
 
 --[[
@@ -2571,8 +2574,8 @@ initial_number
 -- type_tbl
 	local type_tbl = {
 		[{'zones', 'zone'}] = {'table', 'string'},
-		flag = 'number', 
-		stopflag = {'number', 'nil'}, 
+		flag = {'number', 'string'}, 
+		stopflag = {'number', 'string', 'nil'}, 
 		[{'req_num', 'reqnum'}] = {'number', 'nil'},
 	}
 	
@@ -2618,8 +2621,8 @@ initial_number
 -- type_tbl
 	local type_tbl = {
 		[{'zone', 'polyzone'}] = 'table',
-		flag = 'number', 
-		stopflag = {'number', 'nil'}, 
+		flag = {'number', 'string'}, 
+		stopflag = {'number', 'string', 'nil'}, 
 		[{'req_num', 'reqnum'}] = {'number', 'nil'},
 	}
 	
@@ -2708,8 +2711,8 @@ toggle = boolean or nil
 	local type_tbl = {
 		[{'units', 'unit'}] = 'table', 
 		[{'zone', 'polyzone'}] = 'table', 
-		flag = 'number', 
-		stopflag = {'number', 'nil'}, 
+		flag = {'number', 'string'},  
+		stopflag = {'number', 'string', 'nil'},  
 		[{'maxalt', 'alt'}] = {'number', 'nil'}, 
 		interval = {'number', 'nil'}, 
 		[{'req_num', 'reqnum'}] = {'number', 'nil'},
@@ -2835,8 +2838,8 @@ function mist.flagFunc.units_in_zones(vars)
 	local type_tbl = {
 		units = 'table', 
 		zones = 'table', 
-		flag = 'number', 
-		stopflag = {'number', 'nil'}, 
+		flag = {'number', 'string'}, 
+		stopflag = {'number', 'string', 'nil'}, 
 		[{'zone_type', 'zonetype'}] = {'string', 'nil'}, 
 		[{'req_num', 'reqnum'}] = {'number', 'nil'},
 		interval = {'number', 'nil'},
@@ -2943,8 +2946,8 @@ function mist.flagFunc.units_in_moving_zones(vars)
 		units = 'table', 
 		[{'zone_units', 'zoneunits'}]  = 'table', 
 		radius = 'number',
-		flag = 'number', 
-		stopflag = {'number', 'nil'}, 
+		flag = {'number', 'string'}, 
+		stopflag = {'number', 'string', 'nil'}, 
 		[{'zone_type', 'zonetype'}] = {'string', 'nil'}, 
 		[{'req_num', 'reqnum'}] = {'number', 'nil'},
 		interval = {'number', 'nil'},
@@ -3059,8 +3062,8 @@ toggle = boolean or nil
 		[{'altoffset1', 'alt1'}] = 'number', 
 		[{'unitset2', 'units2'}] = 'table', 
 		[{'altoffset2', 'alt2'}] = 'number', 
-		flag = 'number', 
-		stopflag = {'number', 'nil'}, 
+		flag = {'number', 'string'}, 
+		stopflag = {'number', 'string', 'nil'}, 
 		[{'req_num', 'reqnum'}] = {'number', 'nil'}, 
 		interval = {'number', 'nil'}, 
 		radius = {'number', 'nil'},
@@ -3116,8 +3119,8 @@ stopFlag
 ]]
 	local type_tbl = {
 	[{'group', 'groupname', 'gp', 'groupName'}] = 'string', 
-	flag = 'number', 
-	stopflag = {'number', 'nil'}, 
+	flag = {'number', 'string'}, 
+	stopflag = {'number', 'string', 'nil'}, 
 	interval = {'number', 'nil'}, 
 	toggle = {'boolean', 'nil'},
 	}
@@ -3153,8 +3156,8 @@ end
 mist.flagFunc.group_dead = function(vars)
 	local type_tbl = {
 	[{'group', 'groupname', 'gp', 'groupName'}] = 'string', 
-	flag = 'number', 
-	stopflag = {'number', 'nil'}, 
+	flag = {'number', 'string'}, 
+	stopflag = {'number', 'string', 'nil'}, 
 	interval = {'number', 'nil'}, 
 	toggle = {'boolean', 'nil'},
 	}
@@ -3190,8 +3193,8 @@ mist.flagFunc.group_alive_less_than = function(vars)
 	local type_tbl = {
 	[{'group', 'groupname', 'gp', 'groupName'}] = 'string',
 	percent = 'number',
-	flag = 'number', 
-	stopflag = {'number', 'nil'}, 
+	flag = {'number', 'string'}, 
+	stopflag = {'number', 'string', 'nil'}, 
 	interval = {'number', 'nil'}, 
 	toggle = {'boolean', 'nil'},
 	}
@@ -3234,8 +3237,8 @@ mist.flagFunc.group_alive_more_than = function(vars)
 	local type_tbl = {
 	[{'group', 'groupname', 'gp', 'groupName'}] = 'string',
 	percent = 'number',
-	flag = 'number', 
-	stopflag = {'number', 'nil'}, 
+	flag = {'number', 'string'}, 
+	stopflag = {'number', 'string', 'nil'}, 
 	interval = {'number', 'nil'}, 
 	toggle = {'boolean', 'nil'},
 	}
