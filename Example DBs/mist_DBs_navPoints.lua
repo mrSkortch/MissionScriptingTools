@@ -4,16 +4,10 @@ navPoints =
     {
         [1] = 
         {
-            ["y"] = 670391.42857142,
-            ["x"] = -260757.14285714,
-            ["name"] = "DODGE",
-            ["callsignStr"] = "DODGE",
-            ["point"] = 
-            {
-                ["y"] = 0,
-                ["x"] = -260757.14285714,
-                ["z"] = 670391.42857142,
-            }, -- end of ["point"]
+            ["y"] = 659248.57142856,
+            ["x"] = -243614.28571428,
+            ["name"] = "KB1NE",
+            ["callsignStr"] = "KB1NE",
             ["properties"] = 
             {
                 ["vnav"] = 1,
@@ -22,8 +16,13 @@ navPoints =
                 ["angle"] = 0,
                 ["steer"] = 2,
             }, -- end of ["properties"]
-            ["groupId"] = 22,
-            ["callsign"] = 3,
+            ["point"] = 
+            {
+                ["y"] = 0,
+                ["x"] = -243614.28571428,
+                ["z"] = 659248.57142856,
+            }, -- end of ["point"]
+            ["groupId"] = 26,
         }, -- end of [1]
         [2] = 
         {
@@ -71,50 +70,6 @@ navPoints =
         }, -- end of [3]
         [4] = 
         {
-            ["y"] = 643248.57142856,
-            ["x"] = -242471.42857143,
-            ["name"] = "KB1NW",
-            ["callsignStr"] = "KB1NW",
-            ["properties"] = 
-            {
-                ["vnav"] = 1,
-                ["scale"] = 0,
-                ["vangle"] = 0,
-                ["angle"] = 0,
-                ["steer"] = 2,
-            }, -- end of ["properties"]
-            ["point"] = 
-            {
-                ["y"] = 0,
-                ["x"] = -242471.42857143,
-                ["z"] = 643248.57142856,
-            }, -- end of ["point"]
-            ["groupId"] = 25,
-        }, -- end of [4]
-        [5] = 
-        {
-            ["y"] = 659248.57142856,
-            ["x"] = -243614.28571428,
-            ["name"] = "KB1NE",
-            ["callsignStr"] = "KB1NE",
-            ["properties"] = 
-            {
-                ["vnav"] = 1,
-                ["scale"] = 0,
-                ["vangle"] = 0,
-                ["angle"] = 0,
-                ["steer"] = 2,
-            }, -- end of ["properties"]
-            ["point"] = 
-            {
-                ["y"] = 0,
-                ["x"] = -243614.28571428,
-                ["z"] = 659248.57142856,
-            }, -- end of ["point"]
-            ["groupId"] = 26,
-        }, -- end of [5]
-        [6] = 
-        {
             ["y"] = 625534.28571428,
             ["x"] = -309328.57142857,
             ["name"] = "MAZDA",
@@ -135,6 +90,51 @@ navPoints =
             }, -- end of ["properties"]
             ["groupId"] = 27,
             ["callsign"] = 4,
+        }, -- end of [4]
+        [5] = 
+        {
+            ["y"] = 670391.42857142,
+            ["x"] = -260757.14285714,
+            ["name"] = "DODGE",
+            ["callsignStr"] = "DODGE",
+            ["point"] = 
+            {
+                ["y"] = 0,
+                ["x"] = -260757.14285714,
+                ["z"] = 670391.42857142,
+            }, -- end of ["point"]
+            ["properties"] = 
+            {
+                ["vnav"] = 1,
+                ["scale"] = 0,
+                ["vangle"] = 0,
+                ["angle"] = 0,
+                ["steer"] = 2,
+            }, -- end of ["properties"]
+            ["groupId"] = 22,
+            ["callsign"] = 3,
+        }, -- end of [5]
+        [6] = 
+        {
+            ["y"] = 643248.57142856,
+            ["x"] = -242471.42857143,
+            ["name"] = "KB1NW",
+            ["callsignStr"] = "KB1NW",
+            ["properties"] = 
+            {
+                ["vnav"] = 1,
+                ["scale"] = 0,
+                ["vangle"] = 0,
+                ["angle"] = 0,
+                ["steer"] = 2,
+            }, -- end of ["properties"]
+            ["point"] = 
+            {
+                ["y"] = 0,
+                ["x"] = -242471.42857143,
+                ["z"] = 643248.57142856,
+            }, -- end of ["point"]
+            ["groupId"] = 25,
         }, -- end of [6]
     }, -- end of ["blue"]
     ["red"] = 

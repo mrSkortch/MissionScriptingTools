@@ -1,6 +1,14 @@
 --[[
+v33
+- added getGroupPayload
+- re-wrote how mist.stringMatch worked. no functional difference between previous iteration
+- DBs now contain callsign, psi, modulation, frequency, uncontrolled, radioSet, hardpoint_racks, and onboard_num. Dependent on whether or not group type has the option available. 
+
+
 v32
 - flagfuncs now support string values for flag and stop flags
+- optimized and fixed issue with mist.getGroupData
+
 
 v31
 - added more special characters to ignore for mist.stringMatch
@@ -29,8 +37,8 @@ added mist.getUnitsInPolygon
 v27
 added mist.flagFunc.group_alive
 added mist.flagFunc.group_dead
+added mist.flagFunc.group_alive_more_than
 added mist.flagFunc.group_alive_less_than
-added mist.flagFunc.group_dead_less_than
 ]]
 
 --MiST Mission Scripting Tools
@@ -39,7 +47,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 3
 mist.minorVersion = 5
-mist.build = 32 
+mist.build = 33 
 
 
 --[[
@@ -570,7 +578,6 @@ do
 	local cntry = newGroup.country
 	local groupType = newGroup.category
 	local newCountry = ''
-	
 	-- validate data
 	for countryName, countryId in pairs(country.id) do
 		if type(cntry) == 'string' then
@@ -705,7 +712,6 @@ do
 	
 	
 	
-	
 	-- sanitize table
 	newGroup.groupName = nil
 	newGroup.clone = nil
@@ -719,9 +725,7 @@ do
 		newGroup.units[unitIndex].unitName = nil
 	end
 	
-	--env.info('added')
 	coalition.addGroup(country.id[newCountry], Unit.Category[newCat], newGroup)
-	
 	
 	return newGroup.name
 	
@@ -1527,7 +1531,7 @@ function mist.getGroupPoints(groupname)   -- if groupname exists in env.mission,
 						if obj_type_name == "helicopter" or obj_type_name == "ship" or obj_type_name == "plane" or obj_type_name == "vehicle" then	-- only these types have points						
 							if ((type(obj_type_data) == 'table') and obj_type_data.group and (type(obj_type_data.group) == 'table') and (#obj_type_data.group > 0)) then  --there's a group!				
 								for group_num, group_data in pairs(obj_type_data.group) do		
-									if group_data and group_data.name and group_data.name == groupname then -- this is the group we are looking for
+									if group_data and group_data.name and mist.stringMatch(group_data.name, groupname) then -- this is the group we are looking for
 										if group_data.route and group_data.route.points and #group_data.route.points > 0 then
 											local points = {}
 											for point_num, point in pairs(group_data.route.points) do
@@ -1866,6 +1870,7 @@ for coa_name, coa_data in pairs(env.mission.coalition) do
 										mist.DBs.units[coa_name][countryName][category][group_num]["radioSet"] = group_data.radioSet
 										mist.DBs.units[coa_name][countryName][category][group_num]["uncontrolled"] = group_data.uncontrolled
 										mist.DBs.units[coa_name][countryName][category][group_num]["frequency"] = group_data.frequency
+										mist.DBs.units[coa_name][countryName][category][group_num]["modulation"] = group_data.modulation
 															
 										for unit_num, unit_data in pairs(group_data.units) do
 											local units_tbl = mist.DBs.units[coa_name][countryName][category][group_num]["units"]  --pointer to the units table for this group
@@ -2651,6 +2656,15 @@ end
 
 
 function mist.pointInPolygon(point, poly, maxalt) --raycasting point in polygon. Code from http://softsurfer.com/Archive/algorithm_0103/algorithm_0103.htm
+	local type_tbl = {
+		point {'table'},
+		poly = {'number'}, 
+		maxalt = {'number', 'nil'}, 
+		}
+	
+	local err, errmsg = mist.utils.typeCheck('mist.pointInPolygon', type_tbl, {point, poly, maxalt})
+	assert(err, errmsg)
+	
 	point = mist.utils.makeVec3(point)
 	local px = point.x
 	local pz = point.z
@@ -3468,7 +3482,7 @@ function mist.getGroupRoute(groupname, task)   -- same as getGroupPoints but ret
 						if obj_type_name == "helicopter" or obj_type_name == "ship" or obj_type_name == "plane" or obj_type_name == "vehicle" then	-- only these types have points						
 							if ((type(obj_type_data) == 'table') and obj_type_data.group and (type(obj_type_data.group) == 'table') and (#obj_type_data.group > 0)) then  --there's a group!				
 								for group_num, group_data in pairs(obj_type_data.group) do		
-									if group_data and group_data.name and group_data.name == groupname then -- this is the group we are looking for
+									if group_data and group_data.name and mist.stringMatch(group_data.name, groupname) then -- this is the group we are looking for
 										if group_data.route and group_data.route.points and #group_data.route.points > 0 then
 											local points = {}
 											
@@ -4823,7 +4837,7 @@ mist.getCurrentGroupData = function(gpName)
 			newData.units[unitNum]["heading"] = mist.getHeading(unitData, true) -- added to DBs
 			newData.units[unitNum]['alt'] = unitData:getPosition().p.y
 			newData.country = string.lower(country.name[unitData:getCountry()])
-			
+			newData.units[unitNum]['callsign'] = unitData:getCallsign()
 		end
 
 		return newData
@@ -4832,42 +4846,60 @@ mist.getCurrentGroupData = function(gpName)
 end
 
 mist.getGroupData = function(gpName)
-	--env.info('getgroupData')
-	for groupName, groupData in pairs(mist.DBs.groupsByName) do
-		if string.lower(groupName) == string.lower(gpName) then
-			local newData = {}
-			newData.hidden = false -- maybe add this to DBs
-			newData.groupId = groupData.groupId
-			newData.groupName = groupName
-			newData.category = groupData.category
-			newData.country = groupData.country
-			newData.units = {}
-			newData.task = groupData.task
-
-			for unitNum, unitData in pairs(groupData.units) do
-				newData.units[unitNum] = {}
-				
-				newData.units[unitNum]["unitId"] = unitData.unitId
-				--newData.units[unitNum]['point'] = unitData.point
-				newData.units[unitNum]['x'] = unitData.point.x
-				newData.units[unitNum]['y'] = unitData.point.y
-				newData.units[unitNum]['alt'] = unitData.alt
-				newData.units[unitNum]['alt_type'] = unitData.alt_type
-				newData.units[unitNum]['speed'] = unitData.speed
-				newData.units[unitNum]["type"] = unitData.type
-				newData.units[unitNum]["skill"] = unitData.skill
-				newData.units[unitNum]["unitName"] = unitData.unitName
-				newData.units[unitNum]["heading"] = unitData.heading -- added to DBs
-				newData.units[unitNum]["playerCanDrive"] = unitData.playerCanDrive -- added to DBs
-				
-				
-				if newData.category == 'plane' or newData.category == 'helicopter' then
-					newData.units[unitNum]["payload"] = mist.getPayload(unitData.unitName)
-					newData.units[unitNum]['livery_id'] = unitData.livery_id
-				end
+	local found = false
+	local newData = {}
+	if mist.DBs.groupsByName[gpName] then
+		newData = mist.utils.deepCopy(mist.DBs.groupsByName[gpName])
+		found = true
+	end				
+	
+	if found == false then
+		for groupName, groupData in pairs(mist.DBs.groupsByName) do
+			if mist.stringMatch(groupName, gpName) == true then
+				newData = mist.utils.deepCopy(groupData)
+				newData.groupName = groupName
+				found = true
+				break
 			end
-			return newData	
 		end
+	end
+
+	local payloads
+	if newData.category == 'plane' or newData.category == 'helicopter' then
+		payloads = mist.getGroupPayload(newData.groupName)
+	end
+	if found == true then
+		newData.hidden = false -- maybe add this to DBs
+
+		for unitNum, unitData in pairs(newData.units) do
+			newData.units[unitNum] = {}
+			
+			newData.units[unitNum]["unitId"] = unitData.unitId
+			--newData.units[unitNum]['point'] = unitData.point
+			newData.units[unitNum]['x'] = unitData.point.x
+			newData.units[unitNum]['y'] = unitData.point.y
+			newData.units[unitNum]['alt'] = unitData.alt
+			newData.units[unitNum]['alt_type'] = unitData.alt_type
+			newData.units[unitNum]['speed'] = unitData.speed
+			newData.units[unitNum]["type"] = unitData.type
+			newData.units[unitNum]["skill"] = unitData.skill
+			newData.units[unitNum]["unitName"] = unitData.unitName
+			newData.units[unitNum]["heading"] = unitData.heading -- added to DBs
+			newData.units[unitNum]["playerCanDrive"] = unitData.playerCanDrive -- added to DBs
+			
+			
+			if newData.category == 'plane' or newData.category == 'helicopter' then
+				newData.units[unitNum]["payload"] = payloads[unitNum]
+				newData.units[unitNum]['livery_id'] = unitData.livery_id
+				newData.units[unitNum]['onboard_num'] = unitData.onboard_num
+				newData.units[unitNum]['callsign'] = unitData.callsign
+			end
+		end
+		
+		return newData	
+	else
+		env.info(gpName .. ' not found in mist.getGroupData')
+		return
 	end
 end
 
@@ -4883,7 +4915,7 @@ mist.getPayload = function(unitName)
 									for group_num, group_data in pairs(obj_type_data.group) do		
 										if group_data and group_data.name then
 											for unitIndex, unitData in pairs(group_data.units) do --group index
-												if string.lower(unitName) == string.lower(unitData.name) then
+												if mist.stringMatch(unitName, unitData.name) == true then
 													return unitData.payload
 												end						
 											end
@@ -4897,11 +4929,46 @@ mist.getPayload = function(unitName)
 			end
 		end
 	else
+		env.info('mist.getPayload got ' .. type(unitName))
 		return false
 	end
+	env.info('mist.getPayload, payload not found')
 	return 
 end
 
+mist.getGroupPayload = function(groupName)
+	if groupName and type(groupName) == 'string' then
+		for coa_name, coa_data in pairs(env.mission.coalition) do
+			if (coa_name == 'red' or coa_name == 'blue') and type(coa_data) == 'table' then			
+				if coa_data.country then --there is a country table
+					for cntry_id, cntry_data in pairs(coa_data.country) do
+						for obj_type_name, obj_type_data in pairs(cntry_data) do
+							if obj_type_name == "helicopter" or obj_type_name == "ship" or obj_type_name == "plane" or obj_type_name == "vehicle" then	-- only these types have points						
+								if ((type(obj_type_data) == 'table') and obj_type_data.group and (type(obj_type_data.group) == 'table') and (#obj_type_data.group > 0)) then  --there's a group!				
+									for group_num, group_data in pairs(obj_type_data.group) do		
+										if group_data and group_data.name and mist.stringMatch(groupName, group_data.name) == true then
+											local payloads = {}
+											for unitIndex, unitData in pairs(group_data.units) do --group index
+												payloads[unitIndex] = unitData.payload
+											end
+											return payloads
+										end
+									end
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+	else
+		env.info('mist.getGroupPayload got ' .. type(groupName))
+		return false
+	end
+	env.info('mist.getGroupPayload, payload not found')
+	return 
+
+end
 
 mist.teleportToPoint = function(vars) -- main teleport function that all of teleport/respawn functions call
 	local point = vars.point
@@ -4916,9 +4983,6 @@ mist.teleportToPoint = function(vars) -- main teleport function that all of tele
 	end
 	
 	local action = vars.action
-	local isStatic = false
-
-	
 	
 	local disperse = vars.disperse or false
 	local maxDisp = vars.maxDisp
@@ -4931,7 +4995,7 @@ mist.teleportToPoint = function(vars) -- main teleport function that all of tele
 	local innerRadius = vars.innerRadius
 	
 	local route = vars.route
-
+	
 	local newGroupData
 	if gpName and not vars.groupData then
 		if string.lower(action) == 'teleport' or string.lower(action) == 'tele' then
@@ -4949,7 +5013,6 @@ mist.teleportToPoint = function(vars) -- main teleport function that all of tele
 		action = 'tele'
 		newGroupData = vars.groupData
 	end
-
 
 	local diff = {['x'] = 0, ['y'] = 0}
 	local newCoord, origCoord
@@ -4975,6 +5038,7 @@ mist.teleportToPoint = function(vars) -- main teleport function that all of tele
 			end
 		end
 		if valid == false then
+			env.info('mist.teleportToPoint; vars.point not a valid coordinate')
 			return false
 		end
 	end
@@ -4996,8 +5060,8 @@ mist.teleportToPoint = function(vars) -- main teleport function that all of tele
 	
 	--tostring, tostring(),
 	
-	newGroupData.country = mist.DBs.groupsByName[gpName].country
-	newGroupData.category = mist.DBs.groupsByName[gpName].category
+	newGroupData.country = mist.DBs.groupsByName[newGroupData.groupName].country
+	newGroupData.category = mist.DBs.groupsByName[newGroupData.groupName].category
 	if route then
 		newGroupData.route = route
 	end
@@ -5427,24 +5491,12 @@ end
 
 
 mist.stringMatch = function(s1, s2, bool)
+	local exclude = {'%-', '%(', '%)', '%_', '%[', '%]', '%.', '%#', '% ', '%{', '%}', '%$', '%%', '%?', '%+', '%^'}
 	if type(s1) == 'string' and type(s2) == 'string' then
-		s1 = string.gsub(s1, "%-", '')
-		s1 = string.gsub(s1, "%(", '')
-		s1 = string.gsub(s1, "%)", '')
-		s1 = string.gsub(s1, "%_", '')
-		s1 = string.gsub(s1, "%[", '')
-		s1 = string.gsub(s1, "%]", '')
-		s1 = string.gsub(s1, "%.", '')
-		
-		
-		s2 = string.gsub(s2, "%-", '')
-		s2 = string.gsub(s2, "%(", '')
-		s2 = string.gsub(s2, "%)", '')
-		s2 = string.gsub(s2, "%_", '')
-		s2 = string.gsub(s1, "%[", '')
-		s2 = string.gsub(s1, "%]", '')
-		s2 = string.gsub(s1, "%.", '')
-		
+		for i , str in pairs(exclude) do
+			s1 = string.gsub(s1, str, '')
+			s2 = string.gsub(s2, str, '')
+		end
 		if not bool then
 			s1 = string.lower(s1)
 			s2 = string.lower(s2)
@@ -5456,7 +5508,7 @@ mist.stringMatch = function(s1, s2, bool)
 			return false
 		end
 	else
-		assert('mist.stringMatch; Either the first or second variable were not strings')
+		env.info('mist.stringMatch; Either the first or second variable were not a string')
 		return false
 	end
 end
