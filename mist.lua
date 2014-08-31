@@ -1,4 +1,7 @@
 --[[
+v34
+- fixed missing entries in dbupdate
+
 v33
 - added getGroupPayload
 - re-wrote how mist.stringMatch worked. no functional difference between previous iteration
@@ -47,7 +50,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 3
 mist.minorVersion = 5
-mist.build = 33 
+mist.build = 34 
 
 
 --[[
@@ -76,7 +79,8 @@ do
 	local coroutines = {}
 	
 	local tempSpawnedUnits = {} -- birth events added here
-	local mistAddedObjects = {} -- mist.dynAdd added here
+	local mistAddedObjects = {} -- mist.dynAdd unit data added here
+	local mistAddedGroups = {} -- mist.dynAdd groupdata added here
 	local writeGroups = {}
 	
 	local function update_alive_units()  -- coroutine function
@@ -128,7 +132,6 @@ do
 	local function dbUpdate(event)
 		local newTable = {}
 		
-		local tableSize = #mist.DBs.dynGroupsAdded + 1
 		newTable['startTime'] =  timer.getAbsTime()
 		
 		if type(event) == 'string' then -- if name of an object. 
@@ -150,7 +153,7 @@ do
 			
 			newTable.name = newObject:getName()
 			newTable.groupId = tonumber(newObject:getID())
-
+			newTable.groupName = newObject:getName()
 			local unitOneRef 
 			if newType == 'static' then
 			
@@ -178,16 +181,32 @@ do
 			end
 
 			for catData, catId in pairs(Unit.Category) do
-				if Group.getByName(newTable.name):isExist() then
-					if catId == Group.getByName(newTable.name):getCategory() then
+				if Group.getByName(newTable.groupName):isExist() then
+					if catId == Group.getByName(newTable.groupName):getCategory() then
 						newTable['category'] = string.lower(catData)
 					end
-				elseif StaticObject.getByName(newTable.name):isExist() then
-					if catId == StaticObject.getByName(newTable.name):getCategory() then
+				elseif StaticObject.getByName(newTable.groupName):isExist() then
+					if catId == StaticObject.getByName(newTable.groupName):getCategory() then
 						newTable['category'] = string.lower(catData)
 					end
 					
 				end
+			end
+			
+			local gfound = false
+			for index, data in pairs(mistAddedGroups) do
+				if mist.stringMatch(data.name, newTable.groupName) == true then
+					gfound = true
+					newTable.task = data.task
+					newTable.modulation = data.modulation
+					newTable.uncontrolled = data.uncontrolled
+					newTable.radioSet = data.radioSet
+					mistAddedGroups[index] = nil
+				end
+			end
+			
+			if gfound == false then
+				newTable.uncontrolled = false
 			end
 			
 			newTable.units = {}
@@ -198,6 +217,9 @@ do
 					
 					newTable.units[unitId].x = mist.utils.round(unitData:getPosition().p.x)
 					newTable.units[unitId].y = mist.utils.round(unitData:getPosition().p.z)
+					newTable.units[unitId].point = {}
+					newTable.units[unitId].point.x = newTable.units[unitId].x
+					newTable.units[unitId].point.y = newTable.units[unitId].y
 					newTable.units[unitId].alt = mist.utils.round(unitData:getPosition().p.y)
 			
 					newTable.units[unitId].heading = mist.getHeading(unitData, true)
@@ -206,7 +228,7 @@ do
 					newTable.units[unitId].unitId = tonumber(unitData:getID())
 					
 					
-					newTable.units[unitId].groupName = newTable.name
+					newTable.units[unitId].groupName = newTable.groupName
 					newTable.units[unitId].groupId = newTable.groupId
 					newTable.units[unitId].countryId = newTable.countryId
 					newTable.units[unitId].coalitionId = newTable.coalitionId
@@ -218,8 +240,9 @@ do
 							found = true
 							newTable.units[unitId].livery_id = data.livery_id
 							newTable.units[unitId].skill = data.skill
-							newTable.units[unitId].alt_type = data.alt_type	
-							
+							newTable.units[unitId].alt_type = data.alt_type
+							newTable.units[unitId].callsign = data.callsign
+							newTable.units[unitId].psi = data.psi
 							mistAddedObjects[index] = nil
 						end
 						if found == false then
@@ -236,6 +259,9 @@ do
 				
 				newTable.units[1].x = mist.utils.round(newObject:getPosition().p.x)
 				newTable.units[1].y = mist.utils.round(newObject:getPosition().p.z)
+				newTable.units[1].point = {}
+				newTable.units[1].point.x = newTable.units[1].x
+				newTable.units[1].point.y = newTable.units[1].y
 				newTable.units[1].alt = mist.utils.round(newObject:getPosition().p.y)
 				newTable.units[1].heading = mist.getHeading(newObject, true)
 				newTable.units[1].type = newObject:getTypeName()
@@ -701,6 +727,8 @@ do
 		end
 		mistAddedObjects[#mistAddedObjects + 1] = mist.utils.deepCopy(newGroup.units[unitIndex])
 	end
+	mistAddedGroups[#mistAddedGroups + 1] = mist.utils.deepCopy(newGroup)
+	
 	if newGroup.route and not newGroup.route.points then
 		if not newGroup.route.points and newGroup.route[1] then
 			local copyRoute = newGroup.route
@@ -1897,7 +1925,8 @@ for coa_name, coa_data in pairs(env.mission.coalition) do
 												units_tbl[unit_num]["point"]["x"] = unit_data.x
 												units_tbl[unit_num]["point"]["y"] = unit_data.y
 											end
-											
+											units_tbl[unit_num]['x'] = unit_data.x
+											units_tbl[unit_num]['y'] = unit_data.y
 											
 											units_tbl[unit_num]["callsign"] = unit_data.callsign
 											units_tbl[unit_num]["onboard_num"] = unit_data.onboard_num
@@ -3508,7 +3537,6 @@ function mist.getGroupRoute(groupname, task)   -- same as getGroupPoints but ret
 												points[point_num] = routeData
 											end
 											
-												
 											return points
 										end
 										return
@@ -4863,7 +4891,7 @@ mist.getGroupData = function(gpName)
 			end
 		end
 	end
-
+	
 	local payloads
 	if newData.category == 'plane' or newData.category == 'helicopter' then
 		payloads = mist.getGroupPayload(newData.groupName)
