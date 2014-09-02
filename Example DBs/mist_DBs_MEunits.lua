@@ -54,10 +54,10 @@ MEunits =
                 [1] = 
                 {
                     ["coalition"] = "blue",
-                    ["category"] = "ship",
                     ["countryId"] = 11,
-                    ["groupId"] = 8,
+                    ["category"] = "ship",
                     ["country"] = "usa",
+                    ["groupId"] = 8,
                     ["startTime"] = 0,
                     ["groupName"] = "US Ships",
                     ["units"] = 
@@ -71,15 +71,17 @@ MEunits =
                                 ["x"] = -355285.71428571,
                             }, -- end of ["point"]
                             ["groupId"] = 8,
+                            ["y"] = 443857.14285714,
                             ["skill"] = "Average",
                             ["coalition"] = "blue",
                             ["countryId"] = 11,
-                            ["groupName"] = "US Ships",
+                            ["x"] = -355285.71428571,
+                            ["unitId"] = 13,
                             ["category"] = "ship",
                             ["unitName"] = "US Ship #1",
-                            ["country"] = "usa",
                             ["heading"] = 0,
-                            ["unitId"] = 13,
+                            ["country"] = "usa",
+                            ["groupName"] = "US Ships",
                         }, -- end of [1]
                         [2] = 
                         {
@@ -90,15 +92,17 @@ MEunits =
                                 ["x"] = -356085.71428571,
                             }, -- end of ["point"]
                             ["groupId"] = 8,
+                            ["y"] = 444657.14285714,
                             ["skill"] = "Average",
                             ["coalition"] = "blue",
                             ["countryId"] = 11,
-                            ["groupName"] = "US Ships",
+                            ["x"] = -356085.71428571,
+                            ["unitId"] = 14,
                             ["category"] = "ship",
                             ["unitName"] = "US Ship #2",
-                            ["country"] = "usa",
                             ["heading"] = 0,
-                            ["unitId"] = 14,
+                            ["country"] = "usa",
+                            ["groupName"] = "US Ships",
                         }, -- end of [2]
                     }, -- end of ["units"]
                 }, -- end of [1]
@@ -107,63 +111,89 @@ MEunits =
             {
                 [1] = 
                 {
-                    ["groupId"] = 1,
+                    ["modulation"] = 0,
+                    ["country"] = "usa",
+                    ["uncontrolled"] = false,
                     ["groupName"] = "AH-1s_1",
                     ["units"] = 
                     {
                         [1] = 
                         {
                             ["alt"] = 500,
-                            ["heading"] = 0.017389551289373,
                             ["point"] = 
                             {
                                 ["y"] = 631857.14285714,
                                 ["x"] = -297857.14285714,
                             }, -- end of ["point"]
-                            ["groupId"] = 1,
                             ["alt_type"] = "BARO",
                             ["livery_id"] = "standard",
-                            ["skill"] = "High",
-                            ["countryId"] = 11,
-                            ["coalition"] = "blue",
-                            ["speed"] = 55.555555555556,
-                            ["country"] = "usa",
+                            ["onboard_num"] = "50",
                             ["category"] = "helicopter",
-                            ["unitName"] = "AH-1s_1_1",
+                            ["speed"] = 55.555555555556,
                             ["type"] = "AH-1W",
-                            ["unitId"] = 1,
+                            ["country"] = "usa",
+                            ["psi"] = -0.017389551289373,
+                            ["unitName"] = "AH-1s_1_1",
                             ["groupName"] = "AH-1s_1",
+                            ["coalition"] = "blue",
+                            ["countryId"] = 11,
+                            ["x"] = -297857.14285714,
+                            ["y"] = 631857.14285714,
+                            ["unitId"] = 1,
+                            ["heading"] = 0.017389551289373,
+                            ["skill"] = "High",
+                            ["callsign"] = 
+                            {
+                                [1] = 1,
+                                [2] = 1,
+                                [3] = 1,
+                                ["name"] = "Enfield11",
+                            }, -- end of ["callsign"]
+                            ["groupId"] = 1,
                         }, -- end of [1]
                         [2] = 
                         {
                             ["alt"] = 500,
-                            ["heading"] = 0.017389551289373,
                             ["point"] = 
                             {
                                 ["y"] = 631897.14285714,
                                 ["x"] = -297897.14285714,
                             }, -- end of ["point"]
-                            ["groupId"] = 1,
                             ["alt_type"] = "BARO",
                             ["livery_id"] = "standard",
-                            ["skill"] = "High",
-                            ["countryId"] = 11,
-                            ["coalition"] = "blue",
-                            ["speed"] = 55.555555555556,
-                            ["country"] = "usa",
+                            ["onboard_num"] = "51",
                             ["category"] = "helicopter",
-                            ["unitName"] = "AH-1s_1_2",
+                            ["speed"] = 55.555555555556,
                             ["type"] = "AH-1W",
-                            ["unitId"] = 2,
+                            ["country"] = "usa",
+                            ["psi"] = -0.017389551289373,
+                            ["unitName"] = "AH-1s_1_2",
                             ["groupName"] = "AH-1s_1",
+                            ["coalition"] = "blue",
+                            ["countryId"] = 11,
+                            ["x"] = -297897.14285714,
+                            ["y"] = 631897.14285714,
+                            ["unitId"] = 2,
+                            ["heading"] = 0.017389551289373,
+                            ["skill"] = "High",
+                            ["callsign"] = 
+                            {
+                                [1] = 1,
+                                [2] = 1,
+                                [3] = 2,
+                                ["name"] = "Enfield12",
+                            }, -- end of ["callsign"]
+                            ["groupId"] = 1,
                         }, -- end of [2]
                     }, -- end of ["units"]
-                    ["coalition"] = "blue",
+                    ["countryId"] = 11,
+                    ["radioSet"] = false,
+                    ["groupId"] = 1,
                     ["category"] = "helicopter",
-                    ["country"] = "usa",
+                    ["coalition"] = "blue",
                     ["startTime"] = 0,
                     ["task"] = "CAS",
-                    ["countryId"] = 11,
+                    ["frequency"] = 127.5,
                 }, -- end of [1]
             }, -- end of ["helicopter"]
             ["vehicle"] = 
@@ -176,91 +206,99 @@ MEunits =
                     {
                         [1] = 
                         {
-                            ["type"] = "M-1 Abrams",
+                            ["heading"] = 0,
                             ["point"] = 
                             {
                                 ["y"] = 639800,
                                 ["x"] = -294685.71428571,
                             }, -- end of ["point"]
                             ["groupId"] = 11,
-                            ["skill"] = "Average",
-                            ["countryId"] = 11,
+                            ["y"] = 639800,
                             ["coalition"] = "blue",
                             ["groupName"] = "USTanks1",
-                            ["heading"] = 0,
+                            ["type"] = "M-1 Abrams",
+                            ["countryId"] = 11,
+                            ["x"] = -294685.71428571,
+                            ["unitId"] = 19,
                             ["category"] = "vehicle",
                             ["unitName"] = "USTanks1_1",
                             ["playerCanDrive"] = true,
-                            ["unitId"] = 19,
                             ["country"] = "usa",
+                            ["skill"] = "Average",
                         }, -- end of [1]
                         [2] = 
                         {
-                            ["type"] = "M-1 Abrams",
+                            ["heading"] = 0,
                             ["point"] = 
                             {
                                 ["y"] = 639840,
                                 ["x"] = -294725.71428571,
                             }, -- end of ["point"]
                             ["groupId"] = 11,
-                            ["skill"] = "Average",
-                            ["countryId"] = 11,
+                            ["y"] = 639840,
                             ["coalition"] = "blue",
                             ["groupName"] = "USTanks1",
-                            ["heading"] = 0,
+                            ["type"] = "M-1 Abrams",
+                            ["countryId"] = 11,
+                            ["x"] = -294725.71428571,
+                            ["unitId"] = 20,
                             ["category"] = "vehicle",
                             ["unitName"] = "USTanks1_2",
                             ["playerCanDrive"] = true,
-                            ["unitId"] = 20,
                             ["country"] = "usa",
+                            ["skill"] = "Average",
                         }, -- end of [2]
                         [3] = 
                         {
-                            ["type"] = "M-1 Abrams",
+                            ["heading"] = 0,
                             ["point"] = 
                             {
                                 ["y"] = 639880,
                                 ["x"] = -294765.71428571,
                             }, -- end of ["point"]
                             ["groupId"] = 11,
-                            ["skill"] = "Average",
-                            ["countryId"] = 11,
+                            ["y"] = 639880,
                             ["coalition"] = "blue",
                             ["groupName"] = "USTanks1",
-                            ["heading"] = 0,
+                            ["type"] = "M-1 Abrams",
+                            ["countryId"] = 11,
+                            ["x"] = -294765.71428571,
+                            ["unitId"] = 21,
                             ["category"] = "vehicle",
                             ["unitName"] = "USTanks1_3",
                             ["playerCanDrive"] = true,
-                            ["unitId"] = 21,
                             ["country"] = "usa",
+                            ["skill"] = "Average",
                         }, -- end of [3]
                         [4] = 
                         {
-                            ["type"] = "M-1 Abrams",
+                            ["heading"] = 0,
                             ["point"] = 
                             {
                                 ["y"] = 639920,
                                 ["x"] = -294805.71428571,
                             }, -- end of ["point"]
                             ["groupId"] = 11,
-                            ["skill"] = "Average",
-                            ["countryId"] = 11,
+                            ["y"] = 639920,
                             ["coalition"] = "blue",
                             ["groupName"] = "USTanks1",
-                            ["heading"] = 0,
+                            ["type"] = "M-1 Abrams",
+                            ["countryId"] = 11,
+                            ["x"] = -294805.71428571,
+                            ["unitId"] = 22,
                             ["category"] = "vehicle",
                             ["unitName"] = "USTanks1_4",
                             ["playerCanDrive"] = true,
-                            ["unitId"] = 22,
                             ["country"] = "usa",
+                            ["skill"] = "Average",
                         }, -- end of [4]
                     }, -- end of ["units"]
                     ["coalition"] = "blue",
                     ["category"] = "vehicle",
-                    ["country"] = "usa",
+                    ["countryId"] = 11,
                     ["startTime"] = 0,
                     ["task"] = "Ground Nothing",
-                    ["countryId"] = 11,
+                    ["country"] = "usa",
                 }, -- end of [1]
                 [2] = 
                 {
@@ -270,242 +308,310 @@ MEunits =
                     {
                         [1] = 
                         {
-                            ["type"] = "M-1 Abrams",
+                            ["heading"] = 1.4977557614926,
                             ["point"] = 
                             {
                                 ["y"] = 653171.42857143,
                                 ["x"] = -293085.71428571,
                             }, -- end of ["point"]
                             ["groupId"] = 12,
-                            ["skill"] = "Average",
-                            ["countryId"] = 11,
+                            ["y"] = 653171.42857143,
                             ["coalition"] = "blue",
                             ["groupName"] = "USTanks2",
-                            ["heading"] = 1.4977557614926,
+                            ["type"] = "M-1 Abrams",
+                            ["countryId"] = 11,
+                            ["x"] = -293085.71428571,
+                            ["unitId"] = 23,
                             ["category"] = "vehicle",
                             ["unitName"] = "USTanks2_1",
                             ["playerCanDrive"] = true,
-                            ["unitId"] = 23,
                             ["country"] = "usa",
+                            ["skill"] = "Average",
                         }, -- end of [1]
                         [2] = 
                         {
-                            ["type"] = "M-1 Abrams",
+                            ["heading"] = 1.4977557614926,
                             ["point"] = 
                             {
                                 ["y"] = 653211.42857143,
                                 ["x"] = -293125.71428571,
                             }, -- end of ["point"]
                             ["groupId"] = 12,
-                            ["skill"] = "Average",
-                            ["countryId"] = 11,
+                            ["y"] = 653211.42857143,
                             ["coalition"] = "blue",
                             ["groupName"] = "USTanks2",
-                            ["heading"] = 1.4977557614926,
+                            ["type"] = "M-1 Abrams",
+                            ["countryId"] = 11,
+                            ["x"] = -293125.71428571,
+                            ["unitId"] = 24,
                             ["category"] = "vehicle",
                             ["unitName"] = "USTanks2_2",
                             ["playerCanDrive"] = true,
-                            ["unitId"] = 24,
                             ["country"] = "usa",
+                            ["skill"] = "Average",
                         }, -- end of [2]
                         [3] = 
                         {
-                            ["type"] = "M-1 Abrams",
+                            ["heading"] = 1.4977557614926,
                             ["point"] = 
                             {
                                 ["y"] = 653251.42857143,
                                 ["x"] = -293165.71428571,
                             }, -- end of ["point"]
                             ["groupId"] = 12,
-                            ["skill"] = "Average",
-                            ["countryId"] = 11,
+                            ["y"] = 653251.42857143,
                             ["coalition"] = "blue",
                             ["groupName"] = "USTanks2",
-                            ["heading"] = 1.4977557614926,
+                            ["type"] = "M-1 Abrams",
+                            ["countryId"] = 11,
+                            ["x"] = -293165.71428571,
+                            ["unitId"] = 25,
                             ["category"] = "vehicle",
                             ["unitName"] = "USTanks2_3",
                             ["playerCanDrive"] = true,
-                            ["unitId"] = 25,
                             ["country"] = "usa",
+                            ["skill"] = "Average",
                         }, -- end of [3]
                         [4] = 
                         {
-                            ["type"] = "M-1 Abrams",
+                            ["heading"] = 1.4977557614926,
                             ["point"] = 
                             {
                                 ["y"] = 653291.42857143,
                                 ["x"] = -293205.71428571,
                             }, -- end of ["point"]
                             ["groupId"] = 12,
-                            ["skill"] = "Average",
-                            ["countryId"] = 11,
+                            ["y"] = 653291.42857143,
                             ["coalition"] = "blue",
                             ["groupName"] = "USTanks2",
-                            ["heading"] = 1.4977557614926,
+                            ["type"] = "M-1 Abrams",
+                            ["countryId"] = 11,
+                            ["x"] = -293205.71428571,
+                            ["unitId"] = 26,
                             ["category"] = "vehicle",
                             ["unitName"] = "USTanks2_4",
                             ["playerCanDrive"] = true,
-                            ["unitId"] = 26,
                             ["country"] = "usa",
+                            ["skill"] = "Average",
                         }, -- end of [4]
                     }, -- end of ["units"]
                     ["coalition"] = "blue",
                     ["category"] = "vehicle",
-                    ["country"] = "usa",
+                    ["countryId"] = 11,
                     ["startTime"] = 0,
                     ["task"] = "Ground Nothing",
-                    ["countryId"] = 11,
+                    ["country"] = "usa",
                 }, -- end of [2]
             }, -- end of ["vehicle"]
             ["plane"] = 
             {
                 [1] = 
                 {
-                    ["groupId"] = 4,
+                    ["modulation"] = 0,
+                    ["country"] = "usa",
+                    ["uncontrolled"] = false,
                     ["groupName"] = "F-15C Client #1",
                     ["units"] = 
                     {
                         [1] = 
                         {
                             ["alt"] = 2000,
-                            ["heading"] = -0.57883789069348,
                             ["point"] = 
                             {
                                 ["y"] = 662142.85714286,
                                 ["x"] = -288142.85714286,
                             }, -- end of ["point"]
-                            ["groupId"] = 4,
                             ["alt_type"] = "BARO",
                             ["livery_id"] = "19th Fighter SQN (AK)",
-                            ["skill"] = "Client",
-                            ["countryId"] = 11,
-                            ["coalition"] = "blue",
-                            ["speed"] = 138.88888888889,
-                            ["country"] = "usa",
+                            ["onboard_num"] = "10",
                             ["category"] = "plane",
-                            ["unitName"] = "F-15C Client #1",
+                            ["speed"] = 138.88888888889,
                             ["type"] = "F-15C",
-                            ["unitId"] = 8,
+                            ["country"] = "usa",
+                            ["psi"] = 0.57883789069348,
+                            ["unitName"] = "F-15C Client #1",
                             ["groupName"] = "F-15C Client #1",
+                            ["coalition"] = "blue",
+                            ["countryId"] = 11,
+                            ["x"] = -288142.85714286,
+                            ["y"] = 662142.85714286,
+                            ["unitId"] = 8,
+                            ["heading"] = -0.57883789069348,
+                            ["skill"] = "Client",
+                            ["callsign"] = 
+                            {
+                                [1] = 2,
+                                [2] = 1,
+                                [3] = 1,
+                                ["name"] = "Springfield11",
+                            }, -- end of ["callsign"]
+                            ["groupId"] = 4,
                         }, -- end of [1]
                     }, -- end of ["units"]
-                    ["coalition"] = "blue",
+                    ["countryId"] = 11,
+                    ["radioSet"] = false,
+                    ["groupId"] = 4,
                     ["category"] = "plane",
-                    ["country"] = "usa",
+                    ["coalition"] = "blue",
                     ["startTime"] = 0,
                     ["task"] = "CAP",
-                    ["countryId"] = 11,
+                    ["frequency"] = 124,
                 }, -- end of [1]
                 [2] = 
                 {
-                    ["groupId"] = 5,
+                    ["modulation"] = 0,
+                    ["country"] = "usa",
+                    ["uncontrolled"] = false,
                     ["groupName"] = "F-15C Client #2",
                     ["units"] = 
                     {
                         [1] = 
                         {
                             ["alt"] = 2000,
-                            ["heading"] = -0.57883789069348,
                             ["point"] = 
                             {
                                 ["y"] = 668428.57142857,
                                 ["x"] = -287000,
                             }, -- end of ["point"]
-                            ["groupId"] = 5,
                             ["alt_type"] = "BARO",
                             ["livery_id"] = "19th Fighter SQN (AK)",
-                            ["skill"] = "Client",
-                            ["countryId"] = 11,
-                            ["coalition"] = "blue",
-                            ["speed"] = 138.88888888889,
-                            ["country"] = "usa",
+                            ["onboard_num"] = "10",
                             ["category"] = "plane",
-                            ["unitName"] = "F-15C Client #2",
+                            ["speed"] = 138.88888888889,
                             ["type"] = "F-15C",
-                            ["unitId"] = 10,
+                            ["country"] = "usa",
+                            ["psi"] = 0.57883789069348,
+                            ["unitName"] = "F-15C Client #2",
                             ["groupName"] = "F-15C Client #2",
+                            ["coalition"] = "blue",
+                            ["countryId"] = 11,
+                            ["x"] = -287000,
+                            ["y"] = 668428.57142857,
+                            ["unitId"] = 10,
+                            ["heading"] = -0.57883789069348,
+                            ["skill"] = "Client",
+                            ["callsign"] = 
+                            {
+                                [1] = 2,
+                                [2] = 1,
+                                [3] = 1,
+                                ["name"] = "Springfield11",
+                            }, -- end of ["callsign"]
+                            ["groupId"] = 5,
                         }, -- end of [1]
                     }, -- end of ["units"]
-                    ["coalition"] = "blue",
+                    ["countryId"] = 11,
+                    ["radioSet"] = false,
+                    ["groupId"] = 5,
                     ["category"] = "plane",
-                    ["country"] = "usa",
+                    ["coalition"] = "blue",
                     ["startTime"] = 0,
                     ["task"] = "CAP",
-                    ["countryId"] = 11,
+                    ["frequency"] = 124,
                 }, -- end of [2]
                 [3] = 
                 {
-                    ["groupId"] = 6,
+                    ["modulation"] = 0,
+                    ["country"] = "usa",
+                    ["uncontrolled"] = false,
                     ["groupName"] = "A-10C Client #1",
                     ["units"] = 
                     {
                         [1] = 
                         {
                             ["alt"] = 2000,
-                            ["heading"] = -0.67060113146646,
                             ["point"] = 
                             {
                                 ["y"] = 636428.57142857,
                                 ["x"] = -318142.85714286,
                             }, -- end of ["point"]
-                            ["groupId"] = 6,
                             ["alt_type"] = "BARO",
                             ["livery_id"] = "104th FS Maryland ANG, Baltimore (MD)",
-                            ["skill"] = "Client",
-                            ["countryId"] = 11,
-                            ["coalition"] = "blue",
-                            ["speed"] = 138.88888888889,
-                            ["country"] = "usa",
+                            ["onboard_num"] = "52",
                             ["category"] = "plane",
-                            ["unitName"] = "A-10C Client #1",
+                            ["speed"] = 138.88888888889,
                             ["type"] = "A-10C",
-                            ["unitId"] = 11,
+                            ["country"] = "usa",
+                            ["psi"] = 0.67060113146646,
+                            ["unitName"] = "A-10C Client #1",
                             ["groupName"] = "A-10C Client #1",
+                            ["coalition"] = "blue",
+                            ["countryId"] = 11,
+                            ["x"] = -318142.85714286,
+                            ["y"] = 636428.57142857,
+                            ["unitId"] = 11,
+                            ["heading"] = -0.67060113146646,
+                            ["skill"] = "Client",
+                            ["callsign"] = 
+                            {
+                                [1] = 3,
+                                [2] = 1,
+                                [3] = 1,
+                                ["name"] = "Uzi11",
+                            }, -- end of ["callsign"]
+                            ["groupId"] = 6,
                         }, -- end of [1]
                     }, -- end of ["units"]
-                    ["coalition"] = "blue",
+                    ["countryId"] = 11,
+                    ["radioSet"] = false,
+                    ["groupId"] = 6,
                     ["category"] = "plane",
-                    ["country"] = "usa",
+                    ["coalition"] = "blue",
                     ["startTime"] = 0,
                     ["task"] = "CAS",
-                    ["countryId"] = 11,
+                    ["frequency"] = 251,
                 }, -- end of [3]
                 [4] = 
                 {
-                    ["groupId"] = 7,
+                    ["modulation"] = 0,
+                    ["country"] = "usa",
+                    ["uncontrolled"] = false,
                     ["groupName"] = "A-10C Client #2",
                     ["units"] = 
                     {
                         [1] = 
                         {
                             ["alt"] = 2000,
-                            ["heading"] = -0.66079849060746,
                             ["point"] = 
                             {
                                 ["y"] = 644428.57142857,
                                 ["x"] = -315857.14285714,
                             }, -- end of ["point"]
-                            ["groupId"] = 7,
                             ["alt_type"] = "BARO",
                             ["livery_id"] = "104th FS Maryland ANG, Baltimore (MD)",
-                            ["skill"] = "Client",
-                            ["countryId"] = 11,
-                            ["coalition"] = "blue",
-                            ["speed"] = 138.88888888889,
-                            ["country"] = "usa",
+                            ["onboard_num"] = "52",
                             ["category"] = "plane",
-                            ["unitName"] = "A-10C Client #2",
+                            ["speed"] = 138.88888888889,
                             ["type"] = "A-10C",
-                            ["unitId"] = 12,
+                            ["country"] = "usa",
+                            ["psi"] = 0.66079849060746,
+                            ["unitName"] = "A-10C Client #2",
                             ["groupName"] = "A-10C Client #2",
+                            ["coalition"] = "blue",
+                            ["countryId"] = 11,
+                            ["x"] = -315857.14285714,
+                            ["y"] = 644428.57142857,
+                            ["unitId"] = 12,
+                            ["heading"] = -0.66079849060746,
+                            ["skill"] = "Client",
+                            ["callsign"] = 
+                            {
+                                [1] = 3,
+                                [2] = 1,
+                                [3] = 1,
+                                ["name"] = "Uzi11",
+                            }, -- end of ["callsign"]
+                            ["groupId"] = 7,
                         }, -- end of [1]
                     }, -- end of ["units"]
-                    ["coalition"] = "blue",
+                    ["countryId"] = 11,
+                    ["radioSet"] = false,
+                    ["groupId"] = 7,
                     ["category"] = "plane",
-                    ["country"] = "usa",
+                    ["coalition"] = "blue",
                     ["startTime"] = 0,
                     ["task"] = "CAS",
-                    ["countryId"] = 11,
+                    ["frequency"] = 251,
                 }, -- end of [4]
             }, -- end of ["plane"]
             ["static"] = 
@@ -523,7 +629,7 @@ MEunits =
                         [1] = 
                         {
                             ["shape_name"] = "PalatkaB",
-                            ["heading"] = 0,
+                            ["type"] = "FARP Tent",
                             ["point"] = 
                             {
                                 ["y"] = 636248.57142857,
@@ -532,12 +638,14 @@ MEunits =
                             ["groupId"] = 15,
                             ["groupName"] = "tent1",
                             ["countryId"] = 11,
-                            ["unitId"] = 37,
+                            ["coalition"] = "blue",
+                            ["x"] = -300871.42857143,
+                            ["y"] = 636248.57142857,
                             ["category"] = "static",
                             ["unitName"] = "tent1",
-                            ["type"] = "FARP Tent",
                             ["country"] = "usa",
-                            ["coalition"] = "blue",
+                            ["heading"] = 0,
+                            ["unitId"] = 37,
                         }, -- end of [1]
                     }, -- end of ["units"]
                 }, -- end of [1]
@@ -554,7 +662,7 @@ MEunits =
                         [1] = 
                         {
                             ["shape_name"] = "PalatkaB",
-                            ["heading"] = 0,
+                            ["type"] = "FARP Tent",
                             ["point"] = 
                             {
                                 ["y"] = 638620,
@@ -563,12 +671,14 @@ MEunits =
                             ["groupId"] = 16,
                             ["groupName"] = "tent2",
                             ["countryId"] = 11,
-                            ["unitId"] = 38,
+                            ["coalition"] = "blue",
+                            ["x"] = -299814.28571429,
+                            ["y"] = 638620,
                             ["category"] = "static",
                             ["unitName"] = "tent2",
-                            ["type"] = "FARP Tent",
                             ["country"] = "usa",
-                            ["coalition"] = "blue",
+                            ["heading"] = 0,
+                            ["unitId"] = 38,
                         }, -- end of [1]
                     }, -- end of ["units"]
                 }, -- end of [2]
@@ -585,7 +695,7 @@ MEunits =
                         [1] = 
                         {
                             ["shape_name"] = "konteiner_red1",
-                            ["heading"] = 0,
+                            ["type"] = "Container red 1",
                             ["point"] = 
                             {
                                 ["y"] = 684605.71428571,
@@ -594,12 +704,14 @@ MEunits =
                             ["groupId"] = 30,
                             ["groupName"] = "static",
                             ["countryId"] = 11,
-                            ["unitId"] = 44,
+                            ["coalition"] = "blue",
+                            ["x"] = -279949.99999999,
+                            ["y"] = 684605.71428571,
                             ["category"] = "static",
                             ["unitName"] = "static",
-                            ["type"] = "Container red 1",
                             ["country"] = "usa",
-                            ["coalition"] = "blue",
+                            ["heading"] = 0,
+                            ["unitId"] = 44,
                         }, -- end of [1]
                     }, -- end of ["units"]
                 }, -- end of [3]
@@ -628,10 +740,10 @@ MEunits =
                 [1] = 
                 {
                     ["coalition"] = "red",
-                    ["category"] = "ship",
                     ["countryId"] = 2,
-                    ["groupId"] = 9,
+                    ["category"] = "ship",
                     ["country"] = "russia",
+                    ["groupId"] = 9,
                     ["startTime"] = 0,
                     ["groupName"] = "Rus Ships #1",
                     ["units"] = 
@@ -645,15 +757,17 @@ MEunits =
                                 ["x"] = -34285.714285714,
                             }, -- end of ["point"]
                             ["groupId"] = 9,
+                            ["y"] = 200000,
                             ["skill"] = "Average",
                             ["coalition"] = "red",
                             ["countryId"] = 2,
-                            ["groupName"] = "Rus Ships #1",
+                            ["x"] = -34285.714285714,
+                            ["unitId"] = 15,
                             ["category"] = "ship",
                             ["unitName"] = "1ship1",
-                            ["country"] = "russia",
                             ["heading"] = 0,
-                            ["unitId"] = 15,
+                            ["country"] = "russia",
+                            ["groupName"] = "Rus Ships #1",
                         }, -- end of [1]
                         [2] = 
                         {
@@ -664,25 +778,27 @@ MEunits =
                                 ["x"] = -35085.714285714,
                             }, -- end of ["point"]
                             ["groupId"] = 9,
+                            ["y"] = 200800,
                             ["skill"] = "Average",
                             ["coalition"] = "red",
                             ["countryId"] = 2,
-                            ["groupName"] = "Rus Ships #1",
+                            ["x"] = -35085.714285714,
+                            ["unitId"] = 16,
                             ["category"] = "ship",
                             ["unitName"] = "1ship2",
-                            ["country"] = "russia",
                             ["heading"] = 0,
-                            ["unitId"] = 16,
+                            ["country"] = "russia",
+                            ["groupName"] = "Rus Ships #1",
                         }, -- end of [2]
                     }, -- end of ["units"]
                 }, -- end of [1]
                 [2] = 
                 {
                     ["coalition"] = "red",
-                    ["category"] = "ship",
                     ["countryId"] = 2,
-                    ["groupId"] = 10,
+                    ["category"] = "ship",
                     ["country"] = "russia",
+                    ["groupId"] = 10,
                     ["startTime"] = 0,
                     ["groupName"] = "Rus Ships #2",
                     ["units"] = 
@@ -696,15 +812,17 @@ MEunits =
                                 ["x"] = -86428.571428571,
                             }, -- end of ["point"]
                             ["groupId"] = 10,
+                            ["y"] = 73571.428571428,
                             ["skill"] = "Average",
                             ["coalition"] = "red",
                             ["countryId"] = 2,
-                            ["groupName"] = "Rus Ships #2",
+                            ["x"] = -86428.571428571,
+                            ["unitId"] = 17,
                             ["category"] = "ship",
                             ["unitName"] = "2ship1",
-                            ["country"] = "russia",
                             ["heading"] = 1.1755995276042,
-                            ["unitId"] = 17,
+                            ["country"] = "russia",
+                            ["groupName"] = "Rus Ships #2",
                         }, -- end of [1]
                         [2] = 
                         {
@@ -715,15 +833,17 @@ MEunits =
                                 ["x"] = -87228.571428571,
                             }, -- end of ["point"]
                             ["groupId"] = 10,
+                            ["y"] = 74371.428571428,
                             ["skill"] = "Average",
                             ["coalition"] = "red",
                             ["countryId"] = 2,
-                            ["groupName"] = "Rus Ships #2",
+                            ["x"] = -87228.571428571,
+                            ["unitId"] = 18,
                             ["category"] = "ship",
                             ["unitName"] = "2ship2",
-                            ["country"] = "russia",
                             ["heading"] = 1.1755995276042,
-                            ["unitId"] = 18,
+                            ["country"] = "russia",
+                            ["groupName"] = "Rus Ships #2",
                         }, -- end of [2]
                     }, -- end of ["units"]
                 }, -- end of [2]
@@ -732,123 +852,151 @@ MEunits =
             {
                 [1] = 
                 {
-                    ["groupId"] = 2,
+                    ["modulation"] = 0,
+                    ["country"] = "russia",
+                    ["uncontrolled"] = false,
                     ["groupName"] = "Ka-50s_1",
                     ["units"] = 
                     {
                         [1] = 
                         {
                             ["alt"] = 500,
-                            ["heading"] = 2.5953630185698,
                             ["point"] = 
                             {
                                 ["y"] = 615000,
                                 ["x"] = -237571.42857143,
                             }, -- end of ["point"]
-                            ["groupId"] = 2,
                             ["alt_type"] = "BARO",
                             ["livery_id"] = "Russia Demo #024",
-                            ["skill"] = "High",
-                            ["countryId"] = 2,
-                            ["coalition"] = "red",
-                            ["speed"] = 55.555555555556,
-                            ["country"] = "russia",
+                            ["onboard_num"] = "50",
                             ["category"] = "helicopter",
-                            ["unitName"] = "Ka-50s_1_1",
+                            ["speed"] = 55.555555555556,
                             ["type"] = "Ka-50",
-                            ["unitId"] = 3,
+                            ["country"] = "russia",
+                            ["psi"] = -2.5953630185698,
+                            ["unitName"] = "Ka-50s_1_1",
                             ["groupName"] = "Ka-50s_1",
+                            ["coalition"] = "red",
+                            ["countryId"] = 2,
+                            ["x"] = -237571.42857143,
+                            ["y"] = 615000,
+                            ["unitId"] = 3,
+                            ["heading"] = 2.5953630185698,
+                            ["skill"] = "High",
+                            ["callsign"] = 100,
+                            ["groupId"] = 2,
                         }, -- end of [1]
                         [2] = 
                         {
                             ["alt"] = 500,
-                            ["heading"] = 2.5953630185698,
                             ["point"] = 
                             {
                                 ["y"] = 615040,
                                 ["x"] = -237611.42857143,
                             }, -- end of ["point"]
-                            ["groupId"] = 2,
                             ["alt_type"] = "BARO",
                             ["livery_id"] = "Russia Demo #024",
-                            ["skill"] = "High",
-                            ["countryId"] = 2,
-                            ["coalition"] = "red",
-                            ["speed"] = 55.555555555556,
-                            ["country"] = "russia",
+                            ["onboard_num"] = "51",
                             ["category"] = "helicopter",
-                            ["unitName"] = "Ka-50s_1_2",
+                            ["speed"] = 55.555555555556,
                             ["type"] = "Ka-50",
-                            ["unitId"] = 4,
+                            ["country"] = "russia",
+                            ["psi"] = -2.5953630185698,
+                            ["unitName"] = "Ka-50s_1_2",
                             ["groupName"] = "Ka-50s_1",
+                            ["coalition"] = "red",
+                            ["countryId"] = 2,
+                            ["x"] = -237611.42857143,
+                            ["y"] = 615040,
+                            ["unitId"] = 4,
+                            ["heading"] = 2.5953630185698,
+                            ["skill"] = "High",
+                            ["callsign"] = 101,
+                            ["groupId"] = 2,
                         }, -- end of [2]
                     }, -- end of ["units"]
-                    ["coalition"] = "red",
+                    ["countryId"] = 2,
+                    ["radioSet"] = false,
+                    ["groupId"] = 2,
                     ["category"] = "helicopter",
-                    ["country"] = "russia",
+                    ["coalition"] = "red",
                     ["startTime"] = 0,
                     ["task"] = "CAS",
-                    ["countryId"] = 2,
+                    ["frequency"] = 124,
                 }, -- end of [1]
                 [2] = 
                 {
-                    ["groupId"] = 3,
+                    ["modulation"] = 1,
+                    ["country"] = "russia",
+                    ["uncontrolled"] = false,
                     ["groupName"] = "Mi-8s_1",
                     ["units"] = 
                     {
                         [1] = 
                         {
                             ["alt"] = 500,
-                            ["heading"] = 2.6119254271103,
                             ["point"] = 
                             {
                                 ["y"] = 603285.71428571,
                                 ["x"] = -243285.71428571,
                             }, -- end of ["point"]
-                            ["groupId"] = 3,
                             ["alt_type"] = "BARO",
                             ["livery_id"] = "Russia",
-                            ["skill"] = "Random",
-                            ["countryId"] = 2,
-                            ["coalition"] = "red",
-                            ["speed"] = 55.555555555556,
-                            ["country"] = "russia",
+                            ["onboard_num"] = "52",
                             ["category"] = "helicopter",
-                            ["unitName"] = "Mi-8s_1_1",
+                            ["speed"] = 55.555555555556,
                             ["type"] = "Mi-8MT",
-                            ["unitId"] = 5,
+                            ["country"] = "russia",
+                            ["psi"] = -2.6119254271103,
+                            ["unitName"] = "Mi-8s_1_1",
                             ["groupName"] = "Mi-8s_1",
+                            ["coalition"] = "red",
+                            ["countryId"] = 2,
+                            ["x"] = -243285.71428571,
+                            ["y"] = 603285.71428571,
+                            ["unitId"] = 5,
+                            ["heading"] = 2.6119254271103,
+                            ["skill"] = "Random",
+                            ["callsign"] = 103,
+                            ["groupId"] = 3,
                         }, -- end of [1]
                         [2] = 
                         {
                             ["alt"] = 500,
-                            ["heading"] = 2.6119254271103,
                             ["point"] = 
                             {
                                 ["y"] = 603325.71428571,
                                 ["x"] = -243325.71428571,
                             }, -- end of ["point"]
-                            ["groupId"] = 3,
                             ["alt_type"] = "BARO",
                             ["livery_id"] = "Russia",
-                            ["skill"] = "Random",
-                            ["countryId"] = 2,
-                            ["coalition"] = "red",
-                            ["speed"] = 55.555555555556,
-                            ["country"] = "russia",
+                            ["onboard_num"] = "53",
                             ["category"] = "helicopter",
-                            ["unitName"] = "Mi-8s_1_1 #1",
+                            ["speed"] = 55.555555555556,
                             ["type"] = "Mi-8MT",
-                            ["unitId"] = 6,
+                            ["country"] = "russia",
+                            ["psi"] = -2.6119254271103,
+                            ["unitName"] = "Mi-8s_1_1 #1",
                             ["groupName"] = "Mi-8s_1",
+                            ["coalition"] = "red",
+                            ["countryId"] = 2,
+                            ["x"] = -243325.71428571,
+                            ["y"] = 603325.71428571,
+                            ["unitId"] = 6,
+                            ["heading"] = 2.6119254271103,
+                            ["skill"] = "Random",
+                            ["callsign"] = 102,
+                            ["groupId"] = 3,
                         }, -- end of [2]
                     }, -- end of ["units"]
-                    ["coalition"] = "red",
+                    ["countryId"] = 2,
+                    ["radioSet"] = false,
+                    ["groupId"] = 3,
                     ["category"] = "helicopter",
-                    ["country"] = "russia",
+                    ["coalition"] = "red",
                     ["startTime"] = 0,
                     ["task"] = "Transport",
-                    ["countryId"] = 2,
+                    ["frequency"] = 127.5,
                 }, -- end of [2]
             }, -- end of ["helicopter"]
             ["vehicle"] = 
@@ -861,131 +1009,143 @@ MEunits =
                     {
                         [1] = 
                         {
-                            ["type"] = "BTR-80",
+                            ["heading"] = -1.7994767003775,
                             ["point"] = 
                             {
                                 ["y"] = 654545.71428571,
                                 ["x"] = -292842.85714286,
                             }, -- end of ["point"]
                             ["groupId"] = 13,
-                            ["skill"] = "Average",
-                            ["countryId"] = 2,
+                            ["y"] = 654545.71428571,
                             ["coalition"] = "red",
                             ["groupName"] = "RuBTRs",
-                            ["heading"] = -1.7994767003775,
+                            ["type"] = "BTR-80",
+                            ["countryId"] = 2,
+                            ["x"] = -292842.85714286,
+                            ["unitId"] = 27,
                             ["category"] = "vehicle",
                             ["unitName"] = "RuBTRs1",
                             ["playerCanDrive"] = true,
-                            ["unitId"] = 27,
                             ["country"] = "russia",
+                            ["skill"] = "Average",
                         }, -- end of [1]
                         [2] = 
                         {
-                            ["type"] = "BTR-80",
+                            ["heading"] = -1.7994767003775,
                             ["point"] = 
                             {
                                 ["y"] = 654585.71428571,
                                 ["x"] = -292882.85714286,
                             }, -- end of ["point"]
                             ["groupId"] = 13,
-                            ["skill"] = "Average",
-                            ["countryId"] = 2,
+                            ["y"] = 654585.71428571,
                             ["coalition"] = "red",
                             ["groupName"] = "RuBTRs",
-                            ["heading"] = -1.7994767003775,
+                            ["type"] = "BTR-80",
+                            ["countryId"] = 2,
+                            ["x"] = -292882.85714286,
+                            ["unitId"] = 28,
                             ["category"] = "vehicle",
                             ["unitName"] = "RuBTRs2",
                             ["playerCanDrive"] = true,
-                            ["unitId"] = 28,
                             ["country"] = "russia",
+                            ["skill"] = "Average",
                         }, -- end of [2]
                         [3] = 
                         {
-                            ["type"] = "BTR-80",
+                            ["heading"] = -1.7994767003775,
                             ["point"] = 
                             {
                                 ["y"] = 654625.71428571,
                                 ["x"] = -292922.85714286,
                             }, -- end of ["point"]
                             ["groupId"] = 13,
-                            ["skill"] = "Average",
-                            ["countryId"] = 2,
+                            ["y"] = 654625.71428571,
                             ["coalition"] = "red",
                             ["groupName"] = "RuBTRs",
-                            ["heading"] = -1.7994767003775,
+                            ["type"] = "BTR-80",
+                            ["countryId"] = 2,
+                            ["x"] = -292922.85714286,
+                            ["unitId"] = 29,
                             ["category"] = "vehicle",
                             ["unitName"] = "RuBTRs3",
                             ["playerCanDrive"] = true,
-                            ["unitId"] = 29,
                             ["country"] = "russia",
+                            ["skill"] = "Average",
                         }, -- end of [3]
                         [4] = 
                         {
-                            ["type"] = "BTR-80",
+                            ["heading"] = -1.7994767003775,
                             ["point"] = 
                             {
                                 ["y"] = 654665.71428571,
                                 ["x"] = -292962.85714286,
                             }, -- end of ["point"]
                             ["groupId"] = 13,
-                            ["skill"] = "Average",
-                            ["countryId"] = 2,
+                            ["y"] = 654665.71428571,
                             ["coalition"] = "red",
                             ["groupName"] = "RuBTRs",
-                            ["heading"] = -1.7994767003775,
+                            ["type"] = "BTR-80",
+                            ["countryId"] = 2,
+                            ["x"] = -292962.85714286,
+                            ["unitId"] = 30,
                             ["category"] = "vehicle",
                             ["unitName"] = "RuBTRs4",
                             ["playerCanDrive"] = true,
-                            ["unitId"] = 30,
                             ["country"] = "russia",
+                            ["skill"] = "Average",
                         }, -- end of [4]
                         [5] = 
                         {
-                            ["type"] = "BTR-80",
+                            ["heading"] = -1.7994767003775,
                             ["point"] = 
                             {
                                 ["y"] = 654705.71428571,
                                 ["x"] = -293002.85714286,
                             }, -- end of ["point"]
                             ["groupId"] = 13,
-                            ["skill"] = "Average",
-                            ["countryId"] = 2,
+                            ["y"] = 654705.71428571,
                             ["coalition"] = "red",
                             ["groupName"] = "RuBTRs",
-                            ["heading"] = -1.7994767003775,
+                            ["type"] = "BTR-80",
+                            ["countryId"] = 2,
+                            ["x"] = -293002.85714286,
+                            ["unitId"] = 31,
                             ["category"] = "vehicle",
                             ["unitName"] = "RuBTRs5",
                             ["playerCanDrive"] = true,
-                            ["unitId"] = 31,
                             ["country"] = "russia",
+                            ["skill"] = "Average",
                         }, -- end of [5]
                         [6] = 
                         {
-                            ["type"] = "BTR-80",
+                            ["heading"] = -1.7994767003775,
                             ["point"] = 
                             {
                                 ["y"] = 654745.71428571,
                                 ["x"] = -293042.85714286,
                             }, -- end of ["point"]
                             ["groupId"] = 13,
-                            ["skill"] = "Average",
-                            ["countryId"] = 2,
+                            ["y"] = 654745.71428571,
                             ["coalition"] = "red",
                             ["groupName"] = "RuBTRs",
-                            ["heading"] = -1.7994767003775,
+                            ["type"] = "BTR-80",
+                            ["countryId"] = 2,
+                            ["x"] = -293042.85714286,
+                            ["unitId"] = 32,
                             ["category"] = "vehicle",
                             ["unitName"] = "RuBTRs6",
                             ["playerCanDrive"] = true,
-                            ["unitId"] = 32,
                             ["country"] = "russia",
+                            ["skill"] = "Average",
                         }, -- end of [6]
                     }, -- end of ["units"]
                     ["coalition"] = "red",
                     ["category"] = "vehicle",
-                    ["country"] = "russia",
+                    ["countryId"] = 2,
                     ["startTime"] = 0,
                     ["task"] = "Ground Nothing",
-                    ["countryId"] = 2,
+                    ["country"] = "russia",
                 }, -- end of [1]
                 [2] = 
                 {
@@ -995,168 +1155,194 @@ MEunits =
                     {
                         [1] = 
                         {
-                            ["type"] = "T-55",
+                            ["heading"] = 0,
                             ["point"] = 
                             {
                                 ["y"] = 628677.14285714,
                                 ["x"] = -273442.85714286,
                             }, -- end of ["point"]
                             ["groupId"] = 14,
-                            ["skill"] = "Excellent",
-                            ["countryId"] = 2,
+                            ["y"] = 628677.14285714,
                             ["coalition"] = "red",
                             ["groupName"] = "RuTanks",
-                            ["heading"] = 0,
+                            ["type"] = "T-55",
+                            ["countryId"] = 2,
+                            ["x"] = -273442.85714286,
+                            ["unitId"] = 33,
                             ["category"] = "vehicle",
                             ["unitName"] = "RuTanks1",
                             ["playerCanDrive"] = true,
-                            ["unitId"] = 33,
                             ["country"] = "russia",
+                            ["skill"] = "Excellent",
                         }, -- end of [1]
                         [2] = 
                         {
-                            ["type"] = "T-55",
+                            ["heading"] = 0,
                             ["point"] = 
                             {
                                 ["y"] = 628717.14285714,
                                 ["x"] = -273482.85714286,
                             }, -- end of ["point"]
                             ["groupId"] = 14,
-                            ["skill"] = "Excellent",
-                            ["countryId"] = 2,
+                            ["y"] = 628717.14285714,
                             ["coalition"] = "red",
                             ["groupName"] = "RuTanks",
-                            ["heading"] = 0,
+                            ["type"] = "T-55",
+                            ["countryId"] = 2,
+                            ["x"] = -273482.85714286,
+                            ["unitId"] = 34,
                             ["category"] = "vehicle",
                             ["unitName"] = "RuTanks2",
                             ["playerCanDrive"] = true,
-                            ["unitId"] = 34,
                             ["country"] = "russia",
+                            ["skill"] = "Excellent",
                         }, -- end of [2]
                         [3] = 
                         {
-                            ["type"] = "T-55",
+                            ["heading"] = 0,
                             ["point"] = 
                             {
                                 ["y"] = 628757.14285714,
                                 ["x"] = -273522.85714286,
                             }, -- end of ["point"]
                             ["groupId"] = 14,
-                            ["skill"] = "Excellent",
-                            ["countryId"] = 2,
+                            ["y"] = 628757.14285714,
                             ["coalition"] = "red",
                             ["groupName"] = "RuTanks",
-                            ["heading"] = 0,
+                            ["type"] = "T-55",
+                            ["countryId"] = 2,
+                            ["x"] = -273522.85714286,
+                            ["unitId"] = 35,
                             ["category"] = "vehicle",
                             ["unitName"] = "RuTanks3",
                             ["playerCanDrive"] = true,
-                            ["unitId"] = 35,
                             ["country"] = "russia",
+                            ["skill"] = "Excellent",
                         }, -- end of [3]
                         [4] = 
                         {
-                            ["type"] = "T-55",
+                            ["heading"] = 0,
                             ["point"] = 
                             {
                                 ["y"] = 628797.14285714,
                                 ["x"] = -273562.85714286,
                             }, -- end of ["point"]
                             ["groupId"] = 14,
-                            ["skill"] = "Excellent",
-                            ["countryId"] = 2,
+                            ["y"] = 628797.14285714,
                             ["coalition"] = "red",
                             ["groupName"] = "RuTanks",
-                            ["heading"] = 0,
+                            ["type"] = "T-55",
+                            ["countryId"] = 2,
+                            ["x"] = -273562.85714286,
+                            ["unitId"] = 36,
                             ["category"] = "vehicle",
                             ["unitName"] = "RuTanks4",
                             ["playerCanDrive"] = true,
-                            ["unitId"] = 36,
                             ["country"] = "russia",
+                            ["skill"] = "Excellent",
                         }, -- end of [4]
                     }, -- end of ["units"]
                     ["coalition"] = "red",
                     ["category"] = "vehicle",
-                    ["country"] = "russia",
+                    ["countryId"] = 2,
                     ["startTime"] = 0,
                     ["task"] = "Ground Nothing",
-                    ["countryId"] = 2,
+                    ["country"] = "russia",
                 }, -- end of [2]
             }, -- end of ["vehicle"]
             ["plane"] = 
             {
                 [1] = 
                 {
-                    ["groupId"] = 20,
+                    ["modulation"] = 0,
+                    ["country"] = "russia",
+                    ["uncontrolled"] = false,
                     ["groupName"] = "Su-33 Client #1",
                     ["units"] = 
                     {
                         [1] = 
                         {
                             ["alt"] = 2000,
-                            ["heading"] = 0,
                             ["point"] = 
                             {
                                 ["y"] = 590391.42857142,
                                 ["x"] = -250185.71428571,
                             }, -- end of ["point"]
-                            ["groupId"] = 20,
                             ["alt_type"] = "BARO",
                             ["livery_id"] = "279th kiap 1st squad navy",
-                            ["skill"] = "Client",
-                            ["countryId"] = 2,
-                            ["coalition"] = "red",
-                            ["speed"] = 138.88888888889,
-                            ["country"] = "russia",
+                            ["onboard_num"] = "53",
                             ["category"] = "plane",
-                            ["unitName"] = "Su-33 Client #1",
+                            ["speed"] = 138.88888888889,
                             ["type"] = "Su-33",
-                            ["unitId"] = 42,
+                            ["country"] = "russia",
+                            ["psi"] = 0,
+                            ["unitName"] = "Su-33 Client #1",
                             ["groupName"] = "Su-33 Client #1",
+                            ["coalition"] = "red",
+                            ["countryId"] = 2,
+                            ["x"] = -250185.71428571,
+                            ["y"] = 590391.42857142,
+                            ["unitId"] = 42,
+                            ["heading"] = 0,
+                            ["skill"] = "Client",
+                            ["callsign"] = 104,
+                            ["groupId"] = 20,
                         }, -- end of [1]
                     }, -- end of ["units"]
-                    ["coalition"] = "red",
+                    ["countryId"] = 2,
+                    ["radioSet"] = false,
+                    ["groupId"] = 20,
                     ["category"] = "plane",
-                    ["country"] = "russia",
+                    ["coalition"] = "red",
                     ["startTime"] = 0,
                     ["task"] = "CAP",
-                    ["countryId"] = 2,
+                    ["frequency"] = 124,
                 }, -- end of [1]
                 [2] = 
                 {
-                    ["groupId"] = 21,
+                    ["modulation"] = 0,
+                    ["country"] = "russia",
+                    ["uncontrolled"] = false,
                     ["groupName"] = "Su-33 Client #2",
                     ["units"] = 
                     {
                         [1] = 
                         {
                             ["alt"] = 2000,
-                            ["heading"] = 0,
                             ["point"] = 
                             {
                                 ["y"] = 597819.99999999,
                                 ["x"] = -235614.28571428,
                             }, -- end of ["point"]
-                            ["groupId"] = 21,
                             ["alt_type"] = "BARO",
                             ["livery_id"] = "279th kiap 1st squad navy",
-                            ["skill"] = "Client",
-                            ["countryId"] = 2,
-                            ["coalition"] = "red",
-                            ["speed"] = 138.88888888889,
-                            ["country"] = "russia",
+                            ["onboard_num"] = "53",
                             ["category"] = "plane",
-                            ["unitName"] = "Su-33 Client #2",
+                            ["speed"] = 138.88888888889,
                             ["type"] = "Su-33",
-                            ["unitId"] = 43,
+                            ["country"] = "russia",
+                            ["psi"] = 0,
+                            ["unitName"] = "Su-33 Client #2",
                             ["groupName"] = "Su-33 Client #2",
+                            ["coalition"] = "red",
+                            ["countryId"] = 2,
+                            ["x"] = -235614.28571428,
+                            ["y"] = 597819.99999999,
+                            ["unitId"] = 43,
+                            ["heading"] = 0,
+                            ["skill"] = "Client",
+                            ["callsign"] = 104,
+                            ["groupId"] = 21,
                         }, -- end of [1]
                     }, -- end of ["units"]
-                    ["coalition"] = "red",
+                    ["countryId"] = 2,
+                    ["radioSet"] = false,
+                    ["groupId"] = 21,
                     ["category"] = "plane",
-                    ["country"] = "russia",
+                    ["coalition"] = "red",
                     ["startTime"] = 0,
                     ["task"] = "CAP",
-                    ["countryId"] = 2,
+                    ["frequency"] = 124,
                 }, -- end of [2]
             }, -- end of ["plane"]
             ["static"] = 
@@ -1181,13 +1367,15 @@ MEunits =
                             }, -- end of ["point"]
                             ["groupId"] = 17,
                             ["groupName"] = "RU Farp",
+                            ["countryId"] = 2,
                             ["coalition"] = "red",
-                            ["unitId"] = 39,
+                            ["x"] = -258442.85714286,
+                            ["y"] = 617591.42857143,
                             ["category"] = "static",
                             ["unitName"] = "RU Farp",
-                            ["type"] = "FARP",
-                            ["countryId"] = 2,
                             ["country"] = "russia",
+                            ["type"] = "FARP",
+                            ["unitId"] = 39,
                         }, -- end of [1]
                     }, -- end of ["units"]
                 }, -- end of [1]
@@ -1204,7 +1392,7 @@ MEunits =
                         [1] = 
                         {
                             ["shape_name"] = "PalatkaB",
-                            ["heading"] = 0,
+                            ["type"] = "FARP Tent",
                             ["point"] = 
                             {
                                 ["y"] = 617962.85714285,
@@ -1213,12 +1401,14 @@ MEunits =
                             ["groupId"] = 18,
                             ["groupName"] = "RuTent1",
                             ["countryId"] = 2,
-                            ["unitId"] = 40,
+                            ["coalition"] = "red",
+                            ["x"] = -258642.85714286,
+                            ["y"] = 617962.85714285,
                             ["category"] = "static",
                             ["unitName"] = "RuTent1",
-                            ["type"] = "FARP Tent",
                             ["country"] = "russia",
-                            ["coalition"] = "red",
+                            ["heading"] = 0,
+                            ["unitId"] = 40,
                         }, -- end of [1]
                     }, -- end of ["units"]
                 }, -- end of [2]
@@ -1235,7 +1425,7 @@ MEunits =
                         [1] = 
                         {
                             ["shape_name"] = "PalatkaB",
-                            ["heading"] = 0,
+                            ["type"] = "FARP Tent",
                             ["point"] = 
                             {
                                 ["y"] = 617691.42857143,
@@ -1244,12 +1434,14 @@ MEunits =
                             ["groupId"] = 19,
                             ["groupName"] = "RuTent2",
                             ["countryId"] = 2,
-                            ["unitId"] = 41,
+                            ["coalition"] = "red",
+                            ["x"] = -259071.42857143,
+                            ["y"] = 617691.42857143,
                             ["category"] = "static",
                             ["unitName"] = "RuTent2",
-                            ["type"] = "FARP Tent",
                             ["country"] = "russia",
-                            ["coalition"] = "red",
+                            ["heading"] = 0,
+                            ["unitId"] = 41,
                         }, -- end of [1]
                     }, -- end of ["units"]
                 }, -- end of [3]

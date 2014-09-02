@@ -2,28 +2,6 @@ zonesByNum =
 {
     [1] = 
     {
-        ["y"] = 673819.99999999,
-        ["radius"] = 3000,
-        ["point"] = 
-        {
-            ["y"] = 0,
-            ["x"] = -271900,
-            ["z"] = 673819.99999999,
-        }, -- end of ["point"]
-        ["name"] = "explosion zone",
-        ["color"] = 
-        {
-            [1] = 1,
-            [2] = 1,
-            [3] = 1,
-            [4] = 0.14901960784314,
-        }, -- end of ["color"]
-        ["x"] = -271900,
-        ["hidden"] = false,
-        ["zoneId"] = 1,
-    }, -- end of [1]
-    [2] = 
-    {
         ["y"] = 614105.71428571,
         ["radius"] = 3000,
         ["point"] = 
@@ -43,8 +21,8 @@ zonesByNum =
         ["x"] = -245328.57142857,
         ["hidden"] = false,
         ["zoneId"] = 2,
-    }, -- end of [2]
-    [3] = 
+    }, -- end of [1]
+    [2] = 
     {
         ["y"] = 692534.28571428,
         ["radius"] = 3000,
@@ -65,5 +43,27 @@ zonesByNum =
         ["x"] = -285971.42857143,
         ["hidden"] = false,
         ["zoneId"] = 3,
+    }, -- end of [2]
+    [3] = 
+    {
+        ["y"] = 673819.99999999,
+        ["radius"] = 3000,
+        ["point"] = 
+        {
+            ["y"] = 0,
+            ["x"] = -271900,
+            ["z"] = 673819.99999999,
+        }, -- end of ["point"]
+        ["name"] = "explosion zone",
+        ["color"] = 
+        {
+            [1] = 1,
+            [2] = 1,
+            [3] = 1,
+            [4] = 0.14901960784314,
+        }, -- end of ["color"]
+        ["x"] = -271900,
+        ["hidden"] = false,
+        ["zoneId"] = 1,
     }, -- end of [3]
 } -- end of zonesByNum

@@ -1,16 +1,45 @@
+--[[
+
+]]
 
 --MiST Mission Scripting Tools
 mist = {}
 
 -- don't change these
 mist.majorVersion = 3
-mist.minorVersion = 4
-mist.build = 27 
+mist.minorVersion = 5
+mist.build = 34 
 
+
+--[[
+DB update refactor
+currently:
+
+mist.dynAdd adds table data it addToDBs table
+spawn events are monitored
+groupsToAdd table created
+addToDBs parsed and added to spawned events table
+spawnEvents table parsed and added to groupsToAdd table
+groupsToAdd then parsed and calls mist.dbUpdate()
+mist.dbUpdate() gets all of the group data and saves the group data to the mist.DBs
+
+
+plan/goal:
+make update into coroutine/remove in pairs loops 
+seperate larger funcs into smaller funcs
+
+writeGroups contains all DB creation code
+
+]]
 --------------------------------------------------------------------------------------------------------------
 -- the main area
 do
 	local coroutines = {}
+	
+	local tempSpawnedUnits = {} -- birth events added here
+	local mistAddedObjects = {} -- mist.dynAdd unit data added here
+	local mistAddedGroups = {} -- mist.dynAdd groupdata added here
+	local writeGroups = {}
 	
 	local function update_alive_units()  -- coroutine function
 		local lalive_units = mist.DBs.aliveUnits -- local references for faster execution
@@ -57,16 +86,339 @@ do
 			end
 		end
 	end
+	
+	local function dbUpdate(event)
+		local newTable = {}
+		
+		newTable['startTime'] =  timer.getAbsTime()
+		
+		if type(event) == 'string' then -- if name of an object. 
+			--env.info('event')
+			local newObject
+			local newType = 'group'
+			if Group.getByName(event) then
+				newObject = Group.getByName(event)
+			elseif StaticObject.getByName(event) then
+				newObject = StaticObject.getByName(event)
+				newType = 'static'
+			--	env.info('its static')
+			else
+				env.info('WTF')
+				return false
+			end
+			
+
+			
+			newTable.name = newObject:getName()
+			newTable.groupId = tonumber(newObject:getID())
+			newTable.groupName = newObject:getName()
+			local unitOneRef 
+			if newType == 'static' then
+			
+				unitOneRef = newObject	
+				newTable.countryId = tonumber(newObject:getCountry())
+				newTable.coalitionId = tonumber(newObject:getCoalition())
+				newTable.category = 'static'
+			else
+				unitOneRef = newObject:getUnits()
+				newTable.countryId = tonumber(unitOneRef[1]:getCountry())
+				newTable.coalitionId = tonumber(unitOneRef[1]:getCoalition())
+				newTable.category = tonumber(newObject:getCategory())
+			end
+			
+			for countryData, countryId in pairs(country.id) do
+				if newTable.country and string.upper(countryData) == string.upper(newTable.country) or countryId == newTable.countryId then
+					newTable['countryId'] = countryId
+					newTable['country'] = string.lower(countryData)
+					for coaData, coaId in pairs(coalition.side) do
+						if coaId == coalition.getCountryCoalition(countryId) then 
+							newTable['coalition'] = string.lower(coaData)
+						end
+					end
+				end
+			end
+
+			for catData, catId in pairs(Unit.Category) do
+				if Group.getByName(newTable.groupName):isExist() then
+					if catId == Group.getByName(newTable.groupName):getCategory() then
+						newTable['category'] = string.lower(catData)
+					end
+				elseif StaticObject.getByName(newTable.groupName):isExist() then
+					if catId == StaticObject.getByName(newTable.groupName):getCategory() then
+						newTable['category'] = string.lower(catData)
+					end
+					
+				end
+			end
+			
+			local gfound = false
+			for index, data in pairs(mistAddedGroups) do
+				if mist.stringMatch(data.name, newTable.groupName) == true then
+					gfound = true
+					newTable.task = data.task
+					newTable.modulation = data.modulation
+					newTable.uncontrolled = data.uncontrolled
+					newTable.radioSet = data.radioSet
+					mistAddedGroups[index] = nil
+				end
+			end
+			
+			if gfound == false then
+				newTable.uncontrolled = false
+			end
+			
+			newTable.units = {}
+			if newType == 'group' then
+				for unitId, unitData in pairs(unitOneRef) do
+					newTable.units[unitId] = {}
+					newTable.units[unitId].unitName = unitData:getName()
+					
+					newTable.units[unitId].x = mist.utils.round(unitData:getPosition().p.x)
+					newTable.units[unitId].y = mist.utils.round(unitData:getPosition().p.z)
+					newTable.units[unitId].point = {}
+					newTable.units[unitId].point.x = newTable.units[unitId].x
+					newTable.units[unitId].point.y = newTable.units[unitId].y
+					newTable.units[unitId].alt = mist.utils.round(unitData:getPosition().p.y)
+			
+					newTable.units[unitId].heading = mist.getHeading(unitData, true)
+
+					newTable.units[unitId].type = unitData:getTypeName()
+					newTable.units[unitId].unitId = tonumber(unitData:getID())
+					
+					
+					newTable.units[unitId].groupName = newTable.groupName
+					newTable.units[unitId].groupId = newTable.groupId
+					newTable.units[unitId].countryId = newTable.countryId
+					newTable.units[unitId].coalitionId = newTable.coalitionId
+					newTable.units[unitId].coalition = newTable.coalition
+					newTable.units[unitId].country = newTable.country
+					local found = false
+					for index, data in pairs(mistAddedObjects) do
+						if mist.stringMatch(data.name, newTable.units[unitId].unitName) == true then
+							found = true
+							newTable.units[unitId].livery_id = data.livery_id
+							newTable.units[unitId].skill = data.skill
+							newTable.units[unitId].alt_type = data.alt_type
+							newTable.units[unitId].callsign = data.callsign
+							newTable.units[unitId].psi = data.psi
+							mistAddedObjects[index] = nil
+						end
+						if found == false then
+							newTable.units[unitId].skill = "High"
+							newTable.units[unitId].alt_type = "BARO"	
+						end
+					end
+					
+				end
+			else -- its a static
+
+				newTable.units[1] = {}
+				newTable.units[1].unitName = newObject:getName()
+				
+				newTable.units[1].x = mist.utils.round(newObject:getPosition().p.x)
+				newTable.units[1].y = mist.utils.round(newObject:getPosition().p.z)
+				newTable.units[1].point = {}
+				newTable.units[1].point.x = newTable.units[1].x
+				newTable.units[1].point.y = newTable.units[1].y
+				newTable.units[1].alt = mist.utils.round(newObject:getPosition().p.y)
+				newTable.units[1].heading = mist.getHeading(newObject, true)
+				newTable.units[1].type = newObject:getTypeName()
+				newTable.units[1].unitId = tonumber(newObject:getID())
+				newTable.units[1].groupName = newTable.name
+				newTable.units[1].groupId = newTable.groupId
+				newTable.units[1].countryId = newTable.countryId
+				newTable.units[1].country = newTable.country
+				newTable.units[1].coalitionId = newTable.coalitionId
+				newTable.units[1].coalition = newTable.coalition
+				
+				----- search mist added objects for extra data if applicable
+				for index, data in pairs(mistAddedObjects) do
+					if mist.stringMatch(data.name, newTable.units[1].unitName) == true then
+						newTable.units[1].shape_name = data.shape_name -- for statics
+						newTable.units[1].livery_id = data.livery_id
+						newTable.units[1].airdromeId = data.airdromeId
+						mistAddedObjects[index] = nil
+					end
+				end
+			end
+		end
+	
+		newTable['timeAdded'] = timer.getAbsTime() -- only on the dynGroupsAdded table. For other reference, see start time
+		--mist.debug.dumpDBs()
+		--end
+		return newTable
+	end
+	
+
+	
+	local function checkSpawnedEvents()
+		if #tempSpawnedUnits > 0 then
+			local groupsToAdd = {}
+			local ltemp = tempSpawnedUnits
+			local ltable = table
+
+			local updatesPerRun = math.ceil(#tempSpawnedUnits/20)
+			if updatesPerRun < 5 then
+				updatesPerRun = 5
+			end
+			--env.info(#groupsToAdd)
+			--env.info(#tempSpawnedUnits)
+			for x = 1, #tempSpawnedUnits do
+				local spawnedObj = ltemp[x]
+				if spawnedObj and spawnedObj:isExist() then
+					local found = false
+					for index, name in pairs(groupsToAdd) do
+						if spawnedObj:getCategory() == 1 then -- normal groups
+							if mist.stringMatch(spawnedObj:getGroup():getName(), name) == true then
+								found = true
+								break
+							end
+						elseif spawnedObj:getCategory() == 3 then -- static objects
+							if mist.stringMatch(spawnedObj:getName(), name) == true then
+								found = true
+								break
+							end
+						end
+					end
+					if found == false then
+						if spawnedObj:getCategory() == 1 then -- normal groups
+							groupsToAdd[#groupsToAdd + 1] = spawnedObj:getGroup():getName()
+						elseif  spawnedObj:getCategory() == 3 then -- static objects
+							groupsToAdd[#groupsToAdd + 1] = spawnedObj:getName()
+						end
+					end
+				end
+				
+
+				table.remove(ltemp, x)
+				if x%updatesPerRun == 0 then  
+					coroutine.yield()
+				end 
+				
+			end
+			
+			
+			if #groupsToAdd > 0 then
+				for groupId, groupName in pairs(groupsToAdd) do
+					if not mist.DBs.groupsByName[groupName] or mist.DBs.groupsByName[groupName] and mist.DBs.groupsByName[groupName].startTime + 10 < timer.getAbsTime() then
+						writeGroups[#writeGroups + 1] = dbUpdate(groupName)
+					end
+				end
+			end
+		end
+	end
+	
+	
+	local function updateDBTables()
+		local i = 0
+		for index, newTable in pairs(writeGroups) do
+			i = i + 1
+		end
+		local savesPerRun = math.ceil(i/10)
+		if savesPerRun < 5 then
+			savesPerRun = 5
+		end
+		if i > 0 then
+			local ldeepCopy = mist.utils.deepCopy
+			for x = 1, i do
+				local newTable = writeGroups[x]
+				local mistCategory 
+				if type(newTable.category) == 'string' then
+					mistCategory = string.lower(newTable.category)
+				end
+
+				if string.upper(newTable['category']) == 'GROUND_UNIT' then
+					mistCategory = 'vehicle'
+					newTable['category'] = mistCategory
+				elseif string.upper(newTable['category']) == 'AIRPLANE' then
+					mistCategory = 'plane'
+					newTable['category'] = mistCategory
+				elseif string.upper(newTable['category']) == 'HELICOPTER' then
+					mistCategory = 'helicopter'
+					newTable['category'] = mistCategory
+				elseif string.upper(newTable['category']) == 'SHIP' then
+					mistCategory = 'ship'
+					newTable['category'] = mistCategory	
+				end
+				for newId, newUnitData in pairs(newTable.units) do
+					newUnitData.category = mistCategory
+					if newUnitData.unitId then
+						mist.DBs.unitsById[tonumber(newUnitData.unitId)] = ldeepCopy(newUnitData) 
+					end
+					
+					mist.DBs.unitsByName[newUnitData.unitName] = ldeepCopy(newUnitData)
+					mist.DBs.unitsByCat[mistCategory][#mist.DBs.unitsByCat[mistCategory] + 1] = ldeepCopy(newUnitData)
+					mist.DBs.unitsByNum[#mist.DBs.unitsByNum + 1] = ldeepCopy(newUnitData) 
+				end
+					-- this is a really annoying DB to populate. Gotta create new tables in case its missing
+				if not mist.DBs.units[newTable.coalition] then
+					mist.DBs.units[newTable.coalition] = {}
+				end
+
+				if not mist.DBs.units[newTable.coalition][newTable.country] then
+					mist.DBs.units[newTable.coalition][(newTable.country)] = {}
+					mist.DBs.units[newTable.coalition][(newTable.country)]['countryId'] = newTable.countryId
+				end
+				if not mist.DBs.units[newTable.coalition][newTable.country][mistCategory] then
+					mist.DBs.units[newTable.coalition][(newTable.country)][mistCategory] = {}
+				end
+				mist.DBs.units[newTable.coalition][(newTable.country)][mistCategory][#mist.DBs.units[newTable.coalition][(newTable.country)][mistCategory] + 1] = ldeepCopy(newTable)
+				
+				if newTable.groupId then
+					mist.DBs.groupsById[newTable.groupId] = ldeepCopy(newTable)
+				end
+				
+				mist.DBs.groupsByName[newTable.name] = ldeepCopy(newTable)
+				mist.DBs.dynGroupsAdded[#mist.DBs.dynGroupsAdded + 1] = ldeepCopy(newTable)
+				
+				writeGroups[x] = nil
+				if x%savesPerRun == 0 then  
+					coroutine.yield()
+				end
+			end
+		end
+	end
+	
 	local update_alive_units_counter = 0
+	local write_DB_table_counter = 0
+	local check_spawn_events_counter = 0
 	
 	-- THE MAIN FUNCTION --   Accessed 100 times/sec.
 	mist.main = function()
 		timer.scheduleFunction(mist.main, {}, timer.getTime() + 0.01)  --reschedule first in case of Lua error
 		----------------------------------------------------------------------------------------------------------
 		--area to add new stuff in
-		
-		
-		
+		write_DB_table_counter = write_DB_table_counter + 1
+		if write_DB_table_counter == 10 then 
+			
+			write_DB_table_counter = 0
+			
+			if not coroutines.updateDBTables then
+				coroutines['updateDBTables'] = coroutine.create(updateDBTables)
+			end
+			
+			coroutine.resume(coroutines.updateDBTables)
+			
+			if coroutine.status(coroutines.updateDBTables) == 'dead' then
+				coroutines.updateDBTables = nil
+			end
+		end
+
+		check_spawn_events_counter = check_spawn_events_counter + 1
+		if check_spawn_events_counter == 10 then 
+			
+			check_spawn_events_counter = 0
+			
+			if not coroutines.checkSpawnedEvents then
+				coroutines['checkSpawnedEvents'] = coroutine.create(checkSpawnedEvents)
+			end
+			
+			coroutine.resume(coroutines.checkSpawnedEvents)
+			
+			if coroutine.status(coroutines.checkSpawnedEvents) == 'dead' then
+				coroutines.checkSpawnedEvents = nil
+			end
+		end
 		
 		-----------------------------------------------------------------------------------------------------------
 		--updating alive units
@@ -87,13 +439,287 @@ do
 		
 		mist.do_scheduled_functions()
 	end -- end of mist.main
+	--------------------------------------------
+	------------ mist dyn add stuff for coroutines
+	local mistGpId = 7000
+	local mistUnitId = 7000
+	local mistDynAddIndex = 1
 	
-end
-------------------------------------------------------------------------------------------------------------
+	 mist.nextGroupId = 1
+	 mist.nextUnitId = 1
+	
+	mist.getNextUnitId = function()
+		mist.nextUnitId = mist.nextUnitId + 1
+		if mist.nextUnitId > 6900 then
+			mist.nextUnitId = 14000
+		end
+		return mist.nextUnitId
+	end
+	
+	mist.getNextGroupId = function()
+		mist.nextGroupId = mist.nextGroupId + 1
+		if mist.nextGroupId > 6900 then
+			mist.nextGroupId = 14000
+		end
+		return mist.nextGroupId
+	end
+	
+	local function groupSpawned(event)
+		if event.id == world.event.S_EVENT_BIRTH and timer.getTime0() < timer.getAbsTime()then -- dont need to add units spawned in at the start of the mission if mist is loaded in init line
+			table.insert(tempSpawnedUnits,(event.initiator))
+		end
+	end
+
+	
+	
+	
+	mist.dynAddStatic = function(staticObj)
+		local newObj = {}
+		newObj.groupId = staticObj.groupId
+		newObj.category = staticObj.category
+		newObj.type = staticObj.type
+		newObj.unitId = staticObj.unitId
+		newObj.y = staticObj.y
+		newObj.x = staticObj.x
+		newObj.heading = staticObj.heading
+		newObj.name = staticObj.name
+		newObj.dead = staticObj.dead
+		newObj.country = staticObj.country
+		newObj.clone = staticObj.clone
+		newObj.shape_name = newObj.shape_name
+		
+		if staticObj.units then -- if its mist format
+			newObj.groupId = staticObj.units[1].groupId
+			newObj.category = staticObj.units[1].category
+			newObj.type = staticObj.units[1].type
+			newObj.unitId = staticObj.units[1].unitId
+			newObj.y = staticObj.units[1].y
+			newObj.x = staticObj.units[1].x
+			newObj.heading = staticObj.units[1].heading
+			newObj.name = staticObj.units[1].name
+			newObj.dead = staticObj.units[1].dead
+			newObj.country = staticObj.units[1].country
+			newObj.shape_name = staticObj.units[1].shape_name
+		end
+
+
+		newObj.country = staticObj.country
+		
+		if not newObj.country then
+			return false
+		end
+		
+		local newCountry
+		for countryName, countryId in pairs(country.id) do
+			if type(newObj.country) == 'string' then
+				if tostring(countryName) == string.upper(newObj.country) then
+					newCountry = countryName
+				end
+			elseif type(newObj.country) == 'number' then
+				if countryId == newObj.country then
+					newCountry = countryName
+				end
+			end
+		end
+		
+		if newObj.clone or not newObj.groupId then
+			mistGpId = mistGpId + 1 
+			newObj.groupId = mistGpId
+		end
+		
+		if newObj.clone or not newObj.unitId then
+			mistUnitId = mistUnitId + 1	
+			newObj.unitId = mistUnitId
+		end
+		
+		if newObj.clone or not newObj.name then
+			mistDynAddIndex = mistDynAddIndex + 1
+			newObj.name = (newCountry .. ' static ' .. mistDynAddIndex)
+		end
+		
+		if not newObj.dead then
+			newObj.dead = false
+		end
+		
+		if not newObj.heading then
+			newObj.heading = math.random(360)
+		end
+		
+		if newObj.x and newObj.y and newObj.type and type(newObj.x) == 'number' and type(newObj.y) == 'number' and type(newObj.type) == 'string' then
+			coalition.addStaticObject(country.id[newCountry], newObj)
+
+			return newObj.name
+		end	
+		return false
+	end
+
+	mist.dynAdd = function(newGroup) -- same as coalition.add function in SSE. checks the passed data to see if its valid. 
+--Will generate groupId, groupName, unitId, and unitName if needed
+--
+	
+	
+	--env.info('dynAdd')
+	local cntry = newGroup.country
+	local groupType = newGroup.category
+	local newCountry = ''
+	-- validate data
+	for countryName, countryId in pairs(country.id) do
+		if type(cntry) == 'string' then
+			if tostring(countryName) == string.upper(cntry) then
+				newCountry = countryName
+			end
+		elseif type(cntry) == 'number' then
+			if countryId == cntry then
+				newCountry = countryName
+			end
+		end
+	end
+	
+	if newCountry == '' then
+		return false
+	end
+	
+	local newCat = ''
+	for catName, catId in pairs(Unit.Category) do
+		if type(groupType) == 'string' then
+			if tostring(catName) == string.upper(groupType) then
+				newCat = catName
+			end
+		elseif type(groupType) == 'number' then
+			if catId == groupType then
+				newCat = catName
+			end
+		end
+		
+		if catName == 'GROUND_UNIT' and (string.upper(groupType) == 'VEHICLE' or string.upper(groupType) == 'GROUND') then
+			newCat = 'GROUND_UNIT'
+		elseif catName == 'AIRPLANE' and string.upper(groupType) == 'PLANE' then
+			newCat = 'AIRPLANE'
+		end
+	end
+	
+	local typeName 
+	if newCat == 'GROUND_UNIT' then
+		typeName = ' gnd '
+	elseif newCat == 'AIRPLANE' then
+		typeName = ' air '
+	elseif newCat == 'HELICOPTER' then
+		typeName = ' hel '
+	elseif newCat == 'SHIP' then
+		typeName = ' shp '
+	elseif newCat == 'BUILDING' then
+		typeName = ' bld '
+	end
+	
+	if newGroup.clone or not newGroup.groupId then
+		mistDynAddIndex = mistDynAddIndex + 1
+		mistGpId = mistGpId + 1 
+		newGroup.groupId = mistGpId
+	end
+	if newGroup.groupName or newGroup.name then
+		if newGroup.groupName then
+			newGroup['name'] = newGroup.groupName
+		elseif newGroup.name then
+			newGroup['name'] = newGroup.name
+		end
+	end
+	
+	if newGroup.clone and mist.DBs.groupsByName[newGroup.name] or not newGroup.name then
+		newGroup['name'] = tostring(tostring(cntry) .. tostring(typeName) .. mistDynAddIndex)
+	end
+	
+	for unitIndex, unitData in pairs(newGroup.units) do
+
+		local originalName = newGroup.units[unitIndex].unitName or newGroup.units[unitIndex].name
+		if newGroup.clone or not unitData.unitId then
+			mistUnitId = mistUnitId + 1	
+			newGroup.units[unitIndex]['unitId'] = mistUnitId
+		end
+		if newGroup.units[unitIndex].unitName or newGroup.units[unitIndex].name then
+			if newGroup.units[unitIndex].unitName then
+				newGroup.units[unitIndex].name = newGroup.units[unitIndex].unitName
+			elseif newGroup.units[unitIndex].name then
+				newGroup.units[unitIndex].name = newGroup.units[unitIndex].name
+			end
+		end
+		if newGroup.clone or not unitData.name then
+			newGroup.units[unitIndex].name = tostring(newGroup.name .. ' unit' .. unitIndex)
+		end
+		
+		if not unitData.skill then 
+			newGroup.units[unitIndex].skill = 'Random'
+		end
+		
+		if not unitData.alt then
+			if newCat == 'AIRPLANE' then
+				newGroup.units[unitIndex].alt = 2000
+				newGroup.units[unitIndex].alt_type = 'RADIO'
+				newGroup.units[unitIndex].speed = 150
+			elseif newCat == 'HELICOPTER' then
+				newGroup.units[unitIndex].alt = 500
+				newGroup.units[unitIndex].alt_type = 'RADIO'
+				newGroup.units[unitIndex].speed = 60
+			else
+				--[[env.info('check height')
+				newGroup.units[unitIndex].alt = land.getHeight({x = newGroup.units[unitIndex].x, y = newGroup.units[unitIndex].y})
+				newGroup.units[unitIndex].alt_type = 'BARO']]
+			end
+		
+
+		end
+				
+		if newCat == 'AIRPLANE' or newCat == 'HELICOPTER' then
+			if (newGroup.units[unitIndex].alt_type ~= 'RADIO' or newGroup.units[unitIndex].alt_type ~= 'BARO') or not newGroup.units[unitIndex].alt_type then
+				newGroup.units[unitIndex].alt_type = 'RADIO'
+			end
+			if not unitData.speed then
+				if newCat == 'AIRPLANE' then
+					newGroup.units[unitIndex].speed = 150
+				elseif newCat == 'HELICOPTER' then
+					newGroup.units[unitIndex].speed = 60
+				end
+			end
+			if not unitData.payload then
+				newGroup.units[unitIndex].payload = mist.getPayload(originalName)
+			end
+		end
+		mistAddedObjects[#mistAddedObjects + 1] = mist.utils.deepCopy(newGroup.units[unitIndex])
+	end
+	mistAddedGroups[#mistAddedGroups + 1] = mist.utils.deepCopy(newGroup)
+	
+	if newGroup.route and not newGroup.route.points then
+		if not newGroup.route.points and newGroup.route[1] then
+			local copyRoute = newGroup.route
+			newGroup.route = {}
+			newGroup.route.points = copyRoute
+		end
+	end
+	newGroup.country = newCountry
+	
+	
+	
+	-- sanitize table
+	newGroup.groupName = nil
+	newGroup.clone = nil
+	newGroup.category = nil
+	newGroup.country = nil
+	
+	newGroup.tasks = {}
+	newGroup.visible = false
+	
+	for unitIndex, unitData in pairs(newGroup.units) do
+		newGroup.units[unitIndex].unitName = nil
+	end
+	
+	coalition.addGroup(country.id[newCountry], Unit.Category[newCat], newGroup)
+	
+	return newGroup.name
+	
+	end
 
 ---------------------------------------------------------------------------------------------
 --Modified Slmod task scheduler, superior to timer.scheduleFunction
-do
+	
 	local Tasks = {}
 	local task_id = 0
 	--[[ mist.scheduleFunction:
@@ -169,8 +795,7 @@ do
 	end
 
 	
-end
-do
+
 	local idNum = 0
 
 	--Simplified event handler
@@ -193,9 +818,14 @@ do
 			end
 		end
 		return false
-	end
+	end	
 
+	mist.addEventHandler(groupSpawned)
+--	mist.scheduleFunction(checkSpawnedEvents, {}, timer.getTime() + 5, 1)
+	
 end
+------------------------------------------------------------------------------------------------------------
+
 
 ----------------------------------------------------------------------------------------------
 -- Utils- conversion, Lua utils, etc.
@@ -866,6 +1496,18 @@ mist.getNorthCorrection = function(point)  --gets the correction needed for true
 	return math.atan2(north_posit.z - point.z, north_posit.x - point.x)
 end
 
+mist.getUnitSkill = function(unitName)
+	if Unit.getByName(unitName) then
+		local lunit = Unit.getByName(unitName)
+		for name, data in pairs(mist.DBs.unitsByName) do
+			if name == unitName and data.type == lunit:getTypeName() and data.unitId == lunit:getID() and data.skill then
+				return data.skill
+			end
+		end
+	end
+	return false
+end
+
 function mist.getGroupPoints(groupname)   -- if groupname exists in env.mission, then returns table of the group's points in numerical order, such as: { [1] = {x = 299435.224, y = -1146632.6773}, [2] = { x = 663324.6563, y = 322424.1112}}
 	for coa_name, coa_data in pairs(env.mission.coalition) do
 		if (coa_name == 'red' or coa_name == 'blue') and type(coa_data) == 'table' then			
@@ -875,7 +1517,7 @@ function mist.getGroupPoints(groupname)   -- if groupname exists in env.mission,
 						if obj_type_name == "helicopter" or obj_type_name == "ship" or obj_type_name == "plane" or obj_type_name == "vehicle" then	-- only these types have points						
 							if ((type(obj_type_data) == 'table') and obj_type_data.group and (type(obj_type_data.group) == 'table') and (#obj_type_data.group > 0)) then  --there's a group!				
 								for group_num, group_data in pairs(obj_type_data.group) do		
-									if group_data and group_data.name and group_data.name == groupname then -- this is the group we are looking for
+									if group_data and group_data.name and mist.stringMatch(group_data.name, groupname) then -- this is the group we are looking for
 										if group_data.route and group_data.route.points and #group_data.route.points > 0 then
 											local points = {}
 											for point_num, point in pairs(group_data.route.points) do
@@ -1210,6 +1852,11 @@ for coa_name, coa_data in pairs(env.mission.coalition) do
 										mist.DBs.units[coa_name][countryName][category][group_num]["startTime"] = group_data.start_time
 										mist.DBs.units[coa_name][countryName][category][group_num]["task"] = group_data.task
 										mist.DBs.units[coa_name][countryName][category][group_num]["units"] = {}
+										
+										mist.DBs.units[coa_name][countryName][category][group_num]["radioSet"] = group_data.radioSet
+										mist.DBs.units[coa_name][countryName][category][group_num]["uncontrolled"] = group_data.uncontrolled
+										mist.DBs.units[coa_name][countryName][category][group_num]["frequency"] = group_data.frequency
+										mist.DBs.units[coa_name][countryName][category][group_num]["modulation"] = group_data.modulation
 															
 										for unit_num, unit_data in pairs(group_data.units) do
 											local units_tbl = mist.DBs.units[coa_name][countryName][category][group_num]["units"]  --pointer to the units table for this group
@@ -1236,8 +1883,13 @@ for coa_name, coa_data in pairs(env.mission.coalition) do
 												units_tbl[unit_num]["point"]["x"] = unit_data.x
 												units_tbl[unit_num]["point"]["y"] = unit_data.y
 											end
+											units_tbl[unit_num]['x'] = unit_data.x
+											units_tbl[unit_num]['y'] = unit_data.y
 											
-											
+											units_tbl[unit_num]["callsign"] = unit_data.callsign
+											units_tbl[unit_num]["onboard_num"] = unit_data.onboard_num
+											units_tbl[unit_num]["hardpoint_racks"] = unit_data.hardpoint_racks
+											units_tbl[unit_num]["psi"] = unit_data.psi
 											units_tbl[unit_num]["shape_name"] = unit_data.shape_name
 											
 											units_tbl[unit_num]["groupName"] = group_data.name
@@ -1322,6 +1974,18 @@ for coa_name, coa_data in pairs(mist.DBs.units) do
 end
 
 --------------
+-------- mist unitID funcs 
+do
+	for id, idData in pairs(mist.DBs.unitsById) do
+		if idData.unitId > mist.nextUnitId then
+			mist.nextUnitId = mist.utils.deepCopy(idData.unitId)
+		end
+		if idData.groupId > mist.nextGroupId then
+			mist.nextGroupId = mist.utils.deepCopy(idData.groupId)
+		end
+	end
+end
+
 --DynDBs
 mist.DBs.MEunits = mist.utils.deepCopy(mist.DBs.units)
 mist.DBs.MEunitsByName = mist.utils.deepCopy(mist.DBs.unitsByName)
@@ -1902,8 +2566,8 @@ initial_number
 -- type_tbl
 	local type_tbl = {
 		[{'zones', 'zone'}] = {'table', 'string'},
-		flag = 'number', 
-		stopflag = {'number', 'nil'}, 
+		flag = {'number', 'string'}, 
+		stopflag = {'number', 'string', 'nil'}, 
 		[{'req_num', 'reqnum'}] = {'number', 'nil'},
 	}
 	
@@ -1949,8 +2613,8 @@ initial_number
 -- type_tbl
 	local type_tbl = {
 		[{'zone', 'polyzone'}] = 'table',
-		flag = 'number', 
-		stopflag = {'number', 'nil'}, 
+		flag = {'number', 'string'}, 
+		stopflag = {'number', 'string', 'nil'}, 
 		[{'req_num', 'reqnum'}] = {'number', 'nil'},
 	}
 	
@@ -1979,6 +2643,15 @@ end
 
 
 function mist.pointInPolygon(point, poly, maxalt) --raycasting point in polygon. Code from http://softsurfer.com/Archive/algorithm_0103/algorithm_0103.htm
+	local type_tbl = {
+		point {'table'},
+		poly = {'number'}, 
+		maxalt = {'number', 'nil'}, 
+		}
+	
+	local err, errmsg = mist.utils.typeCheck('mist.pointInPolygon', type_tbl, {point, poly, maxalt})
+	assert(err, errmsg)
+	
 	point = mist.utils.makeVec3(point)
 	local px = point.x
 	local pz = point.z
@@ -2007,6 +2680,22 @@ function mist.pointInPolygon(point, poly, maxalt) --raycasting point in polygon.
 	end
 end
 
+mist.getUnitsInPolygon = function (unit_names, polyZone, max_alt)
+	local units = {}
+	
+	for i = 1, #unit_names do
+		units[#units + 1] = Unit.getByName(unitNames[i])
+	end
+	
+	local inZoneUnits = {}
+	for i =1, #units do
+		if units[i]:isActive() and mist.pointInPolygon(units[i]:getPosition().p, polyZone, max_alt) then
+			inZoneUnits[inZoneUnits + 1] = units[i]
+		end
+	end
+	
+	return inZoneUnits
+end
 
 function mist.flagFunc.units_in_polygon(vars)
 --[[vars needs to be:
@@ -2023,8 +2712,8 @@ toggle = boolean or nil
 	local type_tbl = {
 		[{'units', 'unit'}] = 'table', 
 		[{'zone', 'polyzone'}] = 'table', 
-		flag = 'number', 
-		stopflag = {'number', 'nil'}, 
+		flag = {'number', 'string'},  
+		stopflag = {'number', 'string', 'nil'},  
 		[{'maxalt', 'alt'}] = {'number', 'nil'}, 
 		interval = {'number', 'nil'}, 
 		[{'req_num', 'reqnum'}] = {'number', 'nil'},
@@ -2150,8 +2839,8 @@ function mist.flagFunc.units_in_zones(vars)
 	local type_tbl = {
 		units = 'table', 
 		zones = 'table', 
-		flag = 'number', 
-		stopflag = {'number', 'nil'}, 
+		flag = {'number', 'string'}, 
+		stopflag = {'number', 'string', 'nil'}, 
 		[{'zone_type', 'zonetype'}] = {'string', 'nil'}, 
 		[{'req_num', 'reqnum'}] = {'number', 'nil'},
 		interval = {'number', 'nil'},
@@ -2258,8 +2947,8 @@ function mist.flagFunc.units_in_moving_zones(vars)
 		units = 'table', 
 		[{'zone_units', 'zoneunits'}]  = 'table', 
 		radius = 'number',
-		flag = 'number', 
-		stopflag = {'number', 'nil'}, 
+		flag = {'number', 'string'}, 
+		stopflag = {'number', 'string', 'nil'}, 
 		[{'zone_type', 'zonetype'}] = {'string', 'nil'}, 
 		[{'req_num', 'reqnum'}] = {'number', 'nil'},
 		interval = {'number', 'nil'},
@@ -2374,8 +3063,8 @@ toggle = boolean or nil
 		[{'altoffset1', 'alt1'}] = 'number', 
 		[{'unitset2', 'units2'}] = 'table', 
 		[{'altoffset2', 'alt2'}] = 'number', 
-		flag = 'number', 
-		stopflag = {'number', 'nil'}, 
+		flag = {'number', 'string'}, 
+		stopflag = {'number', 'string', 'nil'}, 
 		[{'req_num', 'reqnum'}] = {'number', 'nil'}, 
 		interval = {'number', 'nil'}, 
 		radius = {'number', 'nil'},
@@ -2419,6 +3108,177 @@ toggle = boolean or nil
 		end
 	end
 end
+
+mist.flagFunc.group_alive = function(vars)
+--[[vars
+groupName
+flag
+toggle
+interval
+stopFlag
+
+]]
+	local type_tbl = {
+	[{'group', 'groupname', 'gp', 'groupName'}] = 'string', 
+	flag = {'number', 'string'}, 
+	stopflag = {'number', 'string', 'nil'}, 
+	interval = {'number', 'nil'}, 
+	toggle = {'boolean', 'nil'},
+	}
+	
+	local err, errmsg = mist.utils.typeCheck('mist.flagFunc.group_alive', type_tbl, vars)
+	assert(err, errmsg)
+	
+	local groupName = vars.groupName or vars.group or vars.gp or vars.Groupname
+	local flag = vars.flag
+	local stopflag = vars.stopflag or -1
+	local interval = vars.interval or 1
+	local toggle = vars.toggle or nil
+	
+	
+	if stopflag == -1 or (type(trigger.misc.getUserFlag(stopflag)) == 'number' and trigger.misc.getUserFlag(stopflag) == 0) or (type(trigger.misc.getUserFlag(stopflag)) == 'boolean' and trigger.misc.getUserFlag(stopflag) == false) then
+		if Group.getByName(groupName) and Group.getByName(groupName):isActive() then
+			if trigger.misc.getUserFlag(flag) == 0 then
+				trigger.action.setUserFlag(flag, true)
+			end
+		else
+			if toggle then
+				trigger.action.setUserFlag(flag, false)
+			end
+		end
+	end
+		
+	if (type(trigger.misc.getUserFlag(stopflag)) == 'number' and trigger.misc.getUserFlag(stopflag) == 0) or (type(trigger.misc.getUserFlag(stopflag)) == 'boolean' and trigger.misc.getUserFlag(stopflag) == false) then
+		mist.scheduleFunction(mist.flagFunc.group_alive, {{groupName = groupName, flag = flag, stopflag = stopflag, interval = interval, toggle = toggle}}, timer.getTime() + interval)
+	end
+
+end
+
+mist.flagFunc.group_dead = function(vars)
+	local type_tbl = {
+	[{'group', 'groupname', 'gp', 'groupName'}] = 'string', 
+	flag = {'number', 'string'}, 
+	stopflag = {'number', 'string', 'nil'}, 
+	interval = {'number', 'nil'}, 
+	toggle = {'boolean', 'nil'},
+	}
+	
+	local err, errmsg = mist.utils.typeCheck('mist.flagFunc.group_dead', type_tbl, vars)
+	assert(err, errmsg)
+	
+	local groupName = vars.groupName or vars.group or vars.gp or vars.Groupname
+	local flag = vars.flag
+	local stopflag = vars.stopflag or -1
+	local interval = vars.interval or 1
+	local toggle = vars.toggle or nil
+	
+	
+	if stopflag == -1 or (type(trigger.misc.getUserFlag(stopflag)) == 'number' and trigger.misc.getUserFlag(stopflag) == 0) or (type(trigger.misc.getUserFlag(stopflag)) == 'boolean' and trigger.misc.getUserFlag(stopflag) == false) then
+		if not Group.getByName(groupName) then
+			if trigger.misc.getUserFlag(flag) == 0 then
+				trigger.action.setUserFlag(flag, true)
+			end
+		else
+			if toggle then
+				trigger.action.setUserFlag(flag, false)
+			end
+		end
+	end
+		
+	if (type(trigger.misc.getUserFlag(stopflag)) == 'number' and trigger.misc.getUserFlag(stopflag) == 0) or (type(trigger.misc.getUserFlag(stopflag)) == 'boolean' and trigger.misc.getUserFlag(stopflag) == false) then
+		mist.scheduleFunction(mist.flagFunc.group_dead, {{groupName = groupName, flag = flag, stopflag = stopflag, interval = interval, toggle = toggle}}, timer.getTime() + interval)
+	end
+end
+
+mist.flagFunc.group_alive_less_than = function(vars)
+	local type_tbl = {
+	[{'group', 'groupname', 'gp', 'groupName'}] = 'string',
+	percent = 'number',
+	flag = {'number', 'string'}, 
+	stopflag = {'number', 'string', 'nil'}, 
+	interval = {'number', 'nil'}, 
+	toggle = {'boolean', 'nil'},
+	}
+	
+	local err, errmsg = mist.utils.typeCheck('mist.flagFunc.group_alive_less_than', type_tbl, vars)
+	assert(err, errmsg)
+	
+	local groupName = vars.groupName or vars.group or vars.gp or vars.Groupname
+	local flag = vars.flag
+	local percent = vars.percent
+	local stopflag = vars.stopflag or -1
+	local interval = vars.interval or 1
+	local toggle = vars.toggle or nil
+	
+	
+	if stopflag == -1 or (type(trigger.misc.getUserFlag(stopflag)) == 'number' and trigger.misc.getUserFlag(stopflag) == 0) or (type(trigger.misc.getUserFlag(stopflag)) == 'boolean' and trigger.misc.getUserFlag(stopflag) == false) then
+		if Group.getByName(groupName) and Group.getByName(groupName):isActive() then
+			if Group.getByName(groupName):getSize()/Group.getByName(groupName):getInitialSize() < percent/100 then
+				if trigger.misc.getUserFlag(flag) == 0 then
+					trigger.action.setUserFlag(flag, true)
+				end
+			else
+				if toggle then
+					trigger.action.setUserFlag(flag, false)
+				end
+			end
+		else
+			if trigger.misc.getUserFlag(flag) == 0 then
+				trigger.action.setUserFlag(flag, true)
+			end
+		end
+	end
+		
+	if (type(trigger.misc.getUserFlag(stopflag)) == 'number' and trigger.misc.getUserFlag(stopflag) == 0) or (type(trigger.misc.getUserFlag(stopflag)) == 'boolean' and trigger.misc.getUserFlag(stopflag) == false) then
+		mist.scheduleFunction(mist.flagFunc.group_alive_less_than, {{groupName = groupName, flag = flag, stopflag = stopflag, interval = interval, toggle = toggle, percent = percent}}, timer.getTime() + interval)
+	end
+end
+
+mist.flagFunc.group_alive_more_than = function(vars)
+	local type_tbl = {
+	[{'group', 'groupname', 'gp', 'groupName'}] = 'string',
+	percent = 'number',
+	flag = {'number', 'string'}, 
+	stopflag = {'number', 'string', 'nil'}, 
+	interval = {'number', 'nil'}, 
+	toggle = {'boolean', 'nil'},
+	}
+	
+	local err, errmsg = mist.utils.typeCheck('mist.flagFunc.group_alive_more_than', type_tbl, vars)
+	assert(err, errmsg)
+	
+	local groupName = vars.groupName or vars.group or vars.gp or vars.Groupname
+	local flag = vars.flag
+	local percent = vars.percent
+	local stopflag = vars.stopflag or -1
+	local interval = vars.interval or 1
+	local toggle = vars.toggle or nil
+	
+	
+	if stopflag == -1 or (type(trigger.misc.getUserFlag(stopflag)) == 'number' and trigger.misc.getUserFlag(stopflag) == 0) or (type(trigger.misc.getUserFlag(stopflag)) == 'boolean' and trigger.misc.getUserFlag(stopflag) == false) then
+		if Group.getByName(groupName) and Group.getByName(groupName):isActive() then
+			if Group.getByName(groupName):getSize()/Group.getByName(groupName):getInitialSize() > percent/100 then
+				if trigger.misc.getUserFlag(flag) == 0 then
+					trigger.action.setUserFlag(flag, true)
+				end
+			else
+				if toggle and trigger.misc.getUserFlag(flag) == 1 then
+					trigger.action.setUserFlag(flag, false)
+				end
+			end
+		else --- just in case
+			if toggle and trigger.misc.getUserFlag(flag) == 1 then
+				trigger.action.setUserFlag(flag, false)
+			end
+		end
+	end
+		
+	if (type(trigger.misc.getUserFlag(stopflag)) == 'number' and trigger.misc.getUserFlag(stopflag) == 0) or (type(trigger.misc.getUserFlag(stopflag)) == 'boolean' and trigger.misc.getUserFlag(stopflag) == false) then
+		mist.scheduleFunction(mist.flagFunc.group_alive_more_than, {{groupName = groupName, flag = flag, stopflag = stopflag, interval = interval, toggle = toggle, percent = percent}}, timer.getTime() + interval)
+	end
+end
+
+
 
 --Gets the average position of a group of units (by name)
 mist.getAvgPos = function(unitNames)
@@ -2609,7 +3469,7 @@ function mist.getGroupRoute(groupname, task)   -- same as getGroupPoints but ret
 						if obj_type_name == "helicopter" or obj_type_name == "ship" or obj_type_name == "plane" or obj_type_name == "vehicle" then	-- only these types have points						
 							if ((type(obj_type_data) == 'table') and obj_type_data.group and (type(obj_type_data.group) == 'table') and (#obj_type_data.group > 0)) then  --there's a group!				
 								for group_num, group_data in pairs(obj_type_data.group) do		
-									if group_data and group_data.name and group_data.name == groupname then -- this is the group we are looking for
+									if group_data and group_data.name and mist.stringMatch(group_data.name, groupname) then -- this is the group we are looking for
 										if group_data.route and group_data.route.points and #group_data.route.points > 0 then
 											local points = {}
 											
@@ -2635,7 +3495,6 @@ function mist.getGroupRoute(groupname, task)   -- same as getGroupPoints but ret
 												points[point_num] = routeData
 											end
 											
-												
 											return points
 										end
 										return
@@ -2732,9 +3591,9 @@ mist.fixedWing.buildWP = function(point, WPtype, speed, alt, altType)
 	
 	if altType then
 		altType = string.lower(altType)
-		if altType == 'radio' or 'agl' then
+		if altType == 'radio' or altType == 'agl' then
 			wp.alt_type = 'RADIO'
-		elseif altType == 'baro' or 'asl' then
+		elseif altType == 'baro' or altType == 'asl' then
 			wp.alt_type = 'BARO'
 		end
 	else
@@ -2791,9 +3650,9 @@ mist.heli.buildWP = function(point, WPtype, speed, alt, altType)
 	
 	if altType then
 		altType = string.lower(altType)
-		if altType == 'radio' or 'agl' then
+		if altType == 'radio' or altType == 'agl' then
 			wp.alt_type = 'RADIO'
-		elseif altType == 'baro' or 'asl' then
+		elseif altType == 'baro' or altType == 'asl' then
 			wp.alt_type = 'BARO'
 		end
 	else
@@ -2987,7 +3846,36 @@ mist.isTerrainValid = function(coord, terrainTypes) -- vec2/3 and enum or table 
 	return false
 end
 
-
+mist.terrainHeightDiff = function(coord, searchSize)
+	local samples = {}
+	local searchRadius = 5
+	if searchSize then
+		searchRadius = searchSize
+	end
+	if type(coord) == 'string' then
+		coord = mist.utils.zoneToVec3(coord)
+	end
+	
+	coord = mist.utils.makeVec2(coord)
+	
+	samples[#samples + 1] = land.getHeight(coord)
+	for i = 0, 360, 30 do
+		samples[#samples + 1] = land.getHeight({x = (coord.x + (math.sin(math.rad(i))*searchRadius)), y = (coord.y + (math.cos(math.rad(i))*searchRadius))})
+		if searchRadius >= 20 then -- if search radius is sorta large, take a sample halfway between center and outer edge
+			samples[#samples + 1] = land.getHeight({x = (coord.x + (math.sin(math.rad(i))*(searchRadius/2))), y = (coord.y + (math.cos(math.rad(i))*(searchRadius/2)))})
+		end
+	end
+	local tMax, tMin = 0, 1000000
+	for index, height in pairs(samples) do
+		if height > tMax then
+			tMax = height
+		end
+		if height < tMin then
+			tMin = height
+		end
+	end
+	return mist.utils.round(tMax - tMin, 2)
+end
 
 
 
@@ -3492,7 +4380,6 @@ mist.getBRString = function(vars)
 	end
 end
 
-
 -- Returns the Vec3 coordinates of the average position of the concentration of units most in the heading direction.
 --[[ vars for mist.getLeadingPos:
 vars.units - table of unit names
@@ -3879,588 +4766,31 @@ end
 -- start of sct Merge
 
 do -- all function uses of group and unit Ids must be in this do statement
-	local mistGpId = 7000
-	local mistUnitId = 7000
-	local mistDynAddIndex = 1
 	
-	 mist.nextGroupId = 1
-	 mist.nextUnitId = 1
 	
-
-	local tempSpawnedUnits = {} -- birth events added here
-	local addToDBs = {} -- mist.dynAdd added here
+mist.groupTableCheck = function(groupData)
+	local isOk = false
 	
-	local function checkSpawnedEvents()
-		--env.info('check Spawned Events')
-		local groupsToAdd = {}
-		
-		for index, gpData in pairs(addToDBs) do
-			groupsToAdd[#groupsToAdd + 1] = gpData
-			groupsToAdd[#groupsToAdd].mist = true -- ok now
-			
-			addToDBs[index] = nil
-		end
-		--env.info(#groupsToAdd)
-		--env.info(#tempSpawnedUnits)
-		for eventId, eventData in pairs(tempSpawnedUnits) do
-			if eventData and eventData:isExist() then
-				if eventData:getCategory() == 1 then -- normal groups
-					local match = false
-					if #groupsToAdd > 0 then -- if groups are expected
-						for groupId, groupData in pairs(groupsToAdd) do -- iterate through known groups to add
-							if (type(groupData) == 'string' and groupData == eventData:getGroup():getName()) or (type(groupData) == 'table' and groupData.name == eventData:getGroup():getName()) then -- already added, do nothing
-								match = true
-								break
-							end
-						end
-						if match == false then -- hasn't been added
-							groupsToAdd[#groupsToAdd + 1] = eventData:getGroup():getName()
-						end
-					else -- no groups added by mist
-						groupsToAdd[#groupsToAdd + 1] = eventData:getGroup():getName()
-					end
-				elseif  eventData:getCategory() == 3 then -- static objects
-					local name = eventData:getName()
-					local found = false
-					for groupId, groupData in pairs(groupsToAdd) do
-						if type(groupData) == 'string' and groupData == name then
-							found = true
-							break
-						end
-					end
-					if found == false then
-						groupsToAdd[#groupsToAdd + 1] = name
-					end
-				end
-			end
-			tempSpawnedUnits[eventId] = nil
-		end
-		
-		
-		if #groupsToAdd > 0 then
-			--env.info('doDBUpdate')
-			for groupId, groupData in pairs(groupsToAdd) do
-				if not mist.DBs.groupsByName[groupData] or mist.DBs.groupsByName[groupData] and mist.DBs.groupsByName[groupData].startTime + 10 < timer.getAbsTime() then
-					mist.dbUpdate(groupData)
-				end
+	if groupData.country then
+		isOk = true
+	end
+	if groupData.category then
+		isOk = true
+	else
+		isOk = false
+	end
+	if groupData.units then
+		for unitId, unitData in pairs(groupData.units) do
+			if unitData.x and unitData.y and unitData.type then
+				isOk = true
 			end
 		end
+	else
+		isOk = false
 	end
 	
-	mist.scheduleFunction(checkSpawnedEvents, {}, timer.getTime() + 5, 2)
-	
-	for id, idData in pairs(mist.DBs.unitsById) do
-		if idData.unitId > mist.nextUnitId then
-			mist.nextUnitId = mist.utils.deepCopy(idData.unitId)
-		end
-		if idData.groupId > mist.nextGroupId then
-			mist.nextGroupId = mist.utils.deepCopy(idData.groupId)
-		end
-	end
-	
-	mist.getNextUnitId = function()
-		mist.nextUnitId = mist.nextUnitId + 1
-		if mist.nextUnitId > 6900 then
-			mist.nextUnitId = 14000
-		end
-		return mist.nextUnitId
-	end
-	
-	mist.getNextGroupId = function()
-		mist.nextGroupId = mist.nextGroupId + 1
-		if mist.nextGroupId > 6900 then
-			mist.nextGroupId = 14000
-		end
-		return mist.nextGroupId
-	end
-	
-	local function groupSpawned(event)
-		
-
-		--trigger.action.outText(mist.utils.tableShow(event), 25)
-		if event.id == world.event.S_EVENT_BIRTH and timer.getTime0() < timer.getAbsTime()then -- dont need to add units spawned in at the start of the mission if mist is loaded in init line
-			--env.info(#tempSpawnedUnits .. 'S_EVENTBIRTH')
-			tempSpawnedUnits[#tempSpawnedUnits + 1] = (event.initiator)
-
-			--[[local msg = {}
-			msg.text = mist.utils.tableShow(event)
-			msg.text = msg.text .. '\n' .. Unit.getName(event.initiator)
-			msg.msgFor = {coa = {'all'}}
-			msg.displayTime = 10
-		
-			mist.message.add(msg)]]
-		--	mist.scheduleFunction(checkSpawnedEvents, {}, timer.getTime() + 1.5)
-		end
-
-	end
-	
-	mist.addEventHandler(groupSpawned)
-	
-	
-	mist.dbUpdate = function(event)
-		local groupData
-	
-		--env.info('dbUpdate')
-	--[[ Similar to normal DBs, example...
-		[unitID] = {
-			[instance1] = {fist added unitData}
-			[instance2] = {2nd added Unit Data}
-
-	]]
-	
-	
-		if type(event) == 'string' then -- if name of an object. 
-			--env.info('event')
-			local newObject
-			local newType = 'group'
-			if Group.getByName(event) then
-				newObject = Group.getByName(event)
-				--env.info('group')
-			elseif StaticObject.getByName(event) then
-				newObject = StaticObject.getByName(event)
-				newType = 'static'
-			--	env.info('its static')
-			else
-				env.info('WTF')
-				return false
-			end
-			
-			groupData = {}
-			groupData.name = newObject:getName()
-			groupData.groupId = tonumber(newObject:getID())
-
-			local unitOneRef 
-			if newType == 'static' then
-			
-				unitOneRef = newObject	
-				groupData.countryId = tonumber(newObject:getCountry())
-				groupData.coalitionId = tonumber(newObject:getCoalition())
-				groupData.category = 'static'
-			else
-				unitOneRef = newObject:getUnits()
-				groupData.countryId = tonumber(unitOneRef[1]:getCountry())
-				groupData.coalitionId = tonumber(unitOneRef[1]:getCoalition())
-				groupData.category = tonumber(newObject:getCategory())
-			end
-			
-			groupData.units = {}
-			if newType == 'group' then
-				for unitId, unitData in pairs(unitOneRef) do
-					groupData.units[unitId] = {}
-					groupData.units[unitId].name = unitData:getName()
-					
-					groupData.units[unitId].x = mist.utils.round(unitData:getPosition().p.x)
-					groupData.units[unitId].y = mist.utils.round(unitData:getPosition().p.z)
-					groupData.units[unitId].alt = mist.utils.round(unitData:getPosition().p.y)
-					groupData.units[unitId].alt_type = "BARO"				
-					groupData.units[unitId].heading = mist.getHeading(unitData, true)
-
-					groupData.units[unitId].type = unitData:getTypeName()
-					groupData.units[unitId].unitId = tonumber(unitData:getID())
-					groupData.units[unitId].skill = "HIGH" 
-					
-					groupData.units[unitId].groupName = groupData.name
-					groupData.units[unitId].groupId = groupData.groupId
-					groupData.units[unitId].countryId = groupData.countryId
-					groupData.units[unitId].coalitionId = groupData.coalitionId
-					
-				end
-			else -- its a static
-
-				groupData.units[1] = {}
-				groupData.units[1].name = newObject:getName()
-				
-				groupData.units[1].x = mist.utils.round(newObject:getPosition().p.x)
-				groupData.units[1].y = mist.utils.round(newObject:getPosition().p.z)
-				groupData.units[1].alt = mist.utils.round(newObject:getPosition().p.y)
-				groupData.units[1].heading = mist.getHeading(newObject, true)
-				groupData.units[1].type = newObject:getTypeName()
-				groupData.units[1].unitId = tonumber(newObject:getID())
-				groupData.units[1].groupName = groupData.name
-				groupData.units[1].groupId = groupData.groupId
-				groupData.units[1].countryId = groupData.countryId
-				groupData.units[1].coalitionId = groupData.coalitionId
-	
-			
-			end
-
-		
-		else -- its a table
-			groupData = event
-	
-		end
-	
-		local mistCategory 
-		if type(groupData.category) == 'string' then
-			mistCategory = string.lower(groupData.category)
-		end
-
-		--mist.debug.writeData(mist.utils.serialize,{'DBs', groupData}, 'newUnits.txt')	
-		--for newGroupIndex, newGroupData in pairs(groupData) do
-
-		local newTable = {}
-		
-		local tableSize = #mist.DBs.dynGroupsAdded + 1
-		newTable['name'] = groupData.name
-		newTable['groupId'] = groupData.groupId
-		newTable['startTime'] =  timer.getAbsTime()
-		newTable['task'] = groupData.task
-		
-
-		for countryData, countryId in pairs(country.id) do
-			if groupData.country and string.upper(countryData) == string.upper(groupData.country) or countryId == groupData.countryId then
-				newTable['countryId'] = countryId
-				newTable['country'] = string.lower(countryData)
-				for coaData, coaId in pairs(coalition.side) do
-					if coaId == coalition.getCountryCoalition(countryId) then 
-						newTable['coalition'] = string.lower(coaData)
-					end
-				end
-			end
-		end
-
-		for catData, catId in pairs(Unit.Category) do
-			if Group.getByName(groupData.name):isExist() then
-				if catId == Group.getByName(groupData.name):getCategory() then
-					newTable['category'] = string.lower(catData)
-				end
-			elseif StaticObject.getByName(groupData.name):isExist() then
-				if catId == StaticObject.getByName(groupData.name):getCategory() then
-					newTable['category'] = string.lower(catData)
-				end
-				
-			end
-		end
-		
-
-		if string.upper(newTable['category']) == 'GROUND_UNIT' then
-			mistCategory = 'vehicle'
-			newTable['category'] = mistCategory
-		elseif string.upper(newTable['category']) == 'AIRPLANE' then
-			mistCategory = 'plane'
-			newTable['category'] = mistCategory
-		elseif string.upper(newTable['category']) == 'HELICOPTER' then
-            mistCategory = 'helicopter'
-            newTable['category'] = mistCategory
-        elseif string.upper(newTable['category']) == 'SHIP' then
-            mistCategory = 'ship'
-            newTable['category'] = mistCategory	
-		end
-	
-		newTable['units'] = {}
-		for newUnitId, newUnitData in pairs(groupData.units) do
-		
-			newTable['units'][newUnitId] = {}
-			newTable['units'][newUnitId]['unitName'] = newUnitData.name
-			newTable['units'][newUnitId]['groupId'] = tonumber(groupData.groupId)
-			newTable['units'][newUnitId]['heading'] = newUnitData.heading
-			newTable['units'][newUnitId]['point'] = {}
-			newTable['units'][newUnitId]['point']['x'] = newUnitData.x
-			newTable['units'][newUnitId]['point']['y'] = newUnitData.y
-			newTable['units'][newUnitId]['alt'] = newUnitData.alt
-			newTable['units'][newUnitId]['alt_type'] = newUnitData.alt_type
-			newTable['units'][newUnitId]['unitId'] = tonumber(newUnitData.unitId)
-			newTable['units'][newUnitId]['speed'] = newUnitData.speed
-			newTable['units'][newUnitId]['airdromeId'] = newUnitData.airdromeId
-			newTable['units'][newUnitId]['type'] = newUnitData.type
-			newTable['units'][newUnitId]['skill'] = newUnitData.skill
-			newTable['units'][newUnitId]['groupName'] = groupData.name
-			newTable['units'][newUnitId]['livery_id'] = groupData.livery_id
-			newTable['units'][newUnitId]['country'] = string.lower(newTable.country)
-			newTable['units'][newUnitId]['countryId'] = newTable.countryId
-			newTable['units'][newUnitId]['coalition'] = newTable.coalition
-			newTable['units'][newUnitId]['category'] = newTable.category
-			
-			newTable['units'][newUnitId]['shape_name'] = newTable.shape_name -- for statics
-			
-						
-			
-			if newUnitData.unitId then
-				mist.DBs.unitsById[tonumber(newUnitData.unitId)] = mist.utils.deepCopy(newTable['units'][newUnitId]) 
-			end
-			
-			mist.DBs.unitsByName[newUnitData.name] = mist.utils.deepCopy(newTable['units'][newUnitId])
-			mist.DBs.unitsByCat[mistCategory][#mist.DBs.unitsByCat[mistCategory] + 1] = mist.utils.deepCopy(newTable['units'][newUnitId])
-			mist.DBs.unitsByNum[#mist.DBs.unitsByNum + 1] = mist.utils.deepCopy(newTable['units'][newUnitId])  
-	
-		end
-
-		
-		
-		-- this is a really annoying DB to populate. Gotta create new tables in case its missing
-		if not mist.DBs.units[newTable.coalition] then
-			mist.DBs.units[newTable.coalition] = {}
-		end
-
-		if not mist.DBs.units[newTable.coalition][newTable.country] then
-			mist.DBs.units[newTable.coalition][(newTable.country)] = {}
-			mist.DBs.units[newTable.coalition][(newTable.country)]['countryId'] = newTable.countryId
-		end
-		if not mist.DBs.units[newTable.coalition][newTable.country][mistCategory] then
-			mist.DBs.units[newTable.coalition][(newTable.country)][mistCategory] = {}
-		end
-		mist.DBs.units[newTable.coalition][(newTable.country)][mistCategory][#mist.DBs.units[newTable.coalition][(newTable.country)][mistCategory] + 1] = mist.utils.deepCopy(newTable)
-		
-		if newTable.groupId then
-			mist.DBs.groupsById[groupData.groupId] = mist.utils.deepCopy(newTable)
-		end
-		
-		mist.DBs.groupsByName[groupData.name] = mist.utils.deepCopy(newTable)
-		
-		newTable['timeAdded'] = timer.getAbsTime() -- only on the dynGroupsAdded table. For other reference, see start time
-		mist.DBs.dynGroupsAdded[#mist.DBs.dynGroupsAdded + 1] = mist.utils.deepCopy(newTable)
-		
-
-		--mist.debug.dumpDBs()
-		--end
-		return
-	end
-	
-	
-	mist.dynAddStatic = function(staticObj)
-		local newObj = {}
-		newObj.groupId = staticObj.groupId
-		newObj.category = staticObj.category
-		newObj.type = staticObj.type
-		newObj.unitId = staticObj.unitId
-		newObj.y = staticObj.y
-		newObj.x = staticObj.x
-		newObj.heading = staticObj.heading
-		newObj.name = staticObj.name
-		newObj.dead = staticObj.dead
-		newObj.country = staticObj.country
-		newObj.clone = staticObj.clone
-		newObj.shape_name = newObj.shape_name
-		
-		if staticObj.units then -- if its mist format
-			newObj.groupId = staticObj.units[1].groupId
-			newObj.category = staticObj.units[1].category
-			newObj.type = staticObj.units[1].type
-			newObj.unitId = staticObj.units[1].unitId
-			newObj.y = staticObj.units[1].y
-			newObj.x = staticObj.units[1].x
-			newObj.heading = staticObj.units[1].heading
-			newObj.name = staticObj.units[1].name
-			newObj.dead = staticObj.units[1].dead
-			newObj.country = staticObj.units[1].country
-			newObj.shape_name = staticObj.units[1].shape_name
-		end
-
-
-		newObj.country = staticObj.country
-		
-		if not newObj.country then
-			return false
-		end
-		
-		local newCountry
-		for countryName, countryId in pairs(country.id) do
-			if type(newObj.country) == 'string' then
-				if tostring(countryName) == string.upper(newObj.country) then
-					newCountry = countryName
-				end
-			elseif type(newObj.country) == 'number' then
-				if countryId == newObj.country then
-					newCountry = countryName
-				end
-			end
-		end
-		
-		if newObj.clone or not newObj.groupId then
-			mistGpId = mistGpId + 1 
-			newObj.groupId = mistGpId
-		end
-		
-		if newObj.clone or not newObj.unitId then
-			mistUnitId = mistUnitId + 1	
-			newObj.unitId = mistUnitId
-		end
-		
-		if newObj.clone or not newObj.name then
-			mistDynAddIndex = mistDynAddIndex + 1
-			newObj.name = (newCountry .. ' static ' .. mistDynAddIndex)
-		end
-		
-		if not newObj.dead then
-			newObj.dead = false
-		end
-		
-		if not newObj.heading then
-			newObj.heading = math.random(360)
-		end
-		
-		if newObj.x and newObj.y and newObj.type and type(newObj.x) == 'number' and type(newObj.y) == 'number' and type(newObj.type) == 'string' then
-			coalition.addStaticObject(country.id[newCountry], newObj)
-
-			return newObj.name
-		end	
-		return false
-	end
-
-	mist.dynAdd = function(newGroup) -- same as coalition.add function in SSE. checks the passed data to see if its valid. 
---Will generate groupId, groupName, unitId, and unitName if needed
---
-	
-	
-	--env.info('dynAdd')
-	local cntry = newGroup.country
-	local groupType = newGroup.category
-	local newCountry = ''
-	
-	-- validate data
-	for countryName, countryId in pairs(country.id) do
-		if type(cntry) == 'string' then
-			if tostring(countryName) == string.upper(cntry) then
-				newCountry = countryName
-			end
-		elseif type(cntry) == 'number' then
-			if countryId == cntry then
-				newCountry = countryName
-			end
-		end
-	end
-	
-	if newCountry == '' then
-		return false
-	end
-	
-	local newCat = ''
-	for catName, catId in pairs(Unit.Category) do
-		if type(groupType) == 'string' then
-			if tostring(catName) == string.upper(groupType) then
-				newCat = catName
-			end
-		elseif type(groupType) == 'number' then
-			if catId == groupType then
-				newCat = catName
-			end
-		end
-		
-		if catName == 'GROUND_UNIT' and (string.upper(groupType) == 'VEHICLE' or string.upper(groupType) == 'GROUND') then
-			newCat = 'GROUND_UNIT'
-		elseif catName == 'AIRPLANE' and string.upper(groupType) == 'PLANE' then
-			newCat = 'AIRPLANE'
-		end
-	end
-	
-	local typeName 
-	if newCat == 'GROUND_UNIT' then
-		typeName = ' gnd '
-	elseif newCat == 'AIRPLANE' then
-		typeName = ' air '
-	elseif newCat == 'HELICOPTER' then
-		typeName = ' hel '
-	elseif newCat == 'SHIP' then
-		typeName = ' shp '
-	elseif newCat == 'BUILDING' then
-		typeName = ' bld '
-	end
-	
-	if newGroup.clone or not newGroup.groupId then
-		mistDynAddIndex = mistDynAddIndex + 1
-		mistGpId = mistGpId + 1 
-		newGroup.groupId = mistGpId
-	end
-	if newGroup.groupName or newGroup.name then
-		if newGroup.groupName then
-			newGroup['name'] = newGroup.groupName
-		elseif newGroup.name then
-			newGroup['name'] = newGroup.name
-		end
-	end
-	if newGroup.clone or not newGroup.name then
-		newGroup['name'] = tostring(tostring(cntry) .. tostring(typeName) .. mistDynAddIndex)
-	end
-	
-	for unitIndex, unitData in pairs(newGroup.units) do
-
-		local originalName = newGroup.units[unitIndex].unitName or newGroup.units[unitIndex].name
-		if newGroup.clone or not unitData.unitId then
-			mistUnitId = mistUnitId + 1	
-			newGroup.units[unitIndex]['unitId'] = mistUnitId
-		end
-		if newGroup.units[unitIndex].unitName or newGroup.units[unitIndex].name then
-			if newGroup.units[unitIndex].unitName then
-				newGroup.units[unitIndex].name = newGroup.units[unitIndex].unitName
-			elseif newGroup.units[unitIndex].name then
-				newGroup.units[unitIndex].name = newGroup.units[unitIndex].name
-			end
-		end
-		if newGroup.clone or not unitData.name then
-			newGroup.units[unitIndex].name = tostring(newGroup.name .. ' unit' .. unitIndex)
-		end
-		
-		if not unitData.skill then 
-			newGroup.units[unitIndex].skill = 'Random'
-		end
-		
-		if not unitData.alt then
-			if newCat == 'AIRPLANE' then
-				newGroup.units[unitIndex].alt = 2000
-				newGroup.units[unitIndex].alt_type = 'RADIO'
-				newGroup.units[unitIndex].speed = 150
-			elseif newCat == 'HELICOPTER' then
-				newGroup.units[unitIndex].alt = 500
-				newGroup.units[unitIndex].alt_type = 'RADIO'
-				newGroup.units[unitIndex].speed = 60
-			else
-				--[[env.info('check height')
-				newGroup.units[unitIndex].alt = land.getHeight({x = newGroup.units[unitIndex].x, y = newGroup.units[unitIndex].y})
-				newGroup.units[unitIndex].alt_type = 'BARO']]
-			end
-		
-
-		end
-				
-		if newCat == 'AIRPLANE' or newCat == 'HELICOPTER' then
-			if (newGroup.units[unitIndex].alt_type ~= 'RADIO' or newGroup.units[unitIndex].alt_type ~= 'BARO') or not newGroup.units[unitIndex].alt_type then
-				newGroup.units[unitIndex].alt_type = 'RADIO'
-			end
-			if not unitData.speed then
-				if newCat == 'AIRPLANE' then
-					newGroup.units[unitIndex].speed = 150
-				elseif newCat == 'HELICOPTER' then
-					newGroup.units[unitIndex].speed = 60
-				end
-			end
-			if not unitData.payload then
-				newGroup.units[unitIndex].payload = mist.getPayload(originalName)
-			end
-		end
-		
-	end
-	if newGroup.route and not newGroup.route.points then
-		if not newGroup.route.points and newGroup.route[1] then
-			local copyRoute = newGroup.route
-			newGroup.route = {}
-			newGroup.route.points = copyRoute
-		end
-	end
-	newGroup.country = newCountry
-	
-	addToDBs[#addToDBs + 1] = mist.utils.deepCopy(newGroup)
-	
-	
-	-- sanitize table
-	newGroup.groupName = nil
-	newGroup.clone = nil
-	newGroup.category = nil
-	newGroup.country = nil
-	
-	newGroup.tasks = {}
-	newGroup.visible = false
-	
-	for unitIndex, unitData in pairs(newGroup.units) do
-		newGroup.units[unitIndex].unitName = nil
-	end
-	
-	--env.info('added')
-	coalition.addGroup(country.id[newCountry], Unit.Category[newCat], newGroup)
-	
-	
-	return newGroup.name
-	
-	end
+	return isOk
+end	
 
 mist.getCurrentGroupData = function(gpName)
 	if Group.getByName(gpName) then
@@ -4486,14 +4816,14 @@ mist.getCurrentGroupData = function(gpName)
 			newData.units[unitNum]['x'] = unitData:getPosition().p.x
 			newData.units[unitNum]['y'] = unitData:getPosition().p.z
 			newData.units[unitNum]["type"] = unitData:getTypeName()
-			--newData.units[unitNum]["skill"] = unitData.skill
+			newData.units[unitNum]["skill"] = mist.getUnitSkill(unitData:getName())
 			
 			-- get velocity needed
 			newData.units[unitNum]["unitName"] = unitData:getName()
 			newData.units[unitNum]["heading"] = mist.getHeading(unitData, true) -- added to DBs
 			newData.units[unitNum]['alt'] = unitData:getPosition().p.y
 			newData.country = string.lower(country.name[unitData:getCountry()])
-			
+			newData.units[unitNum]['callsign'] = unitData:getCallsign()
 		end
 
 		return newData
@@ -4502,42 +4832,60 @@ mist.getCurrentGroupData = function(gpName)
 end
 
 mist.getGroupData = function(gpName)
-	--env.info('getgroupData')
-	for groupName, groupData in pairs(mist.DBs.groupsByName) do
-		if string.lower(groupName) == string.lower(gpName) then
-			local newData = {}
-			newData.hidden = false -- maybe add this to DBs
-			newData.groupId = groupData.groupId
-			newData.groupName = groupName
-			newData.category = groupData.category
-			newData.country = groupData.country
-			newData.units = {}
-			newData.task = groupData.task
-
-			for unitNum, unitData in pairs(groupData.units) do
-				newData.units[unitNum] = {}
-				
-				newData.units[unitNum]["unitId"] = unitData.unitId
-				--newData.units[unitNum]['point'] = unitData.point
-				newData.units[unitNum]['x'] = unitData.point.x
-				newData.units[unitNum]['y'] = unitData.point.y
-				newData.units[unitNum]['alt'] = unitData.alt
-				newData.units[unitNum]['alt_type'] = unitData.alt_type
-				newData.units[unitNum]['speed'] = unitData.speed
-				newData.units[unitNum]["type"] = unitData.type
-				newData.units[unitNum]["skill"] = unitData.skill
-				newData.units[unitNum]["unitName"] = unitData.unitName
-				newData.units[unitNum]["heading"] = unitData.heading -- added to DBs
-				newData.units[unitNum]["playerCanDrive"] = unitData.playerCanDrive -- added to DBs
-				
-				
-				if newData.category == 'plane' or newData.category == 'helicopter' then
-					newData.units[unitNum]["payload"] = mist.getPayload(unitData.unitName)
-					newData.units[unitNum]['livery_id'] = unitData.livery_id
-				end
+	local found = false
+	local newData = {}
+	if mist.DBs.groupsByName[gpName] then
+		newData = mist.utils.deepCopy(mist.DBs.groupsByName[gpName])
+		found = true
+	end				
+	
+	if found == false then
+		for groupName, groupData in pairs(mist.DBs.groupsByName) do
+			if mist.stringMatch(groupName, gpName) == true then
+				newData = mist.utils.deepCopy(groupData)
+				newData.groupName = groupName
+				found = true
+				break
 			end
-			return newData	
 		end
+	end
+	
+	local payloads
+	if newData.category == 'plane' or newData.category == 'helicopter' then
+		payloads = mist.getGroupPayload(newData.groupName)
+	end
+	if found == true then
+		newData.hidden = false -- maybe add this to DBs
+
+		for unitNum, unitData in pairs(newData.units) do
+			newData.units[unitNum] = {}
+			
+			newData.units[unitNum]["unitId"] = unitData.unitId
+			--newData.units[unitNum]['point'] = unitData.point
+			newData.units[unitNum]['x'] = unitData.point.x
+			newData.units[unitNum]['y'] = unitData.point.y
+			newData.units[unitNum]['alt'] = unitData.alt
+			newData.units[unitNum]['alt_type'] = unitData.alt_type
+			newData.units[unitNum]['speed'] = unitData.speed
+			newData.units[unitNum]["type"] = unitData.type
+			newData.units[unitNum]["skill"] = unitData.skill
+			newData.units[unitNum]["unitName"] = unitData.unitName
+			newData.units[unitNum]["heading"] = unitData.heading -- added to DBs
+			newData.units[unitNum]["playerCanDrive"] = unitData.playerCanDrive -- added to DBs
+			
+			
+			if newData.category == 'plane' or newData.category == 'helicopter' then
+				newData.units[unitNum]["payload"] = payloads[unitNum]
+				newData.units[unitNum]['livery_id'] = unitData.livery_id
+				newData.units[unitNum]['onboard_num'] = unitData.onboard_num
+				newData.units[unitNum]['callsign'] = unitData.callsign
+			end
+		end
+		
+		return newData	
+	else
+		env.info(gpName .. ' not found in mist.getGroupData')
+		return
 	end
 end
 
@@ -4553,7 +4901,7 @@ mist.getPayload = function(unitName)
 									for group_num, group_data in pairs(obj_type_data.group) do		
 										if group_data and group_data.name then
 											for unitIndex, unitData in pairs(group_data.units) do --group index
-												if string.lower(unitName) == string.lower(unitData.name) then
+												if mist.stringMatch(unitName, unitData.name) == true then
 													return unitData.payload
 												end						
 											end
@@ -4567,11 +4915,46 @@ mist.getPayload = function(unitName)
 			end
 		end
 	else
+		env.info('mist.getPayload got ' .. type(unitName))
 		return false
 	end
+	env.info('mist.getPayload, payload not found')
 	return 
 end
 
+mist.getGroupPayload = function(groupName)
+	if groupName and type(groupName) == 'string' then
+		for coa_name, coa_data in pairs(env.mission.coalition) do
+			if (coa_name == 'red' or coa_name == 'blue') and type(coa_data) == 'table' then			
+				if coa_data.country then --there is a country table
+					for cntry_id, cntry_data in pairs(coa_data.country) do
+						for obj_type_name, obj_type_data in pairs(cntry_data) do
+							if obj_type_name == "helicopter" or obj_type_name == "ship" or obj_type_name == "plane" or obj_type_name == "vehicle" then	-- only these types have points						
+								if ((type(obj_type_data) == 'table') and obj_type_data.group and (type(obj_type_data.group) == 'table') and (#obj_type_data.group > 0)) then  --there's a group!				
+									for group_num, group_data in pairs(obj_type_data.group) do		
+										if group_data and group_data.name and mist.stringMatch(groupName, group_data.name) == true then
+											local payloads = {}
+											for unitIndex, unitData in pairs(group_data.units) do --group index
+												payloads[unitIndex] = unitData.payload
+											end
+											return payloads
+										end
+									end
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+	else
+		env.info('mist.getGroupPayload got ' .. type(groupName))
+		return false
+	end
+	env.info('mist.getGroupPayload, payload not found')
+	return 
+
+end
 
 mist.teleportToPoint = function(vars) -- main teleport function that all of teleport/respawn functions call
 	local point = vars.point
@@ -4586,9 +4969,6 @@ mist.teleportToPoint = function(vars) -- main teleport function that all of tele
 	end
 	
 	local action = vars.action
-	local isStatic = false
-
-	
 	
 	local disperse = vars.disperse or false
 	local maxDisp = vars.maxDisp
@@ -4601,7 +4981,7 @@ mist.teleportToPoint = function(vars) -- main teleport function that all of tele
 	local innerRadius = vars.innerRadius
 	
 	local route = vars.route
-
+	
 	local newGroupData
 	if gpName and not vars.groupData then
 		if string.lower(action) == 'teleport' or string.lower(action) == 'tele' then
@@ -4619,7 +4999,6 @@ mist.teleportToPoint = function(vars) -- main teleport function that all of tele
 		action = 'tele'
 		newGroupData = vars.groupData
 	end
-
 
 	local diff = {['x'] = 0, ['y'] = 0}
 	local newCoord, origCoord
@@ -4645,6 +5024,7 @@ mist.teleportToPoint = function(vars) -- main teleport function that all of tele
 			end
 		end
 		if valid == false then
+			env.info('mist.teleportToPoint; vars.point not a valid coordinate')
 			return false
 		end
 	end
@@ -4666,8 +5046,8 @@ mist.teleportToPoint = function(vars) -- main teleport function that all of tele
 	
 	--tostring, tostring(),
 	
-	newGroupData.country = mist.DBs.groupsByName[gpName].country
-	newGroupData.category = mist.DBs.groupsByName[gpName].category
+	newGroupData.country = mist.DBs.groupsByName[newGroupData.groupName].country
+	newGroupData.category = mist.DBs.groupsByName[newGroupData.groupName].category
 	if route then
 		newGroupData.route = route
 	end
@@ -4795,9 +5175,158 @@ mist.teleportGroup = function(gpName, task)
 	end
 	return newGroup
 end
+
+mist.spawnRandomizedGroup = function(groupName, vars) -- need to debug
+	if Group.getByName(groupName) then
+		local gpData = mist.getGroupData(groupName)
+		gpData.units = mist.randomizeGroupOrder(gpData.units, vars)
+		gpData.route = mist.getGroupRoute(groupName, 'task')
+		
+		mist.dynAdd(gpData)
+	end
+	
+	return true
+end
+	
+mist.randomizeNumTable = function(vars)
+	local newTable = {}
+	
+	local excludeIndex = {}
+	local randomTable = {}
+	
+	if vars and vars.exclude and type(vars.exclude) == 'table' then
+		for index, data in pairs(vars.exclude) do
+			excludeIndex[data] = true
+		end		
+	end
+	
+	local low, hi, size
+	
+	if vars.size then
+		size = vars.size
+	end
+	
+	if vars and vars.lowerLimit and type(vars.lowerLimit) == 'number' then
+		low = mist.utils.round(vars.lowerLimit)
+	else
+		low = 1
+	end
+	
+	if vars and vars.upperLimit and type(vars.upperLimit) == 'number' then
+		hi = mist.utils.round(vars.upperLimit)
+	else
+		hi = size
+	end
+
+	local choices = {}
+	-- add to exclude list and create list of what to randomize
+	for i = 1, size do
+		if not (i >= low and i <= hi) then
+
+			excludeIndex[i] = true
+		end
+		if not excludeIndex[i] then
+			table.insert(choices, i)
+		else 
+			newTable[i] = i
+		end
+	end
+
+	for ind, num in pairs(choices) do
+		local found = false
+		local x = 0
+		while found == false do
+			x = mist.random(size) -- get random number from list
+			local addNew = true
+			for index, _ in pairs(excludeIndex) do
+				if index == x then
+					addNew = false
+					break
+				end
+			end
+			if addNew == true then
+				excludeIndex[x] = true
+				found = true
+			end
+			excludeIndex[x] = true
+		
+		end
+		newTable[num] = x
+	end
+	--[[
+	for i = 1, #newTable do
+		env.info(newTable[i])
+	end
+	]]
+	return newTable
+end
+
+mist.randomizeGroupOrder = function(passedUnits, vars) 
+	-- figure out what to exclude, and send data to other func
+	local units = passedUnits
+	
+	if passedUnits.units then
+		units = passUnits.units
+	end
+	
+	local exclude = {}
+	local excludeNum = {}
+	if vars and vars.excludeType and type(vars.excludeType) == 'table' then
+		exclude = vars.excludeType 
+	end
+	
+	if vars and vars.excludeNum and type(vars.excludeNum) == 'table' then
+		excludeNum = vars.excludeNum 
+	end
+	
+	local low, hi
+	
+	if vars and vars.lowerLimit and type(vars.lowerLimit) == 'number' then
+		low = mist.utils.round(vars.lowerLimit)
+	else
+		low = 1
+	end
+	
+	if vars and vars.upperLimit and type(vars.upperLimit) == 'number' then
+		hi = mist.utils.round(vars.upperLimit)
+	else
+		hi = #units
+	end
 	
 
-end
+	local excludeNum = {}
+	for unitIndex, unitData in pairs(units) do
+		if unitIndex >= low and unitIndex  <= hi then -- if within range
+			local found = false
+			if #exclude > 0 then
+				for excludeType, index in pairs(exclude) do -- check if excluded
+					if mist.stringMatch(excludeType, unitData.type) then -- if excluded
+						excludeNum[unitIndex] = unitIndex
+						found = true
+					end
+				end
+			end
+		else -- unitIndex is either to low, or to high: added to exclude list 
+			excludeNum[unitIndex] = unitId
+		end
+	end	
+	
+	local newGroup = {}
+	local newOrder = mist.randomizeNumTable({exclude = excludeNum, size = #units})
+
+	for unitIndex, unitData in pairs(units) do
+		for i = 1, #newOrder do
+			if newOrder[i] == unitIndex then
+				newGroup[i] = mist.utils.deepCopy(units[i]) -- gets all of the unit data
+				newGroup[i].type = mist.utils.deepCopy(unitData.type)
+				newGroup[i].skill = mist.utils.deepCopy(unitData.skill)
+				newGroup[i].unitName = mist.utils.deepCopy(unitData.unitName)
+				newGroup[i].unitIndex = mist.utils.deepCopy(unitData.unitIndex) -- replaces the units data with a new type
+			end
+		end
+	end	
+	return newGroup
+end	
 
 mist.ground.patrolRoute = function(vars)
 	
@@ -4945,6 +5474,33 @@ mist.random = function(firstNum, secondNum) -- no support for decimals
 	return choices[rtnVal]
 end
 
+
+
+mist.stringMatch = function(s1, s2, bool)
+	local exclude = {'%-', '%(', '%)', '%_', '%[', '%]', '%.', '%#', '% ', '%{', '%}', '%$', '%%', '%?', '%+', '%^'}
+	if type(s1) == 'string' and type(s2) == 'string' then
+		for i , str in pairs(exclude) do
+			s1 = string.gsub(s1, str, '')
+			s2 = string.gsub(s2, str, '')
+		end
+		if not bool then
+			s1 = string.lower(s1)
+			s2 = string.lower(s2)
+		end
+		
+		if s1 == s2 then
+			return true
+		else
+			return false
+		end
+	else
+		env.info('mist.stringMatch; Either the first or second variable were not a string')
+		return false
+	end
+end
+
+mist.matchString = mist.stringMatch -- both commands work because order out type of I
+
 mist.DBs.const = {}
 
 --[[
@@ -5052,6 +5608,6 @@ scope examples:
 
 {unitTypes = { blue = {'A-10C'}}}
 ]]
-
+end
 mist.main()
 env.info(('Mist version ' .. mist.majorVersion .. '.' .. mist.minorVersion .. '.' .. mist.build .. ' loaded.'))
