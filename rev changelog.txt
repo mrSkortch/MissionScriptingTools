@@ -1,5 +1,10 @@
 -- changelog 
-v33 Mist 3.5 rc
+
+v34 v3.5 release
+- fixed missing entries in dbupdate
+- isActive() check added to getUnitsInPolygon
+
+v33
 - added getGroupPayload
 - re-wrote how mist.stringMatch worked. no functional difference between previous iteration
 - DBs now contain callsign, psi, modulation, frequency, uncontrolled, radioSet, hardpoint_racks, and onboard_num. Dependent on whether or not group type has the option available. 
@@ -12,7 +17,7 @@ v32
 
 v31
 - added more special characters to ignore for mist.stringMatch
-- added 3rd variable to mist.matchString to define if strings are case sensitive
+- added 3rd variable to mist.string to define if strings are case sensitive
 - added mist.randomizeNumTable
 - modified mist.randomizeGroupOrder to use mist.randomizeNumTable
 - added mist.terrainHeightDiff

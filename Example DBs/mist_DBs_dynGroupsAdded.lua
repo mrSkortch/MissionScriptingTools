@@ -4,261 +4,327 @@ dynGroupsAdded =
     {
         ["country"] = "usa",
         ["coalitionId"] = 2,
+        ["groupName"] = "usa gnd 2",
         ["units"] = 
         {
             [1] = 
             {
-                ["alt"] = 77,
+                ["alt"] = 73,
                 ["type"] = "M-1 Abrams",
+                ["point"] = 
+                {
+                    ["y"] = 692297,
+                    ["x"] = -283873,
+                }, -- end of ["point"]
                 ["groupId"] = 7001,
                 ["coalitionId"] = 2,
                 ["coalition"] = "blue",
-                ["skill"] = "Average",
+                ["groupName"] = "usa gnd 2",
                 ["country"] = "usa",
                 ["countryId"] = 2,
-                ["x"] = -283050,
-                ["y"] = 692716,
+                ["x"] = -283873,
+                ["y"] = 692297,
                 ["category"] = "vehicle",
                 ["unitName"] = "usa gnd 2 unit1",
                 ["unitId"] = 7001,
-                ["heading"] = 1.4977740232821,
-                ["groupName"] = "usa gnd 2",
+                ["heading"] = 1.4977603826792,
+                ["skill"] = "Average",
             }, -- end of [1]
             [2] = 
             {
-                ["alt"] = 77,
+                ["alt"] = 73,
                 ["type"] = "M-1 Abrams",
+                ["point"] = 
+                {
+                    ["y"] = 692378,
+                    ["x"] = -283913,
+                }, -- end of ["point"]
                 ["groupId"] = 7001,
                 ["coalitionId"] = 2,
                 ["coalition"] = "blue",
-                ["skill"] = "Average",
+                ["groupName"] = "usa gnd 2",
                 ["country"] = "usa",
                 ["countryId"] = 2,
-                ["x"] = -282921,
-                ["y"] = 692608,
+                ["x"] = -283913,
+                ["y"] = 692378,
                 ["category"] = "vehicle",
                 ["unitName"] = "usa gnd 2 unit2",
                 ["unitId"] = 7002,
-                ["heading"] = 1.4977727247084,
-                ["groupName"] = "usa gnd 2",
+                ["heading"] = 1.4977610327793,
+                ["skill"] = "Average",
             }, -- end of [2]
             [3] = 
             {
-                ["alt"] = 77,
+                ["alt"] = 72,
                 ["type"] = "M-1 Abrams",
+                ["point"] = 
+                {
+                    ["y"] = 692136,
+                    ["x"] = -283991,
+                }, -- end of ["point"]
                 ["groupId"] = 7001,
                 ["coalitionId"] = 2,
                 ["coalition"] = "blue",
-                ["skill"] = "Average",
+                ["groupName"] = "usa gnd 2",
                 ["country"] = "usa",
                 ["countryId"] = 2,
-                ["x"] = -282918,
-                ["y"] = 692720,
+                ["x"] = -283991,
+                ["y"] = 692136,
                 ["category"] = "vehicle",
                 ["unitName"] = "usa gnd 2 unit3",
                 ["unitId"] = 7003,
-                ["heading"] = 1.4977727247084,
-                ["groupName"] = "usa gnd 2",
+                ["heading"] = 1.4977579653353,
+                ["skill"] = "Average",
             }, -- end of [3]
             [4] = 
             {
-                ["alt"] = 76,
+                ["alt"] = 73,
                 ["type"] = "M-1 Abrams",
+                ["point"] = 
+                {
+                    ["y"] = 692340,
+                    ["x"] = -283878,
+                }, -- end of ["point"]
                 ["groupId"] = 7001,
                 ["coalitionId"] = 2,
                 ["coalition"] = "blue",
-                ["skill"] = "Average",
+                ["groupName"] = "usa gnd 2",
                 ["country"] = "usa",
                 ["countryId"] = 2,
-                ["x"] = -283138,
-                ["y"] = 692546,
+                ["x"] = -283878,
+                ["y"] = 692340,
                 ["category"] = "vehicle",
                 ["unitName"] = "usa gnd 2 unit4",
                 ["unitId"] = 7004,
-                ["heading"] = 1.4977645535052,
-                ["groupName"] = "usa gnd 2",
+                ["heading"] = 1.4977603826792,
+                ["skill"] = "Average",
             }, -- end of [4]
         }, -- end of ["units"]
-        ["coalition"] = "blue",
-        ["name"] = "usa gnd 2",
-        ["category"] = "vehicle",
-        ["groupId"] = 7001,
-        ["startTime"] = 43221.091,
         ["countryId"] = 2,
+        ["name"] = "usa gnd 2",
         ["timeAdded"] = 43221.091,
+        ["category"] = "vehicle",
+        ["coalition"] = "blue",
+        ["startTime"] = 43221.091,
+        ["task"] = "Ground Nothing",
+        ["groupId"] = 7001,
     }, -- end of [1]
     [2] = 
     {
         ["country"] = "usa",
         ["coalitionId"] = 2,
+        ["groupName"] = "usa gnd 4",
         ["units"] = 
         {
             [1] = 
             {
-                ["alt"] = 64,
+                ["alt"] = 68,
                 ["type"] = "M-1 Abrams",
+                ["point"] = 
+                {
+                    ["y"] = 690998,
+                    ["x"] = -285539,
+                }, -- end of ["point"]
                 ["groupId"] = 7003,
                 ["coalitionId"] = 2,
                 ["coalition"] = "blue",
-                ["skill"] = "Average",
+                ["groupName"] = "usa gnd 4",
                 ["country"] = "usa",
                 ["countryId"] = 2,
-                ["x"] = -286116,
-                ["y"] = 689691,
+                ["x"] = -285539,
+                ["y"] = 690998,
                 ["category"] = "vehicle",
                 ["unitName"] = "usa gnd 4 unit1",
                 ["unitId"] = 7006,
-                ["heading"] = 1.4977453540626,
-                ["groupName"] = "usa gnd 4",
+                ["heading"] = 1.4977591325037,
+                ["skill"] = "Average",
             }, -- end of [1]
             [2] = 
             {
-                ["alt"] = 64,
+                ["alt"] = 68,
                 ["type"] = "M-1 Abrams",
+                ["point"] = 
+                {
+                    ["y"] = 690984,
+                    ["x"] = -285610,
+                }, -- end of ["point"]
                 ["groupId"] = 7003,
                 ["coalitionId"] = 2,
                 ["coalition"] = "blue",
-                ["skill"] = "Average",
+                ["groupName"] = "usa gnd 4",
                 ["country"] = "usa",
                 ["countryId"] = 2,
-                ["x"] = -286241,
-                ["y"] = 689608,
+                ["x"] = -285610,
+                ["y"] = 690984,
                 ["category"] = "vehicle",
                 ["unitName"] = "usa gnd 4 unit2",
                 ["unitId"] = 7007,
-                ["heading"] = 1.4977453540626,
-                ["groupName"] = "usa gnd 4",
+                ["heading"] = 1.4977589159233,
+                ["skill"] = "Average",
             }, -- end of [2]
             [3] = 
             {
-                ["alt"] = 64,
+                ["alt"] = 68,
                 ["type"] = "M-1 Abrams",
+                ["point"] = 
+                {
+                    ["y"] = 690825,
+                    ["x"] = -285472,
+                }, -- end of ["point"]
                 ["groupId"] = 7003,
                 ["coalitionId"] = 2,
                 ["coalition"] = "blue",
-                ["skill"] = "Average",
+                ["groupName"] = "usa gnd 4",
                 ["country"] = "usa",
                 ["countryId"] = 2,
-                ["x"] = -286216,
-                ["y"] = 689801,
+                ["x"] = -285472,
+                ["y"] = 690825,
                 ["category"] = "vehicle",
                 ["unitName"] = "usa gnd 4 unit3",
                 ["unitId"] = 7008,
-                ["heading"] = 1.4977566526345,
-                ["groupName"] = "usa gnd 4",
+                ["heading"] = 1.4977598003676,
+                ["skill"] = "Average",
             }, -- end of [3]
             [4] = 
             {
-                ["alt"] = 63,
+                ["alt"] = 68,
                 ["type"] = "M-1 Abrams",
+                ["point"] = 
+                {
+                    ["y"] = 690920,
+                    ["x"] = -285485,
+                }, -- end of ["point"]
                 ["groupId"] = 7003,
                 ["coalitionId"] = 2,
                 ["coalition"] = "blue",
-                ["skill"] = "Average",
+                ["groupName"] = "usa gnd 4",
                 ["country"] = "usa",
                 ["countryId"] = 2,
-                ["x"] = -285959,
-                ["y"] = 689666,
+                ["x"] = -285485,
+                ["y"] = 690920,
                 ["category"] = "vehicle",
                 ["unitName"] = "usa gnd 4 unit4",
                 ["unitId"] = 7009,
-                ["heading"] = 1.4977453540626,
-                ["groupName"] = "usa gnd 4",
+                ["heading"] = 1.4977598003676,
+                ["skill"] = "Average",
             }, -- end of [4]
         }, -- end of ["units"]
-        ["coalition"] = "blue",
-        ["name"] = "usa gnd 4",
-        ["category"] = "vehicle",
-        ["groupId"] = 7003,
-        ["startTime"] = 43222.091,
         ["countryId"] = 2,
+        ["name"] = "usa gnd 4",
         ["timeAdded"] = 43222.091,
+        ["category"] = "vehicle",
+        ["coalition"] = "blue",
+        ["startTime"] = 43222.091,
+        ["task"] = "Ground Nothing",
+        ["groupId"] = 7003,
     }, -- end of [2]
     [3] = 
     {
         ["country"] = "usa",
         ["coalitionId"] = 2,
+        ["groupName"] = "usa gnd 6",
         ["units"] = 
         {
             [1] = 
             {
-                ["alt"] = 75,
+                ["alt"] = 65,
                 ["type"] = "M-1 Abrams",
+                ["point"] = 
+                {
+                    ["y"] = 692970,
+                    ["x"] = -288880,
+                }, -- end of ["point"]
                 ["groupId"] = 7005,
                 ["coalitionId"] = 2,
                 ["coalition"] = "blue",
-                ["skill"] = "Average",
+                ["groupName"] = "usa gnd 6",
                 ["country"] = "usa",
                 ["countryId"] = 2,
-                ["x"] = -283191,
-                ["y"] = 692403,
+                ["x"] = -288880,
+                ["y"] = 692970,
                 ["category"] = "vehicle",
                 ["unitName"] = "usa gnd 6 unit1",
                 ["unitId"] = 7011,
-                ["heading"] = 1.4977670979571,
-                ["groupName"] = "usa gnd 6",
+                ["heading"] = 1.4977545807326,
+                ["skill"] = "Average",
             }, -- end of [1]
             [2] = 
             {
-                ["alt"] = 75,
+                ["alt"] = 65,
                 ["type"] = "M-1 Abrams",
+                ["point"] = 
+                {
+                    ["y"] = 693075,
+                    ["x"] = -288920,
+                }, -- end of ["point"]
                 ["groupId"] = 7005,
                 ["coalitionId"] = 2,
                 ["coalition"] = "blue",
-                ["skill"] = "Average",
+                ["groupName"] = "usa gnd 6",
                 ["country"] = "usa",
                 ["countryId"] = 2,
-                ["x"] = -283019,
-                ["y"] = 692346,
+                ["x"] = -288920,
+                ["y"] = 693075,
                 ["category"] = "vehicle",
                 ["unitName"] = "usa gnd 6 unit2",
                 ["unitId"] = 7012,
-                ["heading"] = 1.4977724749332,
-                ["groupName"] = "usa gnd 6",
+                ["heading"] = 1.4977545807326,
+                ["skill"] = "Average",
             }, -- end of [2]
             [3] = 
             {
-                ["alt"] = 74,
+                ["alt"] = 65,
                 ["type"] = "M-1 Abrams",
+                ["point"] = 
+                {
+                    ["y"] = 692855,
+                    ["x"] = -288930,
+                }, -- end of ["point"]
                 ["groupId"] = 7005,
                 ["coalitionId"] = 2,
                 ["coalition"] = "blue",
-                ["skill"] = "Average",
+                ["groupName"] = "usa gnd 6",
                 ["country"] = "usa",
                 ["countryId"] = 2,
-                ["x"] = -283231,
-                ["y"] = 692212,
+                ["x"] = -288930,
+                ["y"] = 692855,
                 ["category"] = "vehicle",
                 ["unitName"] = "usa gnd 6 unit3",
                 ["unitId"] = 7013,
-                ["heading"] = 1.4977616370277,
-                ["groupName"] = "usa gnd 6",
+                ["heading"] = 1.4977545807326,
+                ["skill"] = "Average",
             }, -- end of [3]
             [4] = 
             {
-                ["alt"] = 75,
+                ["alt"] = 65,
                 ["type"] = "M-1 Abrams",
+                ["point"] = 
+                {
+                    ["y"] = 693055,
+                    ["x"] = -288765,
+                }, -- end of ["point"]
                 ["groupId"] = 7005,
                 ["coalitionId"] = 2,
                 ["coalition"] = "blue",
-                ["skill"] = "Average",
+                ["groupName"] = "usa gnd 6",
                 ["country"] = "usa",
                 ["countryId"] = 2,
-                ["x"] = -283080,
-                ["y"] = 692390,
+                ["x"] = -288765,
+                ["y"] = 693055,
                 ["category"] = "vehicle",
                 ["unitName"] = "usa gnd 6 unit4",
                 ["unitId"] = 7014,
-                ["heading"] = 1.4977670979571,
-                ["groupName"] = "usa gnd 6",
+                ["heading"] = 1.4977545807326,
+                ["skill"] = "Average",
             }, -- end of [4]
         }, -- end of ["units"]
-        ["coalition"] = "blue",
-        ["name"] = "usa gnd 6",
-        ["category"] = "vehicle",
-        ["groupId"] = 7005,
-        ["startTime"] = 43223.091,
         ["countryId"] = 2,
+        ["name"] = "usa gnd 6",
         ["timeAdded"] = 43223.091,
+        ["category"] = "vehicle",
+        ["coalition"] = "blue",
+        ["startTime"] = 43223.091,
+        ["task"] = "Ground Nothing",
+        ["groupId"] = 7005,
     }, -- end of [3]
 } -- end of dynGroupsAdded

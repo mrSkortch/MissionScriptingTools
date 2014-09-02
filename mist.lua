@@ -1,47 +1,5 @@
 --[[
-v34
-- fixed missing entries in dbupdate
 
-v33
-- added getGroupPayload
-- re-wrote how mist.stringMatch worked. no functional difference between previous iteration
-- DBs now contain callsign, psi, modulation, frequency, uncontrolled, radioSet, hardpoint_racks, and onboard_num. Dependent on whether or not group type has the option available. 
-
-
-v32
-- flagfuncs now support string values for flag and stop flags
-- optimized and fixed issue with mist.getGroupData
-
-
-v31
-- added more special characters to ignore for mist.stringMatch
-- added 3rd variable to mist.string to define if strings are case sensitive
-- added mist.randomizeNumTable
-- modified mist.randomizeGroupOrder to use mist.randomizeNumTable
-- added mist.terrainHeightDiff
-
-v30
--Optimizations and fixes of refactoring
--mist.dbUpdate changed to a local dbUpdate function. now no longer accessible globally
-- added mist.matchString because I always get it backwards
-
-v29
--Refactoring dbUpdate and related functions integration
-
-v28
-added mist.getUnitSkill
-added mist.stringMatch
-added mist.groupTableCheck
-added mist.spawnRandomizedGroup
-added mist.randomizeGroupOrder
-added mist.getUnitsInPolygon
-
-
-v27
-added mist.flagFunc.group_alive
-added mist.flagFunc.group_dead
-added mist.flagFunc.group_alive_more_than
-added mist.flagFunc.group_alive_less_than
 ]]
 
 --MiST Mission Scripting Tools
@@ -2731,7 +2689,7 @@ mist.getUnitsInPolygon = function (unit_names, polyZone, max_alt)
 	
 	local inZoneUnits = {}
 	for i =1, #units do
-		if mist.pointInPolygon(units[i]:getPosition().p, polyZone, max_alt) then
+		if units[i]:isActive() and mist.pointInPolygon(units[i]:getPosition().p, polyZone, max_alt) then
 			inZoneUnits[inZoneUnits + 1] = units[i]
 		end
 	end

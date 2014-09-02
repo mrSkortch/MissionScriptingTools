@@ -4,39 +4,41 @@ deadObjects =
     {
         ["objectPos"] = 
         {
-            ["y"] = 22.32818031311,
-            ["x"] = -292865.125,
-            ["z"] = 654485.5625,
+            ["y"] = 22.166765213013,
+            ["x"] = -292846.4375,
+            ["z"] = 654524.8125,
         }, -- end of ["objectPos"]
         ["objectType"] = "vehicle",
         ["objectData"] = 
         {
-            ["type"] = "BTR-80",
             ["point"] = 
             {
                 ["y"] = 654665.71428571,
                 ["x"] = -292962.85714286,
             }, -- end of ["point"]
-            ["unitId"] = 30,
             ["skill"] = "Average",
-            ["heading"] = -1.7994767003775,
-            ["groupName"] = "RuBTRs",
             ["unit"] = 
             {
                 ["id_"] = 16780544,
             }, -- end of ["unit"]
-            ["countryId"] = 2,
-            ["country"] = "russia",
-            ["coalition"] = "red",
             ["category"] = "vehicle",
             ["unitName"] = "RuBTRs4",
-            ["playerCanDrive"] = true,
+            ["type"] = "BTR-80",
             ["groupId"] = 13,
+            ["groupName"] = "RuBTRs",
+            ["countryId"] = 2,
+            ["coalition"] = "red",
+            ["x"] = -292962.85714286,
+            ["y"] = 654665.71428571,
+            ["heading"] = -1.7994767003775,
+            ["unitId"] = 30,
+            ["playerCanDrive"] = true,
+            ["country"] = "russia",
             ["pos"] = 
             {
-                ["y"] = 22.327236175537,
-                ["x"] = -292865.40625,
-                ["z"] = 654486.25,
+                ["y"] = 22.16552734375,
+                ["x"] = -292846.40625,
+                ["z"] = 654525.1875,
             }, -- end of ["pos"]
         }, -- end of ["objectData"]
         ["object"] = 
@@ -48,39 +50,41 @@ deadObjects =
     {
         ["objectPos"] = 
         {
-            ["y"] = 22.463031768799,
-            ["x"] = -292869.8125,
-            ["z"] = 654429.8125,
+            ["y"] = 22.457056045532,
+            ["x"] = -292869.3125,
+            ["z"] = 654432,
         }, -- end of ["objectPos"]
         ["objectType"] = "vehicle",
         ["objectData"] = 
         {
-            ["type"] = "BTR-80",
             ["point"] = 
             {
                 ["y"] = 654545.71428571,
                 ["x"] = -292842.85714286,
             }, -- end of ["point"]
-            ["unitId"] = 27,
             ["skill"] = "Average",
-            ["heading"] = -1.7994767003775,
-            ["groupName"] = "RuBTRs",
             ["unit"] = 
             {
                 ["id_"] = 16779776,
             }, -- end of ["unit"]
-            ["countryId"] = 2,
-            ["country"] = "russia",
-            ["coalition"] = "red",
             ["category"] = "vehicle",
             ["unitName"] = "RuBTRs1",
-            ["playerCanDrive"] = true,
+            ["type"] = "BTR-80",
             ["groupId"] = 13,
+            ["groupName"] = "RuBTRs",
+            ["countryId"] = 2,
+            ["coalition"] = "red",
+            ["x"] = -292842.85714286,
+            ["y"] = 654545.71428571,
+            ["heading"] = -1.7994767003775,
+            ["unitId"] = 27,
+            ["playerCanDrive"] = true,
+            ["country"] = "russia",
             ["pos"] = 
             {
-                ["y"] = 22.45796585083,
-                ["x"] = -292869.375,
-                ["z"] = 654431.625,
+                ["y"] = 22.452924728394,
+                ["x"] = -292868.96875,
+                ["z"] = 654433.4375,
             }, -- end of ["pos"]
         }, -- end of ["objectData"]
         ["object"] = 
@@ -88,43 +92,91 @@ deadObjects =
             ["id_"] = 16779776,
         }, -- end of ["object"]
     }, -- end of [16779776]
-    [16780032] = 
+    [16780800] = 
     {
         ["objectPos"] = 
         {
-            ["y"] = 22.255786895752,
-            ["x"] = -292852.625,
-            ["z"] = 654500.25,
+            ["y"] = 22.298601150513,
+            ["x"] = -292854.3125,
+            ["z"] = 654485.875,
         }, -- end of ["objectPos"]
         ["objectType"] = "vehicle",
         ["objectData"] = 
         {
+            ["point"] = 
+            {
+                ["y"] = 654705.71428571,
+                ["x"] = -293002.85714286,
+            }, -- end of ["point"]
+            ["skill"] = "Average",
+            ["unit"] = 
+            {
+                ["id_"] = 16780800,
+            }, -- end of ["unit"]
+            ["category"] = "vehicle",
+            ["unitName"] = "RuBTRs5",
             ["type"] = "BTR-80",
+            ["groupId"] = 13,
+            ["groupName"] = "RuBTRs",
+            ["countryId"] = 2,
+            ["coalition"] = "red",
+            ["x"] = -293002.85714286,
+            ["y"] = 654705.71428571,
+            ["heading"] = -1.7994767003775,
+            ["unitId"] = 31,
+            ["playerCanDrive"] = true,
+            ["country"] = "russia",
+            ["pos"] = 
+            {
+                ["y"] = 22.302053451538,
+                ["x"] = -292855.65625,
+                ["z"] = 654485.9375,
+            }, -- end of ["pos"]
+        }, -- end of ["objectData"]
+        ["object"] = 
+        {
+            ["id_"] = 16780800,
+        }, -- end of ["object"]
+    }, -- end of [16780800]
+    [16780032] = 
+    {
+        ["objectPos"] = 
+        {
+            ["y"] = 22.378034591675,
+            ["x"] = -292859.625,
+            ["z"] = 654456.6875,
+        }, -- end of ["objectPos"]
+        ["objectType"] = "vehicle",
+        ["objectData"] = 
+        {
             ["point"] = 
             {
                 ["y"] = 654585.71428571,
                 ["x"] = -292882.85714286,
             }, -- end of ["point"]
-            ["unitId"] = 28,
             ["skill"] = "Average",
-            ["heading"] = -1.7994767003775,
-            ["groupName"] = "RuBTRs",
             ["unit"] = 
             {
                 ["id_"] = 16780032,
             }, -- end of ["unit"]
-            ["countryId"] = 2,
-            ["country"] = "russia",
-            ["coalition"] = "red",
             ["category"] = "vehicle",
             ["unitName"] = "RuBTRs2",
-            ["playerCanDrive"] = true,
+            ["type"] = "BTR-80",
             ["groupId"] = 13,
+            ["groupName"] = "RuBTRs",
+            ["countryId"] = 2,
+            ["coalition"] = "red",
+            ["x"] = -292882.85714286,
+            ["y"] = 654585.71428571,
+            ["heading"] = -1.7994767003775,
+            ["unitId"] = 28,
+            ["playerCanDrive"] = true,
+            ["country"] = "russia",
             ["pos"] = 
             {
-                ["y"] = 22.251977920532,
-                ["x"] = -292852.3125,
-                ["z"] = 654501.375,
+                ["y"] = 22.37452507019,
+                ["x"] = -292859.8125,
+                ["z"] = 654458.5,
             }, -- end of ["pos"]
         }, -- end of ["objectData"]
         ["object"] = 
@@ -136,39 +188,41 @@ deadObjects =
     {
         ["objectPos"] = 
         {
-            ["y"] = 22.304819107056,
-            ["x"] = -292860.5625,
-            ["z"] = 654489.9375,
+            ["y"] = 22.305490493774,
+            ["x"] = -292859.53125,
+            ["z"] = 654488.625,
         }, -- end of ["objectPos"]
         ["objectType"] = "vehicle",
         ["objectData"] = 
         {
-            ["type"] = "BTR-80",
             ["point"] = 
             {
                 ["y"] = 654745.71428571,
                 ["x"] = -293042.85714286,
             }, -- end of ["point"]
-            ["unitId"] = 32,
             ["skill"] = "Average",
-            ["heading"] = -1.7994767003775,
-            ["groupName"] = "RuBTRs",
             ["unit"] = 
             {
                 ["id_"] = 16781056,
             }, -- end of ["unit"]
-            ["countryId"] = 2,
-            ["country"] = "russia",
-            ["coalition"] = "red",
             ["category"] = "vehicle",
             ["unitName"] = "RuBTRs6",
-            ["playerCanDrive"] = true,
+            ["type"] = "BTR-80",
             ["groupId"] = 13,
+            ["groupName"] = "RuBTRs",
+            ["countryId"] = 2,
+            ["coalition"] = "red",
+            ["x"] = -293042.85714286,
+            ["y"] = 654745.71428571,
+            ["heading"] = -1.7994767003775,
+            ["unitId"] = 32,
+            ["playerCanDrive"] = true,
+            ["country"] = "russia",
             ["pos"] = 
             {
-                ["y"] = 22.305166244507,
-                ["x"] = -292861.71875,
-                ["z"] = 654491,
+                ["y"] = 22.300601959229,
+                ["x"] = -292858.625,
+                ["z"] = 654489.5625,
             }, -- end of ["pos"]
         }, -- end of ["objectData"]
         ["object"] = 
@@ -180,39 +234,41 @@ deadObjects =
     {
         ["objectPos"] = 
         {
-            ["y"] = 22.341709136963,
-            ["x"] = -292862.84375,
-            ["z"] = 654476.8125,
+            ["y"] = 22.347684860229,
+            ["x"] = -292865.125,
+            ["z"] = 654476.75,
         }, -- end of ["objectPos"]
         ["objectType"] = "vehicle",
         ["objectData"] = 
         {
-            ["type"] = "BTR-80",
             ["point"] = 
             {
                 ["y"] = 654625.71428571,
                 ["x"] = -292922.85714286,
             }, -- end of ["point"]
-            ["unitId"] = 29,
             ["skill"] = "Average",
-            ["heading"] = -1.7994767003775,
-            ["groupName"] = "RuBTRs",
             ["unit"] = 
             {
                 ["id_"] = 16780288,
             }, -- end of ["unit"]
-            ["countryId"] = 2,
-            ["country"] = "russia",
-            ["coalition"] = "red",
             ["category"] = "vehicle",
             ["unitName"] = "RuBTRs3",
-            ["playerCanDrive"] = true,
+            ["type"] = "BTR-80",
             ["groupId"] = 13,
+            ["groupName"] = "RuBTRs",
+            ["countryId"] = 2,
+            ["coalition"] = "red",
+            ["x"] = -292922.85714286,
+            ["y"] = 654625.71428571,
+            ["heading"] = -1.7994767003775,
+            ["unitId"] = 29,
+            ["playerCanDrive"] = true,
+            ["country"] = "russia",
             ["pos"] = 
             {
-                ["y"] = 22.339700698853,
-                ["x"] = -292863.03125,
-                ["z"] = 654477.9375,
+                ["y"] = 22.343215942383,
+                ["x"] = -292864.5,
+                ["z"] = 654478.0625,
             }, -- end of ["pos"]
         }, -- end of ["objectData"]
         ["object"] = 
