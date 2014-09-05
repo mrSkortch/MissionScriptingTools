@@ -8,29 +8,10 @@ mist = {}
 -- don't change these
 mist.majorVersion = 3
 mist.minorVersion = 5
-mist.build = 34 
+mist.build = 35 
 
 
---[[
-DB update refactor
-currently:
 
-mist.dynAdd adds table data it addToDBs table
-spawn events are monitored
-groupsToAdd table created
-addToDBs parsed and added to spawned events table
-spawnEvents table parsed and added to groupsToAdd table
-groupsToAdd then parsed and calls mist.dbUpdate()
-mist.dbUpdate() gets all of the group data and saves the group data to the mist.DBs
-
-
-plan/goal:
-make update into coroutine/remove in pairs loops 
-seperate larger funcs into smaller funcs
-
-writeGroups contains all DB creation code
-
-]]
 --------------------------------------------------------------------------------------------------------------
 -- the main area
 do
@@ -2644,8 +2625,8 @@ end
 
 function mist.pointInPolygon(point, poly, maxalt) --raycasting point in polygon. Code from http://softsurfer.com/Archive/algorithm_0103/algorithm_0103.htm
 	local type_tbl = {
-		point {'table'},
-		poly = {'number'}, 
+		point = {'table'},
+		poly = {'table'}, 
 		maxalt = {'number', 'nil'}, 
 		}
 	
