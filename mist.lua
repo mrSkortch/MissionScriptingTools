@@ -2624,7 +2624,7 @@ end
 
 
 function mist.pointInPolygon(point, poly, maxalt) --raycasting point in polygon. Code from http://softsurfer.com/Archive/algorithm_0103/algorithm_0103.htm
-	local type_tbl = {
+	--[[local type_tbl = {
 		point = {'table'},
 		poly = {'table'}, 
 		maxalt = {'number', 'nil'}, 
@@ -2632,7 +2632,7 @@ function mist.pointInPolygon(point, poly, maxalt) --raycasting point in polygon.
 	
 	local err, errmsg = mist.utils.typeCheck('mist.pointInPolygon', type_tbl, {point, poly, maxalt})
 	assert(err, errmsg)
-	
+	]]
 	point = mist.utils.makeVec3(point)
 	local px = point.x
 	local pz = point.z
