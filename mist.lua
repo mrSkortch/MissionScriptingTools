@@ -8,7 +8,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 3
 mist.minorVersion = 5
-mist.build = 35 
+mist.build = 36 
 
 
 
@@ -4780,7 +4780,7 @@ mist.getCurrentGroupData = function(gpName)
 		newData.name = gpName
 		newData.groupId = tonumber(newGroup:getID())
 		newData.category = newGroup:getCategory()
-		
+		newData.groupName = gpName
         
 		if newData.category == 2 then
 			newData.category = 'vehicle'
@@ -5026,9 +5026,13 @@ mist.teleportToPoint = function(vars) -- main teleport function that all of tele
 	end
 	
 	--tostring, tostring(),
+	if not newGroupData.country and mist.DBs.groupsByName[newGroupData.groupName].country then
+		newGroupData.country = mist.DBs.groupsByName[newGroupData.groupName].country
+	end
+	if not newGroupData.category and mist.DBs.groupsByName[newGroupData.groupName].category then
+		newGroupData.category = mist.DBs.groupsByName[newGroupData.groupName].category
+	end
 	
-	newGroupData.country = mist.DBs.groupsByName[newGroupData.groupName].country
-	newGroupData.category = mist.DBs.groupsByName[newGroupData.groupName].category
 	if route then
 		newGroupData.route = route
 	end
