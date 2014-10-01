@@ -8,7 +8,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 3
 mist.minorVersion = 5
-mist.build = 36 
+mist.build = 37 
 
 
 
@@ -1829,7 +1829,7 @@ for coa_name, coa_data in pairs(env.mission.coalition) do
 										mist.DBs.units[coa_name][countryName][category][group_num]["category"] = category
 										mist.DBs.units[coa_name][countryName][category][group_num]["coalition"] = coa_name
 										mist.DBs.units[coa_name][countryName][category][group_num]["country"] = countryName
-										mist.DBs.units[coa_name][countryName][category][group_num]["countryId"] = cntry_id
+										mist.DBs.units[coa_name][countryName][category][group_num]["countryId"] = cntry_data.id
 										mist.DBs.units[coa_name][countryName][category][group_num]["startTime"] = group_data.start_time
 										mist.DBs.units[coa_name][countryName][category][group_num]["task"] = group_data.task
 										mist.DBs.units[coa_name][countryName][category][group_num]["units"] = {}
@@ -1850,7 +1850,7 @@ for coa_name, coa_data in pairs(env.mission.coalition) do
 											units_tbl[unit_num]["category"] = category
 											units_tbl[unit_num]["coalition"] = coa_name
 											units_tbl[unit_num]["country"] = countryName
-											units_tbl[unit_num]["countryId"] = cntry_id
+											units_tbl[unit_num]["countryId"] = cntry_data.id
 											units_tbl[unit_num]["heading"] = unit_data.heading
 											units_tbl[unit_num]["playerCanDrive"] = unit_data.playerCanDrive
 											units_tbl[unit_num]["alt"] = unit_data.alt
