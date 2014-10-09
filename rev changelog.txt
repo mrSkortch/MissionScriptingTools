@@ -1,4 +1,13 @@
 -- changelog 
+v37
+- If the point given 
+- fixed bug with mist.flagFunc.group_alive_less_than and mist.flagFunc.group_alive_more_than
+
+v36
+-fixed a bug with databases getting an incorrect countryId value
+
+v35
+- fixed bug with mist.teleportToPoint 
 
 v34 v3.5 release
 - fixed missing entries in dbupdate

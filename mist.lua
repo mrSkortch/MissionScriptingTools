@@ -3118,7 +3118,7 @@ stopFlag
 	
 	
 	if stopflag == -1 or (type(trigger.misc.getUserFlag(stopflag)) == 'number' and trigger.misc.getUserFlag(stopflag) == 0) or (type(trigger.misc.getUserFlag(stopflag)) == 'boolean' and trigger.misc.getUserFlag(stopflag) == false) then
-		if Group.getByName(groupName) and Group.getByName(groupName):isActive() then
+		if Group.getByName(groupName) and Group.getByName(groupName):isExist() then
 			if trigger.misc.getUserFlag(flag) == 0 then
 				trigger.action.setUserFlag(flag, true)
 			end
@@ -3193,7 +3193,7 @@ mist.flagFunc.group_alive_less_than = function(vars)
 	
 	
 	if stopflag == -1 or (type(trigger.misc.getUserFlag(stopflag)) == 'number' and trigger.misc.getUserFlag(stopflag) == 0) or (type(trigger.misc.getUserFlag(stopflag)) == 'boolean' and trigger.misc.getUserFlag(stopflag) == false) then
-		if Group.getByName(groupName) and Group.getByName(groupName):isActive() then
+		if Group.getByName(groupName) and Group.getByName(groupName):isExist() then
 			if Group.getByName(groupName):getSize()/Group.getByName(groupName):getInitialSize() < percent/100 then
 				if trigger.misc.getUserFlag(flag) == 0 then
 					trigger.action.setUserFlag(flag, true)
@@ -3237,7 +3237,7 @@ mist.flagFunc.group_alive_more_than = function(vars)
 	
 	
 	if stopflag == -1 or (type(trigger.misc.getUserFlag(stopflag)) == 'number' and trigger.misc.getUserFlag(stopflag) == 0) or (type(trigger.misc.getUserFlag(stopflag)) == 'boolean' and trigger.misc.getUserFlag(stopflag) == false) then
-		if Group.getByName(groupName) and Group.getByName(groupName):isActive() then
+		if Group.getByName(groupName) and Group.getByName(groupName):isExist() then
 			if Group.getByName(groupName):getSize()/Group.getByName(groupName):getInitialSize() > percent/100 then
 				if trigger.misc.getUserFlag(flag) == 0 then
 					trigger.action.setUserFlag(flag, true)
@@ -5009,6 +5009,13 @@ mist.teleportToPoint = function(vars) -- main teleport function that all of tele
 			return false
 		end
 	end
+	if not newGroupData.country and mist.DBs.groupsByName[newGroupData.groupName].country then
+		newGroupData.country = mist.DBs.groupsByName[newGroupData.groupName].country
+	end
+	if not newGroupData.category and mist.DBs.groupsByName[newGroupData.groupName].category then
+		newGroupData.category = mist.DBs.groupsByName[newGroupData.groupName].category
+	end
+	
 	for unitNum, unitData in pairs(newGroupData.units) do
 		if disperse then
 			if maxDisp and type(maxDisp) == 'number' and unitNum ~= 1 then
@@ -5023,15 +5030,17 @@ mist.teleportToPoint = function(vars) -- main teleport function that all of tele
 			newGroupData.units[unitNum]["x"] = unitData.x + diff.x
 			newGroupData.units[unitNum]["y"] = unitData.y + diff.y
 		end
+		
+		--[[if newGroupData.category == 'plane' or newGroupData.category = 'helicopter' then
+	        if point.z and point.y + 10 > terrain.getHeight({point.x, point.z}) then
+				newGroupData.units[unitNum]["alt"] = point.y
+			end
+		end
+		]]
 	end
 	
 	--tostring, tostring(),
-	if not newGroupData.country and mist.DBs.groupsByName[newGroupData.groupName].country then
-		newGroupData.country = mist.DBs.groupsByName[newGroupData.groupName].country
-	end
-	if not newGroupData.category and mist.DBs.groupsByName[newGroupData.groupName].category then
-		newGroupData.category = mist.DBs.groupsByName[newGroupData.groupName].category
-	end
+
 	
 	if route then
 		newGroupData.route = route
