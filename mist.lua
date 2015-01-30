@@ -8,7 +8,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 3
 mist.minorVersion = 5
-mist.build = 37 
+mist.build = 38 
 
 
 
@@ -678,6 +678,7 @@ do
 	newGroup.country = newCountry
 	
 	
+	--mist.debug.writeData(mist.utils.serialize,{'msg', newGroup}, 'newGroup.lua')
 	
 	-- sanitize table
 	newGroup.groupName = nil
@@ -4503,12 +4504,15 @@ mist.msgMGRS = function(vars)
 	
 	local s = mist.getMGRSString{units = units, acc = acc}
 	local newText
-	if string.find(text, '%%s') then  -- look for %s
-		newText = string.format(text, s)  -- insert the coordinates into the message
-	else  -- else, just append to the end.
-		newText = text .. s
+	if text then
+		if string.find(text, '%%s') then  -- look for %s
+			newText = string.format(text, s)  -- insert the coordinates into the message
+		else  -- else, just append to the end.
+			newText = text .. s
+		end
+	else
+		newText = s
 	end
-	
 	mist.message.add{
 		text = newText,
 		displayTime = displayTime,
@@ -4534,10 +4538,14 @@ mist.msgLL = function(vars)
 	
 	local s = mist.getLLString{units = units, acc = acc, DMS = DMS}
 	local newText
-	if string.find(text, '%%s') then  -- look for %s
-		newText = string.format(text, s)  -- insert the coordinates into the message
-	else  -- else, just append to the end.
-		newText = text .. s
+	if text then
+		if string.find(text, '%%s') then  -- look for %s
+			newText = string.format(text, s)  -- insert the coordinates into the message
+		else  -- else, just append to the end.
+			newText = text .. s
+		end
+	else
+		newText = s
 	end
 	
 	mist.message.add{
@@ -4569,10 +4577,14 @@ mist.msgBR = function(vars)
 	
 	local s = mist.getBRString{units = units, ref = ref, alt = alt, metric = metric}
 	local newText
-	if string.find(text, '%%s') then  -- look for %s
-		newText = string.format(text, s)  -- insert the coordinates into the message
-	else  -- else, just append to the end.
-		newText = text .. s
+	if text then
+		if string.find(text, '%%s') then  -- look for %s
+			newText = string.format(text, s)  -- insert the coordinates into the message
+		else  -- else, just append to the end.
+			newText = text .. s
+		end
+	else
+		newText = s
 	end
 	
 	mist.message.add{
@@ -4648,10 +4660,14 @@ mist.msgLeadingMGRS = function(vars)
 	
 	local s = mist.getLeadingMGRSString{units = units, heading = heading, radius = radius, headingDegrees = headingDegrees, acc = acc}
 	local newText
-	if string.find(text, '%%s') then  -- look for %s
-		newText = string.format(text, s)  -- insert the coordinates into the message
-	else  -- else, just append to the end.
-		newText = text .. s
+	if text then
+		if string.find(text, '%%s') then  -- look for %s
+			newText = string.format(text, s)  -- insert the coordinates into the message
+		else  -- else, just append to the end.
+			newText = text .. s
+		end
+	else
+		newText = s
 	end
 	
 	mist.message.add{
@@ -4686,10 +4702,15 @@ mist.msgLeadingLL = function(vars)
 	
 	local s = mist.getLeadingLLString{units = units, heading = heading, radius = radius, headingDegrees = headingDegrees, acc = acc, DMS = DMS}
 	local newText
-	if string.find(text, '%%s') then  -- look for %s
-		newText = string.format(text, s)  -- insert the coordinates into the message
-	else  -- else, just append to the end.
-		newText = text .. s
+	
+	if text then
+		if string.find(text, '%%s') then  -- look for %s
+			newText = string.format(text, s)  -- insert the coordinates into the message
+		else  -- else, just append to the end.
+			newText = text .. s
+		end
+	else
+		newText = s
 	end
 	
 	mist.message.add{
@@ -4726,10 +4747,15 @@ mist.msgLeadingBR = function(vars)
 	
 	local s = mist.getLeadingBRString{units = units, heading = heading, radius = radius, headingDegrees = headingDegrees, metric = metric, alt = alt, ref = ref}
 	local newText
-	if string.find(text, '%%s') then  -- look for %s
-		newText = string.format(text, s)  -- insert the coordinates into the message
-	else  -- else, just append to the end.
-		newText = text .. s
+	
+	if text then
+		if string.find(text, '%%s') then  -- look for %s
+			newText = string.format(text, s)  -- insert the coordinates into the message
+		else  -- else, just append to the end.
+			newText = text .. s
+		end
+	else
+		newText = s
 	end
 	
 	mist.message.add{
@@ -5030,13 +5056,15 @@ mist.teleportToPoint = function(vars) -- main teleport function that all of tele
 			newGroupData.units[unitNum]["x"] = unitData.x + diff.x
 			newGroupData.units[unitNum]["y"] = unitData.y + diff.y
 		end
-		
-		--[[if newGroupData.category == 'plane' or newGroupData.category = 'helicopter' then
-	        if point.z and point.y + 10 > terrain.getHeight({point.x, point.z}) then
-				newGroupData.units[unitNum]["alt"] = point.y
+		if point then
+			if (newGroupData.category == 'plane' or newGroupData.category == 'helicopter') and point.z then
+				if point.y > 0 and point.y > terrain.getHeight({newGroupData.units[unitNum]["x"], newGroupData.units[unitNum]["y"]}) + 10 then
+					newGroupData.units[unitNum]["alt"] = point.y
+				else
+					newGroupData.units[unitNum]["alt"] = terrain.getHeight({newGroupData.units[unitNum]["x"], newGroupData.units[unitNum]["y"]}) + 300
+				end
 			end
 		end
-		]]
 	end
 	
 	--tostring, tostring(),

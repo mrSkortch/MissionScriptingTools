@@ -1,6 +1,9 @@
--- changelog 
+-- changelog
+v38
+- fixed bug with optional variables for coordinate messages not actually being optional
+ 
 v37
-- If the point given 
+- Teleport To Point related functions now check the altitude of a given point if specified for teleporting aircraft
 - fixed bug with mist.flagFunc.group_alive_less_than and mist.flagFunc.group_alive_more_than
 
 v36
