@@ -8,7 +8,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 3
 mist.minorVersion = 5
-mist.build = 38 
+mist.build = 39
 
 
 
@@ -1490,7 +1490,13 @@ mist.getUnitSkill = function(unitName)
 	return false
 end
 
-function mist.getGroupPoints(groupname)   -- if groupname exists in env.mission, then returns table of the group's points in numerical order, such as: { [1] = {x = 299435.224, y = -1146632.6773}, [2] = { x = 663324.6563, y = 322424.1112}}
+function mist.getGroupPoints(groupIdent)   -- if groupname exists in env.mission, then returns table of the group's points in numerical order, such as: { [1] = {x = 299435.224, y = -1146632.6773}, [2] = { x = 663324.6563, y = 322424.1112}}
+	-- refactor to search by groupId and allow groupId and groupName as inputs
+	local gpId = groupIdent
+	if type(groupIdent) == 'string' and not tonumber(groupIdent) then
+		gpId = mist.DBs.MEgroupsByName[groupIdent].groupId
+	end
+	
 	for coa_name, coa_data in pairs(env.mission.coalition) do
 		if (coa_name == 'red' or coa_name == 'blue') and type(coa_data) == 'table' then			
 			if coa_data.country then --there is a country table
@@ -1499,7 +1505,7 @@ function mist.getGroupPoints(groupname)   -- if groupname exists in env.mission,
 						if obj_type_name == "helicopter" or obj_type_name == "ship" or obj_type_name == "plane" or obj_type_name == "vehicle" then	-- only these types have points						
 							if ((type(obj_type_data) == 'table') and obj_type_data.group and (type(obj_type_data.group) == 'table') and (#obj_type_data.group > 0)) then  --there's a group!				
 								for group_num, group_data in pairs(obj_type_data.group) do		
-									if group_data and group_data.name and mist.stringMatch(group_data.name, groupname) then -- this is the group we are looking for
+									if group_data and group_data.groupId == gpId then -- this is the group we are looking for
 										if group_data.route and group_data.route.points and #group_data.route.points > 0 then
 											local points = {}
 											for point_num, point in pairs(group_data.route.points) do
@@ -1975,7 +1981,7 @@ mist.DBs.MEunitsById = mist.utils.deepCopy(mist.DBs.unitsById)
 mist.DBs.MEunitsByCat = mist.utils.deepCopy(mist.DBs.unitsByCat)
 mist.DBs.MEunitsByNum = mist.utils.deepCopy(mist.DBs.unitsByNum)
 mist.DBs.MEgroupsByName = mist.utils.deepCopy(mist.DBs.groupsByName)
-mist.DBs.MEgroupsById = mist.utils.deepCopy(mist.DBs.groupsByID)
+mist.DBs.MEgroupsById = mist.utils.deepCopy(mist.DBs.groupsById)
 -------------
 
 
@@ -3442,7 +3448,13 @@ mist.goRoute = function(group, path)
 	return false
 end
 
-function mist.getGroupRoute(groupname, task)   -- same as getGroupPoints but returns speed and formation type along with vec2 of point}
+function mist.getGroupRoute(groupIdent, task)   -- same as getGroupPoints but returns speed and formation type along with vec2 of point}
+		-- refactor to search by groupId and allow groupId and groupName as inputs
+	local gpId = groupIdent
+	if type(groupIdent) == 'string' and not tonumber(groupIdent) then
+		gpId = mist.DBs.MEgroupsByName[groupIdent].groupId
+	end
+	
 	for coa_name, coa_data in pairs(env.mission.coalition) do
 		if (coa_name == 'red' or coa_name == 'blue') and type(coa_data) == 'table' then			
 			if coa_data.country then --there is a country table
@@ -3451,7 +3463,7 @@ function mist.getGroupRoute(groupname, task)   -- same as getGroupPoints but ret
 						if obj_type_name == "helicopter" or obj_type_name == "ship" or obj_type_name == "plane" or obj_type_name == "vehicle" then	-- only these types have points						
 							if ((type(obj_type_data) == 'table') and obj_type_data.group and (type(obj_type_data.group) == 'table') and (#obj_type_data.group > 0)) then  --there's a group!				
 								for group_num, group_data in pairs(obj_type_data.group) do		
-									if group_data and group_data.name and mist.stringMatch(group_data.name, groupname) then -- this is the group we are looking for
+									if group_data and group_data.groupId == gpId  then -- this is the group we are looking for
 										if group_data.route and group_data.route.points and #group_data.route.points > 0 then
 											local points = {}
 											
@@ -4078,14 +4090,17 @@ do
 			new.messageID = messageID
 
 			--mist.debug.writeData(mist.utils.serialize,{'msg', new}, 'newMsg.txt')
+
 			
 			messageList[#messageList + 1] = new
 			
 			local mt = { __index =  mist.message}
 			setmetatable(new, mt)  
-								
-								
-		
+
+			if #messageList == 0 then
+				--displayManager()
+			end
+			
 			return messageID
 			
 		end,
@@ -4255,7 +4270,118 @@ do
 		end
 		
 	end
-	
+	local function mistdisplayV4() 
+		-- goal of v4, send new messages only if message has changed, rather than at a constant rate
+		-- make process more effecient!
+		-- possibly change messages for CA players
+		
+		local caMessageRed = false
+		local caMessageBlue = false
+		local audioRed = false
+		local audioBlue = false
+		local audioPlaying = false
+
+		if #messageList > 0 then
+			--mist.debug.writeData(mist.utils.serialize,{'msg', messageList}, 'messageList.lua')
+			for messageId, messageData in pairs(messageList) do
+				if messageData.displayedFor > messageData.displayTime then
+					--mistMSGDestroy(messageData)
+					messageData:remove()  -- now using the remove/destroy function.
+					
+				else
+					if messageList[messageId].displayedFor then
+						messageList[messageId].displayedFor = messageList[messageId].displayedFor + messageDisplayRate
+					end
+				--[[else
+					if messageData.fileName then
+						audioPlaying = true
+					end]]
+				end
+
+				
+			end
+			for coaData, coaId in pairs(coalition.side) do
+				local CAmsg = {}
+				local newestMsg = 100000000
+				
+				for messageIndex, messageData in pairs(messageList) do 
+					for forIndex, forData in pairs(messageData.msgFor) do
+					
+						if coaData == forData then
+							if messageData.addedAt < newestMsg then
+								newestMsg = messageData.addedAt
+							end
+							if messageData.text then
+								CAmsg[#CAmsg + 1] = messageData.text
+								CAmsg[#CAmsg + 1] = '\n ---------------- \n'
+							end
+							if type(messageData.sound) == 'string' and messageData.addedAt + messageDisplayRate > timer.getTime() then
+								if coaData == 'RED' then
+									audioRed = true
+									trigger.action.outSoundForCoalition(coalition.side.RED, messageData.sound)
+								elseif coaData == 'BLUE' then
+									audioBlue = true
+									trigger.action.outSoundForCoalition(coalition.side.BLUE, messageData.sound)
+								end
+							end							
+						end
+					end
+				end
+				if #CAmsg > 0 then
+					if newestMsg < timer.getTime() + .5 then
+						if coaData == 'BLUE' then
+							trigger.action.outTextForCoalition(coalition.side.BLUE, table.concat(CAmsg), 1)
+							caMessageBlue = true
+						elseif coaData == 'RED' then
+							trigger.action.outTextForCoalition(coalition.side.RED, table.concat(CAmsg), 1)
+							caMessageRed = true
+						end
+					end
+				end	
+			end
+			for clientId, clientData in pairs(mist.DBs.humansById) do	
+				local clientDisplay = {}
+		
+				for messageIndex, messageData in pairs(messageList) do 
+					for forIndex, forData in pairs(messageData.msgFor) do
+						if clientId == forData and Group.getByName(clientData.groupName) then
+							if messageData.text then
+								clientDisplay[#clientDisplay + 1] = messageData.text
+								clientDisplay[#clientDisplay + 1] = '\n ---------------- \n'
+							end
+							if string.lower(clientData.coalition) == 'red' and audioRed == false or string.lower(clientData.coalition) == 'blue' and audioBlue == false then
+								if type(messageData.sound) == 'string' and messageData.addedAt + messageDisplayRate > timer.getTime() then
+									trigger.action.outSoundForGroup(clientData.groupId, messageData.sound)
+								end
+							end
+						end
+					end
+				end
+				if #clientDisplay > 0 then
+					trigger.action.outTextForGroup(clientData.groupId, table.concat(clientDisplay), 1)
+					
+				elseif #clientDisplay == 0 then
+					if clientData.coalition == 'blue' and caMessageBlue == true then
+						trigger.action.outTextForGroup(clientData.groupId, 'Blue CA Recieving Message', 1) -- I'd rather this recive the message with a note that its for CA than a blank message box.
+					elseif clientData.coalition == 'red' and caMessageRed == true then
+						trigger.action.outTextForGroup(clientData.groupId, 'Red CA Recieving Message', 1)
+					end
+				end
+			
+				
+			end
+		end
+		
+	end
+	local funcId = 0
+	local function displayManager()
+		if #messageList > 0 and funcId > 0 then
+			mistdisplayV3()
+			funcId = mist.scheduleFunction(displayManager, {}, timer.getTime() + messageDisplayRate, messageDisplayRate)
+		else
+			mist.removeFunction(funcId)-- kill
+		end
+	end
 
 	
 	mist.scheduleFunction(mistdisplayV3, {}, timer.getTime() + messageDisplayRate, messageDisplayRate) -- add this to the main mist thing
@@ -4896,7 +5022,14 @@ mist.getGroupData = function(gpName)
 	end
 end
 
-mist.getPayload = function(unitName)
+mist.getPayload = function(unitIdent)
+			-- refactor to search by groupId and allow groupId and groupName as inputs
+	local unitId = unitIdent
+	if type(unitIdent) == 'string' and not tonumber(unitIdent) then
+		unitId = mist.DBs.MEunitsById[unitIdent].unitId
+	end
+	local gpId = mist.DBs.MEunitsById[unitId].groupId
+	
 	if unitName and type(unitName) == 'string' then
 		for coa_name, coa_data in pairs(env.mission.coalition) do
 			if (coa_name == 'red' or coa_name == 'blue') and type(coa_data) == 'table' then			
@@ -4906,9 +5039,9 @@ mist.getPayload = function(unitName)
 							if obj_type_name == "helicopter" or obj_type_name == "ship" or obj_type_name == "plane" or obj_type_name == "vehicle" then	-- only these types have points						
 								if ((type(obj_type_data) == 'table') and obj_type_data.group and (type(obj_type_data.group) == 'table') and (#obj_type_data.group > 0)) then  --there's a group!				
 									for group_num, group_data in pairs(obj_type_data.group) do		
-										if group_data and group_data.name then
+										if group_data and group_data.groupId == groupId then
 											for unitIndex, unitData in pairs(group_data.units) do --group index
-												if mist.stringMatch(unitName, unitData.name) == true then
+												if unitData.unitId == unitId then
 													return unitData.payload
 												end						
 											end
@@ -4929,8 +5062,13 @@ mist.getPayload = function(unitName)
 	return 
 end
 
-mist.getGroupPayload = function(groupName)
-	if groupName and type(groupName) == 'string' then
+mist.getGroupPayload = function(groupIdent)
+	local gpId = groupIdent
+	if type(groupIdent) == 'string' and not tonumber(groupIdent) then
+		gpId = mist.DBs.MEgroupsByName[groupIdent].groupId
+	end
+	
+	if gpId then
 		for coa_name, coa_data in pairs(env.mission.coalition) do
 			if (coa_name == 'red' or coa_name == 'blue') and type(coa_data) == 'table' then			
 				if coa_data.country then --there is a country table
@@ -4939,7 +5077,7 @@ mist.getGroupPayload = function(groupName)
 							if obj_type_name == "helicopter" or obj_type_name == "ship" or obj_type_name == "plane" or obj_type_name == "vehicle" then	-- only these types have points						
 								if ((type(obj_type_data) == 'table') and obj_type_data.group and (type(obj_type_data.group) == 'table') and (#obj_type_data.group > 0)) then  --there's a group!				
 									for group_num, group_data in pairs(obj_type_data.group) do		
-										if group_data and group_data.name and mist.stringMatch(groupName, group_data.name) == true then
+										if group_data and group_data.groupId == gpId then
 											local payloads = {}
 											for unitIndex, unitData in pairs(group_data.units) do --group index
 												payloads[unitIndex] = unitData.payload
@@ -5348,7 +5486,7 @@ mist.randomizeGroupOrder = function(passedUnits, vars)
 		end
 	end	
 	return newGroup
-end	
+end			
 
 mist.ground.patrolRoute = function(vars)
 	
