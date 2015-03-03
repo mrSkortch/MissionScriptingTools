@@ -8,7 +8,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 3
 mist.minorVersion = 5
-mist.build = 39
+mist.build = 40
 
 
 
@@ -650,7 +650,7 @@ do
 		end
 				
 		if newCat == 'AIRPLANE' or newCat == 'HELICOPTER' then
-			if (newGroup.units[unitIndex].alt_type ~= 'RADIO' or newGroup.units[unitIndex].alt_type ~= 'BARO') or not newGroup.units[unitIndex].alt_type then
+			if newGroup.units[unitIndex].alt_type and newGroup.units[unitIndex].alt_type ~= 'BARO' or not newGroup.units[unitIndex].alt_type then
 				newGroup.units[unitIndex].alt_type = 'RADIO'
 			end
 			if not unitData.speed then
@@ -1479,7 +1479,7 @@ mist.getNorthCorrection = function(point)  --gets the correction needed for true
 end
 
 mist.getUnitSkill = function(unitName)
-	if Unit.getByName(unitName) then
+	if Unit.getByName(unitName) and Unit.getByName(unitName):isExist() == true then
 		local lunit = Unit.getByName(unitName)
 		for name, data in pairs(mist.DBs.unitsByName) do
 			if name == unitName and data.type == lunit:getTypeName() and data.unitId == lunit:getID() and data.skill then
@@ -1489,6 +1489,7 @@ mist.getUnitSkill = function(unitName)
 	end
 	return false
 end
+
 
 function mist.getGroupPoints(groupIdent)   -- if groupname exists in env.mission, then returns table of the group's points in numerical order, such as: { [1] = {x = 299435.224, y = -1146632.6773}, [2] = { x = 663324.6563, y = 322424.1112}}
 	-- refactor to search by groupId and allow groupId and groupName as inputs
@@ -3162,7 +3163,7 @@ mist.flagFunc.group_dead = function(vars)
 	
 	
 	if stopflag == -1 or (type(trigger.misc.getUserFlag(stopflag)) == 'number' and trigger.misc.getUserFlag(stopflag) == 0) or (type(trigger.misc.getUserFlag(stopflag)) == 'boolean' and trigger.misc.getUserFlag(stopflag) == false) then
-		if not Group.getByName(groupName) then
+		if not Group.getByName(groupName) or Group.getByName(groupName):isExist() == false then
 			if trigger.misc.getUserFlag(flag) == 0 then
 				trigger.action.setUserFlag(flag, true)
 			end
@@ -3288,7 +3289,7 @@ mist.getAvgPos = function(unitNames)
 end
 
 mist.getAvgGroupPos = function(groupName)
-	if type(groupName) == 'string' and Group.getByName(groupName) then
+	if type(groupName) == 'string' and Group.getByName(groupName) and Group.getByName(groupName):isExist() == true then
 		groupName = Group.getByName(groupName)
 	end
 	local units = {}
@@ -4754,7 +4755,7 @@ vars.msgFor - scope
 ]]
 
 mist.msgBRA = function(vars)
-	if Unit.getByName(vars.ref) then
+	if Unit.getByName(vars.ref) and Unit.getByName(vars.ref):isExist() == true then
 		vars.ref = Unit.getByName(vars.ref):getPosition().p
 		if not vars.alt then
 			vars.alt = true
@@ -4926,7 +4927,7 @@ mist.groupTableCheck = function(groupData)
 end	
 
 mist.getCurrentGroupData = function(gpName)
-	if Group.getByName(gpName) then
+	if Group.getByName(gpName) and Group.getByName(gpName):isExist() == true then
 		local newGroup = Group.getByName(gpName)
 		local newData = {}
 		newData.name = gpName
@@ -5216,6 +5217,7 @@ mist.teleportToPoint = function(vars) -- main teleport function that all of tele
 		
 		 return mist.dynAddStatic(newGroupData)
 	end
+
 	return mist.dynAdd(newGroupData)
 	
 end
@@ -5337,7 +5339,7 @@ mist.teleportGroup = function(gpName, task)
 end
 
 mist.spawnRandomizedGroup = function(groupName, vars) -- need to debug
-	if Group.getByName(groupName) then
+	if Group.getByName(groupName) and Group.getByName(groupName):isExist() == true then
 		local gpData = mist.getGroupData(groupName)
 		gpData.units = mist.randomizeGroupOrder(gpData.units, vars)
 		gpData.route = mist.getGroupRoute(groupName, 'task')
