@@ -1235,7 +1235,7 @@ mist.utils.tableShow = function(tbl, loc, indent, tableshow_tbls) --based on ser
 				end
 			elseif type(val) == 'function' then
 				if debug and debug.getinfo then
-					fcnname = tostring(val)
+					local fcnname = tostring(val)
 					local info = debug.getinfo(val, "S")
 					if info.what == "C" then
 						tbl_str[#tbl_str + 1] = string.format('%q', fcnname .. ', C function') .. ',\n'
@@ -3267,7 +3267,7 @@ mist.getAvgPos = function(unitNames)
 	for i = 1, #unitNames do
 		local unit = Unit.getByName(unitNames[i])
 		if unit then
-			oneUnit = true  -- at least one unit existed.
+			local oneUnit = true  -- at least one unit existed.
 			local pos = unit:getPosition().p
 			avgX = avgX + pos.x
 			avgY = avgY + pos.y
@@ -3360,9 +3360,9 @@ mist.demos.printFlightData = function(unit)
 				local axialGs = 'NA'
 				local transGs = 'NA'
 				if prevVel and prevTime then
-					xAcc = (unitVel.x - prevVel.x)/(curTime - prevTime)
-					yAcc = (unitVel.y - prevVel.y)/(curTime - prevTime)
-					zAcc = (unitVel.z - prevVel.z)/(curTime - prevTime)
+					local xAcc = (unitVel.x - prevVel.x)/(curTime - prevTime)
+					local yAcc = (unitVel.y - prevVel.y)/(curTime - prevTime)
+					local zAcc = (unitVel.z - prevVel.z)/(curTime - prevTime)
 					
 					unitAcc = string.format('%12.2f', mist.vec.mag({x = xAcc, y = yAcc, z = zAcc}))
 					Gs = string.format('%12.2f', mist.vec.mag({x = xAcc, y = yAcc + 9.81, z = zAcc})/9.81)
@@ -5386,7 +5386,7 @@ mist.ground.patrolRoute = function(vars)
 		useRoute[1].action = useRoute[#useRoute].action -- make it so the first WP matches the last WP
 	end
 	
-	cTask3 = {}
+	local cTask3 = {}
 	local newPatrol = {}
 	newPatrol.route = useRoute
 	newPatrol.gpData = gpData:getName()
