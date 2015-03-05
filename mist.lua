@@ -8,7 +8,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 3
 mist.minorVersion = 5
-mist.build = 40
+mist.build = 41
 
 
 
@@ -1236,7 +1236,7 @@ mist.utils.tableShow = function(tbl, loc, indent, tableshow_tbls) --based on ser
 				end
 			elseif type(val) == 'function' then
 				if debug and debug.getinfo then
-					fcnname = tostring(val)
+					local fcnname = tostring(val)
 					local info = debug.getinfo(val, "S")
 					if info.what == "C" then
 						tbl_str[#tbl_str + 1] = string.format('%q', fcnname .. ', C function') .. ',\n'
@@ -2577,7 +2577,7 @@ initial_number
 	end
 	
 	if stopflag == -1 or (type(trigger.misc.getUserFlag(stopflag)) == 'number' and trigger.misc.getUserFlag(stopflag) == 0) or (type(trigger.misc.getUserFlag(stopflag)) == 'boolean' and trigger.misc.getUserFlag(stopflag) == false) then
-		if (#mist.getDeadMapObjsInZones(zones) - initial_number) >= req_num then
+		if (#mist.getDeadMapObjsInZones(zones) - initial_number) >= req_num and trigger.misc.getUserFlag(flag) == false then
 			trigger.action.setUserFlag(flag, true)
 			return
 		else
@@ -2620,7 +2620,7 @@ initial_number
 	end
 	
 	if stopflag == -1 or (type(trigger.misc.getUserFlag(stopflag)) == 'number' and trigger.misc.getUserFlag(stopflag) == 0) or (type(trigger.misc.getUserFlag(stopflag)) == 'boolean' and trigger.misc.getUserFlag(stopflag) == false) then
-		if (#mist.getDeadMapObjsInPolygonZone(zone) - initial_number) >= req_num then
+		if (#mist.getDeadMapObjsInPolygonZone(zone) - initial_number) >= req_num and trigger.misc.getUserFlag(flag) == false then
 			trigger.action.setUserFlag(flag, true)
 			return
 		else
@@ -2734,7 +2734,7 @@ toggle = boolean or nil
 				local pos = unit:getPosition().p
 				if mist.pointInPolygon(pos, zone, maxalt) then
 					num_in_zone = num_in_zone + 1
-					if num_in_zone >= req_num then
+					if num_in_zone >= req_num and trigger.misc.getUserFlag(flag) == false then
 						trigger.action.setUserFlag(flag, true)
 						break
 					end
@@ -2854,7 +2854,7 @@ function mist.flagFunc.units_in_zones(vars)
 	
 		local in_zone_units = mist.getUnitsInZones(units, zones, zone_type)
 	
-		if #in_zone_units >= req_num then
+		if #in_zone_units >= req_num and trigger.misc.getUserFlag(flag) == false then
 			trigger.action.setUserFlag(flag, true)
 		elseif #in_zone_units < req_num and toggle then
 			trigger.action.setUserFlag(flag, false)
@@ -2968,7 +2968,7 @@ function mist.flagFunc.units_in_moving_zones(vars)
 	
 		local in_zone_units = mist.getUnitsInMovingZones(units, zone_units, radius, zone_type)
 	
-		if #in_zone_units >= req_num then
+		if #in_zone_units >= req_num and trigger.misc.getUserFlag(flag) == false then
 			trigger.action.setUserFlag(flag, true)
 		elseif #in_zone_units < req_num and toggle then
 			trigger.action.setUserFlag(flag, false)
@@ -3086,7 +3086,7 @@ toggle = boolean or nil
 	
 		local unitLOSdata = mist.getUnitsLOS(unitset1, altoffset1, unitset2, altoffset2, radius)
 	
-		if #unitLOSdata >= req_num then
+		if #unitLOSdata >= req_num and trigger.misc.getUserFlag(flag) == false then
 			trigger.action.setUserFlag(flag, true)
 		elseif #unitLOSdata < req_num and toggle then
 			trigger.action.setUserFlag(flag, false)
@@ -3275,7 +3275,7 @@ mist.getAvgPos = function(unitNames)
 	for i = 1, #unitNames do
 		local unit = Unit.getByName(unitNames[i])
 		if unit then
-			oneUnit = true  -- at least one unit existed.
+			
 			local pos = unit:getPosition().p
 			avgX = avgX + pos.x
 			avgY = avgY + pos.y
@@ -3368,9 +3368,9 @@ mist.demos.printFlightData = function(unit)
 				local axialGs = 'NA'
 				local transGs = 'NA'
 				if prevVel and prevTime then
-					xAcc = (unitVel.x - prevVel.x)/(curTime - prevTime)
-					yAcc = (unitVel.y - prevVel.y)/(curTime - prevTime)
-					zAcc = (unitVel.z - prevVel.z)/(curTime - prevTime)
+					local xAcc = (unitVel.x - prevVel.x)/(curTime - prevTime)
+					local yAcc = (unitVel.y - prevVel.y)/(curTime - prevTime)
+					local zAcc = (unitVel.z - prevVel.z)/(curTime - prevTime)
 					
 					unitAcc = string.format('%12.2f', mist.vec.mag({x = xAcc, y = yAcc, z = zAcc}))
 					Gs = string.format('%12.2f', mist.vec.mag({x = xAcc, y = yAcc + 9.81, z = zAcc})/9.81)
@@ -5563,7 +5563,7 @@ mist.ground.patrolRoute = function(vars)
 		useRoute[1].action = useRoute[#useRoute].action -- make it so the first WP matches the last WP
 	end
 	
-	cTask3 = {}
+	local cTask3 = {}
 	local newPatrol = {}
 	newPatrol.route = useRoute
 	newPatrol.gpData = gpData:getName()
