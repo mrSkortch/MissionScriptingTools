@@ -1,4 +1,17 @@
 -- changelog
+v42 v3.6 release
+-added mist.getRandomPointInZone. Function uses mist.getRandomPointInCircle.
+-fixed bug with altitude switching to radio if baro was specified
+-added the speed to DBs if a unit is dynamically spawned in
+-added extra checks in case Group/Unit.getByName returns dead objects
+- Mission file searching functions now search by Id instead of group or unit names.
+The name input variable hasnt changed, value gets converted to Id automatically if found. 
+Functions now also accept a numerical groupId or unitId
+getPayload
+getGroupPayload
+getGroupPoints
+getGroupRoute
+
 v38
 - fixed bug with optional variables for coordinate messages not actually being optional
  
