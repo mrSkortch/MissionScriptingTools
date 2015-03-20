@@ -8,7 +8,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 3
 mist.minorVersion = 6
-mist.build = 42
+mist.build = 43
 
 
 
@@ -530,7 +530,7 @@ do
 		if newObj.x and newObj.y and newObj.type and type(newObj.x) == 'number' and type(newObj.y) == 'number' and type(newObj.type) == 'string' then
 			coalition.addStaticObject(country.id[newCountry], newObj)
 
-			return newObj.name
+			return newObj
 		end	
 		return false
 	end
@@ -696,7 +696,7 @@ do
 	
 	coalition.addGroup(country.id[newCountry], Unit.Category[newCat], newGroup)
 	
-	return newGroup.name
+	return newGroup
 	
 	end
 
@@ -5035,7 +5035,7 @@ mist.getPayload = function(unitIdent)
 			-- refactor to search by groupId and allow groupId and groupName as inputs
 	local unitId = unitIdent
 	if type(unitIdent) == 'string' and not tonumber(unitIdent) then
-		unitId = mist.DBs.MEunitsById[unitIdent].unitId
+		unitId = mist.DBs.MEunitsByName[unitIdent].unitId
 	end
 	local gpId = mist.DBs.MEunitsById[unitId].groupId
 	
@@ -5048,7 +5048,7 @@ mist.getPayload = function(unitIdent)
 							if obj_type_name == "helicopter" or obj_type_name == "ship" or obj_type_name == "plane" or obj_type_name == "vehicle" then	-- only these types have points						
 								if ((type(obj_type_data) == 'table') and obj_type_data.group and (type(obj_type_data.group) == 'table') and (#obj_type_data.group > 0)) then  --there's a group!				
 									for group_num, group_data in pairs(obj_type_data.group) do		
-										if group_data and group_data.groupId == groupId then
+										if group_data and group_data.groupId == gpId then
 											for unitIndex, unitData in pairs(group_data.units) do --group index
 												if unitData.unitId == unitId then
 													return unitData.payload

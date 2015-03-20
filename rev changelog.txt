@@ -1,4 +1,8 @@
 -- changelog
+v43
+-fixed issue with getPayload
+-dynAdd and dynAddStatic now return the full new table and not just its name. The name value is still accessible via returned table.name
+
 v42 v3.6 release
 -added mist.getRandomPointInZone. Function uses mist.getRandomPointInCircle.
 -fixed bug with altitude switching to radio if baro was specified
@@ -11,6 +15,8 @@ getPayload
 getGroupPayload
 getGroupPoints
 getGroupRoute
+
+--re added the mist named file
 
 v38
 - fixed bug with optional variables for coordinate messages not actually being optional
