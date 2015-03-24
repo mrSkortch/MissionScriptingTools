@@ -8,7 +8,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 3
 mist.minorVersion = 6
-mist.build = 43
+mist.build = 44
 
 
 
@@ -791,6 +791,7 @@ do
 			self.f(event)
 		end
 		world.addEventHandler(handler)
+		return handler.id
 	end
 
 	mist.removeEventHandler = function(id)
@@ -4021,9 +4022,12 @@ do
 			new.addedAt = timer.getTime()
 			
 			
-			if vars.sound then -- has no function yet, basic idea is to play the sound file for designated players. Had considered a more complex system similar to On Station audio messaging with staggering mesages, but that isn't entirely needed.
+			if vars.sound or vars.fileName then -- has no function yet, basic idea is to play the sound file for designated players. Had considered a more complex system similar to On Station audio messaging with staggering mesages, but that isn't entirely needed.
 			-- additionally we could have an "outSound" function that will do just the audio alone with no text
 				new.sound = vars.sound
+				if vars.fileName then
+					new.sound = vars.fileName
+				end
 				new.playAudio = true
 			end
 			
@@ -5039,7 +5043,7 @@ mist.getPayload = function(unitIdent)
 	end
 	local gpId = mist.DBs.MEunitsById[unitId].groupId
 	
-	if unitName and type(unitName) == 'string' then
+	if gpId and unitId then
 		for coa_name, coa_data in pairs(env.mission.coalition) do
 			if (coa_name == 'red' or coa_name == 'blue') and type(coa_data) == 'table' then			
 				if coa_data.country then --there is a country table
@@ -5064,7 +5068,7 @@ mist.getPayload = function(unitIdent)
 			end
 		end
 	else
-		env.info('mist.getPayload got ' .. type(unitName))
+		env.info('mist.getPayload got ' .. type(unitIdent))
 		return false
 	end
 	env.info('mist.getPayload, payload not found')
@@ -5205,10 +5209,10 @@ mist.teleportToPoint = function(vars) -- main teleport function that all of tele
 		end
 		if point then
 			if (newGroupData.category == 'plane' or newGroupData.category == 'helicopter') and point.z then
-				if point.y > 0 and point.y > terrain.getHeight({newGroupData.units[unitNum]["x"], newGroupData.units[unitNum]["y"]}) + 10 then
+				if point.y > 0 and point.y > land.getHeight({newGroupData.units[unitNum]["x"], newGroupData.units[unitNum]["y"]}) + 10 then
 					newGroupData.units[unitNum]["alt"] = point.y
 				else
-					newGroupData.units[unitNum]["alt"] = terrain.getHeight({newGroupData.units[unitNum]["x"], newGroupData.units[unitNum]["y"]}) + 300
+					newGroupData.units[unitNum]["alt"] = land.getHeight({newGroupData.units[unitNum]["x"], newGroupData.units[unitNum]["y"]}) + 300
 				end
 			end
 		end
