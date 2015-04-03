@@ -1,4 +1,10 @@
 -- changelog
+v44
+-fxed getPayload for real this time
+-addEventHandler now correctly returns the Id value
+-message.add now also accepts variable 'fileName' for the sound file, this is in addition to the .sound variable
+-fixed issue with teleportToPoint
+
 v43
 -fixed issue with getPayload
 -dynAdd and dynAddStatic now return the full new table and not just its name. The name value is still accessible via returned table.name
