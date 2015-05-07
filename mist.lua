@@ -7,8 +7,8 @@ mist = {}
 
 -- don't change these
 mist.majorVersion = 3
-mist.minorVersion = 6
-mist.build = 44
+mist.minorVersion = 7
+mist.build = 45
 
 
 
@@ -140,12 +140,14 @@ do
 					newTable.modulation = data.modulation
 					newTable.uncontrolled = data.uncontrolled
 					newTable.radioSet = data.radioSet
+					newTable.hidden = data.hidden
 					mistAddedGroups[index] = nil
 				end
 			end
 			
 			if gfound == false then
 				newTable.uncontrolled = false
+				newTable.hidden = false
 			end
 			
 			newTable.units = {}
@@ -610,6 +612,10 @@ do
 		newGroup['name'] = tostring(tostring(cntry) .. tostring(typeName) .. mistDynAddIndex)
 	end
 	
+	if not newGroup.hidden then
+		newGroup.hidden = false
+	end
+	
 	for unitIndex, unitData in pairs(newGroup.units) do
 
 		local originalName = newGroup.units[unitIndex].unitName or newGroup.units[unitIndex].name
@@ -688,7 +694,6 @@ do
 	newGroup.country = nil
 	
 	newGroup.tasks = {}
-	newGroup.visible = false
 	
 	for unitIndex, unitData in pairs(newGroup.units) do
 		newGroup.units[unitIndex].unitName = nil
@@ -1842,12 +1847,16 @@ for coa_name, coa_data in pairs(env.mission.coalition) do
 										mist.DBs.units[coa_name][countryName][category][group_num]["countryId"] = cntry_data.id
 										mist.DBs.units[coa_name][countryName][category][group_num]["startTime"] = group_data.start_time
 										mist.DBs.units[coa_name][countryName][category][group_num]["task"] = group_data.task
+										mist.DBs.units[coa_name][countryName][category][group_num]["hidden"] = group_data.hidden
+										
 										mist.DBs.units[coa_name][countryName][category][group_num]["units"] = {}
 										
 										mist.DBs.units[coa_name][countryName][category][group_num]["radioSet"] = group_data.radioSet
 										mist.DBs.units[coa_name][countryName][category][group_num]["uncontrolled"] = group_data.uncontrolled
 										mist.DBs.units[coa_name][countryName][category][group_num]["frequency"] = group_data.frequency
 										mist.DBs.units[coa_name][countryName][category][group_num]["modulation"] = group_data.modulation
+
+										
 															
 										for unit_num, unit_data in pairs(group_data.units) do
 											local units_tbl = mist.DBs.units[coa_name][countryName][category][group_num]["units"]  --pointer to the units table for this group
@@ -1885,6 +1894,11 @@ for coa_name, coa_data in pairs(env.mission.coalition) do
 											
 											units_tbl[unit_num]["groupName"] = group_data.name
 											units_tbl[unit_num]["groupId"] = group_data.groupId
+											
+											if unit_data.AddPropAircraft then
+												units_tbl[unit_num]["AddPropAircraft"] = unit_data.AddPropAircraft
+											end
+											
 										end --for unit_num, unit_data in pairs(group_data.units) do
 									end --if group_data and group_data.units then
 								end --for group_num, group_data in pairs(obj_type_data.group) do
@@ -3937,55 +3951,13 @@ end
 --------------------------------------------------------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------------------------------------------------------
 -------MESAGGES------
---[[
-local msg = {}
-msg.text = string (required)
-msg.displayTime = number (required)
-msg.msgFor = table (required)
-msg.name = string (optional)
-mist.message.add(msg) 
 
-msgFor accepts a table 
-
-
-]]
-
-
---[[ 
-Need to change to this format...
-scope:
-	{
-		units = {...},  -- unit names.
-		coa = {...}, -- coa names
-		countries = {...}, -- country names
-		CA = {...}, -- looks just like coa.
-		unitTypes = { red = {}, blue = {}, all = {}, Russia = {},}
-	}
-	
-	
-scope examples:
-
-{  units = { 'Hawg11', 'Hawg12' }, CA = {'blue'} }
-
-{ countries = {'Georgia'}, unitTypes = {blue = {'A-10C', 'A-10A'}}}
-
-{ coa = {'all'}}
-
-{unitTypes = { blue = {'A-10C'}}}
-]]
-
-
---[[ vars for mist.message.add
-	vars.text = 'Hello World'
-	vars.displayTime = 20
-	vars.msgFor = {coa = {'red'}, countries = {'Ukraine', 'Georgia'}, unitTypes = {'A-10C'}}
-
-]]
 do
 	local messageList = {}
 	local messageDisplayRate = 0.1 -- this defines the max refresh rate of the message box it honestly only needs to go faster than this for precision timing stuff (which could be its own function)
 	local messageID = 0
-		
+	local displayActive = false
+	
 	mist.message = {
 	
 
@@ -4020,15 +3992,26 @@ do
 			new.displayedFor = 0 -- how long the message has been displayed so far
 			new.name = vars.name   -- ID to overwrite the older message (if it exists) Basically it replaces a message that is displayed with new text.
 			new.addedAt = timer.getTime()
+			new.update = true
 			
+			if vars.multSound and vars.multSound[1] then
+				new.multSound = vars.multSound
+			else 
+				new.multSound = {}
+			end
 			
-			if vars.sound or vars.fileName then -- has no function yet, basic idea is to play the sound file for designated players. Had considered a more complex system similar to On Station audio messaging with staggering mesages, but that isn't entirely needed.
-			-- additionally we could have an "outSound" function that will do just the audio alone with no text
-				new.sound = vars.sound
+			if vars.sound or vars.fileName then -- converts old sound file system into new multSound format
+				local sound = vars.sound
 				if vars.fileName then
-					new.sound = vars.fileName
+					sound = vars.fileName
 				end
-				new.playAudio = true
+				new.multSound[#new.multSound+1] = {time = 0.1, file = sound}
+			end
+			
+			if #new.multSound > 0 then
+				for i, data in pairs(new.multSound) do
+					data.played = false
+				end
 			end
 			
 			local newMsgFor = {} -- list of all groups message displays for
@@ -4093,6 +4076,8 @@ do
 							messageList[i].sound = new.sound
 							messageList[i].text = new.text
 							messageList[i].msgFor = new.msgFor
+							messageList[i].multSound = new.multSound
+							messageList[i].update = true
 							return messageList[i].messageID
 						end
 					end
@@ -4118,19 +4103,6 @@ do
 			
 		end,
 				
-		-- remove = function(self)  -- not a self variable in this case; this function should be passed a self variable and does not need a message id;  see example below.
-			-- for i, msgData in pairs(messageList) do
-				-- if messageList[i].messageID == self then
-					-- table.remove(messageList, i)
-					-- return true --removal successful
-				-- end
-			-- end
-			-- return false -- removal not successful this script fails at life!
-		-- end,
-		
-		------------------------------------------------------
-		------------------------------------------------------
-		-- proposed changes:
 		remove = function(self)  -- Now a self variable; the former functionality taken up by mist.message.removeById.
 			for i, msgData in pairs(messageList) do
 				if messageList[i] == self then  
@@ -4157,247 +4129,121 @@ do
 		------------------------------------------------------
 	}	
 	
-	-----------------------------------------------------------------
-	-- No longer necessary, use the self:remove() instead.
-	
-	-- Local function now
-	-- local function mistMSGDestroy(self)  -- not a self variable
-		-- for i, msgData in pairs(messageList) do
-			-- if messageList[i] == self then
-				-- table.remove(messageList, i)
-				-- return true --removal successful
-			-- end
-		-- end
-		-- return false -- removal not successful this script fails at life!
-
-	
-	-- end
-	-------------------------------------------------------------------------------
-	
-	-- local function now
-
-	--[[
-	audio design concept
-	Need to stagger messages?
-	
-	]]
-	
-	-- local function now
-	local function mistdisplayV3() -- adding audio file support
-		-- CA roles
-		local caMessageRed = false
-		local caMessageBlue = false
-		local audioRed = false
-		local audioBlue = false
-		local audioPlaying = false
-
-		if #messageList > 0 then
-			--mist.debug.writeData(mist.utils.serialize,{'msg', messageList}, 'messageList.lua')
-			for messageId, messageData in pairs(messageList) do
-				if messageData.displayedFor > messageData.displayTime then
-					--mistMSGDestroy(messageData)
-					messageData:remove()  -- now using the remove/destroy function.
-					
-				else
-					if messageList[messageId].displayedFor then
-						messageList[messageId].displayedFor = messageList[messageId].displayedFor + messageDisplayRate
-					end
-				--[[else
-					if messageData.fileName then
-						audioPlaying = true
-					end]]
-				end
-
-				
-			end
-			for coaData, coaId in pairs(coalition.side) do
-				local CAmsg = {}
-				local newestMsg = 100000000
-				
-				for messageIndex, messageData in pairs(messageList) do 
-					for forIndex, forData in pairs(messageData.msgFor) do
-					
-						if coaData == forData then
-							if messageData.addedAt < newestMsg then
-								newestMsg = messageData.addedAt
-							end
-							if messageData.text then
-								CAmsg[#CAmsg + 1] = messageData.text
-								CAmsg[#CAmsg + 1] = '\n ---------------- \n'
-							end
-							if type(messageData.sound) == 'string' and messageData.addedAt + messageDisplayRate > timer.getTime() then
-								if coaData == 'RED' then
-									audioRed = true
-									trigger.action.outSoundForCoalition(coalition.side.RED, messageData.sound)
-								elseif coaData == 'BLUE' then
-									audioBlue = true
-									trigger.action.outSoundForCoalition(coalition.side.BLUE, messageData.sound)
-								end
-							end							
-						end
-					end
-				end
-				if #CAmsg > 0 then
-					if newestMsg < timer.getTime() + .5 then
-						if coaData == 'BLUE' then
-							trigger.action.outTextForCoalition(coalition.side.BLUE, table.concat(CAmsg), 1)
-							caMessageBlue = true
-						elseif coaData == 'RED' then
-							trigger.action.outTextForCoalition(coalition.side.RED, table.concat(CAmsg), 1)
-							caMessageRed = true
-						end
-					end
-				end	
-			end
-			for clientId, clientData in pairs(mist.DBs.humansById) do	
-				local clientDisplay = {}
+		local function mistdisplayV4() 
 		
-				for messageIndex, messageData in pairs(messageList) do 
-					for forIndex, forData in pairs(messageData.msgFor) do
-						if clientId == forData and Group.getByName(clientData.groupName) then
-							if messageData.text then
-								clientDisplay[#clientDisplay + 1] = messageData.text
-								clientDisplay[#clientDisplay + 1] = '\n ---------------- \n'
-							end
-							if string.lower(clientData.coalition) == 'red' and audioRed == false or string.lower(clientData.coalition) == 'blue' and audioBlue == false then
-								if type(messageData.sound) == 'string' and messageData.addedAt + messageDisplayRate > timer.getTime() then
-									trigger.action.outSoundForGroup(clientData.groupId, messageData.sound)
-								end
-							end
-						end
-					end
-				end
-				if #clientDisplay > 0 then
-					trigger.action.outTextForGroup(clientData.groupId, table.concat(clientDisplay), 1)
-					
-				elseif #clientDisplay == 0 then
-					if clientData.coalition == 'blue' and caMessageBlue == true then
-						trigger.action.outTextForGroup(clientData.groupId, 'Blue CA Recieving Message', 1) -- I'd rather this recive the message with a note that its for CA than a blank message box.
-					elseif clientData.coalition == 'red' and caMessageRed == true then
-						trigger.action.outTextForGroup(clientData.groupId, 'Red CA Recieving Message', 1)
-					end
-				end
-			
-				
+		if displayActive == false then
+			displayActive = true
+		end
+		local activeClients = {}
+
+		for clientId, clientData in pairs(mist.DBs.humansById) do
+			if Unit.getByName(clientData.unitName) and Unit.getByName(clientData.unitName):isExist() == true then
+				activeClients[clientData.groupId] = clientData.groupName
 			end
 		end
-		
-	end
-	local function mistdisplayV4() 
-		-- goal of v4, send new messages only if message has changed, rather than at a constant rate
-		-- make process more effecient!
-		-- possibly change messages for CA players
-		
-		local caMessageRed = false
-		local caMessageBlue = false
-		local audioRed = false
-		local audioBlue = false
-		local audioPlaying = false
 
+		
 		if #messageList > 0 then
 			--mist.debug.writeData(mist.utils.serialize,{'msg', messageList}, 'messageList.lua')
+			local msgTableText = {}
+			local msgTableSound = {}
+			
 			for messageId, messageData in pairs(messageList) do
 				if messageData.displayedFor > messageData.displayTime then
-					--mistMSGDestroy(messageData)
 					messageData:remove()  -- now using the remove/destroy function.
-					
 				else
 					if messageList[messageId].displayedFor then
 						messageList[messageId].displayedFor = messageList[messageId].displayedFor + messageDisplayRate
 					end
-				--[[else
-					if messageData.fileName then
-						audioPlaying = true
-					end]]
-				end
-
-				
-			end
-			for coaData, coaId in pairs(coalition.side) do
-				local CAmsg = {}
-				local newestMsg = 100000000
-				
-				for messageIndex, messageData in pairs(messageList) do 
-					for forIndex, forData in pairs(messageData.msgFor) do
+					local nextSound = 1000
+					local soundIndex = 0
 					
-						if coaData == forData then
-							if messageData.addedAt < newestMsg then
-								newestMsg = messageData.addedAt
+					if messageData.multSound then
+						for index, sData in pairs(messageData.multSound) do
+							if sData.time < messageData.displayedFor and sData.played == false and sData.time < nextSound then -- find index of the next sound to be played
+								nextSound = sData.time
+								soundIndex = index
 							end
-							if messageData.text then
-								CAmsg[#CAmsg + 1] = messageData.text
-								CAmsg[#CAmsg + 1] = '\n ---------------- \n'
-							end
-							if type(messageData.sound) == 'string' and messageData.addedAt + messageDisplayRate > timer.getTime() then
-								if coaData == 'RED' then
-									audioRed = true
-									trigger.action.outSoundForCoalition(coalition.side.RED, messageData.sound)
-								elseif coaData == 'BLUE' then
-									audioBlue = true
-									trigger.action.outSoundForCoalition(coalition.side.BLUE, messageData.sound)
-								end
-							end							
+						end
+						if soundIndex ~= 0 then
+							messageData.multSound[soundIndex].played = true
 						end
 					end
-				end
-				if #CAmsg > 0 then
-					if newestMsg < timer.getTime() + .5 then
-						if coaData == 'BLUE' then
-							trigger.action.outTextForCoalition(coalition.side.BLUE, table.concat(CAmsg), 1)
-							caMessageBlue = true
-						elseif coaData == 'RED' then
-							trigger.action.outTextForCoalition(coalition.side.RED, table.concat(CAmsg), 1)
-							caMessageRed = true
-						end
-					end
-				end	
-			end
-			for clientId, clientData in pairs(mist.DBs.humansById) do	
-				local clientDisplay = {}
-		
-				for messageIndex, messageData in pairs(messageList) do 
-					for forIndex, forData in pairs(messageData.msgFor) do
-						if clientId == forData and Group.getByName(clientData.groupName) then
-							if messageData.text then
-								clientDisplay[#clientDisplay + 1] = messageData.text
-								clientDisplay[#clientDisplay + 1] = '\n ---------------- \n'
-							end
-							if string.lower(clientData.coalition) == 'red' and audioRed == false or string.lower(clientData.coalition) == 'blue' and audioBlue == false then
-								if type(messageData.sound) == 'string' and messageData.addedAt + messageDisplayRate > timer.getTime() then
-									trigger.action.outSoundForGroup(clientData.groupId, messageData.sound)
+					
+					for recIndex, recData in pairs(messageData.msgFor) do -- iterate recipiants
+						if recData == 'RED' or recData == 'BLUE' or activeClients[recData] then -- rec exists
+							if messageData.text then -- text
+								if not msgTableText[recData] then -- create table entry for text
+									msgTableText[recData] = {}
+									msgTableText[recData].text = {}
+									if recData == 'RED' or recData == 'BLUE' then
+										msgTableText[recData].text[1] = '---------------- Combined Arms Message: \n'
+									end
+									msgTableText[recData].text[2] = messageData.text
+									msgTableText[recData].displayTime = messageData.displayTime - messageData.displayedFor
+								else -- add to table entry and adjust display time if needed
+									if recData == 'RED' or recData == 'BLUE' then
+										msgTableText[recData].text[#msgTableText[recData].text + 1] = '\n ---------------- Combined Arms Message: \n'
+									else
+										msgTableText[recData].text[#msgTableText[recData].text + 1] = '\n ---------------- \n'
+									end
+									msgTableText[recData].text[#msgTableText[recData].text + 1] = messageData.text
+									if msgTableText[recData].displayTime < messageData.displayTime - messageData.displayedFor then
+										msgTableText[recData].displayTime = messageData.displayTime - messageData.displayedFor
+									end
 								end
 							end
+							if soundIndex ~= 0 then
+								msgTableSound[recData] = messageData.multSound[soundIndex].file
+							end
 						end
 					end
-				end
-				if #clientDisplay > 0 then
-					trigger.action.outTextForGroup(clientData.groupId, table.concat(clientDisplay), 1)
 					
-				elseif #clientDisplay == 0 then
-					if clientData.coalition == 'blue' and caMessageBlue == true then
-						trigger.action.outTextForGroup(clientData.groupId, 'Blue CA Recieving Message', 1) -- I'd rather this recive the message with a note that its for CA than a blank message box.
-					elseif clientData.coalition == 'red' and caMessageRed == true then
-						trigger.action.outTextForGroup(clientData.groupId, 'Red CA Recieving Message', 1)
-					end
+					
 				end
+			end
+			------- new display
+			if msgTableText['RED'] then
+				trigger.action.outTextForCoalition(coalition.side.RED, table.concat(msgTableText['RED'].text), msgTableText['RED'].displayTime)
+			end
+			if msgTableText['BLUE'] then
+				trigger.action.outTextForCoalition(coalition.side.BLUE, table.concat(msgTableText['BLUE'].text), msgTableText['BLUE'].displayTime)
+			end
 			
-				
+			for index, msgData in pairs(msgTableText) do
+				if type(index) == 'number' then -- its a groupNumber
+					trigger.action.outTextForGroup(index, table.concat(msgData.text), msgData.displayTime)
+				end
 			end
+			--- new audio
+			if msgTableSound['RED'] then
+				trigger.action.outSoundForCoalition(coalition.side.RED, msgTableSound['RED'])
+			end
+			if msgTableSound['BLUE'] then
+				trigger.action.outSoundForCoalition(coalition.side.BLUE, msgTableSound['BLUE'])
+			end
+			
+			for index, file in pairs(msgTableSound) do
+				if type(index) == 'number' then -- its a groupNumber
+					trigger.action.outSoundForGroup(index, file)
+				end
+			end
+			--- old code
 		end
 		
 	end
 	local funcId = 0
 	local function displayManager()
 		if #messageList > 0 and funcId > 0 then
-			mistdisplayV3()
+			mistdisplayV4()
 			funcId = mist.scheduleFunction(displayManager, {}, timer.getTime() + messageDisplayRate, messageDisplayRate)
 		else
 			mist.removeFunction(funcId)-- kill
 		end
 	end
 
-	
-	mist.scheduleFunction(mistdisplayV3, {}, timer.getTime() + messageDisplayRate, messageDisplayRate) -- add this to the main mist thing
+	--mistdisplayV4()
+	mist.scheduleFunction(mistdisplayV4, {}, timer.getTime() + messageDisplayRate, messageDisplayRate) -- add this to the main mist thing
 	
 end
 -- End of message system
@@ -4940,13 +4786,16 @@ end
 
 mist.getCurrentGroupData = function(gpName)
 	if Group.getByName(gpName) and Group.getByName(gpName):isExist() == true then
+		local dbData = mist.getGroupData(gpName)
+		
 		local newGroup = Group.getByName(gpName)
 		local newData = {}
 		newData.name = gpName
 		newData.groupId = tonumber(newGroup:getID())
 		newData.category = newGroup:getCategory()
 		newData.groupName = gpName
-        
+        newData.hidden = dbData.hidden
+		
 		if newData.category == 2 then
 			newData.category = 'vehicle'
 		elseif newData.category == 3 then
@@ -5001,7 +4850,7 @@ mist.getGroupData = function(gpName)
 		payloads = mist.getGroupPayload(newData.groupName)
 	end
 	if found == true then
-		newData.hidden = false -- maybe add this to DBs
+		--newData.hidden = false -- maybe add this to DBs
 
 		for unitNum, unitData in pairs(newData.units) do
 			newData.units[unitNum] = {}
@@ -5025,6 +4874,7 @@ mist.getGroupData = function(gpName)
 				newData.units[unitNum]['livery_id'] = unitData.livery_id
 				newData.units[unitNum]['onboard_num'] = unitData.onboard_num
 				newData.units[unitNum]['callsign'] = unitData.callsign
+				newData.units[unitNum]['AddPropAircraft'] = unitData.AddPropAircraft
 			end
 		end
 		

@@ -1,4 +1,15 @@
 -- changelog
+v45
+-Added values to DBs
+--hidden
+--AddPropAircraft
+
+-getGroupData now returns hidden and addPropAircraft values
+-getCurrentGroupData now returns hidden value
+-mist message handling has been updated
+--Refactored message display code to be more effecient and remove repeated code. 
+--Added "multSound" for mist.message.add. This allows for multiple sound files to be attached to a single message. Files are given a user defined timestamp for when the play within the message.  
+
 v44
 -fxed getPayload for real this time
 -addEventHandler now correctly returns the Id value
