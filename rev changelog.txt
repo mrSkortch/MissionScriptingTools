@@ -1,4 +1,16 @@
 -- changelog
+v46
+-added mist.time.milToGame
+-added mist.time.getDate
+-added mist.time.getDHMS
+-added mist.time.converToSec
+-added mist.time.getMilString
+-added mist.time.getClockString
+-added mist.time.getDateString
+-added mist message handling now hiberates if not activly displaying a message
+-fixed minor bug from message refactor
+
+
 v45
 -Added values to DBs
 --hidden

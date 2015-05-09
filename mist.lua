@@ -8,7 +8,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 3
 mist.minorVersion = 7
-mist.build = 45
+mist.build = 46
 
 
 
@@ -3957,7 +3957,117 @@ do
 	local messageDisplayRate = 0.1 -- this defines the max refresh rate of the message box it honestly only needs to go faster than this for precision timing stuff (which could be its own function)
 	local messageID = 0
 	local displayActive = false
+	local displayFuncId = 0
 	
+	local function mistdisplayV4() 
+		local activeClients = {}
+
+		for clientId, clientData in pairs(mist.DBs.humansById) do
+			if Unit.getByName(clientData.unitName) and Unit.getByName(clientData.unitName):isExist() == true then
+				activeClients[clientData.groupId] = clientData.groupName
+			end
+		end
+
+		
+		if #messageList > 0 then
+			if displayActive == false then
+				displayActive = true
+			end
+			--mist.debug.writeData(mist.utils.serialize,{'msg', messageList}, 'messageList.lua')
+			local msgTableText = {}
+			local msgTableSound = {}
+			
+			for messageId, messageData in pairs(messageList) do
+				if messageData.displayedFor > messageData.displayTime then
+					messageData:remove()  -- now using the remove/destroy function.
+				else
+					if messageList[messageId].displayedFor then
+						messageList[messageId].displayedFor = messageList[messageId].displayedFor + messageDisplayRate
+					end
+					local nextSound = 1000
+					local soundIndex = 0
+					
+					if messageData.multSound then
+						for index, sData in pairs(messageData.multSound) do
+							if sData.time < messageData.displayedFor and sData.played == false and sData.time < nextSound then -- find index of the next sound to be played
+								nextSound = sData.time
+								soundIndex = index
+							end
+						end
+						if soundIndex ~= 0 then
+							messageData.multSound[soundIndex].played = true
+						end
+					end
+					
+					for recIndex, recData in pairs(messageData.msgFor) do -- iterate recipiants
+						if recData == 'RED' or recData == 'BLUE' or activeClients[recData] then -- rec exists
+							if messageData.text then -- text
+								if not msgTableText[recData] then -- create table entry for text
+									msgTableText[recData] = {}
+									msgTableText[recData].text = {}
+									if recData == 'RED' or recData == 'BLUE' then
+										msgTableText[recData].text[1] = '---------------- Combined Arms Message: \n'
+									end
+									msgTableText[recData].text[#msgTableText[recData].text + 1] = messageData.text
+									msgTableText[recData].displayTime = messageData.displayTime - messageData.displayedFor
+								else -- add to table entry and adjust display time if needed
+									if recData == 'RED' or recData == 'BLUE' then
+										msgTableText[recData].text[#msgTableText[recData].text + 1] = '\n ---------------- Combined Arms Message: \n'
+									else
+										msgTableText[recData].text[#msgTableText[recData].text + 1] = '\n ---------------- \n'
+									end
+									msgTableText[recData].text[#msgTableText[recData].text + 1] = messageData.text
+									if msgTableText[recData].displayTime < messageData.displayTime - messageData.displayedFor then
+										msgTableText[recData].displayTime = messageData.displayTime - messageData.displayedFor
+									else 
+										msgTableText[recData].displayTime = 1
+									end
+								end
+							end
+							if soundIndex ~= 0 then
+								msgTableSound[recData] = messageData.multSound[soundIndex].file
+							end
+						end
+					end
+					
+					
+				end
+			end
+			------- new display
+			
+			
+			if msgTableText['RED'] then
+				trigger.action.outTextForCoalition(coalition.side.RED, table.concat(msgTableText['RED'].text), msgTableText['RED'].displayTime)
+			end
+			if msgTableText['BLUE'] then
+				trigger.action.outTextForCoalition(coalition.side.BLUE, table.concat(msgTableText['BLUE'].text), msgTableText['BLUE'].displayTime)
+			end
+			
+			for index, msgData in pairs(msgTableText) do
+				if type(index) == 'number' then -- its a groupNumber
+					trigger.action.outTextForGroup(index, table.concat(msgData.text), msgData.displayTime)
+				end
+			end
+			--- new audio
+			if msgTableSound['RED'] then
+				trigger.action.outSoundForCoalition(coalition.side.RED, msgTableSound['RED'])
+			end
+			if msgTableSound['BLUE'] then
+				trigger.action.outSoundForCoalition(coalition.side.BLUE, msgTableSound['BLUE'])
+			end
+			
+			for index, file in pairs(msgTableSound) do
+				if type(index) == 'number' then -- its a groupNumber
+					trigger.action.outSoundForGroup(index, file)
+				end
+			end
+		else
+			mist.removeFunction(displayFuncId)
+			displayActive = false	
+		end
+	
+	end
+
 	mist.message = {
 	
 
@@ -4095,8 +4205,8 @@ do
 			local mt = { __index =  mist.message}
 			setmetatable(new, mt)  
 
-			if #messageList == 0 then
-				--displayManager()
+			if displayActive == false then
+				displayFuncId = mist.scheduleFunction(mistdisplayV4, {}, timer.getTime() + messageDisplayRate, messageDisplayRate)
 			end
 			
 			return messageID
@@ -4122,128 +4232,7 @@ do
 			end
 			return false -- removal not successful this script fails at life!
 		end,
-		
-		
-		
-		------------------------------------------------------
-		------------------------------------------------------
 	}	
-	
-		local function mistdisplayV4() 
-		
-		if displayActive == false then
-			displayActive = true
-		end
-		local activeClients = {}
-
-		for clientId, clientData in pairs(mist.DBs.humansById) do
-			if Unit.getByName(clientData.unitName) and Unit.getByName(clientData.unitName):isExist() == true then
-				activeClients[clientData.groupId] = clientData.groupName
-			end
-		end
-
-		
-		if #messageList > 0 then
-			--mist.debug.writeData(mist.utils.serialize,{'msg', messageList}, 'messageList.lua')
-			local msgTableText = {}
-			local msgTableSound = {}
-			
-			for messageId, messageData in pairs(messageList) do
-				if messageData.displayedFor > messageData.displayTime then
-					messageData:remove()  -- now using the remove/destroy function.
-				else
-					if messageList[messageId].displayedFor then
-						messageList[messageId].displayedFor = messageList[messageId].displayedFor + messageDisplayRate
-					end
-					local nextSound = 1000
-					local soundIndex = 0
-					
-					if messageData.multSound then
-						for index, sData in pairs(messageData.multSound) do
-							if sData.time < messageData.displayedFor and sData.played == false and sData.time < nextSound then -- find index of the next sound to be played
-								nextSound = sData.time
-								soundIndex = index
-							end
-						end
-						if soundIndex ~= 0 then
-							messageData.multSound[soundIndex].played = true
-						end
-					end
-					
-					for recIndex, recData in pairs(messageData.msgFor) do -- iterate recipiants
-						if recData == 'RED' or recData == 'BLUE' or activeClients[recData] then -- rec exists
-							if messageData.text then -- text
-								if not msgTableText[recData] then -- create table entry for text
-									msgTableText[recData] = {}
-									msgTableText[recData].text = {}
-									if recData == 'RED' or recData == 'BLUE' then
-										msgTableText[recData].text[1] = '---------------- Combined Arms Message: \n'
-									end
-									msgTableText[recData].text[2] = messageData.text
-									msgTableText[recData].displayTime = messageData.displayTime - messageData.displayedFor
-								else -- add to table entry and adjust display time if needed
-									if recData == 'RED' or recData == 'BLUE' then
-										msgTableText[recData].text[#msgTableText[recData].text + 1] = '\n ---------------- Combined Arms Message: \n'
-									else
-										msgTableText[recData].text[#msgTableText[recData].text + 1] = '\n ---------------- \n'
-									end
-									msgTableText[recData].text[#msgTableText[recData].text + 1] = messageData.text
-									if msgTableText[recData].displayTime < messageData.displayTime - messageData.displayedFor then
-										msgTableText[recData].displayTime = messageData.displayTime - messageData.displayedFor
-									end
-								end
-							end
-							if soundIndex ~= 0 then
-								msgTableSound[recData] = messageData.multSound[soundIndex].file
-							end
-						end
-					end
-					
-					
-				end
-			end
-			------- new display
-			if msgTableText['RED'] then
-				trigger.action.outTextForCoalition(coalition.side.RED, table.concat(msgTableText['RED'].text), msgTableText['RED'].displayTime)
-			end
-			if msgTableText['BLUE'] then
-				trigger.action.outTextForCoalition(coalition.side.BLUE, table.concat(msgTableText['BLUE'].text), msgTableText['BLUE'].displayTime)
-			end
-			
-			for index, msgData in pairs(msgTableText) do
-				if type(index) == 'number' then -- its a groupNumber
-					trigger.action.outTextForGroup(index, table.concat(msgData.text), msgData.displayTime)
-				end
-			end
-			--- new audio
-			if msgTableSound['RED'] then
-				trigger.action.outSoundForCoalition(coalition.side.RED, msgTableSound['RED'])
-			end
-			if msgTableSound['BLUE'] then
-				trigger.action.outSoundForCoalition(coalition.side.BLUE, msgTableSound['BLUE'])
-			end
-			
-			for index, file in pairs(msgTableSound) do
-				if type(index) == 'number' then -- its a groupNumber
-					trigger.action.outSoundForGroup(index, file)
-				end
-			end
-			--- old code
-		end
-		
-	end
-	local funcId = 0
-	local function displayManager()
-		if #messageList > 0 and funcId > 0 then
-			mistdisplayV4()
-			funcId = mist.scheduleFunction(displayManager, {}, timer.getTime() + messageDisplayRate, messageDisplayRate)
-		else
-			mist.removeFunction(funcId)-- kill
-		end
-	end
-
-	--mistdisplayV4()
-	mist.scheduleFunction(mistdisplayV4, {}, timer.getTime() + messageDisplayRate, messageDisplayRate) -- add this to the main mist thing
 	
 end
 -- End of message system
@@ -5524,6 +5513,194 @@ mist.stringMatch = function(s1, s2, bool)
 end
 
 mist.matchString = mist.stringMatch -- both commands work because order out type of I
+
+mist.time = {}
+-- returns a string for specified military time
+-- theTime is optional
+-- if present current time in mil time is returned
+-- if number or table the time is converted into mil tim
+mist.time.convertToSec = function(timeTable)
+	
+	timeInSec = 0
+	if timeTable and type(timeTable) == 'number' then
+		timeInSec = timeTable
+	elseif timeTable and type(timeTable) == 'table' and (timeTable.d or timeTable.h or timeTable.m or timeTable.s) then
+		if timeTable.d and type(timeTable.d) == 'number' then
+			timeInSec = timeInSec + (timeTable.d*86400)
+		end
+		if timeTable.h and type(timeTable.h) == 'number' then
+			timeInSec = timeInSec + (timeTable.h*3600)
+		end
+		if timeTable.m and type(timeTable.m) == 'number' then
+			timeInSec = timeInSec + (timeTable.m*60)
+		end
+		if timeTable.s and type(timeTable.s) == 'number' then
+			timeInSec = timeInSec + timeTable.s
+		end
+	
+	end
+	return timeInSec
+end
+
+mist.time.getDHMS = function(timeInSec)
+	if timeInSec and type(timeInSec) == 'number' then
+		local tbl = {d = 0, h = 0, m = 0, s = 0}
+			if timeInSec > 86400 then
+				while timeInSec > 86400 do
+					tbl.d = tbl.d + 1
+					timeInSec = timeInSec - 86400
+				end
+			end
+			if timeInSec > 3600 then
+				while timeInSec > 3600 do
+					tbl.h = tbl.h + 1
+					timeInSec = timeInSec - 3600
+				end
+			end
+			if timeInSec > 60 then
+				while timeInSec > 60 do
+					tbl.m = tbl.m + 1
+					timeInSec = timeInSec - 60
+				end
+			end
+			tbl.s = timeInSec
+		return tbl
+	else
+		env.info('mist.time.getDHMS didnt recieve number')
+		return 
+	end
+end
+
+mist.time.getMilString = function(theTime)
+	local timeInSec = 0
+	if theTime then
+		timeInSec = mist.time.convertToSec(theTime)
+	else
+		timeInSec = mist.utils.round(timer.getAbsTime(), 0)
+	end
+	
+	local DHMS = mist.time.getDHMS(timeInSec)
+	
+	return tostring(string.format('%02d', DHMS.h) .. string.format('%02d',DHMS.m))
+end
+
+mist.time.getClockString = function(theTime, hour)
+	local timeInSec = 0
+	if theTime then
+		timeInSec = mist.time.convertToSec(theTime)
+	else
+		timeInSec = mist.utils.round(timer.getAbsTime(), 0)
+	end
+	local DHMS = mist.time.getDHMS(timeInSec)
+	if hour then
+		if DHMS.h > 12 then
+			DHMS.h = DHMS.h - 12
+			return tostring(string.format('%02d', DHMS.h) .. ':' .. string.format('%02d',DHMS.m)  .. ':' .. string.format('%02d',DHMS.s) .. ' PM')
+		else 
+			return tostring(string.format('%02d', DHMS.h) .. ':' .. string.format('%02d',DHMS.m)  .. ':' .. string.format('%02d',DHMS.s) .. ' AM')
+		end
+	else
+		return tostring(string.format('%02d', DHMS.h) .. ':' .. string.format('%02d',DHMS.m)  .. ':' .. string.format('%02d',DHMS.s))
+	end
+end
+
+-- returns the date in string format
+-- both variables optional
+-- first val returns with the month as a string
+-- 2nd val defins if it should be written the American way or the wrong way.
+mist.time.getDate = function(convert)
+	local cal = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31} -- starts at june. 2011. 2012 is leap year, sigh. add a simple check for leap year
+	local date = {}
+	date.d = 0
+	date.m = 6
+	date.y = 2011
+
+	local start = 0
+	local timeInSec = mist.utils.round(timer.getAbsTime())
+	if convert and type(convert) == 'number' then
+		timeInSec = convert
+	end
+			
+	while start < timeInSec do
+		
+		if date.d == cal[date.m] then
+			--if y % 4 >= 0 and i == 2 then -- for leap year. DCS doesnt do leapyear, but I am keeping the code dormant because maybe with WW2 the mission year may become relevant
+			
+			--else
+			date.m = date.m + 1
+			date.d = 0
+			--end
+		end
+		if date.m == 13 then
+			date.m = 1
+			date.y = date.y + 1
+		end
+		date.d = date.d + 1
+		start = start + 86400
+	end
+	return date
+end
+
+mist.time.getDateString = function(rtnType, murica, oTime) -- returns date based on time
+	local word = {'January', 'Feburary', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December' } -- 'etc
+	local curTime = 0 
+	if oTime then 
+		curTime = oTime
+	else 
+		curTime = mist.utils.round(timer.getAbsTime())
+	end
+	local tbl = mist.time.getDate(curTime)
+	
+	if rtnType then
+		if murica then
+			return tostring(word[tbl.m] .. ' ' .. tbl.d .. ' ' .. tbl.y)
+		else
+			return tostring(tbl.d .. ' ' .. word[tbl.m] .. ' ' .. tbl.y)
+		end
+	else
+		if murica then
+			return tostring(tbl.m .. '.' .. tbl.d .. '.' .. tbl.y)
+		else
+			return tostring(tbl.d .. '.' .. tbl.m .. '.' .. tbl.y)
+		end
+	end
+end
+--WIP
+mist.time.milToGame = function(milString, model) --converts a military time relative to the mission in either model or abs time.
+	local curTime = mist.utils.round(timer.getAbsTime())
+	local objTime = mist.utils.round(timer.getTime()) --- model time
+	local milTimeInSec = 0
+	
+	if type(milString) == 'number' then
+	
+	end
+	
+	if milString and type(milString) == 'string' and string.len(milString) >= 4 then
+		local hr = tonumber(string.sub(milString, 1, 2))
+		local mi = tonumber(string.sub(milString, 3))
+		milTimeInSec = milTimeInSec + (mi*60) + (hr*3600)
+	elseif milString and type(milString) == 'table' and (milString.d or milString.h or milString.m or milString.s) then
+		timeInSec = mist.time.convertToSec(milString)
+	end
+	
+	local startTime = timer.getTime0()
+	local daysOffset = 0
+	if startTime > 86400 then
+		daysOffset = mist.utils.round(startTime/86400)
+		if daysOffset > 0 then
+			milTimeInSec = milTimeInSec *daysOffset
+		end
+	end
+	
+	if curTime > milTimeInSec then
+		milTimeInSec = milTimeInSec + 86400
+	end
+	
+	if model then
+		milTimeInSec = objTime + (milTimeInSec - startTime)
+	end
+	return milTimeInSec	
+end
 
 mist.DBs.const = {}
 
