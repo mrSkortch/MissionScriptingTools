@@ -1,4 +1,50 @@
--- changelog
+v48
+-added support for cargo objects within dynAdd and DB scripts
+-DBs added entries for static objects
+--mass
+--canCargo
+--categoryStatic
+-fixed getCurrentData to return static data correctly
+-fixed getGroupData to return static data correctly
+- start_time now saved into DBs for dynAdded objects
+-fixed bug with mist message hibernation code
+
+
+v47 -- not uploaded to git since it wasn't finished.
+- fixed mist.dynAdd not checking for or correctly adding a start_time variable
+-- startTime and start_time are both valid
+- fixed mist.teleportToPoint with regard to the start_time change
+-- if a start_time isn't 0 and the group is being respawned or cloned, the function will set the spawn time relative to the current time.
+-- Group set to spawn in 20 seconds after mission start, at 5 seconds mist.cloneGroup() function is run on said group. The new group will be set to spawn in 20 seconds into the mission.
+-- If the mist.CloneGroup was run at 25 seconds with the base group already spawned, the cloned group will be instantly spawned. 
+- changed mist.time.getMilString to mist.getMilString
+- changed mist.time.getClockString to mist.getClockString
+- changed mist.time.getDateStrimg to mist.getDateString
+- added mist.time.milToGame now accepts a 2nd variable
+
+v46
+-added mist.time.milToGame
+-added mist.time.getDate
+-added mist.time.getDHMS
+-added mist.time.converToSec
+-added mist.time.getMilString
+-added mist.time.getClockString
+-added mist.time.getDateString
+-added mist message handling now hiberates if not activly displaying a message
+-fixed minor bug from message refactor
+
+
+v45
+-Added values to DBs
+--hidden
+--AddPropAircraft
+
+-getGroupData now returns hidden and addPropAircraft values
+-getCurrentGroupData now returns hidden value
+-mist message handling has been updated
+--Refactored message display code to be more effecient and remove repeated code. 
+--Added "multSound" for mist.message.add. This allows for multiple sound files to be attached to a single message. Files are given a user defined timestamp for when the play within the message.  
+
 v44
 -fxed getPayload for real this time
 -addEventHandler now correctly returns the Id value
