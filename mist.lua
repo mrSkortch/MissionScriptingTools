@@ -8,7 +8,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 3
 mist.minorVersion = 7
-mist.build = 46
+mist.build = 48
 
 
 
@@ -71,10 +71,9 @@ do
 	local function dbUpdate(event)
 		local newTable = {}
 		
-		newTable['startTime'] =  timer.getAbsTime()
+		newTable['startTime'] =  0
 		
 		if type(event) == 'string' then -- if name of an object. 
-			--env.info('event')
 			local newObject
 			local newType = 'group'
 			if Group.getByName(event) then
@@ -95,7 +94,6 @@ do
 			newTable.groupName = newObject:getName()
 			local unitOneRef 
 			if newType == 'static' then
-			
 				unitOneRef = newObject	
 				newTable.countryId = tonumber(newObject:getCountry())
 				newTable.coalitionId = tonumber(newObject:getCoalition())
@@ -106,7 +104,6 @@ do
 				newTable.coalitionId = tonumber(unitOneRef[1]:getCoalition())
 				newTable.category = tonumber(newObject:getCategory())
 			end
-			
 			for countryData, countryId in pairs(country.id) do
 				if newTable.country and string.upper(countryData) == string.upper(newTable.country) or countryId == newTable.countryId then
 					newTable['countryId'] = countryId
@@ -118,20 +115,18 @@ do
 					end
 				end
 			end
-
 			for catData, catId in pairs(Unit.Category) do
-				if Group.getByName(newTable.groupName):isExist() then
+				if newType == 'group' and Group.getByName(newTable.groupName):isExist() then
 					if catId == Group.getByName(newTable.groupName):getCategory() then
 						newTable['category'] = string.lower(catData)
 					end
-				elseif StaticObject.getByName(newTable.groupName):isExist() then
+				elseif newType == 'static' and StaticObject.getByName(newTable.groupName):isExist() then
 					if catId == StaticObject.getByName(newTable.groupName):getCategory() then
 						newTable['category'] = string.lower(catData)
 					end
 					
 				end
 			end
-			
 			local gfound = false
 			for index, data in pairs(mistAddedGroups) do
 				if mist.stringMatch(data.name, newTable.groupName) == true then
@@ -141,6 +136,7 @@ do
 					newTable.uncontrolled = data.uncontrolled
 					newTable.radioSet = data.radioSet
 					newTable.hidden = data.hidden
+					newTable.startTime = data.start_time
 					mistAddedGroups[index] = nil
 				end
 			end
@@ -195,10 +191,10 @@ do
 					
 				end
 			else -- its a static
-
+				newTable.category = 'static'
 				newTable.units[1] = {}
 				newTable.units[1].unitName = newObject:getName()
-				
+				newTable.units[1].category = 'static'
 				newTable.units[1].x = mist.utils.round(newObject:getPosition().p.x)
 				newTable.units[1].y = mist.utils.round(newObject:getPosition().p.z)
 				newTable.units[1].point = {}
@@ -214,6 +210,15 @@ do
 				newTable.units[1].country = newTable.country
 				newTable.units[1].coalitionId = newTable.coalitionId
 				newTable.units[1].coalition = newTable.coalition
+				if newObject:getCategory() == 6 and newObject:getCargoDisplayName() then
+					local mass = newObject:getCargoDisplayName()
+					mass = string.gsub(mass, ' ', '')
+					mass = string.gsub(mass, 'kg', '')
+					newTable.units[1].mass = tonumber(mass)
+					newTable.units[1].categoryStatic = 'Cargos'
+					newTable.units[1].canCargo = true
+					newTable.units[1].shape_name = 'ab-212_cargo'
+				end
 				
 				----- search mist added objects for extra data if applicable
 				for index, data in pairs(mistAddedObjects) do
@@ -221,6 +226,10 @@ do
 						newTable.units[1].shape_name = data.shape_name -- for statics
 						newTable.units[1].livery_id = data.livery_id
 						newTable.units[1].airdromeId = data.airdromeId
+						newTable.units[1].mass = data.mass
+						newTable.units[1].canCargo = data.canCargo
+						newTable.units[1].categoryStatic = data.categoryStatic
+						newTable.units[1].type = 'cargo1'
 						mistAddedObjects[index] = nil
 					end
 				end
@@ -230,6 +239,7 @@ do
 		newTable['timeAdded'] = timer.getAbsTime() -- only on the dynGroupsAdded table. For other reference, see start time
 		--mist.debug.dumpDBs()
 		--end
+		
 		return newTable
 	end
 	
@@ -245,8 +255,6 @@ do
 			if updatesPerRun < 5 then
 				updatesPerRun = 5
 			end
-			--env.info(#groupsToAdd)
-			--env.info(#tempSpawnedUnits)
 			for x = 1, #tempSpawnedUnits do
 				local spawnedObj = ltemp[x]
 				if spawnedObj and spawnedObj:isExist() then
@@ -257,17 +265,18 @@ do
 								found = true
 								break
 							end
-						elseif spawnedObj:getCategory() == 3 then -- static objects
+						elseif spawnedObj:getCategory() == 3 or spawnedObj:getCategory() == 6 then -- static objects
 							if mist.stringMatch(spawnedObj:getName(), name) == true then
 								found = true
 								break
 							end
 						end
 					end
+					-- for some reason cargo objects are returning as category == 6. 
 					if found == false then
 						if spawnedObj:getCategory() == 1 then -- normal groups
 							groupsToAdd[#groupsToAdd + 1] = spawnedObj:getGroup():getName()
-						elseif  spawnedObj:getCategory() == 3 then -- static objects
+						elseif spawnedObj:getCategory() == 3 or spawnedObj:getCategory() == 6 then -- static objects
 							groupsToAdd[#groupsToAdd + 1] = spawnedObj:getName()
 						end
 					end
@@ -470,8 +479,10 @@ do
 		newObj.dead = staticObj.dead
 		newObj.country = staticObj.country
 		newObj.clone = staticObj.clone
-		newObj.shape_name = newObj.shape_name
-		
+		newObj.shape_name = staticObj.shape_name
+		newObj.canCargo = staticObj.canCargo
+		newObj.mass = staticObj.mass
+		newObj.categoryStatic = staticObj.categoryStatic
 		if staticObj.units then -- if its mist format
 			newObj.groupId = staticObj.units[1].groupId
 			newObj.category = staticObj.units[1].category
@@ -484,6 +495,9 @@ do
 			newObj.dead = staticObj.units[1].dead
 			newObj.country = staticObj.units[1].country
 			newObj.shape_name = staticObj.units[1].shape_name
+			newObj.canCargo = staticObj.units[1].canCargo
+			newObj.mass = staticObj.units[1].mass
+			newObj.categoryStatic = staticObj.units[1].categoryStatic			
 		end
 
 
@@ -529,6 +543,13 @@ do
 			newObj.heading = math.random(360)
 		end
 		
+		if newObj.categoryStatic then
+			newObj.category = newObj.categoryStatic
+		end
+		if newObj.mass then
+			newObj.category = 'Cargos'
+		end
+		mistAddedObjects[#mistAddedObjects + 1] = mist.utils.deepCopy(newObj)
 		if newObj.x and newObj.y and newObj.type and type(newObj.x) == 'number' and type(newObj.y) == 'number' and type(newObj.type) == 'string' then
 			coalition.addStaticObject(country.id[newCountry], newObj)
 
@@ -616,6 +637,17 @@ do
 		newGroup.hidden = false
 	end
 	
+	if not newGroup.visible then
+		newGroup.visible = false
+	end
+	
+	if (newGroup.start_time and type(newGroup.start_time) ~= 'number') or not newGroup.start_time then
+		if newGroup.startTime then
+			newGroup.start_time = mist.utils.round(newGroup.startTime)
+		else
+			newGroup.start_time = 0
+		end
+	end
 	for unitIndex, unitData in pairs(newGroup.units) do
 
 		local originalName = newGroup.units[unitIndex].unitName or newGroup.units[unitIndex].name
@@ -1890,13 +1922,25 @@ for coa_name, coa_data in pairs(env.mission.coalition) do
 											units_tbl[unit_num]["onboard_num"] = unit_data.onboard_num
 											units_tbl[unit_num]["hardpoint_racks"] = unit_data.hardpoint_racks
 											units_tbl[unit_num]["psi"] = unit_data.psi
-											units_tbl[unit_num]["shape_name"] = unit_data.shape_name
+
 											
 											units_tbl[unit_num]["groupName"] = group_data.name
 											units_tbl[unit_num]["groupId"] = group_data.groupId
 											
 											if unit_data.AddPropAircraft then
 												units_tbl[unit_num]["AddPropAircraft"] = unit_data.AddPropAircraft
+											end
+											
+											if category == 'static' then
+												units_tbl[unit_num]["categoryStatic"] = unit_data.category
+												units_tbl[unit_num]["shape_name"] = unit_data.shape_name											
+												if unit_data.mass then
+													units_tbl[unit_num]["mass"] = unit_data.mass
+												end
+												
+												if unit_data.canCargo then
+													units_tbl[unit_num]["canCargo"] = unit_data.canCargo
+												end	
 											end
 											
 										end --for unit_num, unit_data in pairs(group_data.units) do
@@ -3981,15 +4025,15 @@ do
 				if messageData.displayedFor > messageData.displayTime then
 					messageData:remove()  -- now using the remove/destroy function.
 				else
-					if messageList[messageId].displayedFor then
-						messageList[messageId].displayedFor = messageList[messageId].displayedFor + messageDisplayRate
+					if messageData.displayedFor then
+						messageData.displayedFor = messageData.displayedFor + messageDisplayRate
 					end
 					local nextSound = 1000
 					local soundIndex = 0
 					
-					if messageData.multSound then
+					if messageData.multSound and #messageData.multSound > 0 then
 						for index, sData in pairs(messageData.multSound) do
-							if sData.time < messageData.displayedFor and sData.played == false and sData.time < nextSound then -- find index of the next sound to be played
+							if sData.time <= messageData.displayedFor and sData.played == false and sData.time < nextSound then -- find index of the next sound to be played
 								nextSound = sData.time
 								soundIndex = index
 							end
@@ -4206,6 +4250,7 @@ do
 			setmetatable(new, mt)  
 
 			if displayActive == false then
+				displayActive = true
 				displayFuncId = mist.scheduleFunction(mistdisplayV4, {}, timer.getTime() + messageDisplayRate, messageDisplayRate)
 			end
 			
@@ -4774,9 +4819,9 @@ mist.groupTableCheck = function(groupData)
 end	
 
 mist.getCurrentGroupData = function(gpName)
+	local dbData = mist.getGroupData(gpName)
+	
 	if Group.getByName(gpName) and Group.getByName(gpName):isExist() == true then
-		local dbData = mist.getGroupData(gpName)
-		
 		local newGroup = Group.getByName(gpName)
 		local newData = {}
 		newData.name = gpName
@@ -4811,6 +4856,14 @@ mist.getCurrentGroupData = function(gpName)
 		end
 
 		return newData
+	elseif StaticObject.getByName(gpName) and StaticObject.getByName(gpName):isExist() == true then
+		local staticObj = StaticObject.getByName(gpName)
+		dbData.units[1].x = staticObj:getPosition().p.x
+		dbData.units[1].y = staticObj:getPosition().p.z
+		dbData.units[1].alt = staticObj:getPosition().p.y
+		dbData.units[1].heading = mist.getHeading(staticObj, true)
+	
+		return dbData
 	end
 
 end
@@ -4864,6 +4917,12 @@ mist.getGroupData = function(gpName)
 				newData.units[unitNum]['onboard_num'] = unitData.onboard_num
 				newData.units[unitNum]['callsign'] = unitData.callsign
 				newData.units[unitNum]['AddPropAircraft'] = unitData.AddPropAircraft
+			end
+			if newData.category == 'static' then
+				newData.units[unitNum]['categoryStatic'] = unitData.categoryStatic
+				newData.units[unitNum]['mass'] = unitData.mass
+				newData.units[unitNum]['canCargo'] = unitData.canCargo
+				newData.units[unitNum]['shape_name'] = unitData.shape_name
 			end
 		end
 		
@@ -4978,6 +5037,7 @@ mist.teleportToPoint = function(vars) -- main teleport function that all of tele
 	local innerRadius = vars.innerRadius
 	
 	local route = vars.route
+	local dbData = false
 	
 	local newGroupData
 	if gpName and not vars.groupData then
@@ -4985,9 +5045,11 @@ mist.teleportToPoint = function(vars) -- main teleport function that all of tele
 			newGroupData = mist.getCurrentGroupData(gpName)
 		elseif string.lower(action) == 'respawn' then
 			newGroupData = mist.getGroupData(gpName)
+			dbData = true
 		elseif string.lower(action) == 'clone' then
 			newGroupData = mist.getGroupData(gpName)
 			newGroupData.clone = 'order66'
+			dbData = true
 		else
 			action = 'tele'
 			newGroupData = mist.getCurrentGroupData(gpName)
@@ -5057,18 +5119,28 @@ mist.teleportToPoint = function(vars) -- main teleport function that all of tele
 		end
 	end
 	
-	--tostring, tostring(),
-
+	if newGroupData.start_time then
+		newGroupData.startTime = newGroupData.start_time
+	end
 	
+	if newGroupData.startTime and newGroupData.startTime ~= 0 and dbData == true then
+		local timeDif = timer.getAbsTime() - timer.getTime0()
+		if timeDif > newGroupData.startTime then
+			newGroupData.startTime = 0
+		else
+			newGroupData.startTime = newGroupData.startTime - timeDif
+		end
+		
+	end
+
 	if route then
 		newGroupData.route = route
 	end
-	
+	--mist.debug.writeData(mist.utils.serialize,{'teleportToPoint', newGroupData}, 'newGroupData.lua')
 	if string.lower(newGroupData.category) == 'static' then
-		
-		 return mist.dynAddStatic(newGroupData)
+		return mist.dynAddStatic(newGroupData)
 	end
-	--mist.debug.writeData(mist.utils.serialize,{'targets', newGroupData}, 'newGroupData.lua')
+	
 	return mist.dynAdd(newGroupData)
 	
 end
@@ -5571,7 +5643,7 @@ mist.time.getDHMS = function(timeInSec)
 	end
 end
 
-mist.time.getMilString = function(theTime)
+mist.getMilString = function(theTime)
 	local timeInSec = 0
 	if theTime then
 		timeInSec = mist.time.convertToSec(theTime)
@@ -5584,7 +5656,7 @@ mist.time.getMilString = function(theTime)
 	return tostring(string.format('%02d', DHMS.h) .. string.format('%02d',DHMS.m))
 end
 
-mist.time.getClockString = function(theTime, hour)
+mist.getClockString = function(theTime, hour)
 	local timeInSec = 0
 	if theTime then
 		timeInSec = mist.time.convertToSec(theTime)
@@ -5641,7 +5713,13 @@ mist.time.getDate = function(convert)
 	return date
 end
 
-mist.time.getDateString = function(rtnType, murica, oTime) -- returns date based on time
+mist.time.relativeToStart = function(time)
+	if type(time) == 'number' then
+		return time - timer.getTime0()
+	end
+end
+
+mist.getDateString = function(rtnType, murica, oTime) -- returns date based on time
 	local word = {'January', 'Feburary', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December' } -- 'etc
 	local curTime = 0 
 	if oTime then 
@@ -5666,21 +5744,16 @@ mist.time.getDateString = function(rtnType, murica, oTime) -- returns date based
 	end
 end
 --WIP
-mist.time.milToGame = function(milString, model) --converts a military time relative to the mission in either model or abs time.
+mist.time.milToGame = function(milString, rtnType) --converts a military time. By default returns the abosolute time that event would occur. With optional value it returns how many seconds from time of call till that time.
 	local curTime = mist.utils.round(timer.getAbsTime())
-	local objTime = mist.utils.round(timer.getTime()) --- model time
 	local milTimeInSec = 0
-	
-	if type(milString) == 'number' then
-	
-	end
-	
+
 	if milString and type(milString) == 'string' and string.len(milString) >= 4 then
 		local hr = tonumber(string.sub(milString, 1, 2))
 		local mi = tonumber(string.sub(milString, 3))
 		milTimeInSec = milTimeInSec + (mi*60) + (hr*3600)
 	elseif milString and type(milString) == 'table' and (milString.d or milString.h or milString.m or milString.s) then
-		timeInSec = mist.time.convertToSec(milString)
+		milTimeInSec = mist.time.convertToSec(milString)
 	end
 	
 	local startTime = timer.getTime0()
@@ -5695,9 +5768,8 @@ mist.time.milToGame = function(milString, model) --converts a military time rela
 	if curTime > milTimeInSec then
 		milTimeInSec = milTimeInSec + 86400
 	end
-	
-	if model then
-		milTimeInSec = objTime + (milTimeInSec - startTime)
+	if rtnType then
+		milTimeInSec = milTimeInSec - startTime
 	end
 	return milTimeInSec	
 end
