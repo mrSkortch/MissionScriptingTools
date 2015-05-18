@@ -8,7 +8,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 3
 mist.minorVersion = 7
-mist.build = 48
+mist.build = 49
 
 
 
@@ -3186,7 +3186,6 @@ stopFlag
 	
 	
 	if stopflag == -1 or (type(trigger.misc.getUserFlag(stopflag)) == 'number' and trigger.misc.getUserFlag(stopflag) == 0) or (type(trigger.misc.getUserFlag(stopflag)) == 'boolean' and trigger.misc.getUserFlag(stopflag) == false) then
-		if Group.getByName(groupName) and Group.getByName(groupName):isExist() == true then
 			if trigger.misc.getUserFlag(flag) == 0 then
 				trigger.action.setUserFlag(flag, true)
 			end
@@ -3223,7 +3222,6 @@ mist.flagFunc.group_dead = function(vars)
 	
 	
 	if stopflag == -1 or (type(trigger.misc.getUserFlag(stopflag)) == 'number' and trigger.misc.getUserFlag(stopflag) == 0) or (type(trigger.misc.getUserFlag(stopflag)) == 'boolean' and trigger.misc.getUserFlag(stopflag) == false) then
-		if Group.getByName(groupName) and Group.getByName(groupName):isExist() == false or not Group.getByName(groupName) then
 			if trigger.misc.getUserFlag(flag) == 0 then
 				trigger.action.setUserFlag(flag, true)
 			end
