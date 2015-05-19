@@ -1,3 +1,6 @@
+v49
+-fixed flagFuncs.group_dead and group_alive issue caused via a DCS bug.  
+
 v48
 -added support for cargo objects within dynAdd and DB scripts
 -DBs added entries for static objects
