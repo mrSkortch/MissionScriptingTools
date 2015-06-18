@@ -1,3 +1,10 @@
+v51
+-Fixed bug with message system
+-Added a check to the message system so combined arms messages wont be sent if CA slots are not in a mission.
+
+v50
+-something got deleted from v49 so this fixed it.
+
 v49
 -fixed flagFuncs.group_dead and group_alive issue caused via a DCS bug.  
 
