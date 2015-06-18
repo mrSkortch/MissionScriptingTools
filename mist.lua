@@ -8,7 +8,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 3
 mist.minorVersion = 7
-mist.build = 50
+mist.build = 51
 
 
 
@@ -4003,6 +4003,26 @@ do
 	local displayActive = false
 	local displayFuncId = 0
 	
+	local caSlots = false
+	
+	for index, value in pairs(env.mission.groundControl) do
+		if type(value) == 'table' then
+			for roleName, roleVal in pairs(value) do
+				for rIndex, rVal in pairs(roleVal) do
+					if rIndex == 'red' or rIndex == 'blue' then
+						if env.mission.groundControl[index][roleName][rIndex] > 0 then
+							caSlots = true
+							break
+						end
+					end
+				end
+			end
+		elseif type(value) == 'boolean' and value == true then
+			caSlots = true
+			break
+		end
+	end
+
 	local function mistdisplayV4() 
 		local activeClients = {}
 
@@ -4079,12 +4099,13 @@ do
 			end
 			------- new display
 			
-			
-			if msgTableText['RED'] then
-				trigger.action.outTextForCoalition(coalition.side.RED, table.concat(msgTableText['RED'].text), msgTableText['RED'].displayTime)
-			end
-			if msgTableText['BLUE'] then
-				trigger.action.outTextForCoalition(coalition.side.BLUE, table.concat(msgTableText['BLUE'].text), msgTableText['BLUE'].displayTime)
+			if caSlots == true then
+				if msgTableText['RED'] then
+					trigger.action.outTextForCoalition(coalition.side.RED, table.concat(msgTableText['RED'].text), msgTableText['RED'].displayTime)
+				end
+				if msgTableText['BLUE'] then
+					trigger.action.outTextForCoalition(coalition.side.BLUE, table.concat(msgTableText['BLUE'].text), msgTableText['BLUE'].displayTime)
+				end
 			end
 			
 			for index, msgData in pairs(msgTableText) do
@@ -4176,8 +4197,8 @@ do
 						if type(listData) == 'string' then
 							listData = string.lower(listData)
 						end
-						if forIndex == 'coa' and (listData == string.lower(clientData.coalition) or listData == 'all') or forIndex == 'countries' and string.lower(clientData.country) == listData or forIndex == 'units' and string.lower(clientData.unitName) == listData then --
-							newMsgFor = msgSpamFilter(newMsgFor, clientId) -- so units dont get the same message twice if complex rules are given
+						if (forIndex == 'coa' and (listData == string.lower(clientData.coalition) or listData == 'all')) or (forIndex == 'countries' and string.lower(clientData.country) == listData) or (forIndex == 'units' and string.lower(clientData.unitName) == listData) then --
+							newMsgFor = msgSpamFilter(newMsgFor, clientData.groupId) -- so units dont get the same message twice if complex rules are given
 							--table.insert(newMsgFor, clientId)
 						elseif forIndex == 'unittypes' then
 							for typeId, typeData in pairs(listData) do
@@ -4187,7 +4208,7 @@ do
 										if string.lower(list) == string.lower(clientDataVal) or list == 'all' then
 											if typeData == clientData.type then
 												found = true
-												newMsgFor = msgSpamFilter(newMsgFor, clientId) -- sends info oto other function to see if client is already recieving the current message.
+												newMsgFor = msgSpamFilter(newMsgFor, clientData.groupId) -- sends info oto other function to see if client is already recieving the current message.
 												--table.insert(newMsgFor, clientId)
 											end
 										end
@@ -4241,7 +4262,7 @@ do
 			messageID = messageID + 1
 			new.messageID = messageID
 
-			--mist.debug.writeData(mist.utils.serialize,{'msg', new}, 'newMsg.txt')
+			--mist.debug.writeData(mist.utils.serialize,{'msg', new}, 'newMsg.lua')
 
 			
 			messageList[#messageList + 1] = new
