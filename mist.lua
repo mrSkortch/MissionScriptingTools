@@ -8,7 +8,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 3
 mist.minorVersion = 7
-mist.build = 51
+mist.build = 52
 
 
 
@@ -2637,7 +2637,7 @@ initial_number
 	end
 	
 	if stopflag == -1 or (type(trigger.misc.getUserFlag(stopflag)) == 'number' and trigger.misc.getUserFlag(stopflag) == 0) or (type(trigger.misc.getUserFlag(stopflag)) == 'boolean' and trigger.misc.getUserFlag(stopflag) == false) then
-		if (#mist.getDeadMapObjsInZones(zones) - initial_number) >= req_num and trigger.misc.getUserFlag(flag) == false then
+		if (#mist.getDeadMapObjsInZones(zones) - initial_number) >= req_num and trigger.misc.getUserFlag(flag) == 0 then
 			trigger.action.setUserFlag(flag, true)
 			return
 		else
@@ -2680,7 +2680,7 @@ initial_number
 	end
 	
 	if stopflag == -1 or (type(trigger.misc.getUserFlag(stopflag)) == 'number' and trigger.misc.getUserFlag(stopflag) == 0) or (type(trigger.misc.getUserFlag(stopflag)) == 'boolean' and trigger.misc.getUserFlag(stopflag) == false) then
-		if (#mist.getDeadMapObjsInPolygonZone(zone) - initial_number) >= req_num and trigger.misc.getUserFlag(flag) == false then
+		if (#mist.getDeadMapObjsInPolygonZone(zone) - initial_number) >= req_num and trigger.misc.getUserFlag(flag) == 0 then
 			trigger.action.setUserFlag(flag, true)
 			return
 		else
@@ -2914,7 +2914,7 @@ function mist.flagFunc.units_in_zones(vars)
 	
 		local in_zone_units = mist.getUnitsInZones(units, zones, zone_type)
 	
-		if #in_zone_units >= req_num and trigger.misc.getUserFlag(flag) == false then
+		if #in_zone_units >= req_num and trigger.misc.getUserFlag(flag) == 0 then
 			trigger.action.setUserFlag(flag, true)
 		elseif #in_zone_units < req_num and toggle then
 			trigger.action.setUserFlag(flag, false)
@@ -3028,7 +3028,7 @@ function mist.flagFunc.units_in_moving_zones(vars)
 	
 		local in_zone_units = mist.getUnitsInMovingZones(units, zone_units, radius, zone_type)
 	
-		if #in_zone_units >= req_num and trigger.misc.getUserFlag(flag) == false then
+		if #in_zone_units >= req_num and trigger.misc.getUserFlag(flag) == 0 then
 			trigger.action.setUserFlag(flag, true)
 		elseif #in_zone_units < req_num and toggle then
 			trigger.action.setUserFlag(flag, false)
@@ -3051,7 +3051,7 @@ mist.getUnitsLOS = function(unitset1, altoffset1, unitset2, altoffset2, radius)
 	-- get the positions all in one step, saves execution time.
 	for unitset1_ind = 1, #unitset1 do
 		local unit1 = Unit.getByName(unitset1[unitset1_ind])
-		if unit1 then
+		if unit1 and unit1:isActive() == true then
 			unit_info1[#unit_info1 + 1] = {}
 			unit_info1[#unit_info1]["unit"] = unit1
 			unit_info1[#unit_info1]["pos"]  = unit1:getPosition().p
@@ -3060,7 +3060,7 @@ mist.getUnitsLOS = function(unitset1, altoffset1, unitset2, altoffset2, radius)
 	
 	for unitset2_ind = 1, #unitset2 do
 		local unit2 = Unit.getByName(unitset2[unitset2_ind])
-		if unit2 then
+		if unit2 and unit2:isActive() == true then
 			unit_info2[#unit_info2 + 1] = {}
 			unit_info2[#unit_info2]["unit"] = unit2
 			unit_info2[#unit_info2]["pos"]  = unit2:getPosition().p
@@ -3146,7 +3146,7 @@ toggle = boolean or nil
 	
 		local unitLOSdata = mist.getUnitsLOS(unitset1, altoffset1, unitset2, altoffset2, radius)
 	
-		if #unitLOSdata >= req_num and trigger.misc.getUserFlag(flag) == false then
+		if #unitLOSdata >= req_num and trigger.misc.getUserFlag(flag) == 0 then
 			trigger.action.setUserFlag(flag, true)
 		elseif #unitLOSdata < req_num and toggle then
 			trigger.action.setUserFlag(flag, false)
@@ -3500,10 +3500,13 @@ mist.goRoute = function(group, path)
 	if type(group) == 'string' then
 		group = Group.getByName(group)
 	end
-	local groupCon = group:getController()
-	if groupCon then
-		groupCon:setTask(misTask)
-		return true
+	local groupCon = nil
+	if group then
+		groupCon = group:getController()
+		if groupCon then
+			groupCon:setTask(misTask)
+			return true
+		end
 	end
 	--Controller.setTask(groupCon, misTask)
 	return false
@@ -4102,15 +4105,18 @@ do
 			if caSlots == true then
 				if msgTableText['RED'] then
 					trigger.action.outTextForCoalition(coalition.side.RED, table.concat(msgTableText['RED'].text), msgTableText['RED'].displayTime)
+
 				end
 				if msgTableText['BLUE'] then
 					trigger.action.outTextForCoalition(coalition.side.BLUE, table.concat(msgTableText['BLUE'].text), msgTableText['BLUE'].displayTime)
+
 				end
 			end
 			
 			for index, msgData in pairs(msgTableText) do
 				if type(index) == 'number' then -- its a groupNumber
 					trigger.action.outTextForGroup(index, table.concat(msgData.text), msgData.displayTime)
+
 				end
 			end
 			--- new audio
