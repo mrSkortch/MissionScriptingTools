@@ -1,3 +1,13 @@
+v53
+-added mist.getAvgPos now accepts static objects in addition to units.
+-made DB creation check the mission editor version for no paticular reason
+-added mist.getLastDBUpdateTime which returns the most recent time the DB update function has run. 
+-changed mist.makeUnitTable processed entry to return the time it was processed instead of a boolean value. 
+-Changed teleport/respawn/clone functions to spawn aircraft at random altitudes instead of constants if the point given is vec2/not specified.
+-Fixed FlagFuncs will now recognize units added in dynamically. Note this only applies if you send it unitTableNames identifier and not the table that the function creates. 
+-Added variable to all flagfuncs. unitTableDef is the original definition used for units. 
+-Fixed all getUserFlag checks to compare with numerical value instead of boolean
+
 v52
 -Fixed check in mist.getUnitsLOS to verify units are active in a mission
 -Fixed check in mist.goRoute to verify both the group and controller are valid before assigning the route
