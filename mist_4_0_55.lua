@@ -13,9 +13,9 @@ Official Release: https://github.com/mrSkortch/MissionScriptingTools/tree/master
 mist = {}
 
 -- don't change these
-mist.majorVersion = 3
-mist.minorVersion = 8
-mist.build = 53
+mist.majorVersion = 4
+mist.minorVersion = 0
+mist.build = 55
 
 --------------------------------------------------------------------------------------------------------------
 -- the main area
@@ -1993,6 +1993,7 @@ mist.DBs.humansByName = {}
 mist.DBs.humansById = {}
 
 mist.DBs.dynGroupsAdded = {} -- will be filled by mist.dbUpdate from dynamically spawned groups
+mist.DBs.activeHumans = {}
 
 mist.DBs.aliveUnits = {}  -- will be filled in by the "update_alive_units" coroutine in mist.main.
 
@@ -2199,6 +2200,26 @@ do
 	
 	mist.addEventHandler(addDeadObject)
 	
+	
+	--[[local function addClientsToActive(event)
+		if event.id == world.event.S_EVENT_PLAYER_ENTER_UNIT then
+			if not mist.DBs.activeHumans[Unit.getName(event.initiator)] then
+				local newU = mist.utils.deepCopy(mist.DBs.unitsByName[Unit.getName(event.initiator)])
+				if Unit.getPlayerName(event.initiator) then
+					newU.playerName = Unit.getPlayerName(event.initiator)
+				end
+				mist.DBs.activeHumans[Unit.getName(event.initiator)] = newU
+			end
+		elseif event.id == world.event.S_EVENT_PLAYER_LEAVE_UNIT or event.id == world.event.S_EVENT_DEATH then
+			if mist.DBs.activeHumans[Unit.getName(event.initiator)] then
+				 mist.DBs.activeHumans[Unit.getName(event.initiator)] = nil
+			end
+		elseif event.id == world.event.S_EVENT_BIRTH then -- do client check
+		
+		end
+	end
+	
+	mist.addEventHandler(addClientsToActive)]]
 end
 
 
@@ -4057,6 +4078,7 @@ do
 	local displayFuncId = 0
 	
 	local caSlots = false
+	local caMSGtoGroup = false
 	
 	for index, value in pairs(env.mission.groundControl) do
 		if type(value) == 'table' then
@@ -4075,7 +4097,15 @@ do
 			break
 		end
 	end
-
+	
+	local function mistdisplayV5()
+	 --[[thoughts to improve upon
+	 event handler based activeClients table. 
+	 display messages only when there is an update
+	 possibly co-routine it.
+]]
+	end
+	
 	local function mistdisplayV4() 
 		local activeClients = {}
 
@@ -4084,6 +4114,10 @@ do
 				activeClients[clientData.groupId] = clientData.groupName
 			end
 		end
+		
+		--[[if caSlots == true and caMSGtoGroup == true then
+			
+		end]]
 
 		
 		if #messageList > 0 then
@@ -4123,7 +4157,7 @@ do
 									msgTableText[recData] = {}
 									msgTableText[recData].text = {}
 									if recData == 'RED' or recData == 'BLUE' then
-										msgTableText[recData].text[1] = '---------------- Combined Arms Message: \n'
+										msgTableText[recData].text[1] = '-------Combined Arms Message-------- \n'
 									end
 									msgTableText[recData].text[#msgTableText[recData].text + 1] = messageData.text
 									msgTableText[recData].displayTime = messageData.displayTime - messageData.displayedFor
@@ -4152,21 +4186,20 @@ do
 			end
 			------- new display
 			
-			if caSlots == true then
+			if caSlots == true and caMSGtoGroup == false then
 				if msgTableText['RED'] then
-					trigger.action.outTextForCoalition(coalition.side.RED, table.concat(msgTableText['RED'].text), msgTableText['RED'].displayTime)
+					trigger.action.outTextForCoalition(coalition.side.RED, table.concat(msgTableText['RED'].text), msgTableText['RED'].displayTime, true)
 
 				end
 				if msgTableText['BLUE'] then
-					trigger.action.outTextForCoalition(coalition.side.BLUE, table.concat(msgTableText['BLUE'].text), msgTableText['BLUE'].displayTime)
+					trigger.action.outTextForCoalition(coalition.side.BLUE, table.concat(msgTableText['BLUE'].text), msgTableText['BLUE'].displayTime, true)
 
 				end
 			end
 			
 			for index, msgData in pairs(msgTableText) do
 				if type(index) == 'number' then -- its a groupNumber
-					trigger.action.outTextForGroup(index, table.concat(msgData.text), msgData.displayTime)
-
+					trigger.action.outTextForGroup(index, table.concat(msgData.text), msgData.displayTime, true)
 				end
 			end
 			--- new audio
@@ -4189,6 +4222,22 @@ do
 		end
 	
 	end
+	
+	local typeBase = {
+		['Mi-8MT'] = {'Mi-8MTV2', 'Mi-8MTV', 'Mi-8'},
+		['MiG-21Bis'] = {'Mig-21'},
+		['MiG-15bis'] = {'Mig-15'},
+		['FW-190D9'] = {'FW-190'},
+		['Bf-109K-4'] = {'Bf-109'},
+	}
+	
+	--[[mist.setCAGroupMSG = function(val)
+		if type(val) == 'boolean' then
+			caMSGtoGroup = val
+			return true
+		end	
+		return false
+	end]]
 
 	mist.message = {
 	
@@ -4263,7 +4312,15 @@ do
 								for clientDataEntry, clientDataVal in pairs(clientData) do
 									if type(clientDataVal) == 'string' then
 										if mist.matchString(list, clientDataVal) == true or list == 'all' then
-											if typeData == clientData.type then
+											local sString = typeData
+											for rName, pTbl in pairs(typeBase) do -- just a quick check to see if the user may have meant something and got the specific type of the unit wrong
+												for pIndex, pName in pairs(pTbl) do
+													if mist.stringMatch(sString, pName) then
+														sString = rName
+													end
+												end
+											end
+											if sString == clientData.type then
 												found = true
 												newMsgFor = msgSpamFilter(newMsgFor, clientData.groupId) -- sends info oto other function to see if client is already recieving the current message.
 												--table.insert(newMsgFor, clientId)
