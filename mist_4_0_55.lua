@@ -1,4 +1,11 @@
 --[[
+Links:
+
+ED Forum Thread: http://forums.eagle.ru/showthread.php?t=98616
+
+Github
+Development: https://github.com/mrSkortch/MissionScriptingTools/tree/development
+Official Release: https://github.com/mrSkortch/MissionScriptingTools/tree/master
 
 ]]
 
@@ -6,11 +13,9 @@
 mist = {}
 
 -- don't change these
-mist.majorVersion = 3
-mist.minorVersion = 7
-mist.build = 51
-
-
+mist.majorVersion = 4
+mist.minorVersion = 0
+mist.build = 55
 
 --------------------------------------------------------------------------------------------------------------
 -- the main area
@@ -21,6 +26,7 @@ do
 	local mistAddedObjects = {} -- mist.dynAdd unit data added here
 	local mistAddedGroups = {} -- mist.dynAdd groupdata added here
 	local writeGroups = {}
+	local lastUpdateTime = 0
 	
 	local function update_alive_units()  -- coroutine function
 		local lalive_units = mist.DBs.aliveUnits -- local references for faster execution
@@ -369,6 +375,9 @@ do
 					coroutine.yield()
 				end
 			end
+			if timer.getTime() > lastUpdateTime then
+				lastUpdateTime = timer.getTime()
+			end
 		end
 	end
 	
@@ -438,6 +447,7 @@ do
 	local mistUnitId = 7000
 	local mistDynAddIndex = 1
 	
+	
 	 mist.nextGroupId = 1
 	 mist.nextUnitId = 1
 	
@@ -455,6 +465,10 @@ do
 			mist.nextGroupId = 14000
 		end
 		return mist.nextGroupId
+	end
+	
+	mist.getLastDBUpdateTime = function()
+		return lastUpdateTime
 	end
 	
 	local function groupSpawned(event)
@@ -1871,7 +1885,11 @@ for coa_name, coa_data in pairs(env.mission.coalition) do
 									if group_data and group_data.units and type(group_data.units) == 'table' then  --making sure again- this is a valid group
 											
 										mist.DBs.units[coa_name][countryName][category][group_num] = {}
-										mist.DBs.units[coa_name][countryName][category][group_num]["groupName"] = group_data.name
+										local groupName = group_data.name
+										if env.mission.version > 7 then
+											groupName = env.getValueDictByKey(groupName)
+										end
+										mist.DBs.units[coa_name][countryName][category][group_num]["groupName"] = groupName
 										mist.DBs.units[coa_name][countryName][category][group_num]["groupId"] = group_data.groupId	
 										mist.DBs.units[coa_name][countryName][category][group_num]["category"] = category
 										mist.DBs.units[coa_name][countryName][category][group_num]["coalition"] = coa_name
@@ -1888,13 +1906,15 @@ for coa_name, coa_data in pairs(env.mission.coalition) do
 										mist.DBs.units[coa_name][countryName][category][group_num]["frequency"] = group_data.frequency
 										mist.DBs.units[coa_name][countryName][category][group_num]["modulation"] = group_data.modulation
 
-										
-															
 										for unit_num, unit_data in pairs(group_data.units) do
 											local units_tbl = mist.DBs.units[coa_name][countryName][category][group_num]["units"]  --pointer to the units table for this group
 											
 											units_tbl[unit_num] = {}
-											units_tbl[unit_num]["unitName"] = unit_data.name
+											if env.mission.version > 7 then
+												units_tbl[unit_num]["unitName"] = env.getValueDictByKey(unit_data.name)
+											else
+												units_tbl[unit_num]["unitName"] = unit_data.name
+											end
 											units_tbl[unit_num]["type"] = unit_data.type
 											units_tbl[unit_num]["skill"] = unit_data.skill  --will be nil for statics
 											units_tbl[unit_num]["unitId"] = unit_data.unitId
@@ -1924,7 +1944,7 @@ for coa_name, coa_data in pairs(env.mission.coalition) do
 											units_tbl[unit_num]["psi"] = unit_data.psi
 
 											
-											units_tbl[unit_num]["groupName"] = group_data.name
+											units_tbl[unit_num]["groupName"] = groupName
 											units_tbl[unit_num]["groupId"] = group_data.groupId
 											
 											if unit_data.AddPropAircraft then
@@ -1973,6 +1993,7 @@ mist.DBs.humansByName = {}
 mist.DBs.humansById = {}
 
 mist.DBs.dynGroupsAdded = {} -- will be filled by mist.dbUpdate from dynamically spawned groups
+mist.DBs.activeHumans = {}
 
 mist.DBs.aliveUnits = {}  -- will be filled in by the "update_alive_units" coroutine in mist.main.
 
@@ -2179,6 +2200,26 @@ do
 	
 	mist.addEventHandler(addDeadObject)
 	
+	
+	--[[local function addClientsToActive(event)
+		if event.id == world.event.S_EVENT_PLAYER_ENTER_UNIT then
+			if not mist.DBs.activeHumans[Unit.getName(event.initiator)] then
+				local newU = mist.utils.deepCopy(mist.DBs.unitsByName[Unit.getName(event.initiator)])
+				if Unit.getPlayerName(event.initiator) then
+					newU.playerName = Unit.getPlayerName(event.initiator)
+				end
+				mist.DBs.activeHumans[Unit.getName(event.initiator)] = newU
+			end
+		elseif event.id == world.event.S_EVENT_PLAYER_LEAVE_UNIT or event.id == world.event.S_EVENT_DEATH then
+			if mist.DBs.activeHumans[Unit.getName(event.initiator)] then
+				 mist.DBs.activeHumans[Unit.getName(event.initiator)] = nil
+			end
+		elseif event.id == world.event.S_EVENT_BIRTH then -- do client check
+		
+		end
+	end
+	
+	mist.addEventHandler(addClientsToActive)]]
 end
 
 
@@ -2557,7 +2598,7 @@ Country names to be used in [c] and [-c] short-cuts:
 	end
 	
 	
-	units_tbl['processed'] = true  --add the processed flag
+	units_tbl['processed'] = timer.getTime()  --add the processed flag
 	return units_tbl
 end
 
@@ -2637,7 +2678,7 @@ initial_number
 	end
 	
 	if stopflag == -1 or (type(trigger.misc.getUserFlag(stopflag)) == 'number' and trigger.misc.getUserFlag(stopflag) == 0) or (type(trigger.misc.getUserFlag(stopflag)) == 'boolean' and trigger.misc.getUserFlag(stopflag) == false) then
-		if (#mist.getDeadMapObjsInZones(zones) - initial_number) >= req_num and trigger.misc.getUserFlag(flag) == false then
+		if (#mist.getDeadMapObjsInZones(zones) - initial_number) >= req_num and trigger.misc.getUserFlag(flag) == 0 then
 			trigger.action.setUserFlag(flag, true)
 			return
 		else
@@ -2680,7 +2721,7 @@ initial_number
 	end
 	
 	if stopflag == -1 or (type(trigger.misc.getUserFlag(stopflag)) == 'number' and trigger.misc.getUserFlag(stopflag) == 0) or (type(trigger.misc.getUserFlag(stopflag)) == 'boolean' and trigger.misc.getUserFlag(stopflag) == false) then
-		if (#mist.getDeadMapObjsInPolygonZone(zone) - initial_number) >= req_num and trigger.misc.getUserFlag(flag) == false then
+		if (#mist.getDeadMapObjsInPolygonZone(zone) - initial_number) >= req_num and trigger.misc.getUserFlag(flag) == 0 then
 			trigger.action.setUserFlag(flag, true)
 			return
 		else
@@ -2756,6 +2797,7 @@ maxalt = number or nil,
 interval  = number or nil,
 req_num = number or nil
 toggle = boolean or nil
+unitTableDef = table or nil
 ]]
 -- type_tbl
 	local type_tbl = {
@@ -2767,6 +2809,7 @@ toggle = boolean or nil
 		interval = {'number', 'nil'}, 
 		[{'req_num', 'reqnum'}] = {'number', 'nil'},
 		toggle = {'boolean', 'nil'}, 
+		unitTableDef = {'table', 'nil'},
 	}
 	
 	local err, errmsg = mist.utils.typeCheck('mist.flagFunc.units_in_polygon', type_tbl, vars)
@@ -2779,14 +2822,17 @@ toggle = boolean or nil
 	local maxalt = vars.maxalt or vars.alt
 	local req_num = vars.req_num or vars.reqnum or 1
 	local toggle = vars.toggle or nil
+	local unitTableDef = vars.unitTableDef
 	
-	
-	if not units.processed then -- run unit table short cuts
-		units = mist.makeUnitTable(units)
-		--mist.debug.writeData(mist.utils.serialize,{'vars', vars}, 'vars.txt')
+	if not units.processed then
+		unitTableDef = mist.utils.deepCopy(units)
 	end
 	
-	if stopflag == -1 or (type(trigger.misc.getUserFlag(stopflag)) == 'number' and trigger.misc.getUserFlag(stopflag) == 0) or (type(trigger.misc.getUserFlag(stopflag)) == 'boolean' and trigger.misc.getUserFlag(stopflag) == false) then
+	if (units.processed and units.processed < mist.getLastDBUpdateTime()) or not units.processed then -- run unit table short cuts
+		units = mist.makeUnitTable(unitTableDef)
+	end
+
+	if stopflag == -1 or (type(trigger.misc.getUserFlag(stopflag)) == 'number' and trigger.misc.getUserFlag(stopflag) == 0) or (type(trigger.misc.getUserFlag(stopflag)) == 'boolean' and trigger.misc.getUserFlag(stopflag) == 0) then
 		local num_in_zone = 0
 		for i = 1, #units do
 			local unit = Unit.getByName(units[i])
@@ -2794,7 +2840,7 @@ toggle = boolean or nil
 				local pos = unit:getPosition().p
 				if mist.pointInPolygon(pos, zone, maxalt) then
 					num_in_zone = num_in_zone + 1
-					if num_in_zone >= req_num and trigger.misc.getUserFlag(flag) == false then
+					if num_in_zone >= req_num and trigger.misc.getUserFlag(flag) == 0 then
 						trigger.action.setUserFlag(flag, true)
 						break
 					end
@@ -2802,13 +2848,11 @@ toggle = boolean or nil
 			end
 		end
 		if toggle and (num_in_zone < req_num) and trigger.misc.getUserFlag(flag) > 0 then
-
 			trigger.action.setUserFlag(flag, false)
 		end
 		-- do another check in case stopflag was set true by this function
-		if (type(trigger.misc.getUserFlag(stopflag)) == 'number' and trigger.misc.getUserFlag(stopflag) == 0) or (type(trigger.misc.getUserFlag(stopflag)) == 'boolean' and trigger.misc.getUserFlag(stopflag) == false) then
-
-			mist.scheduleFunction(mist.flagFunc.units_in_polygon, {{units = units, zone = zone, flag = flag, stopflag = stopflag, interval = interval, req_num = req_num, maxalt = maxalt, toggle = toggle}}, timer.getTime() + interval)
+		if (type(trigger.misc.getUserFlag(stopflag)) == 'number' and trigger.misc.getUserFlag(stopflag) == 0) or (type(trigger.misc.getUserFlag(stopflag)) == 'boolean' and trigger.misc.getUserFlag(stopflag) == 0) then
+			mist.scheduleFunction(mist.flagFunc.units_in_polygon, {{units = units, zone = zone, flag = flag, stopflag = stopflag, interval = interval, req_num = req_num, maxalt = maxalt, toggle = toggle, unitTableDef = unitTableDef}}, timer.getTime() + interval)
 		end
 	end
 	
@@ -2894,6 +2938,7 @@ function mist.flagFunc.units_in_zones(vars)
 		[{'req_num', 'reqnum'}] = {'number', 'nil'},
 		interval = {'number', 'nil'},
 		toggle = {'boolean', 'nil'},
+		unitTableDef = {'table', 'nil'},
 	}
 	
 	local err, errmsg = mist.utils.typeCheck('mist.flagFunc.units_in_zones', type_tbl, vars)
@@ -2906,22 +2951,28 @@ function mist.flagFunc.units_in_zones(vars)
 	local req_num = vars.req_num or vars.reqnum or 1
 	local interval = vars.interval or 1
 	local toggle = vars.toggle or nil
+	local unitTableDef = vars.unitTableDef
 	
-	if not units.processed then -- run unit table short cuts
-		units = mist.makeUnitTable(units)
+	if not units.processed then
+		unitTableDef = mist.utils.deepCopy(units)
 	end
+	
+	if (units.processed and units.processed < mist.getLastDBUpdateTime()) or not units.processed then -- run unit table short cuts
+		units = mist.makeUnitTable(unitTableDef)
+	end
+	
 	if stopflag == -1 or (type(trigger.misc.getUserFlag(stopflag)) == 'number' and trigger.misc.getUserFlag(stopflag) == 0) or (type(trigger.misc.getUserFlag(stopflag)) == 'boolean' and trigger.misc.getUserFlag(stopflag) == false) then
 	
 		local in_zone_units = mist.getUnitsInZones(units, zones, zone_type)
 	
-		if #in_zone_units >= req_num and trigger.misc.getUserFlag(flag) == false then
+		if #in_zone_units >= req_num and trigger.misc.getUserFlag(flag) == 0 then
 			trigger.action.setUserFlag(flag, true)
 		elseif #in_zone_units < req_num and toggle then
 			trigger.action.setUserFlag(flag, false)
 		end		
 		-- do another check in case stopflag was set true by this function
 		if (type(trigger.misc.getUserFlag(stopflag)) == 'number' and trigger.misc.getUserFlag(stopflag) == 0) or (type(trigger.misc.getUserFlag(stopflag)) == 'boolean' and trigger.misc.getUserFlag(stopflag) == false) then
-			mist.scheduleFunction(mist.flagFunc.units_in_zones, {{units = units, zones = zones, flag = flag, stopflag = stopflag, zone_type = zone_type, req_num = req_num, interval = interval, toggle = toggle}}, timer.getTime() + interval)
+			mist.scheduleFunction(mist.flagFunc.units_in_zones, {{units = units, zones = zones, flag = flag, stopflag = stopflag, zone_type = zone_type, req_num = req_num, interval = interval, toggle = toggle, unitTableDef = unitTableDef}}, timer.getTime() + interval)
 		end
 	end
 	
@@ -3002,6 +3053,7 @@ function mist.flagFunc.units_in_moving_zones(vars)
 		[{'req_num', 'reqnum'}] = {'number', 'nil'},
 		interval = {'number', 'nil'},
 		toggle = {'boolean', 'nil'},
+		unitTableDef = {'table', 'nil'},
 	}
 	
 	local err, errmsg = mist.utils.typeCheck('mist.flagFunc.units_in_moving_zones', type_tbl, vars)
@@ -3015,20 +3067,21 @@ function mist.flagFunc.units_in_moving_zones(vars)
 	local req_num = vars.req_num or vars.reqnum or 1
 	local interval = vars.interval or 1
 	local toggle = vars.toggle or nil
+	local unitTableDef = vars.unitTableDef
 	
-	if not units.processed then -- run unit table short cuts
-		units = mist.makeUnitTable(units)
+	if not units.processed then
+		unitTableDef = mist.utils.deepCopy(units)
 	end
 	
-	if not zone_units.processed then -- run unit table short cuts
-		zone_units = mist.makeUnitTable(zone_units)
+	if (units.processed and units.processed < mist.getLastDBUpdateTime()) or not units.processed then -- run unit table short cuts
+		units = mist.makeUnitTable(unitTableDef)
 	end
-	
+
 	if stopflag == -1 or (type(trigger.misc.getUserFlag(stopflag)) == 'number' and trigger.misc.getUserFlag(stopflag) == 0) or (type(trigger.misc.getUserFlag(stopflag)) == 'boolean' and trigger.misc.getUserFlag(stopflag) == false) then
 	
 		local in_zone_units = mist.getUnitsInMovingZones(units, zone_units, radius, zone_type)
 	
-		if #in_zone_units >= req_num and trigger.misc.getUserFlag(flag) == false then
+		if #in_zone_units >= req_num and trigger.misc.getUserFlag(flag) == 0 then
 			trigger.action.setUserFlag(flag, true)
 		elseif #in_zone_units < req_num and toggle then
 			trigger.action.setUserFlag(flag, false)
@@ -3051,7 +3104,7 @@ mist.getUnitsLOS = function(unitset1, altoffset1, unitset2, altoffset2, radius)
 	-- get the positions all in one step, saves execution time.
 	for unitset1_ind = 1, #unitset1 do
 		local unit1 = Unit.getByName(unitset1[unitset1_ind])
-		if unit1 then
+		if unit1 and unit1:isActive() == true then
 			unit_info1[#unit_info1 + 1] = {}
 			unit_info1[#unit_info1]["unit"] = unit1
 			unit_info1[#unit_info1]["pos"]  = unit1:getPosition().p
@@ -3060,7 +3113,7 @@ mist.getUnitsLOS = function(unitset1, altoffset1, unitset2, altoffset2, radius)
 	
 	for unitset2_ind = 1, #unitset2 do
 		local unit2 = Unit.getByName(unitset2[unitset2_ind])
-		if unit2 then
+		if unit2 and unit2:isActive() == true then
 			unit_info2[#unit_info2 + 1] = {}
 			unit_info2[#unit_info2]["unit"] = unit2
 			unit_info2[#unit_info2]["pos"]  = unit2:getPosition().p
@@ -3118,6 +3171,8 @@ toggle = boolean or nil
 		interval = {'number', 'nil'}, 
 		radius = {'number', 'nil'},
 		toggle = {'boolean', 'nil'},
+		unitTableDef1 = {'table', 'nil'},
+		unitTableDef2 = {'table', 'nil'},
 	}
 	
 	local err, errmsg = mist.utils.typeCheck('mist.flagFunc.units_LOS', type_tbl, vars)
@@ -3132,28 +3187,38 @@ toggle = boolean or nil
 	local radius = vars.radius or math.huge
 	local req_num = vars.req_num or vars.reqnum or 1
 	local toggle = vars.toggle or nil
+	local unitTableDef1 = vars.unitTableDef1
+	local unitTableDef2 = vars.unitTableDef2
 	
-	
-	if not unitset1.processed then -- run unit table short cuts
-		unitset1 = mist.makeUnitTable(unitset1)
+	if not unitset1.processed then
+		unitTableDef1 = mist.utils.deepCopy(unitset1)
 	end
 	
-	if not unitset2.processed then -- run unit table short cuts
-		unitset2 = mist.makeUnitTable(unitset2)
+	if not unitset2.processed then
+		unitTableDef2 = mist.utils.deepCopy(unitset2)
 	end
+	
+	if (unitset1.processed and unitset1.processed < mist.getLastDBUpdateTime()) or not unitset1.processed then -- run unit table short cuts
+		units = mist.makeUnitTable(unitTableDef1)
+	end
+	
+	if (unitset2.processed and unitset2.processed < mist.getLastDBUpdateTime()) or not unitset2.processed then -- run unit table short cuts
+		units = mist.makeUnitTable(unitTableDef2)
+	end
+	
 	
 	if stopflag == -1 or (type(trigger.misc.getUserFlag(stopflag)) == 'number' and trigger.misc.getUserFlag(stopflag) == 0) or (type(trigger.misc.getUserFlag(stopflag)) == 'boolean' and trigger.misc.getUserFlag(stopflag) == false) then
 	
 		local unitLOSdata = mist.getUnitsLOS(unitset1, altoffset1, unitset2, altoffset2, radius)
 	
-		if #unitLOSdata >= req_num and trigger.misc.getUserFlag(flag) == false then
+		if #unitLOSdata >= req_num and trigger.misc.getUserFlag(flag) == 0 then
 			trigger.action.setUserFlag(flag, true)
 		elseif #unitLOSdata < req_num and toggle then
 			trigger.action.setUserFlag(flag, false)
 		end		
 		-- do another check in case stopflag was set true by this function
 		if (type(trigger.misc.getUserFlag(stopflag)) == 'number' and trigger.misc.getUserFlag(stopflag) == 0) or (type(trigger.misc.getUserFlag(stopflag)) == 'boolean' and trigger.misc.getUserFlag(stopflag) == false) then
-			mist.scheduleFunction(mist.flagFunc.units_LOS, {{unitset1 = unitset1, altoffset1 = altoffset1, unitset2 = unitset2, altoffset2 = altoffset2, flag = flag, stopflag = stopflag, radius = radius, req_num = req_num, interval = interval, toggle = toggle}}, timer.getTime() + interval)
+			mist.scheduleFunction(mist.flagFunc.units_LOS, {{unitset1 = unitset1, altoffset1 = altoffset1, unitset2 = unitset2, altoffset2 = altoffset2, flag = flag, stopflag = stopflag, radius = radius, req_num = req_num, interval = interval, toggle = toggle, unitTableDef1 = unitTableDef1, unitTableDef2 = unitTableDef2}}, timer.getTime() + interval)
 		end
 	end
 end
@@ -3333,14 +3398,20 @@ end
 mist.getAvgPos = function(unitNames)
 	local avgX, avgY, avgZ, totNum = 0, 0, 0, 0
 	for i = 1, #unitNames do
-		local unit = Unit.getByName(unitNames[i])
+		local unit  
+		if Unit.getByName(unitNames[i]) then
+			unit = Unit.getByName(unitNames[i])
+		elseif StaticObject.getByName(unitNames[i]) then
+			unit = StaticObject.getByName(unitNames[i])
+		end
 		if unit then
-			
 			local pos = unit:getPosition().p
-			avgX = avgX + pos.x
-			avgY = avgY + pos.y
-			avgZ = avgZ + pos.z
-			totNum = totNum + 1
+			if pos then -- you never know O.o
+				avgX = avgX + pos.x
+				avgY = avgY + pos.y
+				avgZ = avgZ + pos.z
+				totNum = totNum + 1
+			end
 		end	
 	end
 	if totNum ~= 0 then
@@ -3500,10 +3571,13 @@ mist.goRoute = function(group, path)
 	if type(group) == 'string' then
 		group = Group.getByName(group)
 	end
-	local groupCon = group:getController()
-	if groupCon then
-		groupCon:setTask(misTask)
-		return true
+	local groupCon = nil
+	if group then
+		groupCon = group:getController()
+		if groupCon then
+			groupCon:setTask(misTask)
+			return true
+		end
 	end
 	--Controller.setTask(groupCon, misTask)
 	return false
@@ -4004,6 +4078,7 @@ do
 	local displayFuncId = 0
 	
 	local caSlots = false
+	local caMSGtoGroup = false
 	
 	for index, value in pairs(env.mission.groundControl) do
 		if type(value) == 'table' then
@@ -4022,7 +4097,15 @@ do
 			break
 		end
 	end
-
+	
+	local function mistdisplayV5()
+	 --[[thoughts to improve upon
+	 event handler based activeClients table. 
+	 display messages only when there is an update
+	 possibly co-routine it.
+]]
+	end
+	
 	local function mistdisplayV4() 
 		local activeClients = {}
 
@@ -4031,6 +4114,10 @@ do
 				activeClients[clientData.groupId] = clientData.groupName
 			end
 		end
+		
+		--[[if caSlots == true and caMSGtoGroup == true then
+			
+		end]]
 
 		
 		if #messageList > 0 then
@@ -4070,7 +4157,7 @@ do
 									msgTableText[recData] = {}
 									msgTableText[recData].text = {}
 									if recData == 'RED' or recData == 'BLUE' then
-										msgTableText[recData].text[1] = '---------------- Combined Arms Message: \n'
+										msgTableText[recData].text[1] = '-------Combined Arms Message-------- \n'
 									end
 									msgTableText[recData].text[#msgTableText[recData].text + 1] = messageData.text
 									msgTableText[recData].displayTime = messageData.displayTime - messageData.displayedFor
@@ -4099,18 +4186,20 @@ do
 			end
 			------- new display
 			
-			if caSlots == true then
+			if caSlots == true and caMSGtoGroup == false then
 				if msgTableText['RED'] then
-					trigger.action.outTextForCoalition(coalition.side.RED, table.concat(msgTableText['RED'].text), msgTableText['RED'].displayTime)
+					trigger.action.outTextForCoalition(coalition.side.RED, table.concat(msgTableText['RED'].text), msgTableText['RED'].displayTime, true)
+
 				end
 				if msgTableText['BLUE'] then
-					trigger.action.outTextForCoalition(coalition.side.BLUE, table.concat(msgTableText['BLUE'].text), msgTableText['BLUE'].displayTime)
+					trigger.action.outTextForCoalition(coalition.side.BLUE, table.concat(msgTableText['BLUE'].text), msgTableText['BLUE'].displayTime, true)
+
 				end
 			end
 			
 			for index, msgData in pairs(msgTableText) do
 				if type(index) == 'number' then -- its a groupNumber
-					trigger.action.outTextForGroup(index, table.concat(msgData.text), msgData.displayTime)
+					trigger.action.outTextForGroup(index, table.concat(msgData.text), msgData.displayTime, true)
 				end
 			end
 			--- new audio
@@ -4120,6 +4209,7 @@ do
 			if msgTableSound['BLUE'] then
 				trigger.action.outSoundForCoalition(coalition.side.BLUE, msgTableSound['BLUE'])
 			end
+			
 			
 			for index, file in pairs(msgTableSound) do
 				if type(index) == 'number' then -- its a groupNumber
@@ -4132,6 +4222,22 @@ do
 		end
 	
 	end
+	
+	local typeBase = {
+		['Mi-8MT'] = {'Mi-8MTV2', 'Mi-8MTV', 'Mi-8'},
+		['MiG-21Bis'] = {'Mig-21'},
+		['MiG-15bis'] = {'Mig-15'},
+		['FW-190D9'] = {'FW-190'},
+		['Bf-109K-4'] = {'Bf-109'},
+	}
+	
+	--[[mist.setCAGroupMSG = function(val)
+		if type(val) == 'boolean' then
+			caMSGtoGroup = val
+			return true
+		end	
+		return false
+	end]]
 
 	mist.message = {
 	
@@ -4205,8 +4311,16 @@ do
 								local found = false
 								for clientDataEntry, clientDataVal in pairs(clientData) do
 									if type(clientDataVal) == 'string' then
-										if string.lower(list) == string.lower(clientDataVal) or list == 'all' then
-											if typeData == clientData.type then
+										if mist.matchString(list, clientDataVal) == true or list == 'all' then
+											local sString = typeData
+											for rName, pTbl in pairs(typeBase) do -- just a quick check to see if the user may have meant something and got the specific type of the unit wrong
+												for pIndex, pName in pairs(pTbl) do
+													if mist.stringMatch(sString, pName) then
+														sString = rName
+													end
+												end
+											end
+											if sString == clientData.type then
 												found = true
 												newMsgFor = msgSpamFilter(newMsgFor, clientData.groupId) -- sends info oto other function to see if client is already recieving the current message.
 												--table.insert(newMsgFor, clientId)
@@ -5130,11 +5244,15 @@ mist.teleportToPoint = function(vars) -- main teleport function that all of tele
 			newGroupData.units[unitNum]["y"] = unitData.y + diff.y
 		end
 		if point then
-			if (newGroupData.category == 'plane' or newGroupData.category == 'helicopter') and point.z then
-				if point.y > 0 and point.y > land.getHeight({newGroupData.units[unitNum]["x"], newGroupData.units[unitNum]["y"]}) + 10 then
+			if (newGroupData.category == 'plane' or newGroupData.category == 'helicopter')  then
+				if point.z and point.y > 0 and point.y > land.getHeight({newGroupData.units[unitNum]["x"], newGroupData.units[unitNum]["y"]}) + 10 then
 					newGroupData.units[unitNum]["alt"] = point.y
 				else
-					newGroupData.units[unitNum]["alt"] = land.getHeight({newGroupData.units[unitNum]["x"], newGroupData.units[unitNum]["y"]}) + 300
+					if newGroupData.category == 'plane' then
+						newGroupData.units[unitNum]["alt"] = land.getHeight({newGroupData.units[unitNum]["x"], newGroupData.units[unitNum]["y"]}) + math.random(300, 9000)
+					else
+						newGroupData.units[unitNum]["alt"] = land.getHeight({newGroupData.units[unitNum]["x"], newGroupData.units[unitNum]["y"]}) + math.random(200, 3000)
+					end
 				end
 			end
 		end
