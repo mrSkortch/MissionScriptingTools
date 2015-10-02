@@ -1,3 +1,6 @@
+v54
+-added a check when adding unitTypes for messages to figure out the correct in-game unit name for a given unit. For example the Mi-8 helicopter is always displayed as 'Mi-8MTV2', however its actual in game name is 'Mi-8MT', this feature allows for you to list 'Mi-8MTV2', 'Mi-8MTV', or 'Mi-8' to get messages sent to the Mi-8. Shortcut also works for the relevant aircraft 'Mig-21', 'Mig-15', 'FW-190', and 'Bf-109'.
+
 v53
 -added mist.getAvgPos now accepts static objects in addition to units.
 -made DB creation check the mission editor version for no paticular reason
