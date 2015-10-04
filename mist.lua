@@ -15,7 +15,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 0
-mist.build = 55
+mist.build = 56
 
 --------------------------------------------------------------------------------------------------------------
 -- the main area
@@ -492,6 +492,7 @@ do
 		newObj.name = staticObj.name
 		newObj.dead = staticObj.dead
 		newObj.country = staticObj.country
+		newObj.countryId = staticObj.countryId
 		newObj.clone = staticObj.clone
 		newObj.shape_name = staticObj.shape_name
 		newObj.canCargo = staticObj.canCargo
@@ -508,21 +509,22 @@ do
 			newObj.name = staticObj.units[1].name
 			newObj.dead = staticObj.units[1].dead
 			newObj.country = staticObj.units[1].country
+			newObj.countryId = staticObj.units[1].countryId
 			newObj.shape_name = staticObj.units[1].shape_name
 			newObj.canCargo = staticObj.units[1].canCargo
 			newObj.mass = staticObj.units[1].mass
 			newObj.categoryStatic = staticObj.units[1].categoryStatic			
 		end
-
-
-		newObj.country = staticObj.country
 		
 		if not newObj.country then
 			return false
 		end
 		
-		local newCountry
-		for countryName, countryId in pairs(country.id) do
+		local newCountry = newObj.country
+		if newObj.countryId then
+			newCountry = newObj.countryId
+		end		
+		for countryId, countryName in pairs(country.name) do
 			if type(newObj.country) == 'string' then
 				if tostring(countryName) == string.upper(newObj.country) then
 					newCountry = countryName
@@ -577,12 +579,17 @@ do
 --
 	
 	
-	--env.info('dynAdd')
+
+	--mist.debug.writeData(mist.utils.serialize,{'msg', newGroup}, 'newGroupOrig.lua')
 	local cntry = newGroup.country
+	if newGroup.countryId then
+		cntry = newGroup.countryId
+	end
+	
 	local groupType = newGroup.category
 	local newCountry = ''
 	-- validate data
-	for countryName, countryId in pairs(country.id) do
+	for countryId, countryName in pairs(country.name) do
 		if type(cntry) == 'string' then
 			if tostring(countryName) == string.upper(cntry) then
 				newCountry = countryName
@@ -616,7 +623,6 @@ do
 			newCat = 'AIRPLANE'
 		end
 	end
-	
 	local typeName 
 	if newCat == 'GROUND_UNIT' then
 		typeName = ' gnd '
@@ -629,7 +635,6 @@ do
 	elseif newCat == 'BUILDING' then
 		typeName = ' bld '
 	end
-	
 	if newGroup.clone or not newGroup.groupId then
 		mistDynAddIndex = mistDynAddIndex + 1
 		mistGpId = mistGpId + 1 
@@ -662,8 +667,9 @@ do
 			newGroup.start_time = 0
 		end
 	end
+	
+	
 	for unitIndex, unitData in pairs(newGroup.units) do
-
 		local originalName = newGroup.units[unitIndex].unitName or newGroup.units[unitIndex].name
 		if newGroup.clone or not unitData.unitId then
 			mistUnitId = mistUnitId + 1	
@@ -720,7 +726,6 @@ do
 		mistAddedObjects[#mistAddedObjects + 1] = mist.utils.deepCopy(newGroup.units[unitIndex])
 	end
 	mistAddedGroups[#mistAddedGroups + 1] = mist.utils.deepCopy(newGroup)
-	
 	if newGroup.route and not newGroup.route.points then
 		if not newGroup.route.points and newGroup.route[1] then
 			local copyRoute = newGroup.route
@@ -5279,7 +5284,6 @@ mist.teleportToPoint = function(vars) -- main teleport function that all of tele
 	if string.lower(newGroupData.category) == 'static' then
 		return mist.dynAddStatic(newGroupData)
 	end
-	
 	return mist.dynAdd(newGroupData)
 	
 end
