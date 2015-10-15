@@ -15,7 +15,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 0
-mist.build = 56
+mist.build = 57
 
 --------------------------------------------------------------------------------------------------------------
 -- the main area
@@ -2039,6 +2039,10 @@ for coa_name, coa_data in pairs(mist.DBs.units) do
 							if unit_data.skill and (unit_data.skill == "Client" or unit_data.skill == "Player") then
 								mist.DBs.humansByName[unit_data.unitName] = mist.utils.deepCopy(unit_data)
 								mist.DBs.humansById[unit_data.unitId] = mist.utils.deepCopy(unit_data)
+								--if Unit.getByName(unit_data.unitName) then
+								--	mist.DBs.activeHumans[unit_data.unitName] = mist.utils.deepCopy(unit_data)
+								--	mist.DBs.activeHumans[unit_data.unitName].playerName = Unit.getByName(unit_data.unitName):getPlayerName()
+								--end
 							end
 						end
 					end
@@ -2163,7 +2167,10 @@ do
 						val['objectPos'] = pos.p
 					end
 					val['objectType'] = mist.DBs.aliveUnits[val.object.id_].category
-				
+					--[[if mist.DBs.activeHumans[Unit.getName(val.object)] then
+						--trigger.action.outText('remove via death: ' .. Unit.getName(val.object),20)
+						mist.DBs.activeHumans[Unit.getName(val.object)] = nil
+					end]]
 				elseif mist.DBs.removedAliveUnits and mist.DBs.removedAliveUnits[val.object.id_] then  -- it didn't exist in alive_units, check old_alive_units
 					--print('object found in old_alive_units')
 					val['objectData'] = mist.utils.deepCopy(mist.DBs.removedAliveUnits[val.object.id_])
@@ -2205,22 +2212,22 @@ do
 	
 	mist.addEventHandler(addDeadObject)
 	
-	
-	--[[local function addClientsToActive(event)
-		if event.id == world.event.S_EVENT_PLAYER_ENTER_UNIT then
-			if not mist.DBs.activeHumans[Unit.getName(event.initiator)] then
+	--[[
+	local function addClientsToActive(event)
+		if event.id == world.event.S_EVENT_PLAYER_ENTER_UNIT or event.id == world.event.S_EVENT_BIRTH then
+			env.info(mist.utils.tableShow(event))
+			if Unit.getPlayerName(event.initiator) then
+				env.info(Unit.getPlayerName(event.initiator))
 				local newU = mist.utils.deepCopy(mist.DBs.unitsByName[Unit.getName(event.initiator)])
-				if Unit.getPlayerName(event.initiator) then
-					newU.playerName = Unit.getPlayerName(event.initiator)
-				end
+				newU.playerName = Unit.getPlayerName(event.initiator)
 				mist.DBs.activeHumans[Unit.getName(event.initiator)] = newU
+				--trigger.action.outText('added: ' .. Unit.getName(event.initiator), 20)
 			end
-		elseif event.id == world.event.S_EVENT_PLAYER_LEAVE_UNIT or event.id == world.event.S_EVENT_DEATH then
+		elseif event.id == world.event.S_EVENT_PLAYER_LEAVE_UNIT and event.initiator then
 			if mist.DBs.activeHumans[Unit.getName(event.initiator)] then
 				 mist.DBs.activeHumans[Unit.getName(event.initiator)] = nil
+				-- trigger.action.outText('removed via control: ' .. Unit.getName(event.initiator), 20)
 			end
-		elseif event.id == world.event.S_EVENT_BIRTH then -- do client check
-		
 		end
 	end
 	
@@ -3059,6 +3066,7 @@ function mist.flagFunc.units_in_moving_zones(vars)
 		interval = {'number', 'nil'},
 		toggle = {'boolean', 'nil'},
 		unitTableDef = {'table', 'nil'},
+		zUnitTableDef = {'table', 'nil'},
 	}
 	
 	local err, errmsg = mist.utils.typeCheck('mist.flagFunc.units_in_moving_zones', type_tbl, vars)
@@ -3073,13 +3081,22 @@ function mist.flagFunc.units_in_moving_zones(vars)
 	local interval = vars.interval or 1
 	local toggle = vars.toggle or nil
 	local unitTableDef = vars.unitTableDef
+	local zUnitTableDef = vars.zUnitTableDef
 	
 	if not units.processed then
 		unitTableDef = mist.utils.deepCopy(units)
 	end
 	
+	if not zone_units.processed then
+		zUnitTableDef = mist.utils.deepCopy(zone_units)
+	end
+	
 	if (units.processed and units.processed < mist.getLastDBUpdateTime()) or not units.processed then -- run unit table short cuts
 		units = mist.makeUnitTable(unitTableDef)
+	end
+	
+	if (zone_units.processed and zone_units.processed < mist.getLastDBUpdateTime()) or not zone_units.processed then -- run unit table short cuts
+		zone_units = mist.makeUnitTable(zUnitTableDef)
 	end
 
 	if stopflag == -1 or (type(trigger.misc.getUserFlag(stopflag)) == 'number' and trigger.misc.getUserFlag(stopflag) == 0) or (type(trigger.misc.getUserFlag(stopflag)) == 'boolean' and trigger.misc.getUserFlag(stopflag) == false) then
@@ -3093,7 +3110,7 @@ function mist.flagFunc.units_in_moving_zones(vars)
 		end		
 		-- do another check in case stopflag was set true by this function
 		if (type(trigger.misc.getUserFlag(stopflag)) == 'number' and trigger.misc.getUserFlag(stopflag) == 0) or (type(trigger.misc.getUserFlag(stopflag)) == 'boolean' and trigger.misc.getUserFlag(stopflag) == false) then
-			mist.scheduleFunction(mist.flagFunc.units_in_moving_zones, {{units = units, zone_units = zone_units, radius = radius, flag = flag, stopflag = stopflag, zone_type = zone_type, req_num = req_num, interval = interval, toggle = toggle}}, timer.getTime() + interval)
+			mist.scheduleFunction(mist.flagFunc.units_in_moving_zones, {{units = units, zone_units = zone_units, radius = radius, flag = flag, stopflag = stopflag, zone_type = zone_type, req_num = req_num, interval = interval, toggle = toggle, unitTableDef = unitTableDef, zUnitTableDef = zUnitTableDef}}, timer.getTime() + interval)
 		end
 	end
 	
@@ -3204,11 +3221,11 @@ toggle = boolean or nil
 	end
 	
 	if (unitset1.processed and unitset1.processed < mist.getLastDBUpdateTime()) or not unitset1.processed then -- run unit table short cuts
-		units = mist.makeUnitTable(unitTableDef1)
+		unitset1 = mist.makeUnitTable(unitTableDef1)
 	end
 	
 	if (unitset2.processed and unitset2.processed < mist.getLastDBUpdateTime()) or not unitset2.processed then -- run unit table short cuts
-		units = mist.makeUnitTable(unitTableDef2)
+		unitset2 = mist.makeUnitTable(unitTableDef2)
 	end
 	
 	
@@ -4085,21 +4102,23 @@ do
 	local caSlots = false
 	local caMSGtoGroup = false
 	
-	for index, value in pairs(env.mission.groundControl) do
-		if type(value) == 'table' then
-			for roleName, roleVal in pairs(value) do
-				for rIndex, rVal in pairs(roleVal) do
-					if rIndex == 'red' or rIndex == 'blue' then
-						if env.mission.groundControl[index][roleName][rIndex] > 0 then
-							caSlots = true
-							break
+	if env.mission.groundControl then -- just to be sure?
+		for index, value in pairs(env.mission.groundControl) do
+			if type(value) == 'table' then
+				for roleName, roleVal in pairs(value) do
+					for rIndex, rVal in pairs(roleVal) do
+						if rIndex == 'red' or rIndex == 'blue' then
+							if env.mission.groundControl[index][roleName][rIndex] > 0 then
+								caSlots = true
+								break
+							end
 						end
 					end
 				end
+			elseif type(value) == 'boolean' and value == true then
+				caSlots = true
+				break
 			end
-		elseif type(value) == 'boolean' and value == true then
-			caSlots = true
-			break
 		end
 	end
 	
@@ -4198,7 +4217,6 @@ do
 				end
 				if msgTableText['BLUE'] then
 					trigger.action.outTextForCoalition(coalition.side.BLUE, table.concat(msgTableText['BLUE'].text), msgTableText['BLUE'].displayTime, true)
-
 				end
 			end
 			
@@ -4344,8 +4362,6 @@ do
 						if string.lower(forIndex) == 'coa' or string.lower(forIndex) == 'ca' then
 							if listData == string.lower(coaData) or listData == 'all' then
 								newMsgFor = msgSpamFilter(newMsgFor, coaData)
-								--table.insert(newMsgFor, coaData)
-							-- added redca or blueca to list
 							end
 						end
 					end

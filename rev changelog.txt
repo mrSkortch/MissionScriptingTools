@@ -1,3 +1,8 @@
+v57
+-fixed bug with groupRandomDistSelf improperly declaring the y variable
+-fixed flagFunc.units_in_moving_zones not checking for a unitNameTable for the zone_units
+-fixed bug in flagFunc.units_LOS when given a unitNameTable for both entries.
+
 v56
 -fixed bug with dynAdd and dynAddStatic not recognizing new countries in dcs 1.5
 
