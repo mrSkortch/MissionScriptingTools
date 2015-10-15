@@ -1,3 +1,13 @@
+v57
+-fixed bug with groupRandomDistSelf improperly declaring the y variable
+-fixed flagFunc.units_in_moving_zones not checking for a unitNameTable for the zone_units
+-fixed bug in flagFunc.units_LOS when given a unitNameTable for both entries.
+
+v56
+-fixed bug with dynAdd and dynAddStatic not recognizing new countries in dcs 1.5
+
+v55
+- Release v4
 v54
 -added a check when adding unitTypes for messages to figure out the correct in-game unit name for a given unit. For example the Mi-8 helicopter is always displayed as 'Mi-8MTV2', however its actual in game name is 'Mi-8MT', this feature allows for you to list 'Mi-8MTV2', 'Mi-8MTV', or 'Mi-8' to get messages sent to the Mi-8. Shortcut also works for the relevant aircraft 'Mig-21', 'Mig-15', 'FW-190', and 'Bf-109'.
 
