@@ -20,6 +20,8 @@
 *.PDF	 diff=astextplain
 *.rtf	 diff=astextplain
 *.RTF	 diff=astextplain
+*.txt  eol=crlf
+
 
 .gitattributes export-ignore
 .gitignore export-ignore

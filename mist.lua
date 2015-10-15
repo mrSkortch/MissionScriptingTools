@@ -3924,7 +3924,7 @@ mist.groupRandomDistSelf = function(gpData, dist, form, heading, speed)
 	local pos = mist.getLeadPos(gpData)
 	local fakeZone = {}
 	fakeZone.radius = dist or math.random(300, 1000)
-	fakeZone.point = {x = pos.x, y, pos.y, z = pos.z}
+	fakeZone.point = {x = pos.x, y = pos.y, z = pos.z}
 	mist.groupToRandomZone(gpData, fakeZone, form, heading, speed)
 
 	return
