@@ -1,3 +1,8 @@
+v58
+-added optional variable to mist.utils.getDir() If present this function will return the "raw" heading, this is useful in assigning the heading variable within a task.
+-mist.utils.makeVec3 now supports being given a table in WP format. Specifically it now coverts a table {x, y, alt) to vec3
+
+
 v57
 -fixed bug with groupRandomDistSelf improperly declaring the y variable
 -fixed flagFunc.units_in_moving_zones not checking for a unitNameTable for the zone_units

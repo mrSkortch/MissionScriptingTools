@@ -15,7 +15,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 0
-mist.build = 57
+mist.build = 58
 
 --------------------------------------------------------------------------------------------------------------
 -- the main area
@@ -921,7 +921,9 @@ end
 
 function mist.utils.makeVec3(Vec2, y)
 	if not Vec2.z then
-		if not y then
+		if Vec2.alt and not y then
+			y = Vec2.alt
+		elseif not y then
 			y = 0
 		end
 		return {x = Vec2.x, y = y, z = Vec2.y}
@@ -959,9 +961,11 @@ mist.utils.zoneToVec3 = function(zone)
 end
 
 -- gets heading-error corrected direction from point along vector vec.
-function mist.utils.getDir(vec, point)
+function mist.utils.getDir(vec, point, raw)
 	local dir = math.atan2(vec.z, vec.x)
-	dir = dir + mist.getNorthCorrection(point)
+	if not raw then
+		dir = dir + mist.getNorthCorrection(point)
+	end
 	if dir < 0 then
 		dir = dir + 2*math.pi  -- put dir in range of 0 to 2*pi
 	end
