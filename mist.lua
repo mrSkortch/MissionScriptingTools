@@ -15,7 +15,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 0
-mist.build = 58
+mist.build = 59
 
 --------------------------------------------------------------------------------------------------------------
 -- the main area
@@ -241,7 +241,7 @@ do
 				end
 			end
 		end
-	
+		--mist.debug.writeData(mist.utils.serialize,{'msg', newTable}, timer.getAbsTime() ..'Group.lua')
 		newTable['timeAdded'] = timer.getAbsTime() -- only on the dynGroupsAdded table. For other reference, see start time
 		--mist.debug.dumpDBs()
 		--end
@@ -254,6 +254,7 @@ do
 	local function checkSpawnedEvents()
 		if #tempSpawnedUnits > 0 then
 			local groupsToAdd = {}
+			local added = false
 			local ltemp = tempSpawnedUnits
 			local ltable = table
 
@@ -265,7 +266,7 @@ do
 				local spawnedObj = ltemp[x]
 				if spawnedObj and spawnedObj:isExist() then
 					local found = false
-					for index, name in pairs(groupsToAdd) do
+					for name, val in pairs(groupsToAdd) do
 						if spawnedObj:getCategory() == 1 then -- normal groups
 							if mist.stringMatch(spawnedObj:getGroup():getName(), name) == true then
 								found = true
@@ -280,26 +281,37 @@ do
 					end
 					-- for some reason cargo objects are returning as category == 6. 
 					if found == false then
+						added = true
 						if spawnedObj:getCategory() == 1 then -- normal groups
-							groupsToAdd[#groupsToAdd + 1] = spawnedObj:getGroup():getName()
+							groupsToAdd[spawnedObj:getGroup():getName()] = true
 						elseif spawnedObj:getCategory() == 3 or spawnedObj:getCategory() == 6 then -- static objects
-							groupsToAdd[#groupsToAdd + 1] = spawnedObj:getName()
+							groupsToAdd[spawnedObj:getName()] = true
 						end
+						
 					end
 				end
-				
 
 				table.remove(ltemp, x)
 				if x%updatesPerRun == 0 then  
 					coroutine.yield()
 				end 
-				
 			end
-			
-			
-			if #groupsToAdd > 0 then
-				for groupId, groupName in pairs(groupsToAdd) do
-					if not mist.DBs.groupsByName[groupName] or mist.DBs.groupsByName[groupName] and mist.DBs.groupsByName[groupName].startTime + 10 < timer.getAbsTime() then
+
+			if added == true then
+				for groupName, val in pairs(groupsToAdd) do
+					local dataChanged = false
+					if mist.DBs.groupsByName[groupName] then
+						for _index, data in pairs(mist.DBs.groupsByName[groupName]) do
+							if data.unitName ~= spawnedObj:getName() and data.unitId ~= spawnedObj:getID() and data.type ~= spawnedObj:getTypeName() then
+								dataChanged = true
+								break
+							end
+						end
+						if dataChanged == false then
+							groupsToAdd[groupName] = false
+						end
+					end
+					if groupsToAdd[groupName] == true or not mist.DBs.groupsByName[groupName] then
 						writeGroups[#writeGroups + 1] = dbUpdate(groupName)
 					end
 				end
@@ -309,6 +321,7 @@ do
 	
 	
 	local function updateDBTables()
+		
 		local i = 0
 		for index, newTable in pairs(writeGroups) do
 			i = i + 1
@@ -548,7 +561,7 @@ do
 		
 		if newObj.clone or not newObj.name then
 			mistDynAddIndex = mistDynAddIndex + 1
-			newObj.name = (newCountry .. ' static ' .. mistDynAddIndex)
+			newObj.name = (country.name[newCountry] .. ' static ' .. mistDynAddIndex)
 		end
 		
 		if not newObj.dead then
@@ -649,7 +662,7 @@ do
 	end
 	
 	if newGroup.clone and mist.DBs.groupsByName[newGroup.name] or not newGroup.name then
-		newGroup['name'] = tostring(tostring(cntry) .. tostring(typeName) .. mistDynAddIndex)
+		newGroup['name'] = tostring(tostring(country.name[cntry]) .. tostring(typeName) .. mistDynAddIndex)
 	end
 	
 	if not newGroup.hidden then
@@ -961,9 +974,9 @@ mist.utils.zoneToVec3 = function(zone)
 end
 
 -- gets heading-error corrected direction from point along vector vec.
-function mist.utils.getDir(vec, point, raw)
+function mist.utils.getDir(vec, point)
 	local dir = math.atan2(vec.z, vec.x)
-	if not raw then
+	if point then
 		dir = dir + mist.getNorthCorrection(point)
 	end
 	if dir < 0 then
@@ -1012,6 +1025,15 @@ end
 mist.utils.round = function(num, idp)
   local mult = 10^(idp or 0)
   return math.floor(num * mult + 0.5) / mult
+end
+
+mist.utils.roundTbl = function(tbl, idp)
+	for id, val in pairs(tbl) do
+		if type(val) == 'number' then
+			tbl[id] = mist.utils.round(val, idp)
+		end
+	end	
+	return tbl
 end
 
 -- porting in Slmod's dostring
@@ -3418,6 +3440,21 @@ mist.flagFunc.group_alive_more_than = function(vars)
 	end
 end
 
+mist.getAvgPoint = function(points)
+	local avgX, avgY, avgZ, totNum = 0, 0, 0, 0
+	for i = 1, #points do
+		local nPoint = mist.utils.makeVec3(points[i])
+		if nPoint.z then
+			avgX = avgX + nPoint.x
+			avgY = avgY + nPoint.y
+			avgZ = avgZ + nPoint.z
+			totNum = totNum + 1
+		end	
+	end
+	if totNum ~= 0 then
+		return {x = avgX/totNum, y = avgY/totNum, z = avgZ/totNum}
+	end
+end
 
 
 --Gets the average position of a group of units (by name)
