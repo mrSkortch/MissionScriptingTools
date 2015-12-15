@@ -591,7 +591,7 @@ do
 	-- validate data
 	for countryId, countryName in pairs(country.name) do
 		if type(cntry) == 'string' then
-            cntry = cntry:gsub("%s+", "_")
+			cntry = cntry:gsub("%s+", "_")
 			if tostring(countryName) == string.upper(cntry) then
 				newCountry = countryName
 			end
