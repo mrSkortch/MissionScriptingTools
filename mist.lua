@@ -15,7 +15,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 0
-mist.build = 59
+mist.build = 60
 
 --------------------------------------------------------------------------------------------------------------
 -- the main area
@@ -604,6 +604,7 @@ do
 	-- validate data
 	for countryId, countryName in pairs(country.name) do
 		if type(cntry) == 'string' then
+			cntry = cntry:gsub("%s+", "_")
 			if tostring(countryName) == string.upper(cntry) then
 				newCountry = countryName
 			end
@@ -997,7 +998,34 @@ function mist.utils.get3DDist(point1, point2)
 	return mist.vec.mag({x = point1.x - point2.x, y = point1.y - point2.y, z = point1.z - point2.z})
 end
 
+function mist.utils.vecToWP(vec)
+	local newWP = {}
+	newWP.x = vec.x
+	newWP.y = vec.y
+	if vec.z then
+		newWP.alt = vec.y
+		newWP.y = vec.z
+	else
+		newWP.alt = land.getHeight({x = vec.x, y = vec.y})
+	end
+	return newWP
+end
 
+function mist.utils.unitToWP(unit)
+	if type(unit) == 'string' then
+		if Unit.getByName(unit) then
+			unit = Unit.getByName(unit)
+		end
+	end
+	if unit:isExist() == true then
+		local new = mist.utils.vecToWP(unit:getPosition().p)
+		new.speed = mist.vec.mag(unit:getVelocity())
+		new.alt_type = "BARO"
+		
+		return new
+	end
+	return false	
+end
 
 
 
@@ -1552,7 +1580,8 @@ mist.tostringBR = function(az, dist, alt, metric)
 	return s
 end
 
-mist.getNorthCorrection = function(point)  --gets the correction needed for true north
+mist.getNorthCorrection = function(gPoint)  --gets the correction needed for true north
+	local point = mist.utils.deepCopy(gPoint)
 	if not point.z then --Vec2; convert to Vec3
 		point.z = point.y
 		point.y = 0
