@@ -398,7 +398,7 @@ do
   local check_spawn_events_counter = 0
 
   -- THE MAIN FUNCTION --   Accessed 100 times/sec.
-  mist.main = function()
+  function mist.main()
     timer.scheduleFunction(mist.main, {}, timer.getTime() + 0.01)  --reschedule first in case of Lua error
     --area to add new stuff in
     write_DB_table_counter = write_DB_table_counter + 1
@@ -451,16 +451,16 @@ do
 
     mist.do_scheduled_functions()
   end -- end of mist.main
+
   -- mist dyn add stuff for coroutines
   local mistGpId = 7000
   local mistUnitId = 7000
   local mistDynAddIndex = 1
 
-
   mist.nextGroupId = 1
   mist.nextUnitId = 1
 
-  mist.getNextUnitId = function()
+  function mist.getNextUnitId()
     mist.nextUnitId = mist.nextUnitId + 1
     if mist.nextUnitId > 6900 then
       mist.nextUnitId = 14000
@@ -468,7 +468,7 @@ do
     return mist.nextUnitId
   end
 
-  mist.getNextGroupId = function()
+  function mist.getNextGroupId()
     mist.nextGroupId = mist.nextGroupId + 1
     if mist.nextGroupId > 6900 then
       mist.nextGroupId = 14000
@@ -476,7 +476,7 @@ do
     return mist.nextGroupId
   end
 
-  mist.getLastDBUpdateTime = function()
+  function mist.getLastDBUpdateTime()
     return lastUpdateTime
   end
 
@@ -490,7 +490,7 @@ do
 
 
 
-  mist.dynAddStatic = function(staticObj)
+  function mist.dynAddStatic(staticObj)
     local newObj = {}
     newObj.groupId = staticObj.groupId
     newObj.category = staticObj.category
@@ -586,7 +586,7 @@ do
 
   -- same as coalition.add function in SSE. checks the passed data to see if its valid.
   -- Will generate groupId, groupName, unitId, and unitName if needed
-  mist.dynAdd = function(newGroup)
+  function mist.dynAdd(newGroup)
 
     --mist.debug.writeData(mist.utils.serialize,{'msg', newGroup}, 'newGroupOrig.lua')
     local cntry = newGroup.country
@@ -778,7 +778,7 @@ do
   rep - time between repetitions of this function (OPTIONAL)
   st - time when repetitions of this function will stop automatically (OPTIONAL)
   ]]
-  mist.scheduleFunction = function(f, vars, t, rep, st)
+  function mist.scheduleFunction(f, vars, t, rep, st)
     --verify correct types
     assert(type(f) == 'function', 'variable 1, expected function, got ' .. type(f))
     assert(type(vars) == 'table' or vars == nil, 'variable 2, expected table or nil, got ' .. type(f))
@@ -794,7 +794,7 @@ do
   end
 
   -- removes a scheduled function based on the function's id.  returns true if successful, false if not successful.
-  mist.removeFunction = function(id)
+  function mist.removeFunction(id)
     local i = 1
     while i <= #Tasks do
       if Tasks[i].id == id then
@@ -806,7 +806,7 @@ do
   end
 
   -- not intended for users to use this function.
-  mist.do_scheduled_functions = function()
+  function mist.do_scheduled_functionsfunction()
     local i = 1
     while i <= #Tasks do
       if not Tasks[i].rep then -- not a repeated process
@@ -845,19 +845,19 @@ do
   local idNum = 0
 
   -- Simplified event handler
-  mist.addEventHandler = function(f) --id is optional!
+  function mist.addEventHandler(f) --id is optional!
     local handler = {}
     idNum = idNum + 1
     handler.id = idNum
     handler.f = f
-    handler.onEvent = function(self, event)
+    local function handler.onEvent(self, event)
       self.f(event)
     end
     world.addEventHandler(handler)
     return handler.id
   end
 
-  mist.removeEventHandler = function(id)
+  function mist.removeEventHandler(id)
     for key, handler in pairs(world.eventHandlers) do
       if handler.id and handler.id == id then
         world.eventHandlers[key] = nil
@@ -875,43 +875,43 @@ end
 -- Utils- conversion, Lua utils, etc.
 mist.utils = {}
 
-mist.utils.toDegree = function(angle)
+function mist.utils.toDegree (angle)
   return angle*180/math.pi
 end
 
-mist.utils.toRadian = function(angle)
+function mist.utils.toRadian (angle)
   return angle*math.pi/180
 end
 
-mist.utils.metersToNM = function(meters)
+function mist.utils.metersToNM (meters)
   return meters/1852
 end
 
-mist.utils.metersToFeet = function(meters)
+function mist.utils.metersToFeet (meters)
   return meters/0.3048
 end
 
-mist.utils.NMToMeters = function(NM)
+function mist.utils.NMToMeters (NM)
   return NM*1852
 end
 
-mist.utils.feetToMeters = function(feet)
+function mist.utils.feetToMeters (feet)
   return feet*0.3048
 end
 
-mist.utils.mpsToKnots = function(mps)
+function mist.utils.mpsToKnots (mps)
   return mps*3600/1852
 end
 
-mist.utils.mpsToKmph = function(mps)
+function mist.utils.mpsToKmph (mps)
   return mps*3.6
 end
 
-mist.utils.knotsToMps = function(knots)
+function mist.utils.knotsToMps (knots)
   return knots*1852/3600
 end
 
-mist.utils.kmphToMps = function(kmph)
+function mist.utils.kmphToMps (kmph)
   return kmph/3.6
 end
 
@@ -946,7 +946,7 @@ function mist.utils.makeVec3GL(Vec2, offset)
   end
 end
 
-mist.utils.zoneToVec3 = function(zone)
+function mist.utils.zoneToVec3 (zone)
   local new = {}
   if type(zone) == 'table' and zone.point then
     new.x = zone.point.x
@@ -1020,7 +1020,7 @@ end
 
 
 --from http://lua-users.org/wiki/CopyTable
-mist.utils.deepCopy = function(object)
+function mist.utils.deepCopy(object)
   local lookup_table = {}
   local function _copy(object)
     if type(object) ~= "table" then
@@ -1040,12 +1040,12 @@ end
 
 -- From http://lua-users.org/wiki/SimpleRound
 -- use negative idp for rounding ahead of decimal place, positive for rounding after decimal place
-mist.utils.round = function(num, idp)
+function mist.utils.round(num, idp)
   local mult = 10^(idp or 0)
   return math.floor(num * mult + 0.5) / mult
 end
 
-mist.utils.roundTbl = function(tbl, idp)
+function mist.utils.roundTbl(tbl, idp)
   for id, val in pairs(tbl) do
     if type(val) == 'number' then
       tbl[id] = mist.utils.round(val, idp)
@@ -1055,7 +1055,7 @@ mist.utils.roundTbl = function(tbl, idp)
 end
 
 -- porting in Slmod's dostring
-mist.utils.dostring = function(s)
+function mist.utils.dostring(s)
   local f, err = loadstring(s)
   if f then
     return true, f()
@@ -1146,7 +1146,7 @@ function mist.utils.typeCheck(fname, type_tbl, var_tbl)
 end
 
 --porting in Slmod's "safestring" basic serialize
-mist.utils.basicSerialize = function(s)
+function mist.utils.basicSerialize(s)
   if s == nil then
     return "\"\""
   else
@@ -1160,9 +1160,9 @@ mist.utils.basicSerialize = function(s)
 end
 
 --porting in Slmod's serialize_slmod
-mist.utils.serialize = function(name, value, level)
+function mist.utils.serialize(name, value, level)
   --Based on ED's serialize_simple2
-  local basicSerialize = function (o)
+  local function basicSerialize(o)
     if type(o) == "number" then
       return tostring(o)
     elseif type(o) == "boolean" then
@@ -1172,7 +1172,7 @@ mist.utils.serialize = function(name, value, level)
     end
   end
 
-  local serialize_to_t = function (name, value, level)
+  local function serialize_to_t(name, value, level)
     local var_str_tbl = {}
     if level == nil then level = "" end
     if level ~= "" then level = level.."  " end
@@ -1214,9 +1214,9 @@ mist.utils.serialize = function(name, value, level)
 end
 
 -- porting in slmod's serialize_wcycles
-mist.utils.serializeWithCycles = function(name, value, saved)
+function mist.utils.serializeWithCycles(name, value, saved)
   --mostly straight out of Programming in Lua
-  local basicSerialize = function (o)
+  local function basicSerialize(o)
     if type(o) == "number" then
       return tostring(o)
     elseif type(o) == "boolean" then
@@ -1252,7 +1252,7 @@ mist.utils.serializeWithCycles = function(name, value, saved)
 end
 
 -- porting in Slmod's serialize_slmod2
-mist.utils.oneLineSerialize = function(tbl)  -- serialization of a table all on a single line, no comments, made to replace old get_table_string function
+function mist.utils.oneLineSerialize(tbl)  -- serialization of a table all on a single line, no comments, made to replace old get_table_string function
   if type(tbl) == 'table' then --function only works for tables!
 
     local tbl_str = {}
@@ -1292,7 +1292,7 @@ mist.utils.oneLineSerialize = function(tbl)  -- serialization of a table all on 
 end
 
 --Function to create string for viewing the contents of a table -NOT for serialization
-mist.utils.tableShow = function(tbl, loc, indent, tableshow_tbls) --based on serialize_slmod, this is a _G serialization
+function mist.utils.tableShow(tbl, loc, indent, tableshow_tbls) --based on serialize_slmod, this is a _G serialization
   tableshow_tbls = tableshow_tbls or {} --create table of tables
   loc = loc or ""
   indent = indent or ""
@@ -1362,7 +1362,7 @@ end
 
 mist.debug = {}
 
-mist.debug.dump_G = function(fname)
+function mist.debug.dump_G(fname)
   if lfs and io then
     local fdir = lfs.writedir() .. [[Logs\]] .. fname
     local f = io.open(fdir, 'w')
@@ -1378,7 +1378,7 @@ mist.debug.dump_G = function(fname)
   end
 end
 
-mist.debug.writeData = function(fcn, fcnVars, fname)
+function mist.debug.writeData(fcn, fcnVars, fname)
   if lfs and io then
     local fdir = lfs.writedir() .. [[Logs\]] .. fname
     local f = io.open(fdir, 'w')
@@ -1394,7 +1394,7 @@ mist.debug.writeData = function(fcn, fcnVars, fname)
   end
 end
 
-mist.debug.dumpDBs = function()
+function mist.debug.dumpDBs()
   for DBname, DB in pairs(mist.DBs) do
     if type(DB) == 'table' and type(DBname) == 'string' then
       mist.debug.writeData(mist.utils.serialize, {DBname, DB}, 'mist_DBs_' .. DBname .. '.lua')
@@ -1405,43 +1405,43 @@ end
 --3D Vector manipulation
 mist.vec = {}
 
-mist.vec.add = function(vec1, vec2)
+function mist.vec.add(vec1, vec2)
   return {x = vec1.x + vec2.x, y = vec1.y + vec2.y, z = vec1.z + vec2.z}
 end
 
-mist.vec.sub = function(vec1, vec2)
+function mist.vec.sub(vec1, vec2)
   return {x = vec1.x - vec2.x, y = vec1.y - vec2.y, z = vec1.z - vec2.z}
 end
 
-mist.vec.scalarMult = function(vec, mult)
+function mist.vec.scalarMult(vec, mult)
   return {x = vec.x*mult, y = vec.y*mult, z = vec.z*mult}
 end
 
 mist.vec.scalar_mult = mist.vec.scalarMult
 
-mist.vec.dp = function(vec1, vec2)
+function mist.vec.dp (vec1, vec2)
   return vec1.x*vec2.x + vec1.y*vec2.y + vec1.z*vec2.z
 end
 
-mist.vec.cp = function(vec1, vec2)
+function mist.vec.cp(vec1, vec2)
   return { x = vec1.y*vec2.z - vec1.z*vec2.y, y = vec1.z*vec2.x - vec1.x*vec2.z, z = vec1.x*vec2.y - vec1.y*vec2.x}
 end
 
-mist.vec.mag = function(vec)
+function mist.vec.mag(vec)
   return (vec.x^2 + vec.y^2 + vec.z^2)^0.5
 end
 
-mist.vec.getUnitVec = function(vec)
+function mist.vec.getUnitVec(vec)
   local mag = mist.vec.mag(vec)
   return { x = vec.x/mag, y = vec.y/mag, z = vec.z/mag }
 end
 
-mist.vec.rotateVec2 = function(vec2, theta)
+function mist.vec.rotateVec2(vec2, theta)
   return { x = vec2.x*math.cos(theta) - vec2.y*math.sin(theta), y = vec2.x*math.sin(theta) + vec2.y*math.cos(theta)}
 end
 
 -- acc- the accuracy of each easting/northing.  0, 1, 2, 3, 4, or 5.
-mist.tostringMGRS = function(MGRS, acc)
+function mist.tostringMGRS(MGRS, acc)
   if acc == 0 then
     return MGRS.UTMZone .. ' ' .. MGRS.MGRSDigraph
   else
@@ -1457,7 +1457,7 @@ position after the decimal of the least significant digit:
 So:
 42.32 - acc of 2.
 ]]
-mist.tostringLL = function(lat, lon, acc, DMS)
+function mist.tostringLL(lat, lon, acc, DMS)
 
   local latHemi, lonHemi
   if lat > 0 then
@@ -1544,7 +1544,7 @@ end
    optional: alt - meters (set to false or nil if you don't want to use it).
    optional: metric - set true to get dist and alt in km and m.
    precision will always be nearest degree and NM or km.]]
-mist.tostringBR = function(az, dist, alt, metric)
+function mist.tostringBR(az, dist, alt, metric)
   az = mist.utils.round(mist.utils.toDegree(az), 0)
 
   if metric then
@@ -1565,7 +1565,7 @@ mist.tostringBR = function(az, dist, alt, metric)
   return s
 end
 
-mist.getNorthCorrection = function(gPoint)  --gets the correction needed for true north
+function mist.getNorthCorrection(gPoint)  --gets the correction needed for true north
   local point = mist.utils.deepCopy(gPoint)
   if not point.z then --Vec2; convert to Vec3
     point.z = point.y
@@ -1576,7 +1576,7 @@ mist.getNorthCorrection = function(gPoint)  --gets the correction needed for tru
   return math.atan2(north_posit.z - point.z, north_posit.x - point.x)
 end
 
-mist.getUnitSkill = function(unitName)
+function mist.getUnitSkill(unitName)
   if Unit.getByName(unitName) and Unit.getByName(unitName):isExist() == true then
     local lunit = Unit.getByName(unitName)
     for name, data in pairs(mist.DBs.unitsByName) do
@@ -2114,7 +2114,7 @@ mist.DBs.deadObjects = {}
 do
   local mt = {}
 
-  mt.__newindex = function(t, key, val)
+  function mt.__newindex(t, key, val)
     local original_key = key --only for duplicate runtime IDs.
     local key_ind = 1
     while mist.DBs.deadObjects[key] do
@@ -2640,7 +2640,7 @@ end
 end
 
 
-mist.getDeadMapObjsInZones = function(zone_names)
+function mist.getDeadMapObjsInZones(zone_names)
   -- zone_names: table of zone names
   -- returns: table of dead map objects (indexed numerically)
   local map_objs = {}
@@ -2663,7 +2663,7 @@ mist.getDeadMapObjsInZones = function(zone_names)
 end
 
 
-mist.getDeadMapObjsInPolygonZone = function(zone)
+function mist.getDeadMapObjsInPolygonZone(zone)
   -- zone_names: table of zone names
   -- returns: table of dead map objects (indexed numerically)
   local map_objs = {}
@@ -2679,7 +2679,7 @@ end
 
 mist.flagFunc = {}
 
-mist.flagFunc.mapobjs_dead_zones = function(vars)
+function mist.flagFunc.mapobjs_dead_zones(vars)
   --[[vars needs to be:
 zones = table or string,
 flag = number,
@@ -2726,7 +2726,7 @@ end
 
 
 
-mist.flagFunc.mapobjs_dead_polygon = function(vars)
+function mist.flagFunc.mapobjs_dead_polygon(vars)
   --[[vars needs to be:
 zone = table,
 flag = number,
@@ -2807,7 +2807,7 @@ function mist.pointInPolygon(point, poly, maxalt) --raycasting point in polygon.
   end
 end
 
-mist.getUnitsInPolygon = function (unit_names, polyZone, max_alt)
+function mist.getUnitsInPolygon(unit_names, polyZone, max_alt)
   local units = {}
 
   for i = 1, #unit_names do
@@ -3142,7 +3142,7 @@ function mist.flagFunc.units_in_moving_zones(vars)
 end
 
 
-mist.getUnitsLOS = function(unitset1, altoffset1, unitset2, altoffset2, radius)
+function mist.getUnitsLOS(unitset1, altoffset1, unitset2, altoffset2, radius)
   radius = radius or math.huge
 
   local unit_info1 = {}
@@ -3193,7 +3193,7 @@ mist.getUnitsLOS = function(unitset1, altoffset1, unitset2, altoffset2, radius)
   return LOS_data
 end
 
-mist.flagFunc.units_LOS = function(vars)
+function mist.flagFunc.units_LOS(vars)
   --[[vars needs to be:
 unitset1 = table,
 altoffset1 = number,
@@ -3270,7 +3270,7 @@ toggle = boolean or nil
   end
 end
 
-mist.flagFunc.group_alive = function(vars)
+function mist.flagFunc.group_alive(vars)
   --[[vars
 groupName
 flag
@@ -3315,7 +3315,7 @@ stopFlag
 
 end
 
-mist.flagFunc.group_dead = function(vars)
+function mist.flagFunc.group_dead(vars)
   local type_tbl = {
     [{'group', 'groupname', 'gp', 'groupName'}] = 'string',
     flag = {'number', 'string'},
@@ -3351,7 +3351,7 @@ mist.flagFunc.group_dead = function(vars)
   end
 end
 
-mist.flagFunc.group_alive_less_than = function(vars)
+function mist.flagFunc.group_alive_less_than(vars)
   local type_tbl = {
     [{'group', 'groupname', 'gp', 'groupName'}] = 'string',
     percent = 'number',
@@ -3395,7 +3395,7 @@ mist.flagFunc.group_alive_less_than = function(vars)
   end
 end
 
-mist.flagFunc.group_alive_more_than = function(vars)
+function mist.flagFunc.group_alive_more_than(vars)
   local type_tbl = {
     [{'group', 'groupname', 'gp', 'groupName'}] = 'string',
     percent = 'number',
@@ -3439,7 +3439,7 @@ mist.flagFunc.group_alive_more_than = function(vars)
   end
 end
 
-mist.getAvgPoint = function(points)
+function mist.getAvgPoint(points)
   local avgX, avgY, avgZ, totNum = 0, 0, 0, 0
   for i = 1, #points do
     local nPoint = mist.utils.makeVec3(points[i])
@@ -3457,7 +3457,7 @@ end
 
 
 --Gets the average position of a group of units (by name)
-mist.getAvgPos = function(unitNames)
+function mist.getAvgPos(unitNames)
   local avgX, avgY, avgZ, totNum = 0, 0, 0, 0
   for i = 1, #unitNames do
     local unit
@@ -3481,7 +3481,7 @@ mist.getAvgPos = function(unitNames)
   end
 end
 
-mist.getAvgGroupPos = function(groupName)
+function mist.getAvgGroupPos(groupName)
   if type(groupName) == 'string' and Group.getByName(groupName) and Group.getByName(groupName):isExist() == true then
     groupName = Group.getByName(groupName)
   end
@@ -3497,7 +3497,7 @@ end
 -- demos
 mist.demos = {}
 
-mist.demos.printFlightData = function(unit)
+function mist.demos.printFlightData(unit)
   if unit:isExist() then
     local function printData(unit, prevVel, prevE, prevTime)
       local angles = mist.getAttitude(unit)
@@ -3616,7 +3616,7 @@ mist.air = {}
 mist.air.fixedWing = {}
 mist.air.heli = {}
 
-mist.goRoute = function(group, path)
+function mist.goRoute(group, path)
   local misTask = {
     id = 'Mission',
     params = {
@@ -3698,11 +3698,11 @@ end
 
 
 
-mist.ground.buildPath = function() end -- ????
+function mist.ground.buildPath() end -- ????
 
 
 -- No longer accepts path
-mist.ground.buildWP = function(point, overRideForm, overRideSpeed)
+function mist.ground.buildWP(point, overRideForm, overRideSpeed)
 
   local wp = {}
   wp.x = point.x
@@ -3759,7 +3759,7 @@ mist.ground.buildWP = function(point, overRideForm, overRideSpeed)
 
 end
 
-mist.fixedWing.buildWP = function(point, WPtype, speed, alt, altType)
+function mist.fixedWing.buildWP(point, WPtype, speed, alt, altType)
 
   local wp = {}
   wp.x = point.x
@@ -3818,7 +3818,7 @@ mist.fixedWing.buildWP = function(point, WPtype, speed, alt, altType)
   return wp
 end
 
-mist.heli.buildWP = function(point, WPtype, speed, alt, altType)
+function mist.heli.buildWP(point, WPtype, speed, alt, altType)
 
   local wp = {}
   wp.x = point.x
@@ -3905,14 +3905,14 @@ function mist.getRandPointInCircle(point, radius, innerRadius)
   return rndCoord
 end
 
-mist.getRandomPointInZone = function(zoneName, innerRadius)
+function mist.getRandomPointInZone(zoneName, innerRadius)
   if type(zoneName) == 'string' and type(trigger.misc.getZone(zoneName)) == 'table' then
     return mist.getRandPointInCircle(trigger.misc.getZone(zoneName).point, trigger.misc.getZone(zoneName).radius, innerRadius)
   end
   return false
 end
 
-mist.groupToRandomPoint = function(vars)
+function mist.groupToRandomPoint(vars)
   local group = vars.group --Required
   local point = vars.point --required
   local radius = vars.radius or 0
@@ -3966,7 +3966,7 @@ mist.groupToRandomPoint = function(vars)
   return
 end
 
-mist.groupRandomDistSelf = function(gpData, dist, form, heading, speed)
+function mist.groupRandomDistSelf(gpData, dist, form, heading, speed)
   local pos = mist.getLeadPos(gpData)
   local fakeZone = {}
   fakeZone.radius = dist or math.random(300, 1000)
@@ -3976,7 +3976,7 @@ mist.groupRandomDistSelf = function(gpData, dist, form, heading, speed)
   return
 end
 
-mist.groupToRandomZone = function(gpData, zone, form, heading, speed)
+function mist.groupToRandomZone(gpData, zone, form, heading, speed)
   if type(gpData) == 'string' then
     gpData = Group.getByName(gpData)
   end
@@ -4004,7 +4004,7 @@ mist.groupToRandomZone = function(gpData, zone, form, heading, speed)
   return
 end
 
-mist.isTerrainValid = function(coord, terrainTypes) -- vec2/3 and enum or table of acceptable terrain types
+function mist.isTerrainValid(coord, terrainTypes) -- vec2/3 and enum or table of acceptable terrain types
   if coord.z then
     coord.y = coord.z
   end
@@ -4033,7 +4033,7 @@ mist.isTerrainValid = function(coord, terrainTypes) -- vec2/3 and enum or table 
   return false
 end
 
-mist.terrainHeightDiff = function(coord, searchSize)
+function mist.terrainHeightDiff(coord, searchSize)
   local samples = {}
   local searchRadius = 5
   if searchSize then
@@ -4066,7 +4066,7 @@ end
 
 
 
-mist.groupToPoint = function(gpData, point, form, heading, speed, useRoads)
+function mist.groupToPoint(gpData, point, form, heading, speed, useRoads)
   if type(point) == 'string' then
     point = trigger.misc.getZone(point)
   end
@@ -4087,7 +4087,7 @@ mist.groupToPoint = function(gpData, point, form, heading, speed, useRoads)
 end
 
 
-mist.getLeadPos = function(group)
+function mist.getLeadPos(group)
   if type(group) == 'string' then -- group name
     group = Group.getByName(group)
   end
@@ -4276,7 +4276,7 @@ do
     ['Bf-109K-4'] = {'Bf-109'},
   }
 
-  --[[mist.setCAGroupMSG = function(val)
+  --[[function mist.setCAGroupMSG(val)
   if type(val) == 'boolean' then
     caMSGtoGroup = val
     return true
@@ -4502,7 +4502,7 @@ format for consistency.  Maybe individual variable specification could also be s
 vars.units - table of unit names (NOT unitNameTable- maybe this should change).
 vars.acc - integer between 0 and 5, inclusive
 ]]
-mist.getMGRSString = function(vars)
+function mist.getMGRSString(vars)
   local units = vars.units
   local acc = vars.acc or 5
   local avgPos = mist.getAvgPos(units)
@@ -4518,7 +4518,7 @@ vars.DMS - if true, output in degrees, minutes, seconds.  Otherwise, output in d
 
 
 ]]
-mist.getLLString = function(vars)
+function mist.getLLString(vars)
   local units = vars.units
   local acc = vars.acc or 3
   local DMS = vars.DMS
@@ -4536,7 +4536,7 @@ vars.ref -  vec3 ref point, maybe overload for vec2 as well?
 vars.alt - boolean, if used, includes altitude in string
 vars.metric - boolean, gives distance in km instead of NM.
 ]]
-mist.getBRString = function(vars)
+function mist.getBRString(vars)
   local units = vars.units
   local ref = mist.utils.makeVec3(vars.ref, 0)  -- turn it into Vec3 if it is not already.
   local alt = vars.alt
@@ -4560,7 +4560,7 @@ vars.heading - direction
 vars.radius - number
 vars.headingDegrees - boolean, switches heading to degrees
 ]]
-mist.getLeadingPos = function(vars)
+function mist.getLeadingPos(vars)
   local units = vars.units
   local heading = vars.heading
   local radius = vars.radius
@@ -4618,7 +4618,7 @@ vars.radius - number
 vars.headingDegrees - boolean, switches heading to degrees
 vars.acc - number, 0 to 5.
 ]]
-mist.getLeadingMGRSString = function(vars)
+function mist.getLeadingMGRSString(vars)
   local pos = mist.getLeadingPos(vars)
   if pos then
     local acc = vars.acc or 5
@@ -4634,7 +4634,7 @@ vars.headingDegrees - boolean, switches heading to degrees
 vars.acc - number of digits after decimal point (can be negative)
 vars.DMS -  boolean, true if you want DMS.
 ]]
-mist.getLeadingLLString = function(vars)
+function mist.getLeadingLLString(vars)
   local pos = mist.getLeadingPos(vars)
   if pos then
     local acc = vars.acc or 3
@@ -4655,7 +4655,7 @@ vars.metric - boolean, if true, use km instead of NM.
 vars.alt - boolean, if true, include altitude.
 vars.ref - vec3/vec2 reference point.
 ]]
-mist.getLeadingBRString = function(vars)
+function mist.getLeadingBRString(vars)
   local pos = mist.getLeadingPos(vars)
   if pos then
     local ref = vars.ref
@@ -4686,7 +4686,7 @@ vars.text - text in the message
 vars.displayTime - self explanatory
 vars.msgFor - scope
 ]]
-mist.msgMGRS = function(vars)
+function mist.msgMGRS(vars)
   local units = vars.units
   local acc = vars.acc
   local text = vars.text
@@ -4719,7 +4719,7 @@ vars.text - text in the message
 vars.displayTime - self explanatory
 vars.msgFor - scope
 ]]
-mist.msgLL = function(vars)
+function mist.msgLL(vars)
   local units = vars.units  -- technically, I don't really need to do this, but it helps readability.
   local acc = vars.acc
   local DMS = vars.DMS
@@ -4757,7 +4757,7 @@ vars.text - text of the message
 vars.displayTime
 vars.msgFor - scope
 ]]
-mist.msgBR = function(vars)
+function mist.msgBR(vars)
   local units = vars.units  -- technically, I don't really need to do this, but it helps readability.
   local ref = vars.ref -- vec2/vec3 will be handled in mist.getBRString
   local alt = vars.alt
@@ -4797,7 +4797,7 @@ vars.text - text of the message
 vars.displayTime
 vars.msgFor - scope
 ]]
-mist.msgBullseye = function(vars)
+function mist.msgBullseye(vars)
   if string.lower(vars.ref) == 'red' then
     vars.ref = mist.DBs.missionData.bullseye.red
     mist.msgBR(vars)
@@ -4817,7 +4817,7 @@ vars.displayTime
 vars.msgFor - scope
 ]]
 
-mist.msgBRA = function(vars)
+function mist.msgBRA(vars)
   if Unit.getByName(vars.ref) and Unit.getByName(vars.ref):isExist() == true then
     vars.ref = Unit.getByName(vars.ref):getPosition().p
     if not vars.alt then
@@ -4838,7 +4838,7 @@ vars.text - text of the message
 vars.displayTime
 vars.msgFor - scope
 ]]
-mist.msgLeadingMGRS = function(vars)
+function mist.msgLeadingMGRS(vars)
   local units = vars.units  -- technically, I don't really need to do this, but it helps readability.
   local heading = vars.heading
   local radius = vars.radius
@@ -4879,7 +4879,7 @@ vars.text - text of the message
 vars.displayTime
 vars.msgFor - scope
 ]]
-mist.msgLeadingLL = function(vars)
+function mist.msgLeadingLL(vars)
   local units = vars.units  -- technically, I don't really need to do this, but it helps readability.
   local heading = vars.heading
   local radius = vars.radius
@@ -4923,7 +4923,7 @@ vars.text - text of the message
 vars.displayTime
 vars.msgFor - scope
 ]]
-mist.msgLeadingBR = function(vars)
+function mist.msgLeadingBR(vars)
   local units = vars.units  -- technically, I don't really need to do this, but it helps readability.
   local heading = vars.heading
   local radius = vars.radius
@@ -4959,7 +4959,7 @@ end
 -- start of sct Merge
 do -- all function uses of group and unit Ids must be in this do statement
 
-  mist.groupTableCheck = function(groupData)
+  function mist.groupTableCheck(groupData)
     local isOk = false
 
     if groupData.country then
@@ -4983,7 +4983,7 @@ do -- all function uses of group and unit Ids must be in this do statement
     return isOk
   end
 
-  mist.getCurrentGroupData = function(gpName)
+  function mist.getCurrentGroupData(gpName)
     local dbData = mist.getGroupData(gpName)
 
     if Group.getByName(gpName) and Group.getByName(gpName):isExist() == true then
@@ -5033,7 +5033,7 @@ do -- all function uses of group and unit Ids must be in this do statement
 
   end
 
-  mist.getGroupData = function(gpName)
+  function mist.getGroupData(gpName)
     local found = false
     local newData = {}
     if mist.DBs.groupsByName[gpName] then
@@ -5098,7 +5098,7 @@ do -- all function uses of group and unit Ids must be in this do statement
     end
   end
 
-  mist.getPayload = function(unitIdent)
+  function mist.getPayload(unitIdent)
     -- refactor to search by groupId and allow groupId and groupName as inputs
     local unitId = unitIdent
     if type(unitIdent) == 'string' and not tonumber(unitIdent) then
@@ -5138,7 +5138,7 @@ do -- all function uses of group and unit Ids must be in this do statement
     return
   end
 
-  mist.getGroupPayload = function(groupIdent)
+  function mist.getGroupPayload(groupIdent)
     local gpId = groupIdent
     if type(groupIdent) == 'string' and not tonumber(groupIdent) then
       gpId = mist.DBs.MEgroupsByName[groupIdent].groupId
@@ -5177,7 +5177,7 @@ do -- all function uses of group and unit Ids must be in this do statement
 
   end
 
-  mist.teleportToPoint = function(vars) -- main teleport function that all of teleport/respawn functions call
+  function mist.teleportToPoint(vars) -- main teleport function that all of teleport/respawn functions call
     local point = vars.point
 
     local gpName
@@ -5313,7 +5313,7 @@ do -- all function uses of group and unit Ids must be in this do statement
 
   end
 
-  mist.respawnInZone = function(gpName, zone, disperse, maxDisp)
+  function mist.respawnInZone(gpName, zone, disperse, maxDisp)
 
     if type(gpName) == 'table' and gpName:getName() then
       gpName = gpName:getName()
@@ -5338,7 +5338,7 @@ do -- all function uses of group and unit Ids must be in this do statement
     return mist.teleportToPoint(vars)
   end
 
-  mist.cloneInZone = function(gpName, zone, disperse, maxDisp)
+  function mist.cloneInZone(gpName, zone, disperse, maxDisp)
 
     if type(gpName) == 'table' then
       gpName = gpName:getName()
@@ -5361,7 +5361,7 @@ do -- all function uses of group and unit Ids must be in this do statement
     return mist.teleportToPoint(vars)
   end
 
-  mist.teleportInZone = function(gpName, zone, disperse, maxDisp) -- groupName, zoneName or table of Zone Names, keepForm is a boolean
+  function mist.teleportInZone(gpName, zone, disperse, maxDisp) -- groupName, zoneName or table of Zone Names, keepForm is a boolean
     if type(gpName) == 'table' and gpName:getName() then
       gpName = gpName:getName()
     else
@@ -5384,7 +5384,7 @@ do -- all function uses of group and unit Ids must be in this do statement
     return mist.teleportToPoint(vars)
   end
 
-  mist.respawnGroup = function(gpName, task)
+  function mist.respawnGroup(gpName, task)
     local vars = {}
     vars.gpName = gpName
     vars.action = 'respawn'
@@ -5399,7 +5399,7 @@ do -- all function uses of group and unit Ids must be in this do statement
     return newGroup
   end
 
-  mist.cloneGroup = function(gpName, task)
+  function mist.cloneGroup(gpName, task)
     local vars = {}
     vars.gpName = gpName
     vars.action = 'clone'
@@ -5414,7 +5414,7 @@ do -- all function uses of group and unit Ids must be in this do statement
     return newGroup
   end
 
-  mist.teleportGroup = function(gpName, task)
+  function mist.teleportGroup(gpName, task)
     local vars = {}
     vars.gpName = gpName
     vars.action = 'teleport'
@@ -5429,7 +5429,7 @@ do -- all function uses of group and unit Ids must be in this do statement
     return newGroup
   end
 
-  mist.spawnRandomizedGroup = function(groupName, vars) -- need to debug
+  function mist.spawnRandomizedGroup(groupName, vars) -- need to debug
     if Group.getByName(groupName) and Group.getByName(groupName):isExist() == true then
       local gpData = mist.getGroupData(groupName)
       gpData.units = mist.randomizeGroupOrder(gpData.units, vars)
@@ -5441,7 +5441,7 @@ do -- all function uses of group and unit Ids must be in this do statement
     return true
   end
 
-  mist.randomizeNumTable = function(vars)
+  function mist.randomizeNumTable(vars)
     local newTable = {}
 
     local excludeIndex = {}
@@ -5514,7 +5514,7 @@ do -- all function uses of group and unit Ids must be in this do statement
     return newTable
   end
 
-  mist.randomizeGroupOrder = function(passedUnits, vars)
+  function mist.randomizeGroupOrder(passedUnits, vars)
     -- figure out what to exclude, and send data to other func
     local units = passedUnits
 
@@ -5581,7 +5581,7 @@ do -- all function uses of group and unit Ids must be in this do statement
     return newGroup
   end
 
-  mist.ground.patrolRoute = function(vars)
+  function mist.ground.patrolRoute(vars)
 
 
     local tempRoute = {}
@@ -5682,7 +5682,7 @@ do -- all function uses of group and unit Ids must be in this do statement
     return
   end
 
-  mist.ground.patrol = function(gpData, pType, form, speed)
+  function mist.ground.patrol(gpData, pType, form, speed)
     local vars = {}
 
     if type(gpData) == 'table' and gpData:getName() then
@@ -5701,7 +5701,7 @@ do -- all function uses of group and unit Ids must be in this do statement
   end
 
 
-  mist.random = function(firstNum, secondNum) -- no support for decimals
+  function mist.random(firstNum, secondNum) -- no support for decimals
     local lowNum, highNum
     if not secondNum then
       highNum = firstNum
@@ -5729,7 +5729,7 @@ do -- all function uses of group and unit Ids must be in this do statement
 
 
 
-  mist.stringMatch = function(s1, s2, bool)
+  function mist.stringMatch(s1, s2, bool)
     local exclude = {'%-', '%(', '%)', '%_', '%[', '%]', '%.', '%#', '% ', '%{', '%}', '%$', '%%', '%?', '%+', '%^'}
     if type(s1) == 'string' and type(s2) == 'string' then
       for i , str in pairs(exclude) do
@@ -5759,7 +5759,7 @@ do -- all function uses of group and unit Ids must be in this do statement
   -- theTime is optional
   -- if present current time in mil time is returned
   -- if number or table the time is converted into mil tim
-  mist.time.convertToSec = function(timeTable)
+  function mist.time.convertToSec(timeTable)
 
     timeInSec = 0
     if timeTable and type(timeTable) == 'number' then
@@ -5782,7 +5782,7 @@ do -- all function uses of group and unit Ids must be in this do statement
     return timeInSec
   end
 
-  mist.time.getDHMS = function(timeInSec)
+  function mist.time.getDHMS(timeInSec)
     if timeInSec and type(timeInSec) == 'number' then
       local tbl = {d = 0, h = 0, m = 0, s = 0}
       if timeInSec > 86400 then
@@ -5811,7 +5811,7 @@ do -- all function uses of group and unit Ids must be in this do statement
     end
   end
 
-  mist.getMilString = function(theTime)
+  function mist.getMilString(theTime)
     local timeInSec = 0
     if theTime then
       timeInSec = mist.time.convertToSec(theTime)
@@ -5824,7 +5824,7 @@ do -- all function uses of group and unit Ids must be in this do statement
     return tostring(string.format('%02d', DHMS.h) .. string.format('%02d',DHMS.m))
   end
 
-  mist.getClockString = function(theTime, hour)
+  function mist.getClockString(theTime, hour)
     local timeInSec = 0
     if theTime then
       timeInSec = mist.time.convertToSec(theTime)
@@ -5848,7 +5848,7 @@ do -- all function uses of group and unit Ids must be in this do statement
   -- both variables optional
   -- first val returns with the month as a string
   -- 2nd val defins if it should be written the American way or the wrong way.
-  mist.time.getDate = function(convert)
+  function mist.time.getDate(convert)
     local cal = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31} -- starts at june. 2011. 2012 is leap year, sigh. add a simple check for leap year
     local date = {}
     date.d = 0
@@ -5881,13 +5881,13 @@ do -- all function uses of group and unit Ids must be in this do statement
     return date
   end
 
-  mist.time.relativeToStart = function(time)
+  function mist.time.relativeToStart(time)
     if type(time) == 'number' then
       return time - timer.getTime0()
     end
   end
 
-  mist.getDateString = function(rtnType, murica, oTime) -- returns date based on time
+  function mist.getDateString(rtnType, murica, oTime) -- returns date based on time
     local word = {'January', 'Feburary', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December' } -- 'etc
     local curTime = 0
     if oTime then
@@ -5912,7 +5912,7 @@ do -- all function uses of group and unit Ids must be in this do statement
     end
   end
   --WIP
-  mist.time.milToGame = function(milString, rtnType) --converts a military time. By default returns the abosolute time that event would occur. With optional value it returns how many seconds from time of call till that time.
+  function mist.time.milToGame(milString, rtnType) --converts a military time. By default returns the abosolute time that event would occur. With optional value it returns how many seconds from time of call till that time.
     local curTime = mist.utils.round(timer.getAbsTime())
     local milTimeInSec = 0
 
