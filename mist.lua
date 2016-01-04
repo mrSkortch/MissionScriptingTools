@@ -17,8 +17,7 @@ mist.majorVersion = 4
 mist.minorVersion = 0
 mist.build = 60
 
---------------------------------------------------------------------------------------------------------------
--- the main area
+-- the main scope
 do
   local coroutines = {}
 
@@ -401,7 +400,6 @@ do
   -- THE MAIN FUNCTION --   Accessed 100 times/sec.
   mist.main = function()
     timer.scheduleFunction(mist.main, {}, timer.getTime() + 0.01)  --reschedule first in case of Lua error
-    ----------------------------------------------------------------------------------------------------------
     --area to add new stuff in
     write_DB_table_counter = write_DB_table_counter + 1
     if write_DB_table_counter == 10 then
@@ -435,7 +433,6 @@ do
       end
     end
 
-    -----------------------------------------------------------------------------------------------------------
     --updating alive units
     update_alive_units_counter = update_alive_units_counter + 1
     if update_alive_units_counter == 5 then
@@ -454,8 +451,7 @@ do
 
     mist.do_scheduled_functions()
   end -- end of mist.main
-  --------------------------------------------
-  ------------ mist dyn add stuff for coroutines
+  -- mist dyn add stuff for coroutines
   local mistGpId = 7000
   local mistUnitId = 7000
   local mistDynAddIndex = 1
@@ -485,7 +481,8 @@ do
   end
 
   local function groupSpawned(event)
-    if event.id == world.event.S_EVENT_BIRTH and timer.getTime0() < timer.getAbsTime()then -- dont need to add units spawned in at the start of the mission if mist is loaded in init line
+    -- dont need to add units spawned in at the start of the mission if mist is loaded in init line
+    if event.id == world.event.S_EVENT_BIRTH and timer.getTime0() < timer.getAbsTime() then
       table.insert(tempSpawnedUnits,(event.initiator))
     end
   end
@@ -587,11 +584,9 @@ do
     return false
   end
 
-  mist.dynAdd = function(newGroup) -- same as coalition.add function in SSE. checks the passed data to see if its valid.
-    --Will generate groupId, groupName, unitId, and unitName if needed
-    --
-
-
+  -- same as coalition.add function in SSE. checks the passed data to see if its valid.
+  -- Will generate groupId, groupName, unitId, and unitName if needed
+  mist.dynAdd = function(newGroup)
 
     --mist.debug.writeData(mist.utils.serialize,{'msg', newGroup}, 'newGroupOrig.lua')
     local cntry = newGroup.country
@@ -770,7 +765,6 @@ do
 
   end
 
-  ---------------------------------------------------------------------------------------------
   --Modified Slmod task scheduler, superior to timer.scheduleFunction
 
   local Tasks = {}
@@ -811,7 +805,6 @@ do
     end
   end
 
-  --------------------------------------------------------------------------------------------------------------------
   -- not intended for users to use this function.
   mist.do_scheduled_functions = function()
     local i = 1
@@ -851,7 +844,7 @@ do
 
   local idNum = 0
 
-  --Simplified event handler
+  -- Simplified event handler
   mist.addEventHandler = function(f) --id is optional!
     local handler = {}
     idNum = idNum + 1
@@ -878,10 +871,7 @@ do
   --	mist.scheduleFunction(checkSpawnedEvents, {}, timer.getTime() + 5, 1)
 
 end
-------------------------------------------------------------------------------------------------------------
 
-
-----------------------------------------------------------------------------------------------
 -- Utils- conversion, Lua utils, etc.
 mist.utils = {}
 
@@ -1171,7 +1161,7 @@ end
 
 --porting in Slmod's serialize_slmod
 mist.utils.serialize = function(name, value, level)
-  -----Based on ED's serialize_simple2
+  --Based on ED's serialize_simple2
   local basicSerialize = function (o)
     if type(o) == "number" then
       return tostring(o)
@@ -1183,9 +1173,6 @@ mist.utils.serialize = function(name, value, level)
   end
 
   local serialize_to_t = function (name, value, level)
-    ----Based on ED's serialize_simple2
-
-
     local var_str_tbl = {}
     if level == nil then level = "" end
     if level ~= "" then level = level.."  " end
@@ -1415,7 +1402,6 @@ mist.debug.dumpDBs = function()
   end
 end
 
------------------------------------------------------------------------------------------------------------------
 --3D Vector manipulation
 mist.vec = {}
 
@@ -1453,7 +1439,6 @@ end
 mist.vec.rotateVec2 = function(vec2, theta)
   return { x = vec2.x*math.cos(theta) - vec2.y*math.sin(theta), y = vec2.x*math.sin(theta) + vec2.y*math.cos(theta)}
 end
----------------------------------------------------------------------------------------------------------------------------
 
 -- acc- the accuracy of each easting/northing.  0, 1, 2, 3, 4, or 5.
 mist.tostringMGRS = function(MGRS, acc)
@@ -1847,12 +1832,10 @@ function mist.getClimbAngle(unit)
     end
   end
 end
------------------------------------------------------------------------------------------------------------
 -- Database building
 mist.DBs = {}
 
 mist.DBs.missionData = {}
------------------------------------------
 if env.mission then
 
   mist.DBs.missionData['startTime'] = env.mission.start_time
@@ -1871,8 +1854,6 @@ if env.mission then
   mist.DBs.missionData.bullseye.blue['y'] = env.mission.coalition.blue.bullseye.y
 
 end
-
-----------------------------------------
 
 mist.DBs.zonesByName = {}
 mist.DBs.zonesByNum = {}
@@ -1902,7 +1883,6 @@ for coa_name, coa_data in pairs(env.mission.coalition) do
   if (coa_name == 'red' or coa_name == 'blue') and type(coa_data) == 'table' then
     mist.DBs.units[coa_name] = {}
 
-    ----------------------------------------------
     -- build nav points DB
     mist.DBs.navPoints[coa_name] = {}
     if coa_data.nav_points then --navpoints
@@ -1920,7 +1900,6 @@ for coa_name, coa_data in pairs(env.mission.coalition) do
         end
       end
     end
-    -------------------------------------------------
     if coa_data.country then --there is a country table
       for cntry_id, cntry_data in pairs(coa_data.country) do
 
@@ -2107,8 +2086,7 @@ for coa_name, coa_data in pairs(mist.DBs.units) do
   end
 end
 
---------------
--------- mist unitID funcs
+-- mist unitID funcs
 do
   for id, idData in pairs(mist.DBs.unitsById) do
     if idData.unitId > mist.nextUnitId then
@@ -2137,7 +2115,6 @@ do
   local mt = {}
 
   mt.__newindex = function(t, key, val)
-    ---------------------------------------------------------------
     local original_key = key --only for duplicate runtime IDs.
     local key_ind = 1
     while mist.DBs.deadObjects[key] do
@@ -2145,7 +2122,6 @@ do
       key = tostring(original_key) .. ' #' .. tostring(key_ind)
       key_ind = key_ind + 1
     end
-    ---------------------------------------------------------------
 
     if mist.DBs.aliveUnits and mist.DBs.aliveUnits[val.object.id_] then
       --print('object found in alive_units')
@@ -2204,7 +2180,6 @@ do
         local id = event.initiator.id_  -- initial ID, could change if there is a duplicate id_ already dead.
         local val = {object = event.initiator} -- the new entry in mist.DBs.deadObjects.
 
-        ---------------------------------------------------------------
         local original_id = id  --only for duplicate runtime IDs.
         local id_ind = 1
         while mist.DBs.deadObjects[id] do
@@ -2212,7 +2187,6 @@ do
           id = tostring(original_id) .. ' #' .. tostring(id_ind)
           id_ind = id_ind + 1
         end
-        ---------------------------------------------------------------
 
         if mist.DBs.aliveUnits and mist.DBs.aliveUnits[val.object.id_] then
           --print('object found in alive_units')
@@ -2288,10 +2262,6 @@ do
 
   mist.addEventHandler(addClientsToActive)]]
 end
-
-
-
-
 
 function mist.makeUnitTable(tbl)
 
@@ -3524,7 +3494,6 @@ mist.getAvgGroupPos = function(groupName)
 
 end
 
----------------------------------------------------------------------------------------
 -- demos
 mist.demos = {}
 
@@ -3639,11 +3608,7 @@ mist.demos.printFlightData = function(unit)
   end
 
 end
---------------------------------------------------------------------------------------------------------------------------------------------
---------------------------------------------------------------------------------------------------------------------------------------------
---------------------------------------------------------------------------------------------------------------------------------------------
 --start of Mission task functions
---*****************************************************
 mist.ground = {}
 mist.fixedWing = {}
 mist.heli = {}
@@ -3675,7 +3640,8 @@ mist.goRoute = function(group, path)
   return false
 end
 
-function mist.getGroupRoute(groupIdent, task)   -- same as getGroupPoints but returns speed and formation type along with vec2 of point}
+-- same as getGroupPoints but returns speed and formation type along with vec2 of point}
+function mist.getGroupRoute(groupIdent, task)
   -- refactor to search by groupId and allow groupId and groupName as inputs
   local gpId = groupIdent
   if type(groupIdent) == 'string' and not tonumber(groupIdent) then
@@ -3911,13 +3877,6 @@ mist.heli.buildWP = function(point, WPtype, speed, alt, altType)
   return wp
 end
 
-
-
----------------------------------
-
---
-
-
 -- need to return a Vec3 or Vec2?
 function mist.getRandPointInCircle(point, radius, innerRadius)
   local theta = 2*math.pi*math.random()
@@ -4151,20 +4110,13 @@ mist.getLeadPos = function(group)
 end
 
 -- end of Mission task functions
---------------------------------------------------------------------------------------------------------------------------------------------
---------------------------------------------------------------------------------------------------------------------------------------------
---------------------------------------------------------------------------------------------------------------------------------------------
 
-
-
---------------------------------------------------------------------------------------------------------------------------------------------
---------------------------------------------------------------------------------------------------------------------------------------------
---------------------------------------------------------------------------------------------------------------------------------------------
--------MESAGGES------
-
+-- MESAGGES
 do
   local messageList = {}
-  local messageDisplayRate = 0.1 -- this defines the max refresh rate of the message box it honestly only needs to go faster than this for precision timing stuff (which could be its own function)
+  -- this defines the max refresh rate of the message box it honestly only needs to
+  -- go faster than this for precision timing stuff (which could be its own function)
+  local messageDisplayRate = 0.1
   local messageID = 0
   local displayActive = false
   local displayFuncId = 0
@@ -4507,13 +4459,7 @@ end]]
 
 end
 -- End of message system
---------------------------------------------------------------------------------------------------------------------------------------------
---------------------------------------------------------------------------------------------------------------------------------------------
---------------------------------------------------------------------------------------------------------------------------------------------
 
---------------------------------------------------------------------------------------------------------------------------------------------
---------------------------------------------------------------------------------------------------------------------------------------------
---------------------------------------------------------------------------------------------------------------------------------------------
 -- Beginning of coordinate messages
 --[[
 Design:
@@ -4841,7 +4787,6 @@ mist.message.add{
 end
 
 
---------------------------------------------------------------------------------------------
 -- basically, just sub-types of mist.msgBR... saves folks the work of getting the ref point.
 --[[
 vars.units- table of unit names (NOT unitNameTable- maybe this should change).
@@ -5009,16 +4954,10 @@ mist.message.add{
   msgFor = msgFor
 }
 end
-
-
 -- end of coordinate messages
---------------------------------------------------------------------------------------------------------------------------------------------
---------------------------------------------------------------------------------------------------------------------------------------------
---------------------------------------------------------------------------------------------------------------------------------------------
+
 -- start of sct Merge
-
 do -- all function uses of group and unit Ids must be in this do statement
-
 
   mist.groupTableCheck = function(groupData)
     local isOk = false
