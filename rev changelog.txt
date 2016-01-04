@@ -1,3 +1,15 @@
+v59
+-removed the new 3rd variable from mist.utils.getDir and just made the 2nd variable optional instead
+-Added check to DB update functions to only update if data from the group has changed from what is currently in the DB. This fixes an issue I had where some data was lost if you spawned a group normally after mission start and then used a respawn, clone, or teleport function on said group
+-fixed issue with dynAdd functions naming a group with the country ID insead of country name
+-added mist.getAvgPoint(). Function is similar to mist.getAvgPos except it uses raw vec2/3 coordinates instead of units
+-added mist.utils.roundTbl() Has the same input values as mist.utils.round except it accepts a table and it rounds all numbers in the first level of the table to the passed percision. 
+
+v58
+-added optional variable to mist.utils.getDir() If present this function will return the "raw" heading, this is useful in assigning the heading variable within a task.
+-mist.utils.makeVec3 now supports being given a table in WP format. Specifically it now coverts a table {x, y, alt) to vec3
+
+
 v57
 -fixed bug with groupRandomDistSelf improperly declaring the y variable
 -fixed flagFunc.units_in_moving_zones not checking for a unitNameTable for the zone_units
