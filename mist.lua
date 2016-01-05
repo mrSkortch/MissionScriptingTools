@@ -9,8 +9,11 @@ Official Release: https://github.com/mrSkortch/MissionScriptingTools/tree/master
 
 ]]
 
---- MiST Mission Scripting Tools
+--- MiST Mission Scripting Tools.
 -- @module mist
+-- @author Speed
+-- @author Grimes
+-- @author lukrop
 mist = {}
 
 -- don't change these
@@ -18,8 +21,8 @@ mist.majorVersion = 4
 mist.minorVersion = 0
 mist.build = 60
 
---- Logger class
--- @section Logger
+--- Logger class.
+-- @type mist.Logger
 mist.Logger = {
   tag = "",
   level = 1,
@@ -27,9 +30,12 @@ mist.Logger = {
 
 -- Logger scope
 do
-  --- Logger constructor
-  -- creates a new logger with empty tag and log level set to 'error'
-  -- @tparam[opt] mist.Logger optional existing logger object
+  --- Logger constructor.
+  -- Creates a new logger object.
+  -- @tparam[opt] table l optional logger object.
+  -- @usage myLogger = mist.Logger:new
+  -- @usage myLogger = mist.Logger:new{tag = "MyScript", level = 2}
+  -- @treturn mist.Logger
   function mist.Logger:new(l)
     l = l or {}
     setmetatable(l, self)
@@ -37,12 +43,14 @@ do
     return l
   end
 
-  --- Sets the level of verbosity for this logger
+  --- Sets the level of verbosity for this logger.
   -- "none" or 0 disables all logging
   -- "error" or 1 shows error messages only
   -- "warning" or 2 shows error and warning messages
   -- "info" or 3 shows error, warning and info messages
   -- @param level this can either be a string or an integer level
+  -- @usage myLogger:setLevel("info")
+  -- @usage myLogger:setLevel(3) -- show everything!
   function mist.Logger:setLevel(level)
     if type(level) == 'string' then
       if level == 'none' or level == 'off' then
@@ -63,7 +71,7 @@ do
   -- @tparam string text string containing keywords to substitute with values
   -- @tparam array vars values to use for substitution
   -- @treturn string new string with keywords substituted
-  local function mist.Logger:substituteKeys(text, vars)
+  local function substituteKeys(text, vars)
     local substText = text
     for identifier in text:gmatch("%%%d") do
       local index = tonumber(identifier:match("%d+"))
@@ -76,31 +84,54 @@ do
     return substText
   end
 
+  --- Logs an error.
+  -- logs to dcs.log as long as at least the "error" log level is set.
+  -- @tparam string text the text with keywords to substitute.
+  -- @tparam[opt] table vars this the values to be used for substitution.
+  -- @tparam[opt] boolean showBox whether to show a box and pause the game.
+  -- @usage myLogger:error("Just an error!")
+  -- @usage myLogger:error("This is a serious error! Foo is %1 instead of 'bar'", {'derp'})
+  -- @usage myLogger:error("It's a trap!", {}, true)
   function mist.Logger:error(text, vars, showBox)
     showBox = showBox or false
     if self.level >= 1 then
       if vars then
-        text = self.subsituteKeys(text, vars)
+        -- check if table is empty
+        if not next(vars) == nil then
+          text = subsituteKeys(text, vars)
+        end
       end
       env.error(tag .. ' | ' .. text, showBox)
     end
   end
 
+  --- Logs a warning.
+  -- @tparam string text the text with keywords to substitute.
+  -- @tparam[opt] table vars this the values to be used for substitution.
+  -- @usage myLogger:warn("I warned you! Those %1 from the interwebs are %2", {"geeks", 1337})
   function mist.Logger:warn(text, vars)
     if self.level >= 2 then
       if vars then
-        text = self.subsituteKeys(text, vars)
+        if not next(vars) == nil then
+          text = subsituteKeys(text, vars)
+        end
       end
       env.warning(tag .. ' | ' .. text)
     end
   end
 
+  --- Logs a info
+  -- @tparam string text the text with keywords to substitute.
+  -- @tparam[opt] table vars this the values to be used for substitution.
+  -- @see warn
   function mist.Logger:info(text, vars)
     if self.level >= 4 then
       if vars then
-        text = self.subsituteKeys(text, vars)
+        if not next(vars) == nil then
+          text = subsituteKeys(text, vars)
+        end
       end
-      env.error(tag .. ' | ' .. text)
+      env.info(tag .. ' | ' .. text)
     end
   end
 end
@@ -955,7 +986,8 @@ do
 
 end
 
---- Utility methods. E.g. conversions between units etc.
+--- Utility methods.
+-- E.g. conversions between units etc.
 -- @section utils
 mist.utils = {}
 
@@ -988,9 +1020,9 @@ function mist.utils.metersToFeet (meters)
 end
 
 --- Converts nautical miles to meters
--- @param NM distance in nautical miles
+-- @param nm distance in nautical miles
 -- @return distance in meters
-function mist.utils.NMToMeters (NM)
+function mist.utils.NMToMeters (nm)
   return NM*1852
 end
 
@@ -1030,48 +1062,51 @@ function mist.utils.kmphToMps (kmph)
 end
 
 --- Converts a Vec3 to a Vec2.
--- @param Vec3 the 3D vector
+-- @tparam Vec3 vec the 3D vector
 -- @return vector converted to Vec2
-function mist.utils.makeVec2(Vec3)
-  if Vec3.z then
-    return {x = Vec3.x, y = Vec3.z}
+function mist.utils.makeVec2(vec)
+  if vec.z then
+    return {x = vec.x, y = vec.z}
   else
-    return {x = Vec3.x, y = Vec3.y}  -- it was actually already vec2.
+    return {x = vec.x, y = vec.y}  -- it was actually already vec2.
   end
 end
 
 --- Converts a Vec2 to a Vec3.
--- @param Vec2 the 2D vector
+-- @tparam Vec2 vec the 2D vector
 -- @param y optional new y axis (altitude) value. If omitted it's 0.
-function mist.utils.makeVec3(Vec2, y)
-  if not Vec2.z then
-    if Vec2.alt and not y then
-      y = Vec2.alt
+function mist.utils.makeVec3(vec, y)
+  if not vec.z then
+    if vec.alt and not y then
+      y = vec.alt
     elseif not y then
       y = 0
     end
-    return {x = Vec2.x, y = y, z = Vec2.y}
+    return {x = vec.x, y = y, z = vec.y}
   else
-    return {x = Vec2.x, y = Vec2.y, z = Vec2.z}  -- it was already Vec3, actually.
+    return {x = vec.x, y = vec.y, z = vec.z}  -- it was already Vec3, actually.
   end
 end
 
 --- Converts a Vec2 to a Vec3 using ground level as altitude.
 -- The ground level at the specific point is used as altitude (y-axis)
 -- for the new vector. Optionally a offset can be specified.
--- @tparam Vec2 Vec2 the 2D vector
+-- @tparam Vec2 vec the 2D vector
 -- @param[opt] offset offset to be applied to the ground level
 -- @return new 3D vector
-function mist.utils.makeVec3GL(Vec2, offset)
+function mist.utils.makeVec3GL(vec, offset)
   local adj = offset or 0
 
-  if not Vec2.z then
-    return {x = Vec2.x, y = (land.getHeight(Vec2) + adj), z = Vec2.y}
+  if not vec.z then
+    return {x = vec.x, y = (land.getHeight(vec) + adj), z = vec.y}
   else
-    return {x = Vec2.x, y = (land.getHeight({x = Vec2.x, y = Vec2.z}) + adj), z = Vec2.z}
+    return {x = vec.x, y = (land.getHeight({x = vec.x, y = vec.z}) + adj), z = vec.z}
   end
 end
 
+--- Returns the center of a zone as Vec3
+-- @tparam string|table zone trigger zone name or table
+-- @treturn Vec3 center of the zone
 function mist.utils.zoneToVec3 (zone)
   local new = {}
   if type(zone) == 'table' and zone.point then
@@ -1090,30 +1125,43 @@ function mist.utils.zoneToVec3 (zone)
   end
 end
 
--- gets heading-error corrected direction from point along vector vec.
+--- Returns heading-error corrected direction.
+-- True-north corrected direction from point along vector vec.
+-- @tparam Vec3 vec
+-- @tparam Vec2 point
+-- @return heading-error corrected direction from point.
 function mist.utils.getDir(vec, point)
   local dir = math.atan2(vec.z, vec.x)
   if point then
     dir = dir + mist.getNorthCorrection(point)
   end
   if dir < 0 then
-    dir = dir + 2*math.pi  -- put dir in range of 0 to 2*pi
+    dir = dir + 2 * math.pi  -- put dir in range of 0 to 2*pi
   end
   return dir
 end
 
--- gets distance in meters between two points (2 dimensional)
+--- Returns distance in meters between two points.
+-- @tparam Vec2|Vec3 point1 first point
+-- @tparam Vec2|Vec3 point2 second point
+-- @treturn number distance between given points.
 function mist.utils.get2DDist(point1, point2)
   point1 = mist.utils.makeVec3(point1)
   point2 = mist.utils.makeVec3(point2)
   return mist.vec.mag({x = point1.x - point2.x, y = 0, z = point1.z - point2.z})
 end
 
--- gets distance in meters between two points (3 dimensional)
+--- Returns distance in meters between two points in 3D space.
+-- @tparam Vec3 point1 first point
+-- @tparam Vec3 point2 second point
+-- @treturn number distancen between given points in 3D space.
 function mist.utils.get3DDist(point1, point2)
   return mist.vec.mag({x = point1.x - point2.x, y = point1.y - point2.y, z = point1.z - point2.z})
 end
 
+--- Creates a waypoint from a vector.
+-- @tparam Vec2|Vec3 vec position of the new waypoint
+-- @treturn Waypoint a new waypoint to be used inside paths.
 function mist.utils.vecToWP(vec)
   local newWP = {}
   newWP.x = vec.x
@@ -1127,6 +1175,11 @@ function mist.utils.vecToWP(vec)
   return newWP
 end
 
+--- Creates a waypoint from a unit.
+-- This function also considers the units speed.
+-- The alt_type of this waypoint is set to "BARO".
+-- @tparam Unit unit Unit whose position and speed will be used.
+-- @treturn Waypoint new waypoint.
 function mist.utils.unitToWP(unit)
   if type(unit) == 'string' then
     if Unit.getByName(unit) then
