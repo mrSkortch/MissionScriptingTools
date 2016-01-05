@@ -9,7 +9,8 @@ Official Release: https://github.com/mrSkortch/MissionScriptingTools/tree/master
 
 ]]
 
---MiST Mission Scripting Tools
+--- MiST Mission Scripting Tools
+-- @module mist
 mist = {}
 
 -- don't change these
@@ -867,49 +868,83 @@ do
 
 end
 
--- mist.utils: conversion, lua utils, etc. functions
+--- Utility methods. E.g. conversions between units etc.
+-- @section utils
 mist.utils = {}
 
+--- Converts angle in radians to degrees
+-- @param angle angle in radians
+-- @return angle in degrees
 function mist.utils.toDegree (angle)
   return angle*180/math.pi
 end
 
+--- Converts angle in degrees to radians
+-- @param angle angle in degrees
+-- @return angle in degrees
 function mist.utils.toRadian (angle)
   return angle*math.pi/180
 end
 
+--- Converts meters to nautical miles
+-- @param meters distance in meters
+-- @return distance in nautical miles
 function mist.utils.metersToNM (meters)
   return meters/1852
 end
 
+--- Converts meters to feet
+-- @param meters distance in meters
+-- @return distance in feet
 function mist.utils.metersToFeet (meters)
   return meters/0.3048
 end
 
+--- Converts nautical miles to meters
+-- @param NM distance in nautical miles
+-- @return distance in meters
 function mist.utils.NMToMeters (NM)
   return NM*1852
 end
 
+--- Converts feet to meters
+-- @param feet distance in feet
+-- @return distance in meters
 function mist.utils.feetToMeters (feet)
   return feet*0.3048
 end
 
+--- Converts meters per second to knots
+-- @param mps speed in m/s
+-- @return speed in knots
 function mist.utils.mpsToKnots (mps)
   return mps*3600/1852
 end
 
+--- Converts meters per second to kilometers per hour
+-- @param mps speed in m/s
+-- @return speed in km/h
 function mist.utils.mpsToKmph (mps)
   return mps*3.6
 end
 
+--- Converts knots to meters per second
+-- @param knots speed in knots
+-- @return speed in m/s
 function mist.utils.knotsToMps (knots)
   return knots*1852/3600
 end
 
+--- Converts kilometers per hour to meters per second
+-- @param kmph speed in km/h
+-- @return speed in m/s
 function mist.utils.kmphToMps (kmph)
   return kmph/3.6
 end
 
+--- Converts a Vec3 to a Vec2.
+-- @param Vec3 the 3D vector
+-- @return vector converted to Vec2
 function mist.utils.makeVec2(Vec3)
   if Vec3.z then
     return {x = Vec3.x, y = Vec3.z}
@@ -918,6 +953,9 @@ function mist.utils.makeVec2(Vec3)
   end
 end
 
+--- Converts a Vec2 to a Vec3.
+-- @param Vec2 the 2D vector
+-- @param y optional new y axis (altitude) value. If omitted it's 0.
 function mist.utils.makeVec3(Vec2, y)
   if not Vec2.z then
     if Vec2.alt and not y then
@@ -931,6 +969,12 @@ function mist.utils.makeVec3(Vec2, y)
   end
 end
 
+--- Converts a Vec2 to a Vec3 using ground level as altitude.
+-- The ground level at the specific point is used as altitude (y-axis)
+-- for the new vector. Optionally a offset can be specified.
+-- @tparam Vec2 Vec2 the 2D vector
+-- @param[opt] offset offset to be applied to the ground level
+-- @return new 3D vector
 function mist.utils.makeVec3GL(Vec2, offset)
   local adj = offset or 0
 
@@ -1620,8 +1664,6 @@ function mist.getGroupPoints(groupIdent)   -- if groupname exists in env.mission
     end --if coa_name == 'red' or coa_name == 'blue' and type(coa_data) == 'table' then
   end --for coa_name, coa_data in pairs(mission.coalition) do
 end
-
-
 
 --[[ table attitude = getAttitude(string unitname) -- will work on any unit, even if not an aircraft.
 
