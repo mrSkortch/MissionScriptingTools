@@ -397,10 +397,10 @@ do
   local write_DB_table_counter = 0
   local check_spawn_events_counter = 0
 
-  -- THE MAIN FUNCTION --   Accessed 100 times/sec.
+  -- The main function. Accessed 100 times/sec.
   function mist.main()
     timer.scheduleFunction(mist.main, {}, timer.getTime() + 0.01)  --reschedule first in case of Lua error
-    --area to add new stuff in
+
     write_DB_table_counter = write_DB_table_counter + 1
     if write_DB_table_counter == 10 then
 
@@ -486,9 +486,6 @@ do
       table.insert(tempSpawnedUnits,(event.initiator))
     end
   end
-
-
-
 
   function mist.dynAddStatic(staticObj)
     local newObj = {}
@@ -840,8 +837,6 @@ do
     end
   end
 
-
-
   local idNum = 0
 
   -- Simplified event handler
@@ -850,7 +845,7 @@ do
     idNum = idNum + 1
     handler.id = idNum
     handler.f = f
-    local function handler.onEvent(self, event)
+    function handler.onEvent(self, event)
       self.f(event)
     end
     world.addEventHandler(handler)
@@ -872,7 +867,7 @@ do
 
 end
 
--- Utils- conversion, Lua utils, etc.
+-- mist.utils: conversion, lua utils, etc. functions
 mist.utils = {}
 
 function mist.utils.toDegree (angle)
@@ -1017,8 +1012,6 @@ function mist.utils.unitToWP(unit)
   return false
 end
 
-
-
 --from http://lua-users.org/wiki/CopyTable
 function mist.utils.deepCopy(object)
   local lookup_table = {}
@@ -1063,7 +1056,6 @@ function mist.utils.dostring(s)
     return false, err
   end
 end
-
 
 --[[ mist.utils.typeCheck(fname, type_tbl, var_tbl)
 Type-checking function:
@@ -1360,6 +1352,7 @@ function mist.utils.tableShow(tbl, loc, indent, tableshow_tbls) --based on seria
   end
 end
 
+-- mist.debug: debug functions
 mist.debug = {}
 
 function mist.debug.dump_G(fname)
@@ -1402,7 +1395,7 @@ function mist.debug.dumpDBs()
   end
 end
 
---3D Vector manipulation
+-- mist.vec: 3D vector manipulation functions
 mist.vec = {}
 
 function mist.vec.add(vec1, vec2)
@@ -1832,7 +1825,8 @@ function mist.getClimbAngle(unit)
     end
   end
 end
--- Database building
+
+-- mist.DBs: various tables acting as databases
 mist.DBs = {}
 
 mist.DBs.missionData = {}
@@ -2724,8 +2718,6 @@ initial_number
   end
 end
 
-
-
 function mist.flagFunc.mapobjs_dead_polygon(vars)
   --[[vars needs to be:
 zone = table,
@@ -2766,8 +2758,6 @@ initial_number
     end
   end
 end
-
-
 
 function mist.pointInPolygon(point, poly, maxalt) --raycasting point in polygon. Code from http://softsurfer.com/Archive/algorithm_0103/algorithm_0103.htm
   --[[local type_tbl = {
@@ -2895,9 +2885,6 @@ unitTableDef = table or nil
 
 end
 
-
-
-
 function mist.getUnitsInZones(unit_names, zone_names, zone_type)
 
   zone_type = zone_type or 'cylinder'
@@ -2952,7 +2939,6 @@ function mist.getUnitsInZones(unit_names, zone_names, zone_type)
   end
   return in_zone_units
 end
-
 
 function mist.flagFunc.units_in_zones(vars)
   --[[vars needs to be:
@@ -3015,7 +3001,6 @@ function mist.flagFunc.units_in_zones(vars)
 
 end
 
-
 function mist.getUnitsInMovingZones(unit_names, zone_unit_names, radius, zone_type)
 
   zone_type = zone_type or 'cylinder'
@@ -3064,8 +3049,6 @@ function mist.getUnitsInMovingZones(unit_names, zone_unit_names, radius, zone_ty
   end
   return in_zone_units
 end
-
-
 
 function mist.flagFunc.units_in_moving_zones(vars)
   --[[vars needs to be:
@@ -3140,7 +3123,6 @@ function mist.flagFunc.units_in_moving_zones(vars)
   end
 
 end
-
 
 function mist.getUnitsLOS(unitset1, altoffset1, unitset2, altoffset2, radius)
   radius = radius or math.huge
@@ -3455,7 +3437,6 @@ function mist.getAvgPoint(points)
   end
 end
 
-
 --Gets the average position of a group of units (by name)
 function mist.getAvgPos(unitNames)
   local avgX, avgY, avgZ, totNum = 0, 0, 0, 0
@@ -3608,6 +3589,7 @@ function mist.demos.printFlightData(unit)
   end
 
 end
+
 --start of Mission task functions
 mist.ground = {}
 mist.fixedWing = {}
@@ -3696,10 +3678,7 @@ function mist.getGroupRoute(groupIdent, task)
   end --for coa_name, coa_data in pairs(mission.coalition) do
 end
 
-
-
 function mist.ground.buildPath() end -- ????
-
 
 -- No longer accepts path
 function mist.ground.buildWP(point, overRideForm, overRideSpeed)
@@ -4064,8 +4043,6 @@ function mist.terrainHeightDiff(coord, searchSize)
   return mist.utils.round(tMax - tMin, 2)
 end
 
-
-
 function mist.groupToPoint(gpData, point, form, heading, speed, useRoads)
   if type(point) == 'string' then
     point = trigger.misc.getZone(point)
@@ -4085,7 +4062,6 @@ function mist.groupToPoint(gpData, point, form, heading, speed, useRoads)
 
   return
 end
-
 
 function mist.getLeadPos(group)
   if type(group) == 'string' then -- group name
@@ -4479,7 +4455,6 @@ mist.getLeadingLLString(UnitNameTable, dir, radius acc)
 mist.getBRString(UnitNameTable, ref, alt, metric)
 mist.getLeadingBRString(UnitNameTable, ref, alt, metric, dir, radius, acc)   -- vars versions?
 
-
 mist.sendMGRSMsg(vars)
 mist.sendLeadingMGRSMsg(vars)
 
@@ -4515,8 +4490,6 @@ end
 vars.units - table of unit names (NOT unitNameTable- maybe this should change).
 vars.acc - integer, number of numbers after decimal place
 vars.DMS - if true, output in degrees, minutes, seconds.  Otherwise, output in degrees, minutes.
-
-
 ]]
 function mist.getLLString(vars)
   local units = vars.units
@@ -4528,7 +4501,6 @@ function mist.getLLString(vars)
     return mist.tostringLL(lat, lon, acc, DMS)
   end
 end
-
 
 --[[
 vars.units- table of unit names (NOT unitNameTable- maybe this should change).
@@ -4610,7 +4582,6 @@ function mist.getLeadingPos(vars)
   end
 end
 
-
 --[[ vars for mist.getLeadingMGRSString:
 vars.units - table of unit names
 vars.heading - direction
@@ -4643,8 +4614,6 @@ function mist.getLeadingLLString(vars)
     return mist.tostringLL(lat, lon, acc, DMS)
   end
 end
-
-
 
 --[[ vars for mist.getLeadingBRString:
 vars.units - table of unit names
@@ -4747,7 +4716,6 @@ mist.message.add{
 
 end
 
-
 --[[
 vars.units- table of unit names (NOT unitNameTable- maybe this should change).
 vars.ref -  vec3 ref point, maybe overload for vec2 as well?
@@ -4786,7 +4754,6 @@ mist.message.add{
 
 end
 
-
 -- basically, just sub-types of mist.msgBR... saves folks the work of getting the ref point.
 --[[
 vars.units- table of unit names (NOT unitNameTable- maybe this should change).
@@ -4816,7 +4783,6 @@ vars.text - text of the message
 vars.displayTime
 vars.msgFor - scope
 ]]
-
 function mist.msgBRA(vars)
   if Unit.getByName(vars.ref) and Unit.getByName(vars.ref):isExist() == true then
     vars.ref = Unit.getByName(vars.ref):getPosition().p
@@ -4826,7 +4792,6 @@ function mist.msgBRA(vars)
     mist.msgBR(vars)
   end
 end
---------------------------------------------------------------------------------------------
 
 --[[ vars for mist.msgLeadingMGRS:
 vars.units - table of unit names
@@ -4868,6 +4833,7 @@ mist.message.add{
 
 
 end
+
 --[[ vars for mist.msgLeadingLL:
 vars.units - table of unit names
 vars.heading - direction, number
@@ -5700,7 +5666,6 @@ do -- all function uses of group and unit Ids must be in this do statement
     return
   end
 
-
   function mist.random(firstNum, secondNum) -- no support for decimals
     local lowNum, highNum
     if not secondNum then
@@ -5727,8 +5692,6 @@ do -- all function uses of group and unit Ids must be in this do statement
     return choices[rtnVal]
   end
 
-
-
   function mist.stringMatch(s1, s2, bool)
     local exclude = {'%-', '%(', '%)', '%_', '%[', '%]', '%.', '%#', '% ', '%{', '%}', '%$', '%%', '%?', '%+', '%^'}
     if type(s1) == 'string' and type(s2) == 'string' then
@@ -5754,6 +5717,7 @@ do -- all function uses of group and unit Ids must be in this do statement
 
   mist.matchString = mist.stringMatch -- both commands work because order out type of I
 
+  -- mist.time: time conversion functions
   mist.time = {}
   -- returns a string for specified military time
   -- theTime is optional
