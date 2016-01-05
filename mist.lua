@@ -18,6 +18,93 @@ mist.majorVersion = 4
 mist.minorVersion = 0
 mist.build = 60
 
+--- Logger class
+-- @section Logger
+mist.Logger = {
+  tag = "",
+  level = 1,
+}
+
+-- Logger scope
+do
+  --- Logger constructor
+  -- creates a new logger with empty tag and log level set to 'error'
+  -- @tparam[opt] mist.Logger optional existing logger object
+  function mist.Logger:new(l)
+    l = l or {}
+    setmetatable(l, self)
+    self.__index = self
+    return l
+  end
+
+  --- Sets the level of verbosity for this logger
+  -- "none" or 0 disables all logging
+  -- "error" or 1 shows error messages only
+  -- "warning" or 2 shows error and warning messages
+  -- "info" or 3 shows error, warning and info messages
+  -- @param level this can either be a string or an integer level
+  function mist.Logger:setLevel(level)
+    if type(level) == 'string' then
+      if level == 'none' or level == 'off' then
+        self.level = 0
+      elseif level == 'error' then
+        self.level = 1
+      elseif level == 'warning' then
+        self.level = 2
+      elseif level == 'info' then
+        self.level = 3
+      end
+    elseif type(level) == 'number' then
+      self.level = level
+    end
+  end
+
+  --- parses text and substitutes keywords with values from given array
+  -- @tparam string text string containing keywords to substitute with values
+  -- @tparam array vars values to use for substitution
+  -- @treturn string new string with keywords substituted
+  local function mist.Logger:substituteKeys(text, vars)
+    local substText = text
+    for identifier in text:gmatch("%%%d") do
+      local index = tonumber(identifier:match("%d+"))
+      local value = vars[index]
+      if type(value) == 'table' then
+        value = mist.utils.oneLineSerialize(value)
+      end
+      substText:gsub(identifier, value)
+    end
+    return substText
+  end
+
+  function mist.Logger:error(text, vars, showBox)
+    showBox = showBox or false
+    if self.level >= 1 then
+      if vars then
+        text = self.subsituteKeys(text, vars)
+      end
+      env.error(tag .. ' | ' .. text, showBox)
+    end
+  end
+
+  function mist.Logger:warn(text, vars)
+    if self.level >= 2 then
+      if vars then
+        text = self.subsituteKeys(text, vars)
+      end
+      env.warning(tag .. ' | ' .. text)
+    end
+  end
+
+  function mist.Logger:info(text, vars)
+    if self.level >= 4 then
+      if vars then
+        text = self.subsituteKeys(text, vars)
+      end
+      env.error(tag .. ' | ' .. text)
+    end
+  end
+end
+
 -- the main scope
 do
   local coroutines = {}
@@ -6056,6 +6143,9 @@ scope examples:
 {unitTypes = { blue = {'A-10C'}}}
 ]]
 end
+
+
+
 mist.main()
 env.info(('Mist version ' .. mist.majorVersion .. '.' .. mist.minorVersion .. '.' .. mist.build .. ' loaded.'))
 
