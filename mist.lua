@@ -27,7 +27,7 @@ do
   local writeGroups = {}
   local lastUpdateTime = 0
 
-  local function update_alive_units()  -- coroutine function
+  local function updateAliveUnits()  -- coroutine function
     local lalive_units = mist.DBs.aliveUnits -- local references for faster execution
     local lunits = mist.DBs.unitsByNum
     local ldeepcopy = mist.utils.deepCopy
@@ -439,17 +439,17 @@ do
       update_alive_units_counter = 0
 
       if not coroutines.update_alive_units then
-        coroutines['update_alive_units'] = coroutine.create(update_alive_units)
+        coroutines['updateAliveUnits'] = coroutine.create(updateAliveUnits)
       end
 
-      coroutine.resume(coroutines.update_alive_units)
+      coroutine.resume(coroutines.updateAliveUnits)
 
-      if coroutine.status(coroutines.update_alive_units) == 'dead' then
-        coroutines.update_alive_units = nil
+      if coroutine.status(coroutines.updateAliveUnits) == 'dead' then
+        coroutines.updateAliveUnits = nil
       end
     end
 
-    mist.do_scheduled_functions()
+    mist.doScheduledFunctions()
   end -- end of mist.main
 
   -- mist dyn add stuff for coroutines
@@ -770,7 +770,7 @@ do
   local Tasks = {}
   local task_id = 0
   --[[ mist.scheduleFunction:
-  int id = mist.schedule_task(f function, vars table, t number, rep number, st number)
+  int id = mist.scheduleFunction(f function, vars table, t number, rep number, st number)
   id - integer id of this function task
   f - function to run
   vars - table of vars for that function
@@ -806,7 +806,7 @@ do
   end
 
   -- not intended for users to use this function.
-  function mist.do_scheduled_functions()
+  function mist.doScheduledFunctions()
     local i = 1
     while i <= #Tasks do
       if not Tasks[i].rep then -- not a repeated process
@@ -1172,7 +1172,7 @@ function mist.utils.serialize(name, value, level)
     end
   end
 
-  local function serialize_to_t(name, value, level)
+  local function serializeToTbl(name, value, level)
     local var_str_tbl = {}
     if level == nil then level = "" end
     if level ~= "" then level = level.."  " end
@@ -1208,7 +1208,7 @@ function mist.utils.serialize(name, value, level)
     return var_str_tbl
   end
 
-  local t_str = serialize_to_t(name, value, level)
+  local t_str = serializeToTbl(name, value, level)
 
   return table.concat(t_str)
 end
@@ -2034,9 +2034,9 @@ mist.DBs.humansById = {}
 mist.DBs.dynGroupsAdded = {} -- will be filled by mist.dbUpdate from dynamically spawned groups
 mist.DBs.activeHumans = {}
 
-mist.DBs.aliveUnits = {}  -- will be filled in by the "update_alive_units" coroutine in mist.main.
+mist.DBs.aliveUnits = {}  -- will be filled in by the "updateAliveUnits" coroutine in mist.main.
 
-mist.DBs.removedAliveUnits = {} -- will be filled in by the "update_alive_units" coroutine in mist.main.
+mist.DBs.removedAliveUnits = {} -- will be filled in by the "updateAliveUnits" coroutine in mist.main.
 -- create mist.DBs.oldAliveUnits
 -- do
 -- local intermediate_alive_units = {}  -- between 0 and 0.5 secs old
