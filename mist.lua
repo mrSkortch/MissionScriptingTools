@@ -24,7 +24,7 @@ mist.build = 60
 --- Logger class.
 -- @type mist.Logger
 mist.Logger = {
-  tag = "",
+  tag = "MIST",
   level = 1,
 }
 
@@ -69,69 +69,70 @@ do
 
   --- parses text and substitutes keywords with values from given array
   -- @tparam string text string containing keywords to substitute with values
-  -- @tparam array vars values to use for substitution
+  -- @param ... variables to use for substitution
   -- @treturn string new string with keywords substituted
-  local function substituteKeys(text, vars)
-    local substText = text
-    for identifier in text:gmatch("%%%d") do
-      local index = tonumber(identifier:match("%d+"))
-      local value = vars[index]
+  local function formatText(text, ...)
+    for index,value in ipairs(arg) do
+      -- TODO: check for getmetatabel(value).__tostring
       if type(value) == 'table' then
         value = mist.utils.oneLineSerialize(value)
+      else
+        value = tostring(value)
       end
-      substText:gsub(identifier, value)
+      text = text:gsub('$' .. index, value)
     end
-    return substText
+    return text
+  end
+
+  --- Logs error and shows alert window.
+  -- This logs an error to the dcs.log and shows a popup window,
+  -- pausing the simulation. This works always even if logging is
+  -- disabled by setting a log level of "none" or 0.
+  -- @tparam string text the text with keywords to substitute.
+  -- @param ... variables to be used for substitution.
+  -- @usage myLogger:alert("Shit just hit the fan! WEEEE!!!11")
+  function mist.Logger:alert(text, ...)
+     text = formatText(text, unpack(arg))
+     env.error(self.tag .. ' | ' .. text, true)
   end
 
   --- Logs an error.
-  -- logs to dcs.log as long as at least the "error" log level is set.
+  -- logs a message prefixed with this loggers tag to dcs.log as
+  -- long as at least the "error" log level (1) is set.
   -- @tparam string text the text with keywords to substitute.
-  -- @tparam[opt] table vars this the values to be used for substitution.
-  -- @tparam[opt] boolean showBox whether to show a box and pause the game.
+  -- @param ... variables to be used for substitution.
   -- @usage myLogger:error("Just an error!")
-  -- @usage myLogger:error("This is a serious error! Foo is %1 instead of 'bar'", {'derp'})
-  -- @usage myLogger:error("It's a trap!", {}, true)
-  function mist.Logger:error(text, vars, showBox)
-    showBox = showBox or false
+  -- @usage myLogger:error("Foo is $1 instead of $2", foo, "bar")
+  function mist.Logger:error(text, ...)
     if self.level >= 1 then
-      if vars then
-        -- check if table is empty
-        if not next(vars) == nil then
-          text = subsituteKeys(text, vars)
-        end
-      end
-      env.error(tag .. ' | ' .. text, showBox)
+      text = formatText(text, unpack(arg))
+      env.error(self.tag .. ' | ' .. text)
     end
   end
 
   --- Logs a warning.
+  -- logs a message prefixed with this loggers tag to dcs.log as
+  -- long as at least the "warning" log level (2) is set.
   -- @tparam string text the text with keywords to substitute.
-  -- @tparam[opt] table vars this the values to be used for substitution.
-  -- @usage myLogger:warn("I warned you! Those %1 from the interwebs are %2", {"geeks", 1337})
-  function mist.Logger:warn(text, vars)
+  -- @param ... variables to be used for substitution.
+  -- @usage myLogger:warn("Mother warned you! Those $1 from the interwebs are $2", {"geeks", 1337})
+  function mist.Logger:warn(text, ...)
     if self.level >= 2 then
-      if vars then
-        if not next(vars) == nil then
-          text = subsituteKeys(text, vars)
-        end
-      end
-      env.warning(tag .. ' | ' .. text)
+      text = formatText(text, unpack(arg))
+      env.warning(self.tag .. ' | ' .. text)
     end
   end
 
   --- Logs a info
+  -- logs a message prefixed with this loggers tag to dcs.log as
+  -- long as the highest log level (3) "info" is set.
   -- @tparam string text the text with keywords to substitute.
-  -- @tparam[opt] table vars this the values to be used for substitution.
+  -- @param ... variables to be used for substitution.
   -- @see warn
-  function mist.Logger:info(text, vars)
-    if self.level >= 4 then
-      if vars then
-        if not next(vars) == nil then
-          text = subsituteKeys(text, vars)
-        end
-      end
-      env.info(tag .. ' | ' .. text)
+  function mist.Logger:info(text, ...)
+    if self.level >= 3 then
+      text = formatText(text, unpack(arg))
+      env.info(self.tag .. ' | ' .. text)
     end
   end
 end
