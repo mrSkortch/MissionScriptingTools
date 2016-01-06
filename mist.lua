@@ -50,7 +50,8 @@ do
   -- "info" or 3 shows error, warning and info messages
   -- @param level this can either be a string or an integer level
   -- @usage myLogger:setLevel("info")
-  -- @usage myLogger:setLevel(3) -- show everything!
+  -- @usage -- log everything
+  --myLogger:setLevel(3)
   function mist.Logger:setLevel(level)
     if type(level) == 'string' then
       if level == 'none' or level == 'off' then
@@ -67,7 +68,7 @@ do
     end
   end
 
-  --- parses text and substitutes keywords with values from given array
+  --- parses text and substitutes keywords with values from given array.
   -- @tparam string text string containing keywords to substitute with values
   -- @param ... variables to use for substitution
   -- @treturn string new string with keywords substituted
@@ -123,7 +124,7 @@ do
     end
   end
 
-  --- Logs a info
+  --- Logs a info.
   -- logs a message prefixed with this loggers tag to dcs.log as
   -- long as the highest log level (3) "info" is set.
   -- @tparam string text the text with keywords to substitute.
@@ -992,70 +993,70 @@ end
 -- @section utils
 mist.utils = {}
 
---- Converts angle in radians to degrees
+--- Converts angle in radians to degrees.
 -- @param angle angle in radians
 -- @return angle in degrees
 function mist.utils.toDegree (angle)
   return angle*180/math.pi
 end
 
---- Converts angle in degrees to radians
+--- Converts angle in degrees to radians.
 -- @param angle angle in degrees
 -- @return angle in degrees
 function mist.utils.toRadian (angle)
   return angle*math.pi/180
 end
 
---- Converts meters to nautical miles
+--- Converts meters to nautical miles.
 -- @param meters distance in meters
 -- @return distance in nautical miles
 function mist.utils.metersToNM (meters)
   return meters/1852
 end
 
---- Converts meters to feet
+--- Converts meters to feet.
 -- @param meters distance in meters
 -- @return distance in feet
 function mist.utils.metersToFeet (meters)
   return meters/0.3048
 end
 
---- Converts nautical miles to meters
+--- Converts nautical miles to meters.
 -- @param nm distance in nautical miles
 -- @return distance in meters
 function mist.utils.NMToMeters (nm)
   return NM*1852
 end
 
---- Converts feet to meters
+--- Converts feet to meters.
 -- @param feet distance in feet
 -- @return distance in meters
 function mist.utils.feetToMeters (feet)
   return feet*0.3048
 end
 
---- Converts meters per second to knots
+--- Converts meters per second to knots.
 -- @param mps speed in m/s
 -- @return speed in knots
 function mist.utils.mpsToKnots (mps)
   return mps*3600/1852
 end
 
---- Converts meters per second to kilometers per hour
+--- Converts meters per second to kilometers per hour.
 -- @param mps speed in m/s
 -- @return speed in km/h
 function mist.utils.mpsToKmph (mps)
   return mps*3.6
 end
 
---- Converts knots to meters per second
+--- Converts knots to meters per second.
 -- @param knots speed in knots
 -- @return speed in m/s
 function mist.utils.knotsToMps (knots)
   return knots*1852/3600
 end
 
---- Converts kilometers per hour to meters per second
+--- Converts kilometers per hour to meters per second.
 -- @param kmph speed in km/h
 -- @return speed in m/s
 function mist.utils.kmphToMps (kmph)
@@ -1105,7 +1106,7 @@ function mist.utils.makeVec3GL(vec, offset)
   end
 end
 
---- Returns the center of a zone as Vec3
+--- Returns the center of a zone as Vec3.
 -- @tparam string|table zone trigger zone name or table
 -- @treturn Vec3 center of the zone
 function mist.utils.zoneToVec3 (zone)
@@ -1197,7 +1198,11 @@ function mist.utils.unitToWP(unit)
   return false
 end
 
---from http://lua-users.org/wiki/CopyTable
+--- Creates a deep copy of a object.
+-- Usually this object is a table.
+-- See also: from http://lua-users.org/wiki/CopyTable
+-- @param object object to copy
+-- @return copy of object
 function mist.utils.deepCopy(object)
   local lookup_table = {}
   local function _copy(object)
@@ -1216,13 +1221,19 @@ function mist.utils.deepCopy(object)
   return _copy(object)
 end
 
+--- Simple rounding function.
 -- From http://lua-users.org/wiki/SimpleRound
 -- use negative idp for rounding ahead of decimal place, positive for rounding after decimal place
+-- @tparam number num number to round
+-- @param idp
 function mist.utils.round(num, idp)
   local mult = 10^(idp or 0)
   return math.floor(num * mult + 0.5) / mult
 end
 
+--- Rounds all numbers inside a table.
+-- @tparam table tbl table in which to round numbers
+-- @param idp
 function mist.utils.roundTbl(tbl, idp)
   for id, val in pairs(tbl) do
     if type(val) == 'number' then
@@ -1232,7 +1243,10 @@ function mist.utils.roundTbl(tbl, idp)
   return tbl
 end
 
--- porting in Slmod's dostring
+--- Executes the given string.
+-- borrowed from Slmod
+-- @tparam string s string containing LUA code.
+-- @treturn boolean true if successfully executed, false otherwise
 function mist.utils.dostring(s)
   local f, err = loadstring(s)
   if f then
@@ -1242,21 +1256,26 @@ function mist.utils.dostring(s)
   end
 end
 
---[[ mist.utils.typeCheck(fname, type_tbl, var_tbl)
-Type-checking function:
-Checks a var_tbl to a type_tbl.  Returns true if the var_tbl passes the type check, returns false plus an error message if the var_tbl fails.
-
-type_tbl examples:
-type_tbl = { {'table', 'number'}, 'string', 'number', 'number', {'string', 'nil'}, {'number', 'nil'} }
-Compare to a var_tbl with up to six entries; var_tbl index 1 must be a table or a number; index 2, a string; index 3, a number;
-index 4, a number; index 5, either a string or nil; and index 6, either a number or nil.
-
-Another example:
-type_tbl = { {'text', 'msg', 'text_out'} = 'string', display_time = 'number', display_mode = {'string', 'nil'} coa = {'string', 'nil'}}
-
-var_tbl must have a string at one of the following table keys: "text", "msg", or "text_out".  var_tbl must have a number at table key "display_time",
-the table key "display_mode" must be either a string or nil, and the table key "coa" must be either a string or nil.
-]]
+--- Checks a table's types.
+-- This function checks a tables types against a specifically forged type table.
+-- @param fname
+-- @tparam table type_tbl
+-- @tparam table var_tbl
+-- @usage -- specifically forged type table
+-- type_tbl = {
+--             {'table', 'number'},
+--             'string',
+--             'number',
+--             'number',
+--             {'string','nil'},
+--             {'number', 'nil'}
+--           }
+-- -- my_tbl index 1 must be a table or a number;
+-- -- index 2, a string; index 3, a number;
+-- -- index 4, a number; index 5, either a string or nil;
+-- -- and index 6, either a number or nil.
+-- mist.utils.typeCheck(type_tbl, my_tb)
+-- @return true if table passes the check, false otherwise.
 function mist.utils.typeCheck(fname, type_tbl, var_tbl)
   --env.info('type check')
   for type_key, type_val in pairs(type_tbl) do
@@ -1322,21 +1341,32 @@ function mist.utils.typeCheck(fname, type_tbl, var_tbl)
   return true
 end
 
---porting in Slmod's "safestring" basic serialize
-function mist.utils.basicSerialize(s)
-  if s == nil then
+--- Serializes the give variable to a string.
+-- borrowed from slmod
+-- @param var variable to serialize
+-- @treturn string variable serialized to string
+function mist.utils.basicSerialize(var)
+  if var == nil then
     return "\"\""
   else
-    if ((type(s) == 'number') or (type(s) == 'boolean') or (type(s) == 'function') or (type(s) == 'table') or (type(s) == 'userdata') ) then
-      return tostring(s)
-    elseif type(s) == 'string' then
-      s = string.format('%q', s)
-      return s
+    if ((type(var) == 'number') or
+      (type(var) == 'boolean') or
+      (type(var) == 'function') or
+      (type(var) == 'table') or
+      (type(var) == 'userdata') ) then
+      return tostring(var)
+    elseif type(var) == 'string' then
+      var = string.format('%q', var)
+      return var
     end
   end
 end
 
---porting in Slmod's serialize_slmod
+--- Serialize value
+-- borrowed from slmod (serialize_slmod)
+-- @param name
+-- @param value value to serialize
+-- @param level
 function mist.utils.serialize(name, value, level)
   --Based on ED's serialize_simple2
   local function basicSerialize(o)
@@ -1390,7 +1420,11 @@ function mist.utils.serialize(name, value, level)
   return table.concat(t_str)
 end
 
--- porting in slmod's serialize_wcycles
+--- Serialize value supporting cycles.
+-- borrowed from slmod (serialize_wcycles)
+-- @param name
+-- @param value value to serialize
+-- @param saved
 function mist.utils.serializeWithCycles(name, value, saved)
   --mostly straight out of Programming in Lua
   local function basicSerialize(o)
@@ -1428,8 +1462,12 @@ function mist.utils.serializeWithCycles(name, value, saved)
   end
 end
 
--- porting in Slmod's serialize_slmod2
-function mist.utils.oneLineSerialize(tbl)  -- serialization of a table all on a single line, no comments, made to replace old get_table_string function
+--- Serialize a table to a single line string.
+-- serialization of a table all on a single line, no comments, made to replace old get_table_string function
+-- borrowed from slmod
+-- @tparam table tbl table to serialize.
+-- @treturn string string containing serialized table
+function mist.utils.oneLineSerialize(tbl)
   if type(tbl) == 'table' then --function only works for tables!
 
     local tbl_str = {}
@@ -1468,7 +1506,14 @@ function mist.utils.oneLineSerialize(tbl)  -- serialization of a table all on a 
   end
 end
 
---Function to create string for viewing the contents of a table -NOT for serialization
+--- Returns table in a easy readable string representation.
+-- this function is not meant for serialization because it uses
+-- newlines for better readability.
+-- @param tbl table to show
+-- @param loc
+-- @param indent
+-- @param tableshow_tbls
+-- @return human readable string representation of given table
 function mist.utils.tableShow(tbl, loc, indent, tableshow_tbls) --based on serialize_slmod, this is a _G serialization
   tableshow_tbls = tableshow_tbls or {} --create table of tables
   loc = loc or ""
