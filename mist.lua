@@ -1582,9 +1582,17 @@ function mist.utils.tableShow(tbl, loc, indent, tableshow_tbls) --based on seria
   end
 end
 
--- mist.debug: debug functions
+--- Debug functions
+-- @section debug
 mist.debug = {}
 
+--- Dumps the global table _G.
+-- This dumps the global table _G to a file in
+-- the DCS\Logs directory.
+-- This function requires you to disable script sanitization
+-- in $DCS_ROOT\Scripts\MissionScripting.lua to access lfs and io
+-- libraries.
+-- @param fname
 function mist.debug.dump_G(fname)
   if lfs and io then
     local fdir = lfs.writedir() .. [[Logs\]] .. fname
@@ -1601,6 +1609,13 @@ function mist.debug.dump_G(fname)
   end
 end
 
+--- Write debug data to file.
+-- This function requires you to disable script sanitization
+-- in $DCS_ROOT\Scripts\MissionScripting.lua to access lfs and io
+-- libraries.
+-- @param fcn
+-- @param fcnVars
+-- @param fname
 function mist.debug.writeData(fcn, fcnVars, fname)
   if lfs and io then
     local fdir = lfs.writedir() .. [[Logs\]] .. fname
@@ -1617,6 +1632,10 @@ function mist.debug.writeData(fcn, fcnVars, fname)
   end
 end
 
+--- Write mist databases to file.
+-- This function requires you to disable script sanitization
+-- in $DCS_ROOT\Scripts\MissionScripting.lua to access lfs and io
+-- libraries.
 function mist.debug.dumpDBs()
   for DBname, DB in pairs(mist.DBs) do
     if type(DB) == 'table' and type(DBname) == 'string' then
@@ -1625,40 +1644,71 @@ function mist.debug.dumpDBs()
   end
 end
 
--- mist.vec: 3D vector manipulation functions
+--- 3D Vector manipulation functions
+-- @section mist.vec
 mist.vec = {}
 
+--- Vector addition.
+-- @tparam Vec3 vec1 first vector
+-- @tparam Vec3 vec2 second vector
+-- @treturn Vec3 new vector, sum of vec1 and vec2.
 function mist.vec.add(vec1, vec2)
   return {x = vec1.x + vec2.x, y = vec1.y + vec2.y, z = vec1.z + vec2.z}
 end
 
+--- Vector substraction.
+-- @tparam Vec3 vec1 first vector
+-- @tparam Vec3 vec2 second vector
+-- @treturn Vec3 new vector, vec2 substracted from vec1.
 function mist.vec.sub(vec1, vec2)
   return {x = vec1.x - vec2.x, y = vec1.y - vec2.y, z = vec1.z - vec2.z}
 end
 
+--- Vector scalar multiplication.
+-- @tparam Vec3 vec vector to multiply
+-- @tparam number mult scalar multiplicator
+-- @treturn Vec3 new vector multiplied with the given scalar
 function mist.vec.scalarMult(vec, mult)
   return {x = vec.x*mult, y = vec.y*mult, z = vec.z*mult}
 end
 
 mist.vec.scalar_mult = mist.vec.scalarMult
 
+--- Vector dot product.
+-- @tparam Vec3 vec1 first vector
+-- @tparam Vec3 vec2 second vector
+-- @treturn number dot product of given vectors
 function mist.vec.dp (vec1, vec2)
   return vec1.x*vec2.x + vec1.y*vec2.y + vec1.z*vec2.z
 end
 
+--- Vector cross product.
+-- @tparam Vec3 vec1 first vector
+-- @tparam Vec3 vec2 second vector
+-- @treturn Vec3 new vector, cross product of vec1 and vec2.
 function mist.vec.cp(vec1, vec2)
   return { x = vec1.y*vec2.z - vec1.z*vec2.y, y = vec1.z*vec2.x - vec1.x*vec2.z, z = vec1.x*vec2.y - vec1.y*vec2.x}
 end
 
+--- Vector magnitude
+-- @tparam Vec3 vec vector
+-- @treturn number magnitude of vector vec
 function mist.vec.mag(vec)
   return (vec.x^2 + vec.y^2 + vec.z^2)^0.5
 end
 
+--- Unit vector
+-- @tparam Vec3 vec
+-- @treturn Vec3 unit vector of vec
 function mist.vec.getUnitVec(vec)
   local mag = mist.vec.mag(vec)
   return { x = vec.x/mag, y = vec.y/mag, z = vec.z/mag }
 end
 
+--- Rotate vector.
+-- @tparam Vec2 vec2 to rotoate
+-- @tparam number theta
+-- @return Vec2 rotated vector.
 function mist.vec.rotateVec2(vec2, theta)
   return { x = vec2.x*math.cos(theta) - vec2.y*math.sin(theta), y = vec2.x*math.sin(theta) + vec2.y*math.cos(theta)}
 end
