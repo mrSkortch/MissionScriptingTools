@@ -30,14 +30,20 @@ mist.Logger = {
 
 -- Logger scope
 do
-  --- Logger constructor.
-  -- Creates a new logger object.
+  --- Creates a new logger.
+  -- Each logger has it's own tag and log level.
   -- @tparam[opt] table l optional logger object.
   -- @usage myLogger = mist.Logger:new
   -- @usage myLogger = mist.Logger:new{tag = "MyScript", level = 2}
   -- @treturn mist.Logger
   function mist.Logger:new(l)
     l = l or {}
+    if not l.tag then
+      l.tag = "MIST"
+    end
+    if not l.level then
+      l.level = 1
+    end
     setmetatable(l, self)
     self.__index = self
     return l
@@ -988,7 +994,7 @@ do
 
 end
 
---- Utility methods.
+--- Utility functions.
 -- E.g. conversions between units etc.
 -- @section utils
 mist.utils = {}
@@ -1583,7 +1589,7 @@ function mist.utils.tableShow(tbl, loc, indent, tableshow_tbls) --based on seria
 end
 
 --- Debug functions
--- @section debug
+-- @section mist.debug
 mist.debug = {}
 
 --- Dumps the global table _G.
@@ -1644,7 +1650,7 @@ function mist.debug.dumpDBs()
   end
 end
 
---- 3D Vector manipulation functions
+--- 3D Vector functions
 -- @section mist.vec
 mist.vec = {}
 
@@ -2104,9 +2110,16 @@ function mist.getClimbAngle(unit)
   end
 end
 
--- mist.DBs: various tables acting as databases
+--- mist.DBs: various tables acting as databases
+-- @section mist.DBs
 mist.DBs = {}
 
+--- Mission data
+-- @table mist.DBs.missionData
+-- @field startTime mission start time
+-- @field theatre mission theatre/map e.g. Caucasus
+-- @field version mission version
+-- @field files mission resources
 mist.DBs.missionData = {}
 if env.mission then
 
@@ -2949,8 +2962,30 @@ function mist.getDeadMapObjsInPolygonZone(zone)
   return map_objs
 end
 
+--- Flag functions.
+-- The mist "Flag functions" are functions that are similar to Slmod functions
+-- that detect a game condition and set a flag when that game condition is met.
+--
+-- They are intended to be used by persons with little or no experience in Lua
+-- programming, but with a good knowledge of the DCS mission editor.
+-- @section mist.flagFunc
 mist.flagFunc = {}
 
+--- Sets a flag if map objects are destroyed inside a zone.
+-- Once this function is run, it will start a continuously evaluated process
+-- that will set a flag true if map objects (such as bridges, buildings in
+-- town, etc.) die (or have died) in a mission editor zone (or set of zones).
+-- This will only happen once; once the flag is set true, the process ends.
+-- @usage
+-- -- Example vars table
+-- vars = {
+--   zones = { "zone1", "zone2" }, -- can also be a single string
+--   flag = 3, -- number of the flag
+--   stopflag = 4, -- optional number of the stop flag
+--   req_num = 10, -- optional minimum amount of map objects needed to die
+-- }
+-- mist.flagFuncs.mapobjs_dead_zones(vars)
+-- @tparam table vars table containing parameters.
 function mist.flagFunc.mapobjs_dead_zones(vars)
   --[[vars needs to be:
 zones = table or string,
@@ -2996,6 +3031,26 @@ initial_number
   end
 end
 
+--- Sets a flag if map objects are destroyed inside a polygon.
+-- Once this function is run, it will start a continuously evaluated process
+-- that will set a flag true if map objects (such as bridges, buildings in
+-- town, etc.) die (or have died) in a polygon.
+-- This will only happen once; once the flag is set true, the process ends.
+-- @usage
+-- -- Example vars table
+-- vars = {
+--   zone = {
+--     [1] = mist.DBs.unitsByName['NE corner'].point,
+--     [2] = mist.DBs.unitsByName['SE corner'].point,
+--     [3] = mist.DBs.unitsByName['SW corner'].point,
+--     [4] = mist.DBs.unitsByName['NW corner'].point
+--   }
+--   flag = 3, -- number of the flag
+--   stopflag = 4, -- optional number of the stop flag
+--   req_num = 10, -- optional minimum amount of map objects needed to die
+-- }
+-- mist.flagFuncs.mapobjs_dead_zones(vars)
+-- @tparam table vars table containing parameters.
 function mist.flagFunc.mapobjs_dead_polygon(vars)
   --[[vars needs to be:
 zone = table,
@@ -3035,61 +3090,6 @@ initial_number
       mist.scheduleFunction(mist.flagFunc.mapobjs_dead_polygon, {{zone = zone, flag = flag, stopflag = stopflag, req_num = req_num, initial_number = initial_number}}, timer.getTime() + 1)
     end
   end
-end
-
-function mist.pointInPolygon(point, poly, maxalt) --raycasting point in polygon. Code from http://softsurfer.com/Archive/algorithm_0103/algorithm_0103.htm
-  --[[local type_tbl = {
-    point = {'table'},
-    poly = {'table'},
-    maxalt = {'number', 'nil'},
-    }
-
-  local err, errmsg = mist.utils.typeCheck('mist.pointInPolygon', type_tbl, {point, poly, maxalt})
-  assert(err, errmsg)
-  ]]
-  point = mist.utils.makeVec3(point)
-  local px = point.x
-  local pz = point.z
-  local cn = 0
-  local newpoly = mist.utils.deepCopy(poly)
-
-  if not maxalt or (point.y <= maxalt) then
-    local polysize = #newpoly
-    newpoly[#newpoly + 1] = newpoly[1]
-
-    newpoly[1] = mist.utils.makeVec3(newpoly[1])
-
-    for k = 1, polysize do
-      newpoly[k+1] = mist.utils.makeVec3(newpoly[k+1])
-      if ((newpoly[k].z <= pz) and (newpoly[k+1].z > pz)) or ((newpoly[k].z > pz) and (newpoly[k+1].z <= pz)) then
-        local vt = (pz - newpoly[k].z) / (newpoly[k+1].z - newpoly[k].z)
-        if (px < newpoly[k].x + vt*(newpoly[k+1].x - newpoly[k].x)) then
-          cn = cn + 1
-        end
-      end
-    end
-
-    return cn%2 == 1
-  else
-    return false
-  end
-end
-
-function mist.getUnitsInPolygon(unit_names, polyZone, max_alt)
-  local units = {}
-
-  for i = 1, #unit_names do
-    units[#units + 1] = Unit.getByName(unitNames[i])
-  end
-
-  local inZoneUnits = {}
-  for i =1, #units do
-    if units[i]:isActive() and mist.pointInPolygon(units[i]:getPosition().p, polyZone, max_alt) then
-      inZoneUnits[inZoneUnits + 1] = units[i]
-    end
-  end
-
-  return inZoneUnits
 end
 
 function mist.flagFunc.units_in_polygon(vars)
@@ -3163,61 +3163,6 @@ unitTableDef = table or nil
 
 end
 
-function mist.getUnitsInZones(unit_names, zone_names, zone_type)
-
-  zone_type = zone_type or 'cylinder'
-  if zone_type == 'c' or zone_type == 'cylindrical' or zone_type == 'C' then
-    zone_type = 'cylinder'
-  end
-  if zone_type == 's' or zone_type == 'spherical' or zone_type == 'S' then
-    zone_type = 'sphere'
-  end
-
-  assert(zone_type == 'cylinder' or zone_type == 'sphere', 'invalid zone_type: ' .. tostring(zone_type))
-
-  local units = {}
-  local zones = {}
-
-  for k = 1, #unit_names do
-    local unit = Unit.getByName(unit_names[k])
-    if unit then
-      units[#units + 1] = unit
-    end
-  end
-
-
-  for k = 1, #zone_names do
-    local zone = trigger.misc.getZone(zone_names[k])
-    if zone then
-      zones[#zones + 1] = {radius = zone.radius, x = zone.point.x, y = zone.point.y, z = zone.point.z}
-    end
-  end
-
-  local in_zone_units = {}
-
-  for units_ind = 1, #units do
-    for zones_ind = 1, #zones do
-      if zone_type == 'sphere' then  --add land height value for sphere zone type
-        local alt = land.getHeight({x = zones[zones_ind].x, y = zones[zones_ind].z})
-        if alt then
-          zones[zones_ind].y = alt
-        end
-      end
-      local unit_pos = units[units_ind]:getPosition().p
-      if unit_pos and units[units_ind]:isActive() == true then
-        if zone_type == 'cylinder' and (((unit_pos.x - zones[zones_ind].x)^2 + (unit_pos.z - zones[zones_ind].z)^2)^0.5 <= zones[zones_ind].radius) then
-          in_zone_units[#in_zone_units + 1] = units[units_ind]
-          break
-        elseif zone_type == 'sphere' and (((unit_pos.x - zones[zones_ind].x)^2 + (unit_pos.y - zones[zones_ind].y)^2 + (unit_pos.z - zones[zones_ind].z)^2)^0.5 <= zones[zones_ind].radius) then
-          in_zone_units[#in_zone_units + 1] = units[units_ind]
-          break
-        end
-      end
-    end
-  end
-  return in_zone_units
-end
-
 function mist.flagFunc.units_in_zones(vars)
   --[[vars needs to be:
   units = table,
@@ -3277,55 +3222,6 @@ function mist.flagFunc.units_in_zones(vars)
     end
   end
 
-end
-
-function mist.getUnitsInMovingZones(unit_names, zone_unit_names, radius, zone_type)
-
-  zone_type = zone_type or 'cylinder'
-  if zone_type == 'c' or zone_type == 'cylindrical' or zone_type == 'C' then
-    zone_type = 'cylinder'
-  end
-  if zone_type == 's' or zone_type == 'spherical' or zone_type == 'S' then
-    zone_type = 'sphere'
-  end
-
-  assert(zone_type == 'cylinder' or zone_type == 'sphere', 'invalid zone_type: ' .. tostring(zone_type))
-
-  local units = {}
-  local zone_units = {}
-
-  for k = 1, #unit_names do
-    local unit = Unit.getByName(unit_names[k])
-    if unit then
-      units[#units + 1] = unit
-    end
-  end
-
-  for k = 1, #zone_unit_names do
-    local unit = Unit.getByName(zone_unit_names[k])
-    if unit then
-      zone_units[#zone_units + 1] = unit
-    end
-  end
-
-  local in_zone_units = {}
-
-  for units_ind = 1, #units do
-    for zone_units_ind = 1, #zone_units do
-      local unit_pos = units[units_ind]:getPosition().p
-      local zone_unit_pos = zone_units[zone_units_ind]:getPosition().p
-      if unit_pos and zone_unit_pos and units[units_ind]:isActive() == true then
-        if zone_type == 'cylinder' and (((unit_pos.x - zone_unit_pos.x)^2 + (unit_pos.z - zone_unit_pos.z)^2)^0.5 <= radius) then
-          in_zone_units[#in_zone_units + 1] = units[units_ind]
-          break
-        elseif zone_type == 'sphere' and (((unit_pos.x - zone_unit_pos.x)^2 + (unit_pos.y - zone_unit_pos.y)^2 + (unit_pos.z - zone_unit_pos.z)^2)^0.5 <= radius) then
-          in_zone_units[#in_zone_units + 1] = units[units_ind]
-          break
-        end
-      end
-    end
-  end
-  return in_zone_units
 end
 
 function mist.flagFunc.units_in_moving_zones(vars)
@@ -3400,57 +3296,6 @@ function mist.flagFunc.units_in_moving_zones(vars)
     end
   end
 
-end
-
-function mist.getUnitsLOS(unitset1, altoffset1, unitset2, altoffset2, radius)
-  radius = radius or math.huge
-
-  local unit_info1 = {}
-  local unit_info2 = {}
-
-  -- get the positions all in one step, saves execution time.
-  for unitset1_ind = 1, #unitset1 do
-    local unit1 = Unit.getByName(unitset1[unitset1_ind])
-    if unit1 and unit1:isActive() == true then
-      unit_info1[#unit_info1 + 1] = {}
-      unit_info1[#unit_info1]["unit"] = unit1
-      unit_info1[#unit_info1]["pos"]  = unit1:getPosition().p
-    end
-  end
-
-  for unitset2_ind = 1, #unitset2 do
-    local unit2 = Unit.getByName(unitset2[unitset2_ind])
-    if unit2 and unit2:isActive() == true then
-      unit_info2[#unit_info2 + 1] = {}
-      unit_info2[#unit_info2]["unit"] = unit2
-      unit_info2[#unit_info2]["pos"]  = unit2:getPosition().p
-    end
-  end
-
-  local LOS_data = {}
-  -- now compute los
-  for unit1_ind = 1, #unit_info1 do
-    local unit_added = false
-    for unit2_ind = 1, #unit_info2 do
-      if radius == math.huge or (mist.vec.mag(mist.vec.sub(unit_info1[unit1_ind].pos, unit_info2[unit2_ind].pos)) < radius) then -- inside radius
-        local point1 = { x = unit_info1[unit1_ind].pos.x, y = unit_info1[unit1_ind].pos.y + altoffset1, z = unit_info1[unit1_ind].pos.z}
-        local point2 = { x = unit_info2[unit2_ind].pos.x, y = unit_info2[unit2_ind].pos.y + altoffset2, z = unit_info2[unit2_ind].pos.z}
-        if land.isVisible(point1, point2) then
-          if unit_added == false then
-            unit_added = true
-            LOS_data[#LOS_data + 1] = {}
-            LOS_data[#LOS_data]['unit'] = unit_info1[unit1_ind].unit
-            LOS_data[#LOS_data]['vis'] = {}
-            LOS_data[#LOS_data]['vis'][#LOS_data[#LOS_data]['vis'] + 1] = unit_info2[unit2_ind].unit
-          else
-            LOS_data[#LOS_data]['vis'][#LOS_data[#LOS_data]['vis'] + 1] = unit_info2[unit2_ind].unit
-          end
-        end
-      end
-    end
-  end
-
-  return LOS_data
 end
 
 function mist.flagFunc.units_LOS(vars)
@@ -3699,6 +3544,216 @@ function mist.flagFunc.group_alive_more_than(vars)
   end
 end
 
+function mist.pointInPolygon(point, poly, maxalt) --raycasting point in polygon. Code from http://softsurfer.com/Archive/algorithm_0103/algorithm_0103.htm
+  --[[local type_tbl = {
+    point = {'table'},
+    poly = {'table'},
+    maxalt = {'number', 'nil'},
+    }
+
+  local err, errmsg = mist.utils.typeCheck('mist.pointInPolygon', type_tbl, {point, poly, maxalt})
+  assert(err, errmsg)
+  ]]
+  point = mist.utils.makeVec3(point)
+  local px = point.x
+  local pz = point.z
+  local cn = 0
+  local newpoly = mist.utils.deepCopy(poly)
+
+  if not maxalt or (point.y <= maxalt) then
+    local polysize = #newpoly
+    newpoly[#newpoly + 1] = newpoly[1]
+
+    newpoly[1] = mist.utils.makeVec3(newpoly[1])
+
+    for k = 1, polysize do
+      newpoly[k+1] = mist.utils.makeVec3(newpoly[k+1])
+      if ((newpoly[k].z <= pz) and (newpoly[k+1].z > pz)) or ((newpoly[k].z > pz) and (newpoly[k+1].z <= pz)) then
+        local vt = (pz - newpoly[k].z) / (newpoly[k+1].z - newpoly[k].z)
+        if (px < newpoly[k].x + vt*(newpoly[k+1].x - newpoly[k].x)) then
+          cn = cn + 1
+        end
+      end
+    end
+
+    return cn%2 == 1
+  else
+    return false
+  end
+end
+
+function mist.getUnitsInPolygon(unit_names, polyZone, max_alt)
+  local units = {}
+
+  for i = 1, #unit_names do
+    units[#units + 1] = Unit.getByName(unitNames[i])
+  end
+
+  local inZoneUnits = {}
+  for i =1, #units do
+    if units[i]:isActive() and mist.pointInPolygon(units[i]:getPosition().p, polyZone, max_alt) then
+      inZoneUnits[inZoneUnits + 1] = units[i]
+    end
+  end
+
+  return inZoneUnits
+end
+
+function mist.getUnitsInZones(unit_names, zone_names, zone_type)
+
+  zone_type = zone_type or 'cylinder'
+  if zone_type == 'c' or zone_type == 'cylindrical' or zone_type == 'C' then
+    zone_type = 'cylinder'
+  end
+  if zone_type == 's' or zone_type == 'spherical' or zone_type == 'S' then
+    zone_type = 'sphere'
+  end
+
+  assert(zone_type == 'cylinder' or zone_type == 'sphere', 'invalid zone_type: ' .. tostring(zone_type))
+
+  local units = {}
+  local zones = {}
+
+  for k = 1, #unit_names do
+    local unit = Unit.getByName(unit_names[k])
+    if unit then
+      units[#units + 1] = unit
+    end
+  end
+
+
+  for k = 1, #zone_names do
+    local zone = trigger.misc.getZone(zone_names[k])
+    if zone then
+      zones[#zones + 1] = {radius = zone.radius, x = zone.point.x, y = zone.point.y, z = zone.point.z}
+    end
+  end
+
+  local in_zone_units = {}
+
+  for units_ind = 1, #units do
+    for zones_ind = 1, #zones do
+      if zone_type == 'sphere' then  --add land height value for sphere zone type
+        local alt = land.getHeight({x = zones[zones_ind].x, y = zones[zones_ind].z})
+        if alt then
+          zones[zones_ind].y = alt
+        end
+      end
+      local unit_pos = units[units_ind]:getPosition().p
+      if unit_pos and units[units_ind]:isActive() == true then
+        if zone_type == 'cylinder' and (((unit_pos.x - zones[zones_ind].x)^2 + (unit_pos.z - zones[zones_ind].z)^2)^0.5 <= zones[zones_ind].radius) then
+          in_zone_units[#in_zone_units + 1] = units[units_ind]
+          break
+        elseif zone_type == 'sphere' and (((unit_pos.x - zones[zones_ind].x)^2 + (unit_pos.y - zones[zones_ind].y)^2 + (unit_pos.z - zones[zones_ind].z)^2)^0.5 <= zones[zones_ind].radius) then
+          in_zone_units[#in_zone_units + 1] = units[units_ind]
+          break
+        end
+      end
+    end
+  end
+  return in_zone_units
+end
+
+function mist.getUnitsInMovingZones(unit_names, zone_unit_names, radius, zone_type)
+
+  zone_type = zone_type or 'cylinder'
+  if zone_type == 'c' or zone_type == 'cylindrical' or zone_type == 'C' then
+    zone_type = 'cylinder'
+  end
+  if zone_type == 's' or zone_type == 'spherical' or zone_type == 'S' then
+    zone_type = 'sphere'
+  end
+
+  assert(zone_type == 'cylinder' or zone_type == 'sphere', 'invalid zone_type: ' .. tostring(zone_type))
+
+  local units = {}
+  local zone_units = {}
+
+  for k = 1, #unit_names do
+    local unit = Unit.getByName(unit_names[k])
+    if unit then
+      units[#units + 1] = unit
+    end
+  end
+
+  for k = 1, #zone_unit_names do
+    local unit = Unit.getByName(zone_unit_names[k])
+    if unit then
+      zone_units[#zone_units + 1] = unit
+    end
+  end
+
+  local in_zone_units = {}
+
+  for units_ind = 1, #units do
+    for zone_units_ind = 1, #zone_units do
+      local unit_pos = units[units_ind]:getPosition().p
+      local zone_unit_pos = zone_units[zone_units_ind]:getPosition().p
+      if unit_pos and zone_unit_pos and units[units_ind]:isActive() == true then
+        if zone_type == 'cylinder' and (((unit_pos.x - zone_unit_pos.x)^2 + (unit_pos.z - zone_unit_pos.z)^2)^0.5 <= radius) then
+          in_zone_units[#in_zone_units + 1] = units[units_ind]
+          break
+        elseif zone_type == 'sphere' and (((unit_pos.x - zone_unit_pos.x)^2 + (unit_pos.y - zone_unit_pos.y)^2 + (unit_pos.z - zone_unit_pos.z)^2)^0.5 <= radius) then
+          in_zone_units[#in_zone_units + 1] = units[units_ind]
+          break
+        end
+      end
+    end
+  end
+  return in_zone_units
+end
+
+function mist.getUnitsLOS(unitset1, altoffset1, unitset2, altoffset2, radius)
+  radius = radius or math.huge
+
+  local unit_info1 = {}
+  local unit_info2 = {}
+
+  -- get the positions all in one step, saves execution time.
+  for unitset1_ind = 1, #unitset1 do
+    local unit1 = Unit.getByName(unitset1[unitset1_ind])
+    if unit1 and unit1:isActive() == true then
+      unit_info1[#unit_info1 + 1] = {}
+      unit_info1[#unit_info1]["unit"] = unit1
+      unit_info1[#unit_info1]["pos"]  = unit1:getPosition().p
+    end
+  end
+
+  for unitset2_ind = 1, #unitset2 do
+    local unit2 = Unit.getByName(unitset2[unitset2_ind])
+    if unit2 and unit2:isActive() == true then
+      unit_info2[#unit_info2 + 1] = {}
+      unit_info2[#unit_info2]["unit"] = unit2
+      unit_info2[#unit_info2]["pos"]  = unit2:getPosition().p
+    end
+  end
+
+  local LOS_data = {}
+  -- now compute los
+  for unit1_ind = 1, #unit_info1 do
+    local unit_added = false
+    for unit2_ind = 1, #unit_info2 do
+      if radius == math.huge or (mist.vec.mag(mist.vec.sub(unit_info1[unit1_ind].pos, unit_info2[unit2_ind].pos)) < radius) then -- inside radius
+        local point1 = { x = unit_info1[unit1_ind].pos.x, y = unit_info1[unit1_ind].pos.y + altoffset1, z = unit_info1[unit1_ind].pos.z}
+        local point2 = { x = unit_info2[unit2_ind].pos.x, y = unit_info2[unit2_ind].pos.y + altoffset2, z = unit_info2[unit2_ind].pos.z}
+        if land.isVisible(point1, point2) then
+          if unit_added == false then
+            unit_added = true
+            LOS_data[#LOS_data + 1] = {}
+            LOS_data[#LOS_data]['unit'] = unit_info1[unit1_ind].unit
+            LOS_data[#LOS_data]['vis'] = {}
+            LOS_data[#LOS_data]['vis'][#LOS_data[#LOS_data]['vis'] + 1] = unit_info2[unit2_ind].unit
+          else
+            LOS_data[#LOS_data]['vis'][#LOS_data[#LOS_data]['vis'] + 1] = unit_info2[unit2_ind].unit
+          end
+        end
+      end
+    end
+  end
+
+  return LOS_data
+end
+
 function mist.getAvgPoint(points)
   local avgX, avgY, avgZ, totNum = 0, 0, 0, 0
   for i = 1, #points do
@@ -3753,7 +3808,8 @@ function mist.getAvgGroupPos(groupName)
 
 end
 
--- demos
+--- Demo functions.
+-- @section mist.demos
 mist.demos = {}
 
 function mist.demos.printFlightData(unit)
@@ -3868,7 +3924,8 @@ function mist.demos.printFlightData(unit)
 
 end
 
---start of Mission task functions
+--- Group task functions.
+-- @section tasks
 mist.ground = {}
 mist.fixedWing = {}
 mist.heli = {}
@@ -4933,6 +4990,7 @@ vars.text - text in the message
 vars.displayTime - self explanatory
 vars.msgFor - scope
 ]]
+
 function mist.msgMGRS(vars)
   local units = vars.units
   local acc = vars.acc
@@ -6292,8 +6350,6 @@ scope examples:
 {unitTypes = { blue = {'A-10C'}}}
 ]]
 end
-
-
 
 mist.main()
 env.info(('Mist version ' .. mist.majorVersion .. '.' .. mist.minorVersion .. '.' .. mist.build .. ' loaded.'))
