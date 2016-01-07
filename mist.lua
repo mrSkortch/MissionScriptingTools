@@ -21,6 +21,9 @@ mist.majorVersion = 4
 mist.minorVersion = 0
 mist.build = 60
 
+-- forward declaration of log shorthand
+local log
+
 do -- the main scope
   local coroutines = {}
 
@@ -44,7 +47,6 @@ do -- the main scope
 
   mist.nextGroupId = 1
   mist.nextUnitId = 1
-
 
   local function updateAliveUnits()  -- coroutine function
     local lalive_units = mist.DBs.aliveUnits -- local references for faster execution
@@ -105,9 +107,9 @@ do -- the main scope
       elseif StaticObject.getByName(event) then
         newObject = StaticObject.getByName(event)
         newType = 'static'
-        --	env.info('its static')
+        --	log:info('its static')
       else
-        env.info('WTF')
+        log:info('WTF')
         return false
       end
 
@@ -413,8 +415,28 @@ do -- the main scope
     end
   end
 
+  --- init function.
+  -- creates logger, adds default event handler
+  -- and calls main the first time.
+  function mist.init()
+    -- create logger
+    mist.log = mist.Logger:new()
+    log = mist.log
+    -- set info log level
+    log:setLevel("info")
+
+    -- add event handler for group spawns
+    mist.addEventHandler(groupSpawned)
+
+    -- call main the first time therafter it reschedules itself.
+    mist.main()
+
+    log:info('MIST version $1.$2.$3 loaded', mist.majorVersion, mist.minorVersion, mist.build)
+  end
+
   --- The main function.
   -- Run 100 times per second.
+  -- You shouldn't call this function.
   function mist.main()
     timer.scheduleFunction(mist.main, {}, timer.getTime() + 0.01)  --reschedule first in case of Lua error
 
@@ -708,7 +730,7 @@ do -- the main scope
           newGroup.units[unitIndex].alt_type = 'RADIO'
           newGroup.units[unitIndex].speed = 60
         else
-          --[[env.info('check height')
+          --[[log:info('check height')
           newGroup.units[unitIndex].alt = land.getHeight({x = newGroup.units[unitIndex].x, y = newGroup.units[unitIndex].y})
           newGroup.units[unitIndex].alt_type = 'BARO']]
         end
@@ -811,7 +833,7 @@ do -- the main scope
           table.remove(Tasks, i)
           local err, errmsg = pcall(Task.f, unpack(Task.vars, 1, table.maxn(Task.vars)))
           if not err then
-            env.info('mist.scheduleFunction, error in scheduled function: ' .. errmsg)
+            log:error('mist.scheduleFunction, error in scheduled function: $1', errmsg)
           end
           --Task.f(unpack(Task.vars, 1, table.maxn(Task.vars)))  -- do the task, do not increment i
         else
@@ -825,7 +847,7 @@ do -- the main scope
           Task.t = timer.getTime() + Task.rep  --schedule next run
           local err, errmsg = pcall(Task.f, unpack(Task.vars, 1, table.maxn(Task.vars)))
           if not err then
-            env.info('mist.scheduleFunction, error in scheduled function: ' .. errmsg)
+            log:error('mist.scheduleFunction, error in scheduled function: $1' .. errmsg)
           end
           --Tasks[i].f(unpack(Tasks[i].vars, 1, table.maxn(Tasks[i].vars)))  -- do the task
           i = i + 1
@@ -1137,7 +1159,7 @@ do -- the main scope
       end
       return { Heading = Heading, Pitch = Pitch, Roll = Roll, Yaw = Yaw, AoA = AoA, ClimbAngle = ClimbAngle}
     else
-      env.info('unit:getPosition() is nil!')
+      log:error("Couldn't get unit's position")
     end
   end
 
@@ -2093,7 +2115,6 @@ function mist.getLeadingBRString(vars)
   end
 end
 
-  mist.addEventHandler(groupSpawned)
 end
 
 do -- group functions scope
@@ -2232,7 +2253,7 @@ do -- group functions scope
 
       return newData
     else
-      env.info(gpName .. ' not found in mist.getGroupData')
+      log:error('$1 not found in MIST database', gpName)
       return
     end
   end
@@ -2270,10 +2291,10 @@ do -- group functions scope
         end
       end
     else
-      env.info('mist.getPayload got ' .. type(unitIdent))
+      log:error('Need string or number. Got: $1', type(unitIdent))
       return false
     end
-    env.info('mist.getPayload, payload not found')
+    log:warn("Couldn't find payload for unit: $1", unitIdent)
     return
   end
 
@@ -2308,10 +2329,10 @@ do -- group functions scope
         end
       end
     else
-      env.info('mist.getGroupPayload got ' .. type(groupName))
+      log:error('Need string or number. Got: $1', type(groupIdent))
       return false
     end
-    env.info('mist.getGroupPayload, payload not found')
+    log:warn("Couldn't find payload for group: $1", groupIdent)
     return
 
   end
@@ -2325,7 +2346,7 @@ do -- group functions scope
     elseif vars.groupName then
       gpName = vars.groupName
     else
-      env.info('teleportToPoint missing either vars.groupName or vars.gpName')
+      log:error('Missing field groupName or gpName in variable table')
     end
 
     local action = vars.action
@@ -2387,7 +2408,7 @@ do -- group functions scope
         end
       end
       if valid == false then
-        env.info('mist.teleportToPoint; vars.point not a valid coordinate')
+        log:error('point supplied in variable table is not a valid coordinate.')
         return false
       end
     end
@@ -2647,7 +2668,7 @@ do -- group functions scope
     end
     --[[
     for i = 1, #newTable do
-      env.info(newTable[i])
+      log:info(newTable[i])
     end
     ]]
     return newTable
@@ -2765,7 +2786,7 @@ do -- group functions scope
         return false
       end
     else
-      env.info('mist.stringMatch; Either the first or second variable were not a string')
+      log:error('Either the first or second variable were not a string')
       return false
     end
   end
@@ -2798,10 +2819,7 @@ end
 do -- mist.Logger scope
   --- Logger class.
   -- @type mist.Logger
-  mist.Logger = {
-    tag = "MIST",
-    level = 1,
-  }
+  mist.Logger = {}
 
   --- Creates a new logger.
   -- Each logger has it's own tag and log level.
@@ -2810,7 +2828,12 @@ do -- mist.Logger scope
   -- @usage myLogger = mist.Logger:new{tag = "MyScript", level = 2}
   -- @treturn mist.Logger
   function mist.Logger:new(l)
-    l = l or {}
+    l = l or {
+      tag = "MIST",
+      level = 1,
+    }
+    -- in case the user only supplied
+    -- either tag or level
     if not l.tag then
       l.tag = "MIST"
     end
@@ -2861,7 +2884,16 @@ do -- mist.Logger scope
       end
       text = text:gsub('$' .. index, value)
     end
-    return text
+    local dInfo = debug.getinfo(3)
+    local fName = dInfo.name
+    -- local fsrc = dinfo.short_src
+    --local fLine = dInfo.linedefined
+    local cLine = dInfo.currentline
+    if fName then
+      return fName .. '|' .. cLine .. ': ' .. text
+    else
+      return cLine .. ': ' .. text
+    end
   end
 
   --- Logs error and shows alert window.
@@ -2873,7 +2905,7 @@ do -- mist.Logger scope
   -- @usage myLogger:alert("Shit just hit the fan! WEEEE!!!11")
   function mist.Logger:alert(text, ...)
     text = formatText(text, unpack(arg))
-    env.error(self.tag .. ' | ' .. text, true)
+    env.error(self.tag .. '|' .. text, true)
   end
 
   --- Logs an error.
@@ -2886,7 +2918,7 @@ do -- mist.Logger scope
   function mist.Logger:error(text, ...)
     if self.level >= 1 then
       text = formatText(text, unpack(arg))
-      env.error(self.tag .. ' | ' .. text)
+      env.error(self.tag .. '|' .. text)
     end
   end
 
@@ -2899,7 +2931,7 @@ do -- mist.Logger scope
   function mist.Logger:warn(text, ...)
     if self.level >= 2 then
       text = formatText(text, unpack(arg))
-      env.warning(self.tag .. ' | ' .. text)
+      env.warning(self.tag .. '|' .. text)
     end
   end
 
@@ -2912,7 +2944,7 @@ do -- mist.Logger scope
   function mist.Logger:info(text, ...)
     if self.level >= 3 then
       text = formatText(text, unpack(arg))
-      env.info(self.tag .. ' | ' .. text)
+      env.info(self.tag .. '|' .. text)
     end
   end
 end
@@ -3207,7 +3239,7 @@ do -- mist.util scope
   -- mist.utils.typeCheck(type_tbl, my_tb)
   -- @return true if table passes the check, false otherwise.
   function mist.utils.typeCheck(fname, type_tbl, var_tbl)
-    --env.info('type check')
+    --log:info('type check')
     for type_key, type_val in pairs(type_tbl) do
       --print('type_key:')
       --print(type_key)
@@ -3340,7 +3372,7 @@ function mist.utils.serialize(name, value, level)
 
       end
     else
-      env.info("Cannot serialize a "..type(value))
+      log:error('Cannot serialize a $1', type(value))
     end
     return var_str_tbl
   end
@@ -3427,7 +3459,7 @@ function mist.utils.oneLineSerialize(tbl)
         tbl_str[#tbl_str + 1] = mist.utils.oneLineSerialize(val)
         tbl_str[#tbl_str + 1] = ', '   --I think this is right, I just added it
       else
-        env.info('unable to serialize value type ' .. mist.utils.basicSerialize(type(val)) .. ' at index ' .. tostring(ind))
+        log:war('Unable to serialize value type $1 at index $2', mist.utils.basicSerialize(type(val)), tostring(ind))
       end
 
     end
@@ -3531,13 +3563,11 @@ do -- mist.debug scope
       local f = io.open(fdir, 'w')
       f:write(mist.utils.tableShow(_G))
       f:close()
-      local errmsg = 'mist.debug.dump_G wrote data to ' .. fdir
-      env.info(errmsg)
-      trigger.action.outText(errmsg, 10)
+      log:info('Wrote debug data to $1', fdir)
+      --trigger.action.outText(errmsg, 10)
     else
-      local errmsg = 'Error: insufficient libraries to run mist.debug.dump_G, you must disable the sanitization of the io and lfs libraries in ./Scripts/MissionScripting.lua'
-      env.info(errmsg)
-      trigger.action.outText(errmsg, 10)
+      log:alert('insufficient libraries to run mist.debug.dump_G, you must disable the sanitization of the io and lfs libraries in ./Scripts/MissionScripting.lua')
+      --trigger.action.outText(errmsg, 10)
     end
   end
 
@@ -3554,13 +3584,11 @@ do -- mist.debug scope
       local f = io.open(fdir, 'w')
       f:write(fcn(unpack(fcnVars, 1, table.maxn(fcnVars))))
       f:close()
-      local errmsg = 'mist.debug.writeData wrote data to ' .. fdir
-      env.info(errmsg)
-      trigger.action.outText(errmsg, 10)
+      log:info('Wrote debug data to $1', fdir)
+      --trigger.action.outText(errmsg, 10)
     else
-      local errmsg = 'Error: insufficient libraries to run mist.debug.writeData, you must disable the sanitization of the io and lfs libraries in ./Scripts/MissionScripting.lua'
-      env.info(errmsg)
-      trigger.action.outText(errmsg, 10)
+      log:alert('insufficient libraries to run mist.debug.dump_G, you must disable the sanitization of the io and lfs libraries in ./Scripts/MissionScripting.lua')
+      --trigger.action.outText(errmsg, 10)
     end
   end
 
@@ -4412,11 +4440,11 @@ end]]
       local function msgSpamFilter(recList, spamBlockOn)
         for id, name in pairs(recList) do
           if name == spamBlockOn then
-            --	env.info('already on recList')
+            --	log:info('already on recList')
             return recList
           end
         end
-        --env.info('add to recList')
+        --log:info('add to recList')
         table.insert(recList, spamBlockOn)
         return recList
       end
@@ -4523,7 +4551,7 @@ end]]
         for i = 1, #messageList do
           if messageList[i].name then
             if messageList[i].name == vars.name then
-              --env.info('updateMessage')
+              --log:info('updateMessage')
               messageList[i].displayedFor = 0
               messageList[i].addedAt = timer.getTime()
               messageList[i].sound = new.sound
@@ -5175,9 +5203,9 @@ do
   --[[
     local function addClientsToActive(event)
       if event.id == world.event.S_EVENT_PLAYER_ENTER_UNIT or event.id == world.event.S_EVENT_BIRTH then
-        env.info(mist.utils.tableShow(event))
+        log:info(mist.utils.tableShow(event))
         if Unit.getPlayerName(event.initiator) then
-          env.info(Unit.getPlayerName(event.initiator))
+          log:info(Unit.getPlayerName(event.initiator))
           local newU = mist.utils.deepCopy(mist.DBs.unitsByName[Unit.getName(event.initiator)])
           newU.playerName = Unit.getPlayerName(event.initiator)
           mist.DBs.activeHumans[Unit.getName(event.initiator)] = newU
@@ -5250,7 +5278,7 @@ do -- mist.time scope
       tbl.s = timeInSec
       return tbl
     else
-      env.info('mist.time.getDHMS didnt recieve number')
+      log:error("Didn't recieve number")
       return
     end
   end
@@ -6297,8 +6325,8 @@ do -- mist unitID funcs
   end
 end
 
-mist.main()
-env.info(('Mist version ' .. mist.majorVersion .. '.' .. mist.minorVersion .. '.' .. mist.build .. ' loaded.'))
+-- initialize mist
+mist.init()
 
 -- vim: sw=2:ts=2
 
