@@ -1,15 +1,25 @@
---[[
-Links:
-
-ED Forum Thread: http://forums.eagle.ru/showthread.php?t=98616
-
-Github
-Development: https://github.com/mrSkortch/MissionScriptingTools/tree/development
-Official Release: https://github.com/mrSkortch/MissionScriptingTools/tree/master
-
-]]
-
---- MiST Mission Scripting Tools.
+--- MIST Mission Scripting Tools.
+-- MIssion Scripting Tools (MIST) is a collection of Lua functions
+-- and databases that is intended to be a supplement to the standard
+-- Lua functions included in the simulator scripting engine.
+--
+-- MIST functions and databases provide ready-made solutions to many common
+-- scripting tasks and challenges, enabling easier scripting and saving
+-- mission scripters time. The table mist.flagFuncs contains a set of
+-- Lua functions (that are similar to Slmod functions) that do not
+-- require detailed Lua knowledge to use.
+--
+-- However, the majority of MIST does require knowledge of the Lua language,
+-- and, if you are going to utilize these components of MIST, it is necessary
+-- that you read the Simulator Scripting Engine guide on the official ED wiki.
+--
+-- Links:
+-- ED Forum Thread: http://forums.eagle.ru/showthread.php?t=98616
+--
+-- Github
+-- Development: https://github.com/mrSkortch/MissionScriptingTools/tree/development
+-- Official Release: https://github.com/mrSkortch/MissionScriptingTools/tree/master
+--
 -- @module mist
 -- @author Speed
 -- @author Grimes
