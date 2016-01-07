@@ -45,7 +45,6 @@ do -- the main scope
   mist.nextGroupId = 1
   mist.nextUnitId = 1
 
-  mist.addEventHandler(groupSpawned)
 
   local function updateAliveUnits()  -- coroutine function
     local lalive_units = mist.DBs.aliveUnits -- local references for faster execution
@@ -843,7 +842,7 @@ do -- the main scope
     idNum = idNum + 1
     handler.id = idNum
     handler.f = f
-    function handler.onEvent(self, event)
+    function handler:onEvent(event)
       self.f(event)
     end
     world.addEventHandler(handler)
@@ -1048,24 +1047,23 @@ do -- the main scope
   end
 
   --[[ table attitude = getAttitude(string unitname) -- will work on any unit, even if not an aircraft.
+    attitude = {
+      Heading = number, -- in radians, range of 0 to 2*pi, relative to true north
+      Pitch = number, -- in radians, range of -pi/2 to pi/2
+      Roll = number, -- in radians, range of 0 to 2*pi, right roll is positive direction
 
-attitude = {
-  Heading = number, -- in radians, range of 0 to 2*pi, relative to true north
-  Pitch = number, -- in radians, range of -pi/2 to pi/2
-  Roll = number, -- in radians, range of 0 to 2*pi, right roll is positive direction
+      --Yaw, AoA, ClimbAngle - relative to earth reference- DOES NOT TAKE INTO ACCOUNT WIND.
+      Yaw = number, -- in radians, range of -pi to pi, right yaw is positive direction
+      AoA = number, -- in radians, range of -pi to pi, rotation of aircraft to the right in comparison to flight direction being positive
+      ClimbAngle = number, -- in radians, range of -pi/2 to pi/2
 
-  --Yaw, AoA, ClimbAngle - relative to earth reference- DOES NOT TAKE INTO ACCOUNT WIND.
-  Yaw = number, -- in radians, range of -pi to pi, right yaw is positive direction
-  AoA = number, -- in radians, range of -pi to pi, rotation of aircraft to the right in comparison to flight direction being positive
-  ClimbAngle = number, -- in radians, range of -pi/2 to pi/2
+      --Maybe later?
+      AxialVel = table, velocity of the aircraft transformed into directions of aircraft axes
+      Speed = number -- absolute velocity in meters/sec
 
-  --Maybe later?
-  AxialVel = table, velocity of the aircraft transformed into directions of aircraft axes
-  Speed = number -- absolute velocity in meters/sec
+      }
 
-  }
-
-]]
+    ]]
   function mist.getAttitude(unit)
     local unitpos = unit:getPosition()
     if unitpos then
@@ -1251,81 +1249,80 @@ attitude = {
   end
 
   function mist.makeUnitTable(tbl)
-
     --[[
-Prefixes:
-"[-u]<unit name>" - subtract this unit if its in the table
-"[g]<group name>" - add this group to the table
-"[-g]<group name>" - subtract this group from the table
-"[c]<country name>"  - add this country's units
-"[-c]<country name>" - subtract this country's units if any are in the table
+      Prefixes:
+      "[-u]<unit name>" - subtract this unit if its in the table
+      "[g]<group name>" - add this group to the table
+      "[-g]<group name>" - subtract this group from the table
+      "[c]<country name>"  - add this country's units
+      "[-c]<country name>" - subtract this country's units if any are in the table
 
-Stand-alone identifiers
-"[all]" - add all units
-"[-all]" - subtract all units (not very useful by itself)
-"[blue]" - add all blue units
-"[-blue]" - subtract all blue units
-"[red]" - add all red coalition units
-"[-red]" - subtract all red units
+      Stand-alone identifiers
+      "[all]" - add all units
+      "[-all]" - subtract all units (not very useful by itself)
+      "[blue]" - add all blue units
+      "[-blue]" - subtract all blue units
+      "[red]" - add all red coalition units
+      "[-red]" - subtract all red units
 
-Compound Identifiers:
-"[c][helicopter]<country name>"  - add all of this country's helicopters
-"[-c][helicopter]<country name>" - subtract all of this country's helicopters
-"[c][plane]<country name>"  - add all of this country's planes
-"[-c][plane]<country name>" - subtract all of this country's planes
-"[c][ship]<country name>"  - add all of this country's ships
-"[-c][ship]<country name>" - subtract all of this country's ships
-"[c][vehicle]<country name>"  - add all of this country's vehicles
-"[-c][vehicle]<country name>" - subtract all of this country's vehicles
+      Compound Identifiers:
+      "[c][helicopter]<country name>"  - add all of this country's helicopters
+      "[-c][helicopter]<country name>" - subtract all of this country's helicopters
+      "[c][plane]<country name>"  - add all of this country's planes
+      "[-c][plane]<country name>" - subtract all of this country's planes
+      "[c][ship]<country name>"  - add all of this country's ships
+      "[-c][ship]<country name>" - subtract all of this country's ships
+      "[c][vehicle]<country name>"  - add all of this country's vehicles
+      "[-c][vehicle]<country name>" - subtract all of this country's vehicles
 
-"[all][helicopter]" -  add all helicopters
-"[-all][helicopter]" - subtract all helicopters
-"[all][plane]" - add all  planes
-"[-all][plane]" - subtract all planes
-"[all][ship]" - add all ships
-"[-all][ship]" - subtract all ships
-"[all][vehicle]" - add all vehicles
-"[-all][vehicle]" - subtract all vehicles
+      "[all][helicopter]" -  add all helicopters
+      "[-all][helicopter]" - subtract all helicopters
+      "[all][plane]" - add all  planes
+      "[-all][plane]" - subtract all planes
+      "[all][ship]" - add all ships
+      "[-all][ship]" - subtract all ships
+      "[all][vehicle]" - add all vehicles
+      "[-all][vehicle]" - subtract all vehicles
 
-"[blue][helicopter]" -  add all blue coalition helicopters
-"[-blue][helicopter]" - subtract all blue coalition helicopters
-"[blue][plane]" - add all blue coalition planes
-"[-blue][plane]" - subtract all blue coalition planes
-"[blue][ship]" - add all blue coalition ships
-"[-blue][ship]" - subtract all blue coalition ships
-"[blue][vehicle]" - add all blue coalition vehicles
-"[-blue][vehicle]" - subtract all blue coalition vehicles
+      "[blue][helicopter]" -  add all blue coalition helicopters
+      "[-blue][helicopter]" - subtract all blue coalition helicopters
+      "[blue][plane]" - add all blue coalition planes
+      "[-blue][plane]" - subtract all blue coalition planes
+      "[blue][ship]" - add all blue coalition ships
+      "[-blue][ship]" - subtract all blue coalition ships
+      "[blue][vehicle]" - add all blue coalition vehicles
+      "[-blue][vehicle]" - subtract all blue coalition vehicles
 
-"[red][helicopter]" -  add all red coalition helicopters
-"[-red][helicopter]" - subtract all red coalition helicopters
-"[red][plane]" - add all red coalition planes
-"[-red][plane]" - subtract all red coalition planes
-"[red][ship]" - add all red coalition ships
-"[-red][ship]" - subtract all red coalition ships
-"[red][vehicle]" - add all red coalition vehicles
-"[-red][vehicle]" - subtract all red coalition vehicles
+      "[red][helicopter]" -  add all red coalition helicopters
+      "[-red][helicopter]" - subtract all red coalition helicopters
+      "[red][plane]" - add all red coalition planes
+      "[-red][plane]" - subtract all red coalition planes
+      "[red][ship]" - add all red coalition ships
+      "[-red][ship]" - subtract all red coalition ships
+      "[red][vehicle]" - add all red coalition vehicles
+      "[-red][vehicle]" - subtract all red coalition vehicles
 
 
-Country names to be used in [c] and [-c] short-cuts:
-"Turkey"
-"Norway"
-"The Netherlands"
-"Spain"
-"UK"
-"Denmark"
-"USA"
-"Georgia"
-"Germany"
-"Belgium"
-"Canada"
-"France"
-"Israel"
-"Ukraine"
-"Russia"
-"South Osetia"
-"Abkhazia"
-"Italy"
-]]
+      Country names to be used in [c] and [-c] short-cuts:
+      "Turkey"
+      "Norway"
+      "The Netherlands"
+      "Spain"
+      "UK"
+      "Denmark"
+      "USA"
+      "Georgia"
+      "Germany"
+      "Belgium"
+      "Canada"
+      "France"
+      "Israel"
+      "Ukraine"
+      "Russia"
+      "South Osetia"
+      "Abkhazia"
+      "Italy"
+      ]]
 
     --Assumption: will be passed a table of strings, sequential
     local units_by_name = {}
@@ -1343,93 +1340,10 @@ Country names to be used in [c] and [-c] short-cuts:
           for unit_type, unit_type_tbl in pairs(country_table) do
             if type(unit_type_tbl) == 'table' then
               for group_ind, group_tbl in pairs(unit_type_tbl) do
-                if type(group_tbl) == 'table' and group_tbl.groupName == unit:sub(4) then -- index 4 to end
-                for unit_ind, unit in pairs(group_tbl.units) do
-                  units_by_name[unit.unitName] = true  --add
-                end
-              end
-            end
-          end
-        end
-      end
-    end
-  elseif unit:sub(1,4) == '[-g]' then -- subtract a group
-    for coa, coa_tbl in pairs(l_munits) do
-      for country, country_table in pairs(coa_tbl) do
-        for unit_type, unit_type_tbl in pairs(country_table) do
-          if type(unit_type_tbl) == 'table' then
-            for group_ind, group_tbl in pairs(unit_type_tbl) do
-              if type(group_tbl) == 'table' and group_tbl.groupName == unit:sub(5) then -- index 5 to end
-              for unit_ind, unit in pairs(group_tbl.units) do
-                if units_by_name[unit.unitName] then
-                  units_by_name[unit.unitName] = nil --remove
-                end
-              end
-            end
-          end
-        end
-      end
-    end
-  end
-elseif unit:sub(1,3) == '[c]' then -- add a country
-  local category = ''
-  local country_start = 4
-  if unit:sub(4,15) == '[helicopter]' then
-    category = 'helicopter'
-    country_start = 16
-  elseif unit:sub(4,10) == '[plane]' then
-    category = 'plane'
-    country_start = 11
-  elseif unit:sub(4,9) == '[ship]' then
-    category = 'ship'
-    country_start = 10
-  elseif unit:sub(4,12) == '[vehicle]' then
-    category = 'vehicle'
-    country_start = 13
-  end
-  for coa, coa_tbl in pairs(l_munits) do
-    for country, country_table in pairs(coa_tbl) do
-      if country == string.lower(unit:sub(country_start)) then   -- match
-        for unit_type, unit_type_tbl in pairs(country_table) do
-          if type(unit_type_tbl) == 'table' and (category == '' or unit_type == category) then
-            for group_ind, group_tbl in pairs(unit_type_tbl) do
-              if type(group_tbl) == 'table' then
-                for unit_ind, unit in pairs(group_tbl.units) do
-                  units_by_name[unit.unitName] = true  --add
-                end
-              end
-            end
-          end
-        end
-      end
-    end
-  end
-elseif unit:sub(1,4) == '[-c]' then -- subtract a country
-  local category = ''
-  local country_start = 5
-  if unit:sub(5,16) == '[helicopter]' then
-    category = 'helicopter'
-    country_start = 17
-  elseif unit:sub(5,11) == '[plane]' then
-    category = 'plane'
-    country_start = 12
-  elseif unit:sub(5,10) == '[ship]' then
-    category = 'ship'
-    country_start = 11
-  elseif unit:sub(5,13) == '[vehicle]' then
-    category = 'vehicle'
-    country_start = 14
-  end
-  for coa, coa_tbl in pairs(l_munits) do
-    for country, country_table in pairs(coa_tbl) do
-      if country == string.lower(unit:sub(country_start)) then   -- match
-        for unit_type, unit_type_tbl in pairs(country_table) do
-          if type(unit_type_tbl) == 'table' and (category == '' or unit_type == category) then
-            for group_ind, group_tbl in pairs(unit_type_tbl) do
-              if type(group_tbl) == 'table' then
-                for unit_ind, unit in pairs(group_tbl.units) do
-                  if units_by_name[unit.unitName] then
-                    units_by_name[unit.unitName] = nil  --remove
+                if type(group_tbl) == 'table' and group_tbl.groupName == unit:sub(4) then
+                  -- index 4 to end
+                  for unit_ind, unit in pairs(group_tbl.units) do
+                    units_by_name[unit.unitName] = true  --add
                   end
                 end
               end
@@ -1437,57 +1351,18 @@ elseif unit:sub(1,4) == '[-c]' then -- subtract a country
           end
         end
       end
-    end
-  end
-elseif unit:sub(1,6) ==  '[blue]' then -- add blue coalition
-  local category = ''
-  if unit:sub(7) == '[helicopter]' then
-    category = 'helicopter'
-  elseif unit:sub(7) == '[plane]' then
-    category = 'plane'
-  elseif unit:sub(7) == '[ship]' then
-    category = 'ship'
-  elseif unit:sub(7) == '[vehicle]' then
-    category = 'vehicle'
-  end
-  for coa, coa_tbl in pairs(l_munits) do
-    if coa == 'blue' then
-      for country, country_table in pairs(coa_tbl) do
-        for unit_type, unit_type_tbl in pairs(country_table) do
-          if type(unit_type_tbl) == 'table' and (category == '' or unit_type == category) then
-            for group_ind, group_tbl in pairs(unit_type_tbl) do
-              if type(group_tbl) == 'table' then
-                for unit_ind, unit in pairs(group_tbl.units) do
-                  units_by_name[unit.unitName] = true  --add
-                end
-              end
-            end
-          end
-        end
-      end
-    end
-  end
-elseif unit:sub(1,7) == '[-blue]' then -- subtract blue coalition
-  local category = ''
-  if unit:sub(8) == '[helicopter]' then
-    category = 'helicopter'
-  elseif unit:sub(8) == '[plane]' then
-    category = 'plane'
-  elseif unit:sub(8) == '[ship]' then
-    category = 'ship'
-  elseif unit:sub(8) == '[vehicle]' then
-    category = 'vehicle'
-  end
-  for coa, coa_tbl in pairs(l_munits) do
-    if coa == 'blue' then
-      for country, country_table in pairs(coa_tbl) do
-        for unit_type, unit_type_tbl in pairs(country_table) do
-          if type(unit_type_tbl) == 'table' and (category == '' or unit_type == category) then
-            for group_ind, group_tbl in pairs(unit_type_tbl) do
-              if type(group_tbl) == 'table' then
-                for unit_ind, unit in pairs(group_tbl.units) do
-                  if units_by_name[unit.unitName] then
-                    units_by_name[unit.unitName] = nil  --remove
+    elseif unit:sub(1,4) == '[-g]' then -- subtract a group
+      for coa, coa_tbl in pairs(l_munits) do
+        for country, country_table in pairs(coa_tbl) do
+          for unit_type, unit_type_tbl in pairs(country_table) do
+            if type(unit_type_tbl) == 'table' then
+              for group_ind, group_tbl in pairs(unit_type_tbl) do
+                if type(group_tbl) == 'table' and group_tbl.groupName == unit:sub(5) then
+                  -- index 5 to end
+                  for unit_ind, unit in pairs(group_tbl.units) do
+                    if units_by_name[unit.unitName] then
+                      units_by_name[unit.unitName] = nil --remove
+                    end
                   end
                 end
               end
@@ -1495,57 +1370,32 @@ elseif unit:sub(1,7) == '[-blue]' then -- subtract blue coalition
           end
         end
       end
-    end
-  end
-elseif unit:sub(1,5) == '[red]' then -- add red coalition
-  local category = ''
-  if unit:sub(6) == '[helicopter]' then
-    category = 'helicopter'
-  elseif unit:sub(6) == '[plane]' then
-    category = 'plane'
-  elseif unit:sub(6) == '[ship]' then
-    category = 'ship'
-  elseif unit:sub(6) == '[vehicle]' then
-    category = 'vehicle'
-  end
-  for coa, coa_tbl in pairs(l_munits) do
-    if coa == 'red' then
-      for country, country_table in pairs(coa_tbl) do
-        for unit_type, unit_type_tbl in pairs(country_table) do
-          if type(unit_type_tbl) == 'table' and (category == '' or unit_type == category) then
-            for group_ind, group_tbl in pairs(unit_type_tbl) do
-              if type(group_tbl) == 'table' then
-                for unit_ind, unit in pairs(group_tbl.units) do
-                  units_by_name[unit.unitName] = true  --add
-                end
-              end
-            end
-          end
-        end
+    elseif unit:sub(1,3) == '[c]' then -- add a country
+      local category = ''
+      local country_start = 4
+      if unit:sub(4,15) == '[helicopter]' then
+        category = 'helicopter'
+        country_start = 16
+      elseif unit:sub(4,10) == '[plane]' then
+        category = 'plane'
+        country_start = 11
+      elseif unit:sub(4,9) == '[ship]' then
+        category = 'ship'
+        country_start = 10
+      elseif unit:sub(4,12) == '[vehicle]' then
+        category = 'vehicle'
+        country_start = 13
       end
-    end
-  end
-elseif unit:sub(1,6) == '[-red]' then -- subtract red coalition
-  local category = ''
-  if unit:sub(7) == '[helicopter]' then
-    category = 'helicopter'
-  elseif unit:sub(7) == '[plane]' then
-    category = 'plane'
-  elseif unit:sub(7) == '[ship]' then
-    category = 'ship'
-  elseif unit:sub(7) == '[vehicle]' then
-    category = 'vehicle'
-  end
-  for coa, coa_tbl in pairs(l_munits) do
-    if coa == 'red' then
-      for country, country_table in pairs(coa_tbl) do
-        for unit_type, unit_type_tbl in pairs(country_table) do
-          if type(unit_type_tbl) == 'table' and (category == '' or unit_type == category) then
-            for group_ind, group_tbl in pairs(unit_type_tbl) do
-              if type(group_tbl) == 'table' then
-                for unit_ind, unit in pairs(group_tbl.units) do
-                  if units_by_name[unit.unitName] then
-                    units_by_name[unit.unitName] = nil  --remove
+      for coa, coa_tbl in pairs(l_munits) do
+        for country, country_table in pairs(coa_tbl) do
+          if country == string.lower(unit:sub(country_start)) then   -- match
+            for unit_type, unit_type_tbl in pairs(country_table) do
+              if type(unit_type_tbl) == 'table' and (category == '' or unit_type == category) then
+                for group_ind, group_tbl in pairs(unit_type_tbl) do
+                  if type(group_tbl) == 'table' then
+                    for unit_ind, unit in pairs(group_tbl.units) do
+                      units_by_name[unit.unitName] = true  --add
+                    end
                   end
                 end
               end
@@ -1553,65 +1403,214 @@ elseif unit:sub(1,6) == '[-red]' then -- subtract red coalition
           end
         end
       end
-    end
-  end
-elseif unit:sub(1,5) == '[all]' then -- add all of a certain category (or all categories)
-  local category = ''
-  if unit:sub(6) == '[helicopter]' then
-    category = 'helicopter'
-  elseif unit:sub(6) == '[plane]' then
-    category = 'plane'
-  elseif unit:sub(6) == '[ship]' then
-    category = 'ship'
-  elseif unit:sub(6) == '[vehicle]' then
-    category = 'vehicle'
-  end
-  for coa, coa_tbl in pairs(l_munits) do
-    for country, country_table in pairs(coa_tbl) do
-      for unit_type, unit_type_tbl in pairs(country_table) do
-        if type(unit_type_tbl) == 'table' and (category == '' or unit_type == category) then
-          for group_ind, group_tbl in pairs(unit_type_tbl) do
-            if type(group_tbl) == 'table' then
-              for unit_ind, unit in pairs(group_tbl.units) do
-                units_by_name[unit.unitName] = true  --add
-              end
-            end
-          end
-        end
+    elseif unit:sub(1,4) == '[-c]' then -- subtract a country
+      local category = ''
+      local country_start = 5
+      if unit:sub(5,16) == '[helicopter]' then
+        category = 'helicopter'
+        country_start = 17
+      elseif unit:sub(5,11) == '[plane]' then
+        category = 'plane'
+        country_start = 12
+      elseif unit:sub(5,10) == '[ship]' then
+        category = 'ship'
+        country_start = 11
+      elseif unit:sub(5,13) == '[vehicle]' then
+        category = 'vehicle'
+        country_start = 14
       end
-    end
-  end
-elseif unit:sub(1,6) == '[-all]' then -- subtract all of a certain category (or all categories)
-  local category = ''
-  if unit:sub(7) == '[helicopter]' then
-    category = 'helicopter'
-  elseif unit:sub(7) == '[plane]' then
-    category = 'plane'
-  elseif unit:sub(7) == '[ship]' then
-    category = 'ship'
-  elseif unit:sub(7) == '[vehicle]' then
-    category = 'vehicle'
-  end
-  for coa, coa_tbl in pairs(l_munits) do
-    for country, country_table in pairs(coa_tbl) do
-      for unit_type, unit_type_tbl in pairs(country_table) do
-        if type(unit_type_tbl) == 'table' and (category == '' or unit_type == category) then
-          for group_ind, group_tbl in pairs(unit_type_tbl) do
-            if type(group_tbl) == 'table' then
-              for unit_ind, unit in pairs(group_tbl.units) do
-                if units_by_name[unit.unitName] then
-                  units_by_name[unit.unitName] = nil  --remove
+      for coa, coa_tbl in pairs(l_munits) do
+        for country, country_table in pairs(coa_tbl) do
+          if country == string.lower(unit:sub(country_start)) then   -- match
+            for unit_type, unit_type_tbl in pairs(country_table) do
+              if type(unit_type_tbl) == 'table' and (category == '' or unit_type == category) then
+                for group_ind, group_tbl in pairs(unit_type_tbl) do
+                  if type(group_tbl) == 'table' then
+                    for unit_ind, unit in pairs(group_tbl.units) do
+                      if units_by_name[unit.unitName] then
+                        units_by_name[unit.unitName] = nil  --remove
+                      end
+                    end
+                  end
                 end
               end
             end
           end
         end
       end
+    elseif unit:sub(1,6) ==  '[blue]' then -- add blue coalition
+      local category = ''
+      if unit:sub(7) == '[helicopter]' then
+        category = 'helicopter'
+      elseif unit:sub(7) == '[plane]' then
+        category = 'plane'
+      elseif unit:sub(7) == '[ship]' then
+        category = 'ship'
+      elseif unit:sub(7) == '[vehicle]' then
+        category = 'vehicle'
+      end
+      for coa, coa_tbl in pairs(l_munits) do
+        if coa == 'blue' then
+          for country, country_table in pairs(coa_tbl) do
+            for unit_type, unit_type_tbl in pairs(country_table) do
+              if type(unit_type_tbl) == 'table' and (category == '' or unit_type == category) then
+                for group_ind, group_tbl in pairs(unit_type_tbl) do
+                  if type(group_tbl) == 'table' then
+                    for unit_ind, unit in pairs(group_tbl.units) do
+                      units_by_name[unit.unitName] = true  --add
+                    end
+                  end
+                end
+              end
+            end
+          end
+        end
+      end
+    elseif unit:sub(1,7) == '[-blue]' then -- subtract blue coalition
+      local category = ''
+      if unit:sub(8) == '[helicopter]' then
+        category = 'helicopter'
+      elseif unit:sub(8) == '[plane]' then
+        category = 'plane'
+      elseif unit:sub(8) == '[ship]' then
+        category = 'ship'
+      elseif unit:sub(8) == '[vehicle]' then
+        category = 'vehicle'
+      end
+      for coa, coa_tbl in pairs(l_munits) do
+        if coa == 'blue' then
+          for country, country_table in pairs(coa_tbl) do
+            for unit_type, unit_type_tbl in pairs(country_table) do
+              if type(unit_type_tbl) == 'table' and (category == '' or unit_type == category) then
+                for group_ind, group_tbl in pairs(unit_type_tbl) do
+                  if type(group_tbl) == 'table' then
+                    for unit_ind, unit in pairs(group_tbl.units) do
+                      if units_by_name[unit.unitName] then
+                        units_by_name[unit.unitName] = nil  --remove
+                      end
+                    end
+                  end
+                end
+              end
+            end
+          end
+        end
+      end
+    elseif unit:sub(1,5) == '[red]' then -- add red coalition
+      local category = ''
+      if unit:sub(6) == '[helicopter]' then
+        category = 'helicopter'
+      elseif unit:sub(6) == '[plane]' then
+        category = 'plane'
+      elseif unit:sub(6) == '[ship]' then
+        category = 'ship'
+      elseif unit:sub(6) == '[vehicle]' then
+        category = 'vehicle'
+      end
+      for coa, coa_tbl in pairs(l_munits) do
+        if coa == 'red' then
+          for country, country_table in pairs(coa_tbl) do
+            for unit_type, unit_type_tbl in pairs(country_table) do
+              if type(unit_type_tbl) == 'table' and (category == '' or unit_type == category) then
+                for group_ind, group_tbl in pairs(unit_type_tbl) do
+                  if type(group_tbl) == 'table' then
+                    for unit_ind, unit in pairs(group_tbl.units) do
+                      units_by_name[unit.unitName] = true  --add
+                    end
+                  end
+                end
+              end
+            end
+          end
+        end
+      end
+    elseif unit:sub(1,6) == '[-red]' then -- subtract red coalition
+      local category = ''
+      if unit:sub(7) == '[helicopter]' then
+        category = 'helicopter'
+      elseif unit:sub(7) == '[plane]' then
+        category = 'plane'
+      elseif unit:sub(7) == '[ship]' then
+        category = 'ship'
+      elseif unit:sub(7) == '[vehicle]' then
+        category = 'vehicle'
+      end
+      for coa, coa_tbl in pairs(l_munits) do
+        if coa == 'red' then
+          for country, country_table in pairs(coa_tbl) do
+            for unit_type, unit_type_tbl in pairs(country_table) do
+              if type(unit_type_tbl) == 'table' and (category == '' or unit_type == category) then
+                for group_ind, group_tbl in pairs(unit_type_tbl) do
+                  if type(group_tbl) == 'table' then
+                    for unit_ind, unit in pairs(group_tbl.units) do
+                      if units_by_name[unit.unitName] then
+                        units_by_name[unit.unitName] = nil  --remove
+                      end
+                    end
+                  end
+                end
+              end
+            end
+          end
+        end
+      end
+    elseif unit:sub(1,5) == '[all]' then -- add all of a certain category (or all categories)
+      local category = ''
+      if unit:sub(6) == '[helicopter]' then
+        category = 'helicopter'
+      elseif unit:sub(6) == '[plane]' then
+        category = 'plane'
+      elseif unit:sub(6) == '[ship]' then
+        category = 'ship'
+      elseif unit:sub(6) == '[vehicle]' then
+        category = 'vehicle'
+      end
+      for coa, coa_tbl in pairs(l_munits) do
+        for country, country_table in pairs(coa_tbl) do
+          for unit_type, unit_type_tbl in pairs(country_table) do
+            if type(unit_type_tbl) == 'table' and (category == '' or unit_type == category) then
+              for group_ind, group_tbl in pairs(unit_type_tbl) do
+                if type(group_tbl) == 'table' then
+                  for unit_ind, unit in pairs(group_tbl.units) do
+                    units_by_name[unit.unitName] = true  --add
+                  end
+                end
+              end
+            end
+          end
+        end
+      end
+    elseif unit:sub(1,6) == '[-all]' then -- subtract all of a certain category (or all categories)
+      local category = ''
+      if unit:sub(7) == '[helicopter]' then
+        category = 'helicopter'
+      elseif unit:sub(7) == '[plane]' then
+        category = 'plane'
+      elseif unit:sub(7) == '[ship]' then
+        category = 'ship'
+      elseif unit:sub(7) == '[vehicle]' then
+        category = 'vehicle'
+      end
+      for coa, coa_tbl in pairs(l_munits) do
+        for country, country_table in pairs(coa_tbl) do
+          for unit_type, unit_type_tbl in pairs(country_table) do
+            if type(unit_type_tbl) == 'table' and (category == '' or unit_type == category) then
+              for group_ind, group_tbl in pairs(unit_type_tbl) do
+                if type(group_tbl) == 'table' then
+                  for unit_ind, unit in pairs(group_tbl.units) do
+                    if units_by_name[unit.unitName] then
+                      units_by_name[unit.unitName] = nil  --remove
+                    end
+                  end
+                end
+              end
+            end
+          end
+        end
+      end
+    else -- just a regular unit
+      units_by_name[unit] = true  --add
     end
-  end
-else -- just a regular unit
-  units_by_name[unit] = true  --add
-end
   end
 
   local units_tbl = {}  -- indexed sequentially
@@ -2094,6 +2093,7 @@ function mist.getLeadingBRString(vars)
   end
 end
 
+  mist.addEventHandler(groupSpawned)
 end
 
 do -- group functions scope
@@ -2720,124 +2720,6 @@ do -- group functions scope
     return newGroup
   end
 
-  function mist.ground.patrolRoute(vars)
-
-
-    local tempRoute = {}
-    local useRoute = {}
-    local gpData = vars.gpData
-    if type(gpData) == 'string' then
-      gpData = Group.getByName(gpData)
-    end
-
-    local useGroupRoute
-    if not vars.useGroupRoute then
-      useGroupRoute = vars.gpData
-    else
-      useGroupRoute = vars.useGroupRoute
-    end
-    local routeProvided = false
-    if not vars.route then
-      if useGroupRoute then
-        tempRoute = mist.getGroupRoute(useGroupRoute)
-      end
-    else
-      useRoute = vars.route
-      local posStart = mist.getLeadPos(gpData)
-      useRoute[1] = mist.ground.buildWP(posStart, useRoute[1].action, useRoute[1].speed)
-      routeProvided = true
-    end
-
-
-    local overRideSpeed = vars.speed or 'default'
-    local pType = vars.pType
-    local offRoadForm = vars.offRoadForm or 'default'
-    local onRoadForm = vars.onRoadForm or 'default'
-
-    if routeProvided == false and #tempRoute > 0 then
-      local posStart = mist.getLeadPos(gpData)
-
-
-      useRoute[#useRoute + 1] = mist.ground.buildWP(posStart, offRoadForm, overRideSpeed)
-      for i = 1, #tempRoute do
-        local tempForm = tempRoute[i].action
-        local tempSpeed = tempRoute[i].speed
-
-        if offRoadForm == 'default' then
-          tempForm = tempRoute[i].action
-        end
-        if onRoadForm == 'default' then
-          onRoadForm = 'On Road'
-        end
-        if (string.lower(tempRoute[i].action) == 'on road' or  string.lower(tempRoute[i].action) == 'onroad' or string.lower(tempRoute[i].action) == 'on_road') then
-          tempForm = onRoadForm
-        else
-          tempForm = offRoadForm
-        end
-
-        if type(overRideSpeed) == 'number' then
-          tempSpeed = overRideSpeed
-        end
-
-
-        useRoute[#useRoute + 1] = mist.ground.buildWP(tempRoute[i], tempForm, tempSpeed)
-      end
-
-      if pType and string.lower(pType) == 'doubleback' then
-        local curRoute = mist.utils.deepCopy(useRoute)
-        for i = #curRoute, 2, -1 do
-          useRoute[#useRoute + 1] = mist.ground.buildWP(curRoute[i], curRoute[i].action, curRoute[i].speed)
-        end
-      end
-
-      useRoute[1].action = useRoute[#useRoute].action -- make it so the first WP matches the last WP
-    end
-
-    local cTask3 = {}
-    local newPatrol = {}
-    newPatrol.route = useRoute
-    newPatrol.gpData = gpData:getName()
-    cTask3[#cTask3 + 1] = 'mist.ground.patrolRoute('
-    cTask3[#cTask3 + 1] = mist.utils.oneLineSerialize(newPatrol)
-    cTask3[#cTask3 + 1] = ')'
-    cTask3 = table.concat(cTask3)
-    local tempTask = {
-      id = 'WrappedAction',
-      params = {
-        action = {
-          id = 'Script',
-          params = {
-            command = cTask3,
-
-          },
-        },
-      },
-    }
-
-
-    useRoute[#useRoute].task = tempTask
-    mist.goRoute(gpData, useRoute)
-
-    return
-  end
-
-  function mist.ground.patrol(gpData, pType, form, speed)
-    local vars = {}
-
-    if type(gpData) == 'table' and gpData:getName() then
-      gpData = gpData:getName()
-    end
-
-    vars.useGroupRoute = gpData
-    vars.gpData = gpData
-    vars.pType = pType
-    vars.offRoadForm = form
-    vars.speed = speed
-
-    mist.ground.patrolRoute(vars)
-
-    return
-  end
 
   function mist.random(firstNum, secondNum) -- no support for decimals
     local lowNum, highNum
@@ -2890,94 +2772,8 @@ do -- group functions scope
 
   mist.matchString = mist.stringMatch -- both commands work because order out type of I
 
-  mist.DBs.const = {}
 
-  --[[
-  ['LAND'] = 1,
-  ['SHALLOW_WATER'] = 2,
-  ['WATER'] = 3,
-  ['ROAD'] = 4,
-  ['RUNWAY'] = 5
-  ]]
-  --[[mist.DBs.const.ME_SSE_terms = {
-  ['ME'] = {
-    ['vehicle'] = {'GROUND', 'GROUND_UNIT'},
-    ['plane'] = {'AIRPLANE'},
-  },
-  ['SSE'] = {
-  },
-
-}]]
-
-
-  mist.DBs.const.callsigns = { -- not accessible by SSE, must use static list :-/
-  ['NATO'] = {
-    ['rules'] = {
-      ['groupLimit'] = 9,
-    },
-    ['AWACS'] = {
-      ['Overlord'] = 1,
-      ['Magic'] = 2,
-      ['Wizard'] = 3,
-      ['Focus'] =	 4,
-      ['Darkstar'] =	 5,
-    },
-    ['TANKER'] = {
-      ['Texaco'] = 1,
-      ['Arco'] = 2,
-      ['Shell'] = 3,
-    },
-    ['JTAC'] = {
-      ['Axeman'] = 1,
-      ['Darknight'] = 2,
-      ['Warrior']	= 3,
-      ['Pointer']	= 4,
-      ['Eyeball'] = 5,
-      ['Moonbeam'] = 6,
-      ['Whiplash'] = 7,
-      ['Finger'] = 8,
-      ['Pinpoint'] = 9,
-      ['Ferret'] = 10,
-      ['Shaba'] = 11,
-      ['Playboy'] = 12,
-      ['Hammer'] = 13,
-      ['Jaguar'] = 14,
-      ['Deathstar'] =	15,
-      ['Anvil'] = 16,
-      ['Firefly']	= 17,
-      ['Mantis'] = 18,
-      ['Badger'] = 19,
-    },
-    ['aircraft'] = {
-      ['Enfield'] = 1,
-      ['Springfield'] = 2,
-      ['Uzi']	= 3,
-      ['Colt'] = 4,
-      ['Dodge'] =	5,
-      ['Ford'] = 6,
-      ['Chevy'] = 7,
-      ['Pontiac'] = 8,
-    },
-
-    ['unique'] = {
-      ['A10'] = {
-        ['Hawg'] = 9,
-        ['Boar'] = 10,
-        ['Pig'] = 11,
-        ['Tusk'] = 12,
-        ['rules'] = {
-          ['canUseAircraft'] = true,
-          ['appliesTo'] = {
-            'A-10C',
-            'A-10A',
-          },
-        },
-      },
-    },
-  },
-
-}
---[[ scope:
+  --[[ scope:
 {
   units = {...},  -- unit names.
   coa = {...}, -- coa names
@@ -5116,46 +4912,114 @@ do -- mist.DBs scope
 
   mist.DBs.removedAliveUnits = {} -- will be filled in by the "updateAliveUnits" coroutine in mist.main.
 
-  -- create mist.DBs.oldAliveUnits
-  -- do
-  -- local intermediate_alive_units = {}  -- between 0 and 0.5 secs old
-  -- local function make_old_alive_units() -- called every 0.5 secs, makes the old_alive_units DB which is just a copy of alive_units that is 0.5 to 1 sec old
-  -- if intermediate_alive_units then
-  -- mist.DBs.oldAliveUnits = mist.utils.deepCopy(intermediate_alive_units)
-  -- end
-  -- intermediate_alive_units = mist.utils.deepCopy(mist.DBs.aliveUnits)
-  -- timer.scheduleFunction(make_old_alive_units, nil, timer.getTime() + 0.5)
-  -- end
+  mist.DBs.const = {}
 
-  -- make_old_alive_units()
-  -- end
+  mist.DBs.const.callsigns = { -- not accessible by SSE, must use static list :-/
+  ['NATO'] = {
+    ['rules'] = {
+      ['groupLimit'] = 9,
+    },
+    ['AWACS'] = {
+      ['Overlord'] = 1,
+      ['Magic'] = 2,
+      ['Wizard'] = 3,
+      ['Focus'] =	 4,
+      ['Darkstar'] =	 5,
+    },
+    ['TANKER'] = {
+      ['Texaco'] = 1,
+      ['Arco'] = 2,
+      ['Shell'] = 3,
+    },
+    ['JTAC'] = {
+      ['Axeman'] = 1,
+      ['Darknight'] = 2,
+      ['Warrior']	= 3,
+      ['Pointer']	= 4,
+      ['Eyeball'] = 5,
+      ['Moonbeam'] = 6,
+      ['Whiplash'] = 7,
+      ['Finger'] = 8,
+      ['Pinpoint'] = 9,
+      ['Ferret'] = 10,
+      ['Shaba'] = 11,
+      ['Playboy'] = 12,
+      ['Hammer'] = 13,
+      ['Jaguar'] = 14,
+      ['Deathstar'] =	15,
+      ['Anvil'] = 16,
+      ['Firefly']	= 17,
+      ['Mantis'] = 18,
+      ['Badger'] = 19,
+    },
+    ['aircraft'] = {
+      ['Enfield'] = 1,
+      ['Springfield'] = 2,
+      ['Uzi']	= 3,
+      ['Colt'] = 4,
+      ['Dodge'] =	5,
+      ['Ford'] = 6,
+      ['Chevy'] = 7,
+      ['Pontiac'] = 8,
+    },
 
-  --Build DBs
-  for coa_name, coa_data in pairs(mist.DBs.units) do
-    for cntry_name, cntry_data in pairs(coa_data) do
-      for category_name, category_data in pairs(cntry_data) do
-        if type(category_data) == 'table' then
-          for group_ind, group_data in pairs(category_data) do
-            if type(group_data) == 'table' and group_data.units and type(group_data.units) == 'table' and #group_data.units > 0 then  -- OCD paradigm programming
-              mist.DBs.groupsByName[group_data.groupName] = mist.utils.deepCopy(group_data)
-              mist.DBs.groupsById[group_data.groupId] = mist.utils.deepCopy(group_data)
-              for unit_ind, unit_data in pairs(group_data.units) do
-                mist.DBs.unitsByName[unit_data.unitName] = mist.utils.deepCopy(unit_data)
-                mist.DBs.unitsById[unit_data.unitId] = mist.utils.deepCopy(unit_data)
+    ['unique'] = {
+      ['A10'] = {
+        ['Hawg'] = 9,
+        ['Boar'] = 10,
+        ['Pig'] = 11,
+        ['Tusk'] = 12,
+        ['rules'] = {
+          ['canUseAircraft'] = true,
+          ['appliesTo'] = {
+            'A-10C',
+            'A-10A',
+          },
+        },
+      },
+    },
+  },
 
-                mist.DBs.unitsByCat[unit_data.category] = mist.DBs.unitsByCat[unit_data.category] or {} -- future-proofing against new categories...
-                table.insert(mist.DBs.unitsByCat[unit_data.category], mist.utils.deepCopy(unit_data))
-                --print('inserting ' .. unit_data.unitName)
-                table.insert(mist.DBs.unitsByNum, mist.utils.deepCopy(unit_data))
+}
+-- create mist.DBs.oldAliveUnits
+-- do
+-- local intermediate_alive_units = {}  -- between 0 and 0.5 secs old
+-- local function make_old_alive_units() -- called every 0.5 secs, makes the old_alive_units DB which is just a copy of alive_units that is 0.5 to 1 sec old
+-- if intermediate_alive_units then
+-- mist.DBs.oldAliveUnits = mist.utils.deepCopy(intermediate_alive_units)
+-- end
+-- intermediate_alive_units = mist.utils.deepCopy(mist.DBs.aliveUnits)
+-- timer.scheduleFunction(make_old_alive_units, nil, timer.getTime() + 0.5)
+-- end
 
-                if unit_data.skill and (unit_data.skill == "Client" or unit_data.skill == "Player") then
-                  mist.DBs.humansByName[unit_data.unitName] = mist.utils.deepCopy(unit_data)
-                  mist.DBs.humansById[unit_data.unitId] = mist.utils.deepCopy(unit_data)
-                  --if Unit.getByName(unit_data.unitName) then
-                  --	mist.DBs.activeHumans[unit_data.unitName] = mist.utils.deepCopy(unit_data)
-                  --	mist.DBs.activeHumans[unit_data.unitName].playerName = Unit.getByName(unit_data.unitName):getPlayerName()
-                  --end
-                end
+-- make_old_alive_units()
+-- end
+
+--Build DBs
+for coa_name, coa_data in pairs(mist.DBs.units) do
+  for cntry_name, cntry_data in pairs(coa_data) do
+    for category_name, category_data in pairs(cntry_data) do
+      if type(category_data) == 'table' then
+        for group_ind, group_data in pairs(category_data) do
+          if type(group_data) == 'table' and group_data.units and type(group_data.units) == 'table' and #group_data.units > 0 then  -- OCD paradigm programming
+            mist.DBs.groupsByName[group_data.groupName] = mist.utils.deepCopy(group_data)
+            mist.DBs.groupsById[group_data.groupId] = mist.utils.deepCopy(group_data)
+            for unit_ind, unit_data in pairs(group_data.units) do
+              mist.DBs.unitsByName[unit_data.unitName] = mist.utils.deepCopy(unit_data)
+              mist.DBs.unitsById[unit_data.unitId] = mist.utils.deepCopy(unit_data)
+
+              mist.DBs.unitsByCat[unit_data.category] = mist.DBs.unitsByCat[unit_data.category] or {} -- future-proofing against new categories...
+              table.insert(mist.DBs.unitsByCat[unit_data.category], mist.utils.deepCopy(unit_data))
+              --print('inserting ' .. unit_data.unitName)
+              table.insert(mist.DBs.unitsByNum, mist.utils.deepCopy(unit_data))
+
+              if unit_data.skill and (unit_data.skill == "Client" or unit_data.skill == "Player") then
+                mist.DBs.humansByName[unit_data.unitName] = mist.utils.deepCopy(unit_data)
+                mist.DBs.humansById[unit_data.unitId] = mist.utils.deepCopy(unit_data)
+                --if Unit.getByName(unit_data.unitName) then
+                --	mist.DBs.activeHumans[unit_data.unitName] = mist.utils.deepCopy(unit_data)
+                --	mist.DBs.activeHumans[unit_data.unitName].playerName = Unit.getByName(unit_data.unitName):getPlayerName()
+                --end
               end
             end
           end
@@ -5163,151 +5027,152 @@ do -- mist.DBs scope
       end
     end
   end
+end
 
 
-  --DynDBs
-  mist.DBs.MEunits = mist.utils.deepCopy(mist.DBs.units)
-  mist.DBs.MEunitsByName = mist.utils.deepCopy(mist.DBs.unitsByName)
-  mist.DBs.MEunitsById = mist.utils.deepCopy(mist.DBs.unitsById)
-  mist.DBs.MEunitsByCat = mist.utils.deepCopy(mist.DBs.unitsByCat)
-  mist.DBs.MEunitsByNum = mist.utils.deepCopy(mist.DBs.unitsByNum)
-  mist.DBs.MEgroupsByName = mist.utils.deepCopy(mist.DBs.groupsByName)
-  mist.DBs.MEgroupsById = mist.utils.deepCopy(mist.DBs.groupsById)
-  -------------
+--DynDBs
+mist.DBs.MEunits = mist.utils.deepCopy(mist.DBs.units)
+mist.DBs.MEunitsByName = mist.utils.deepCopy(mist.DBs.unitsByName)
+mist.DBs.MEunitsById = mist.utils.deepCopy(mist.DBs.unitsById)
+mist.DBs.MEunitsByCat = mist.utils.deepCopy(mist.DBs.unitsByCat)
+mist.DBs.MEunitsByNum = mist.utils.deepCopy(mist.DBs.unitsByNum)
+mist.DBs.MEgroupsByName = mist.utils.deepCopy(mist.DBs.groupsByName)
+mist.DBs.MEgroupsById = mist.utils.deepCopy(mist.DBs.groupsById)
+-------------
 
-  mist.DBs.deadObjects = {}
+mist.DBs.deadObjects = {}
 
-  do
-    local mt = {}
+do
+  local mt = {}
 
-    function mt.__newindex(t, key, val)
-      local original_key = key --only for duplicate runtime IDs.
-      local key_ind = 1
-      while mist.DBs.deadObjects[key] do
-        --print('duplicate runtime id of previously dead object- key: ' .. tostring(key))
-        key = tostring(original_key) .. ' #' .. tostring(key_ind)
-        key_ind = key_ind + 1
-      end
-
-      if mist.DBs.aliveUnits and mist.DBs.aliveUnits[val.object.id_] then
-        --print('object found in alive_units')
-        val['objectData'] = mist.utils.deepCopy(mist.DBs.aliveUnits[val.object.id_])
-        local pos = Object.getPosition(val.object)
-        if pos then
-          val['objectPos'] = pos.p
-        end
-        val['objectType'] = mist.DBs.aliveUnits[val.object.id_].category
-
-      elseif mist.DBs.removedAliveUnits and mist.DBs.removedAliveUnits[val.object.id_] then  -- it didn't exist in alive_units, check old_alive_units
-        --print('object found in old_alive_units')
-        val['objectData'] = mist.utils.deepCopy(mist.DBs.removedAliveUnits[val.object.id_])
-        local pos = Object.getPosition(val.object)
-        if pos then
-          val['objectPos'] = pos.p
-        end
-        val['objectType'] = mist.DBs.removedAliveUnits[val.object.id_].category
-
-      else  --attempt to determine if static object...
-        --print('object not found in alive units or old alive units')
-        local pos = Object.getPosition(val.object)
-        if pos then
-          local static_found = false
-          for ind, static in pairs(mist.DBs.unitsByCat['static']) do
-            if ((pos.p.x - static.point.x)^2 + (pos.p.z - static.point.y)^2)^0.5 < 0.1 then --really, it should be zero...
-              --print('correlated dead static object to position')
-              val['objectData'] = static
-              val['objectPos'] = pos.p
-              val['objectType'] = 'static'
-              static_found = true
-              break
-            end
-          end
-          if not static_found then
-            val['objectPos'] = pos.p
-            val['objectType'] = 'building'
-          end
-        else
-          val['objectType'] = 'unknown'
-        end
-      end
-      rawset(t, key, val)
+  function mt.__newindex(t, key, val)
+    local original_key = key --only for duplicate runtime IDs.
+    local key_ind = 1
+    while mist.DBs.deadObjects[key] do
+      --print('duplicate runtime id of previously dead object- key: ' .. tostring(key))
+      key = tostring(original_key) .. ' #' .. tostring(key_ind)
+      key_ind = key_ind + 1
     end
 
-    setmetatable(mist.DBs.deadObjects, mt)
+    if mist.DBs.aliveUnits and mist.DBs.aliveUnits[val.object.id_] then
+      --print('object found in alive_units')
+      val['objectData'] = mist.utils.deepCopy(mist.DBs.aliveUnits[val.object.id_])
+      local pos = Object.getPosition(val.object)
+      if pos then
+        val['objectPos'] = pos.p
+      end
+      val['objectType'] = mist.DBs.aliveUnits[val.object.id_].category
+
+    elseif mist.DBs.removedAliveUnits and mist.DBs.removedAliveUnits[val.object.id_] then  -- it didn't exist in alive_units, check old_alive_units
+      --print('object found in old_alive_units')
+      val['objectData'] = mist.utils.deepCopy(mist.DBs.removedAliveUnits[val.object.id_])
+      local pos = Object.getPosition(val.object)
+      if pos then
+        val['objectPos'] = pos.p
+      end
+      val['objectType'] = mist.DBs.removedAliveUnits[val.object.id_].category
+
+    else  --attempt to determine if static object...
+      --print('object not found in alive units or old alive units')
+      local pos = Object.getPosition(val.object)
+      if pos then
+        local static_found = false
+        for ind, static in pairs(mist.DBs.unitsByCat['static']) do
+          if ((pos.p.x - static.point.x)^2 + (pos.p.z - static.point.y)^2)^0.5 < 0.1 then --really, it should be zero...
+            --print('correlated dead static object to position')
+            val['objectData'] = static
+            val['objectPos'] = pos.p
+            val['objectType'] = 'static'
+            static_found = true
+            break
+          end
+        end
+        if not static_found then
+          val['objectPos'] = pos.p
+          val['objectType'] = 'building'
+        end
+      else
+        val['objectType'] = 'unknown'
+      end
+    end
+    rawset(t, key, val)
   end
 
-  -- Event handler to start creating the dead_objects table
-  do
+  setmetatable(mist.DBs.deadObjects, mt)
+end
 
-    local function addDeadObject(event)
-      if event.id == world.event.S_EVENT_DEAD or event.id == world.event.S_EVENT_CRASH then
-        if event.initiator and event.initiator.id_ and event.initiator.id_ > 0 then
+-- Event handler to start creating the dead_objects table
+do
 
-          local id = event.initiator.id_  -- initial ID, could change if there is a duplicate id_ already dead.
-          local val = {object = event.initiator} -- the new entry in mist.DBs.deadObjects.
+  local function addDeadObject(event)
+    if event.id == world.event.S_EVENT_DEAD or event.id == world.event.S_EVENT_CRASH then
+      if event.initiator and event.initiator.id_ and event.initiator.id_ > 0 then
 
-          local original_id = id  --only for duplicate runtime IDs.
-          local id_ind = 1
-          while mist.DBs.deadObjects[id] do
-            --print('duplicate runtime id of previously dead object- id: ' .. tostring(id))
-            id = tostring(original_id) .. ' #' .. tostring(id_ind)
-            id_ind = id_ind + 1
+        local id = event.initiator.id_  -- initial ID, could change if there is a duplicate id_ already dead.
+        local val = {object = event.initiator} -- the new entry in mist.DBs.deadObjects.
+
+        local original_id = id  --only for duplicate runtime IDs.
+        local id_ind = 1
+        while mist.DBs.deadObjects[id] do
+          --print('duplicate runtime id of previously dead object- id: ' .. tostring(id))
+          id = tostring(original_id) .. ' #' .. tostring(id_ind)
+          id_ind = id_ind + 1
+        end
+
+        if mist.DBs.aliveUnits and mist.DBs.aliveUnits[val.object.id_] then
+          --print('object found in alive_units')
+          val['objectData'] = mist.utils.deepCopy(mist.DBs.aliveUnits[val.object.id_])
+          local pos = Object.getPosition(val.object)
+          if pos then
+            val['objectPos'] = pos.p
           end
-
-          if mist.DBs.aliveUnits and mist.DBs.aliveUnits[val.object.id_] then
-            --print('object found in alive_units')
-            val['objectData'] = mist.utils.deepCopy(mist.DBs.aliveUnits[val.object.id_])
-            local pos = Object.getPosition(val.object)
-            if pos then
-              val['objectPos'] = pos.p
-            end
-            val['objectType'] = mist.DBs.aliveUnits[val.object.id_].category
-            --[[if mist.DBs.activeHumans[Unit.getName(val.object)] then
-            --trigger.action.outText('remove via death: ' .. Unit.getName(val.object),20)
+          val['objectType'] = mist.DBs.aliveUnits[val.object.id_].category
+          --[[if mist.DBs.activeHumans[Unit.getName(val.object)] then
+          --trigger.action.outText('remove via death: ' .. Unit.getName(val.object),20)
             mist.DBs.activeHumans[Unit.getName(val.object)] = nil
           end]]
-          elseif mist.DBs.removedAliveUnits and mist.DBs.removedAliveUnits[val.object.id_] then  -- it didn't exist in alive_units, check old_alive_units
-            --print('object found in old_alive_units')
-            val['objectData'] = mist.utils.deepCopy(mist.DBs.removedAliveUnits[val.object.id_])
-            local pos = Object.getPosition(val.object)
-            if pos then
-              val['objectPos'] = pos.p
-            end
-            val['objectType'] = mist.DBs.removedAliveUnits[val.object.id_].category
-
-          else  --attempt to determine if static object...
-            --print('object not found in alive units or old alive units')
-            local pos = Object.getPosition(val.object)
-            if pos then
-              local static_found = false
-              for ind, static in pairs(mist.DBs.unitsByCat['static']) do
-                if ((pos.p.x - static.point.x)^2 + (pos.p.z - static.point.y)^2)^0.5 < 0.1 then --really, it should be zero...
-                  --print('correlated dead static object to position')
-                  val['objectData'] = static
-                  val['objectPos'] = pos.p
-                  val['objectType'] = 'static'
-                  static_found = true
-                  break
-                end
-              end
-              if not static_found then
-                val['objectPos'] = pos.p
-                val['objectType'] = 'building'
-              end
-            else
-              val['objectType'] = 'unknown'
-            end
+        elseif mist.DBs.removedAliveUnits and mist.DBs.removedAliveUnits[val.object.id_] then  -- it didn't exist in alive_units, check old_alive_units
+          --print('object found in old_alive_units')
+          val['objectData'] = mist.utils.deepCopy(mist.DBs.removedAliveUnits[val.object.id_])
+          local pos = Object.getPosition(val.object)
+          if pos then
+            val['objectPos'] = pos.p
           end
-          mist.DBs.deadObjects[id] = val
+          val['objectType'] = mist.DBs.removedAliveUnits[val.object.id_].category
 
+        else  --attempt to determine if static object...
+          --print('object not found in alive units or old alive units')
+          local pos = Object.getPosition(val.object)
+          if pos then
+            local static_found = false
+            for ind, static in pairs(mist.DBs.unitsByCat['static']) do
+              if ((pos.p.x - static.point.x)^2 + (pos.p.z - static.point.y)^2)^0.5 < 0.1 then --really, it should be zero...
+                --print('correlated dead static object to position')
+                val['objectData'] = static
+                val['objectPos'] = pos.p
+                val['objectType'] = 'static'
+                static_found = true
+                break
+              end
+            end
+            if not static_found then
+              val['objectPos'] = pos.p
+              val['objectType'] = 'building'
+            end
+          else
+            val['objectType'] = 'unknown'
+          end
         end
+        mist.DBs.deadObjects[id] = val
+
       end
     end
+  end
 
 
-    mist.addEventHandler(addDeadObject)
+  mist.addEventHandler(addDeadObject)
 
-    --[[
+  --[[
     local function addClientsToActive(event)
       if event.id == world.event.S_EVENT_PLAYER_ENTER_UNIT or event.id == world.event.S_EVENT_BIRTH then
         env.info(mist.utils.tableShow(event))
@@ -5614,7 +5479,124 @@ do -- group tasks scope
     end --for coa_name, coa_data in pairs(mission.coalition) do
   end
 
-  function mist.ground.buildPath() end -- ????
+  -- function mist.ground.buildPath() end -- ????
+
+  function mist.ground.patrolRoute(vars)
+    local tempRoute = {}
+    local useRoute = {}
+    local gpData = vars.gpData
+    if type(gpData) == 'string' then
+      gpData = Group.getByName(gpData)
+    end
+
+    local useGroupRoute
+    if not vars.useGroupRoute then
+      useGroupRoute = vars.gpData
+    else
+      useGroupRoute = vars.useGroupRoute
+    end
+    local routeProvided = false
+    if not vars.route then
+      if useGroupRoute then
+        tempRoute = mist.getGroupRoute(useGroupRoute)
+      end
+    else
+      useRoute = vars.route
+      local posStart = mist.getLeadPos(gpData)
+      useRoute[1] = mist.ground.buildWP(posStart, useRoute[1].action, useRoute[1].speed)
+      routeProvided = true
+    end
+
+
+    local overRideSpeed = vars.speed or 'default'
+    local pType = vars.pType
+    local offRoadForm = vars.offRoadForm or 'default'
+    local onRoadForm = vars.onRoadForm or 'default'
+
+    if routeProvided == false and #tempRoute > 0 then
+      local posStart = mist.getLeadPos(gpData)
+
+
+      useRoute[#useRoute + 1] = mist.ground.buildWP(posStart, offRoadForm, overRideSpeed)
+      for i = 1, #tempRoute do
+        local tempForm = tempRoute[i].action
+        local tempSpeed = tempRoute[i].speed
+
+        if offRoadForm == 'default' then
+          tempForm = tempRoute[i].action
+        end
+        if onRoadForm == 'default' then
+          onRoadForm = 'On Road'
+        end
+        if (string.lower(tempRoute[i].action) == 'on road' or  string.lower(tempRoute[i].action) == 'onroad' or string.lower(tempRoute[i].action) == 'on_road') then
+          tempForm = onRoadForm
+        else
+          tempForm = offRoadForm
+        end
+
+        if type(overRideSpeed) == 'number' then
+          tempSpeed = overRideSpeed
+        end
+
+
+        useRoute[#useRoute + 1] = mist.ground.buildWP(tempRoute[i], tempForm, tempSpeed)
+      end
+
+      if pType and string.lower(pType) == 'doubleback' then
+        local curRoute = mist.utils.deepCopy(useRoute)
+        for i = #curRoute, 2, -1 do
+          useRoute[#useRoute + 1] = mist.ground.buildWP(curRoute[i], curRoute[i].action, curRoute[i].speed)
+        end
+      end
+
+      useRoute[1].action = useRoute[#useRoute].action -- make it so the first WP matches the last WP
+    end
+
+    local cTask3 = {}
+    local newPatrol = {}
+    newPatrol.route = useRoute
+    newPatrol.gpData = gpData:getName()
+    cTask3[#cTask3 + 1] = 'mist.ground.patrolRoute('
+    cTask3[#cTask3 + 1] = mist.utils.oneLineSerialize(newPatrol)
+    cTask3[#cTask3 + 1] = ')'
+    cTask3 = table.concat(cTask3)
+    local tempTask = {
+      id = 'WrappedAction',
+      params = {
+        action = {
+          id = 'Script',
+          params = {
+            command = cTask3,
+
+          },
+        },
+      },
+    }
+
+
+    useRoute[#useRoute].task = tempTask
+    mist.goRoute(gpData, useRoute)
+
+    return
+  end
+
+  function mist.ground.patrol(gpData, pType, form, speed)
+    local vars = {}
+
+    if type(gpData) == 'table' and gpData:getName() then
+      gpData = gpData:getName()
+    end
+
+    vars.useGroupRoute = gpData
+    vars.gpData = gpData
+    vars.pType = pType
+    vars.offRoadForm = form
+    vars.speed = speed
+
+    mist.ground.patrolRoute(vars)
+
+    return
+  end
 
   -- No longer accepts path
   function mist.ground.buildWP(point, overRideForm, overRideSpeed)
@@ -6043,20 +6025,21 @@ vars.msgFor - scope
     if text then
       if string.find(text, '%%s') then  -- look for %s
         newText = string.format(text, s)  -- insert the coordinates into the message
-      else  -- else, just append to the end.
-      newText = text .. s
+      else
+        -- just append to the end.
+        newText = text .. s
+      end
+    else
+      newText = s
     end
-  else
-    newText = s
+    mist.message.add{
+      text = newText,
+      displayTime = displayTime,
+      msgFor = msgFor
+    }
   end
-  mist.message.add{
-    text = newText,
-    displayTime = displayTime,
-    msgFor = msgFor
-  }
-end
 
---[[ vars for mist.msgLL
+  --[[ vars for mist.msgLL
 vars.units - table of unit names (NOT unitNameTable- maybe this should change) (Yes).
 vars.acc - integer, number of numbers after decimal place
 vars.DMS - if true, output in degrees, minutes, seconds.  Otherwise, output in degrees, minutes.
@@ -6064,35 +6047,36 @@ vars.text - text in the message
 vars.displayTime - self explanatory
 vars.msgFor - scope
 ]]
-function mist.msgLL(vars)
-  local units = vars.units  -- technically, I don't really need to do this, but it helps readability.
-  local acc = vars.acc
-  local DMS = vars.DMS
-  local text = vars.text
-  local displayTime = vars.displayTime
-  local msgFor = vars.msgFor
+  function mist.msgLL(vars)
+    local units = vars.units  -- technically, I don't really need to do this, but it helps readability.
+    local acc = vars.acc
+    local DMS = vars.DMS
+    local text = vars.text
+    local displayTime = vars.displayTime
+    local msgFor = vars.msgFor
 
-  local s = mist.getLLString{units = units, acc = acc, DMS = DMS}
-  local newText
-  if text then
-    if string.find(text, '%%s') then  -- look for %s
-      newText = string.format(text, s)  -- insert the coordinates into the message
-    else  -- else, just append to the end.
-    newText = text .. s
+    local s = mist.getLLString{units = units, acc = acc, DMS = DMS}
+    local newText
+    if text then
+      if string.find(text, '%%s') then  -- look for %s
+        newText = string.format(text, s)  -- insert the coordinates into the message
+      else
+        -- just append to the end.
+        newText = text .. s
+      end
+    else
+      newText = s
+    end
+
+    mist.message.add{
+      text = newText,
+      displayTime = displayTime,
+      msgFor = msgFor
+    }
+
   end
-else
-  newText = s
-end
 
-mist.message.add{
-  text = newText,
-  displayTime = displayTime,
-  msgFor = msgFor
-}
-
-end
-
---[[
+  --[[
 vars.units- table of unit names (NOT unitNameTable- maybe this should change).
 vars.ref -  vec3 ref point, maybe overload for vec2 as well?
 vars.alt - boolean, if used, includes altitude in string
@@ -6101,37 +6085,38 @@ vars.text - text of the message
 vars.displayTime
 vars.msgFor - scope
 ]]
-function mist.msgBR(vars)
-  local units = vars.units  -- technically, I don't really need to do this, but it helps readability.
-  local ref = vars.ref -- vec2/vec3 will be handled in mist.getBRString
-  local alt = vars.alt
-  local metric = vars.metric
-  local text = vars.text
-  local displayTime = vars.displayTime
-  local msgFor = vars.msgFor
+  function mist.msgBR(vars)
+    local units = vars.units  -- technically, I don't really need to do this, but it helps readability.
+    local ref = vars.ref -- vec2/vec3 will be handled in mist.getBRString
+    local alt = vars.alt
+    local metric = vars.metric
+    local text = vars.text
+    local displayTime = vars.displayTime
+    local msgFor = vars.msgFor
 
-  local s = mist.getBRString{units = units, ref = ref, alt = alt, metric = metric}
-  local newText
-  if text then
-    if string.find(text, '%%s') then  -- look for %s
-      newText = string.format(text, s)  -- insert the coordinates into the message
-    else  -- else, just append to the end.
-    newText = text .. s
+    local s = mist.getBRString{units = units, ref = ref, alt = alt, metric = metric}
+    local newText
+    if text then
+      if string.find(text, '%%s') then  -- look for %s
+        newText = string.format(text, s)  -- insert the coordinates into the message
+      else
+        -- just append to the end.
+        newText = text .. s
+      end
+    else
+      newText = s
+    end
+
+    mist.message.add{
+      text = newText,
+      displayTime = displayTime,
+      msgFor = msgFor
+    }
+
   end
-else
-  newText = s
-end
 
-mist.message.add{
-  text = newText,
-  displayTime = displayTime,
-  msgFor = msgFor
-}
-
-end
-
--- basically, just sub-types of mist.msgBR... saves folks the work of getting the ref point.
---[[
+  -- basically, just sub-types of mist.msgBR... saves folks the work of getting the ref point.
+  --[[
 vars.units- table of unit names (NOT unitNameTable- maybe this should change).
 vars.ref -  string red, blue
 vars.alt - boolean, if used, includes altitude in string
@@ -6140,17 +6125,17 @@ vars.text - text of the message
 vars.displayTime
 vars.msgFor - scope
 ]]
-function mist.msgBullseye(vars)
-  if string.lower(vars.ref) == 'red' then
-    vars.ref = mist.DBs.missionData.bullseye.red
-    mist.msgBR(vars)
-  elseif string.lower(vars.ref) == 'blue' then
-    vars.ref = mist.DBs.missionData.bullseye.blue
-    mist.msgBR(vars)
+  function mist.msgBullseye(vars)
+    if string.lower(vars.ref) == 'red' then
+      vars.ref = mist.DBs.missionData.bullseye.red
+      mist.msgBR(vars)
+    elseif string.lower(vars.ref) == 'blue' then
+      vars.ref = mist.DBs.missionData.bullseye.blue
+      mist.msgBR(vars)
+    end
   end
-end
 
---[[
+  --[[
 vars.units- table of unit names (NOT unitNameTable- maybe this should change).
 vars.ref -  unit name of reference point
 vars.alt - boolean, if used, includes altitude in string
@@ -6159,17 +6144,17 @@ vars.text - text of the message
 vars.displayTime
 vars.msgFor - scope
 ]]
-function mist.msgBRA(vars)
-  if Unit.getByName(vars.ref) and Unit.getByName(vars.ref):isExist() == true then
-    vars.ref = Unit.getByName(vars.ref):getPosition().p
-    if not vars.alt then
-      vars.alt = true
+  function mist.msgBRA(vars)
+    if Unit.getByName(vars.ref) and Unit.getByName(vars.ref):isExist() == true then
+      vars.ref = Unit.getByName(vars.ref):getPosition().p
+      if not vars.alt then
+        vars.alt = true
+      end
+      mist.msgBR(vars)
     end
-    mist.msgBR(vars)
   end
-end
 
---[[ vars for mist.msgLeadingMGRS:
+  --[[ vars for mist.msgLeadingMGRS:
 vars.units - table of unit names
 vars.heading - direction
 vars.radius - number
@@ -6179,38 +6164,39 @@ vars.text - text of the message
 vars.displayTime
 vars.msgFor - scope
 ]]
-function mist.msgLeadingMGRS(vars)
-  local units = vars.units  -- technically, I don't really need to do this, but it helps readability.
-  local heading = vars.heading
-  local radius = vars.radius
-  local headingDegrees = vars.headingDegrees
-  local acc = vars.acc
-  local text = vars.text
-  local displayTime = vars.displayTime
-  local msgFor = vars.msgFor
+  function mist.msgLeadingMGRS(vars)
+    local units = vars.units  -- technically, I don't really need to do this, but it helps readability.
+    local heading = vars.heading
+    local radius = vars.radius
+    local headingDegrees = vars.headingDegrees
+    local acc = vars.acc
+    local text = vars.text
+    local displayTime = vars.displayTime
+    local msgFor = vars.msgFor
 
-  local s = mist.getLeadingMGRSString{units = units, heading = heading, radius = radius, headingDegrees = headingDegrees, acc = acc}
-  local newText
-  if text then
-    if string.find(text, '%%s') then  -- look for %s
-      newText = string.format(text, s)  -- insert the coordinates into the message
-    else  -- else, just append to the end.
-    newText = text .. s
+    local s = mist.getLeadingMGRSString{units = units, heading = heading, radius = radius, headingDegrees = headingDegrees, acc = acc}
+    local newText
+    if text then
+      if string.find(text, '%%s') then  -- look for %s
+        newText = string.format(text, s)  -- insert the coordinates into the message
+      else
+        -- just append to the end.
+        newText = text .. s
+      end
+    else
+      newText = s
+    end
+
+    mist.message.add{
+      text = newText,
+      displayTime = displayTime,
+      msgFor = msgFor
+    }
+
+
   end
-else
-  newText = s
-end
 
-mist.message.add{
-  text = newText,
-  displayTime = displayTime,
-  msgFor = msgFor
-}
-
-
-end
-
---[[ vars for mist.msgLeadingLL:
+  --[[ vars for mist.msgLeadingLL:
 vars.units - table of unit names
 vars.heading - direction, number
 vars.radius - number
@@ -6221,39 +6207,40 @@ vars.text - text of the message
 vars.displayTime
 vars.msgFor - scope
 ]]
-function mist.msgLeadingLL(vars)
-  local units = vars.units  -- technically, I don't really need to do this, but it helps readability.
-  local heading = vars.heading
-  local radius = vars.radius
-  local headingDegrees = vars.headingDegrees
-  local acc = vars.acc
-  local DMS = vars.DMS
-  local text = vars.text
-  local displayTime = vars.displayTime
-  local msgFor = vars.msgFor
+  function mist.msgLeadingLL(vars)
+    local units = vars.units  -- technically, I don't really need to do this, but it helps readability.
+    local heading = vars.heading
+    local radius = vars.radius
+    local headingDegrees = vars.headingDegrees
+    local acc = vars.acc
+    local DMS = vars.DMS
+    local text = vars.text
+    local displayTime = vars.displayTime
+    local msgFor = vars.msgFor
 
-  local s = mist.getLeadingLLString{units = units, heading = heading, radius = radius, headingDegrees = headingDegrees, acc = acc, DMS = DMS}
-  local newText
+    local s = mist.getLeadingLLString{units = units, heading = heading, radius = radius, headingDegrees = headingDegrees, acc = acc, DMS = DMS}
+    local newText
 
-  if text then
-    if string.find(text, '%%s') then  -- look for %s
-      newText = string.format(text, s)  -- insert the coordinates into the message
-    else  -- else, just append to the end.
-    newText = text .. s
+    if text then
+      if string.find(text, '%%s') then  -- look for %s
+        newText = string.format(text, s)  -- insert the coordinates into the message
+      else
+        -- just append to the end.
+        newText = text .. s
+      end
+    else
+      newText = s
+    end
+
+    mist.message.add{
+      text = newText,
+      displayTime = displayTime,
+      msgFor = msgFor
+    }
+
   end
-else
-  newText = s
-end
 
-mist.message.add{
-  text = newText,
-  displayTime = displayTime,
-  msgFor = msgFor
-}
-
-end
-
---[[
+  --[[
 vars.units - table of unit names
 vars.heading - direction, number
 vars.radius - number
@@ -6265,41 +6252,41 @@ vars.text - text of the message
 vars.displayTime
 vars.msgFor - scope
 ]]
-function mist.msgLeadingBR(vars)
-  local units = vars.units  -- technically, I don't really need to do this, but it helps readability.
-  local heading = vars.heading
-  local radius = vars.radius
-  local headingDegrees = vars.headingDegrees
-  local metric = vars.metric
-  local alt = vars.alt
-  local ref = vars.ref -- vec2/vec3 will be handled in mist.getBRString
-  local text = vars.text
-  local displayTime = vars.displayTime
-  local msgFor = vars.msgFor
+  function mist.msgLeadingBR(vars)
+    local units = vars.units  -- technically, I don't really need to do this, but it helps readability.
+    local heading = vars.heading
+    local radius = vars.radius
+    local headingDegrees = vars.headingDegrees
+    local metric = vars.metric
+    local alt = vars.alt
+    local ref = vars.ref -- vec2/vec3 will be handled in mist.getBRString
+    local text = vars.text
+    local displayTime = vars.displayTime
+    local msgFor = vars.msgFor
 
-  local s = mist.getLeadingBRString{units = units, heading = heading, radius = radius, headingDegrees = headingDegrees, metric = metric, alt = alt, ref = ref}
-  local newText
+    local s = mist.getLeadingBRString{units = units, heading = heading, radius = radius, headingDegrees = headingDegrees, metric = metric, alt = alt, ref = ref}
+    local newText
 
-  if text then
-    if string.find(text, '%%s') then  -- look for %s
-      newText = string.format(text, s)  -- insert the coordinates into the message
-    else  -- else, just append to the end.
-    newText = text .. s
+    if text then
+      if string.find(text, '%%s') then  -- look for %s
+        newText = string.format(text, s)  -- insert the coordinates into the message
+      else
+        -- just append to the end.
+        newText = text .. s
+      end
+    else
+      newText = s
+    end
+
+    mist.message.add{
+      text = newText,
+      displayTime = displayTime,
+      msgFor = msgFor
+    }
   end
-else
-  newText = s
-end
-
-mist.message.add{
-  text = newText,
-  displayTime = displayTime,
-  msgFor = msgFor
-}
-end
 end
 
 do -- mist unitID funcs
-
   for id, idData in pairs(mist.DBs.unitsById) do
     if idData.unitId > mist.nextUnitId then
       mist.nextUnitId = mist.utils.deepCopy(idData.unitId)
