@@ -974,7 +974,9 @@ do -- the main scope
     end
   end
 
-  -- Simplified event handler
+  --- Registers an event handler.
+  -- @tparam function f function handling event
+  -- @treturn number id of the event handler
   function mist.addEventHandler(f) --id is optional!
     local handler = {}
     idNum = idNum + 1
@@ -987,6 +989,9 @@ do -- the main scope
     return handler.id
   end
 
+  --- Removes event handler with given id.
+  -- @tparam number id event handler id
+  -- @treturn boolean true on success, false otherwise
   function mist.removeEventHandler(id)
     for key, handler in pairs(world.eventHandlers) do
       if handler.id and handler.id == id then
@@ -1133,6 +1138,9 @@ do -- the main scope
     return math.atan2(north_posit.z - point.z, north_posit.x - point.x)
   end
 
+  --- Returns skill of the given unit.
+  -- @tparam string unitName unit name
+  -- @return skill of the unit
   function mist.getUnitSkill(unitName)
     if Unit.getByName(unitName) and Unit.getByName(unitName):isExist() == true then
       local lunit = Unit.getByName(unitName)
@@ -1145,8 +1153,16 @@ do -- the main scope
     return false
   end
 
-  function mist.getGroupPoints(groupIdent)   -- if groupname exists in env.mission, then returns table of the group's points in numerical order, such as: { [1] = {x = 299435.224, y = -1146632.6773}, [2] = { x = 663324.6563, y = 322424.1112}}
-    -- refactor to search by groupId and allow groupId and groupName as inputs
+  --- Returns an array containing a group's units positions.
+  --  e.g.
+  --    {
+  --      [1] = {x = 299435.224, y = -1146632.6773},
+  --      [2] = {x = 663324.6563, y = 322424.1112}
+  --    }
+  --  @tparam number|string groupIdent group id or name
+  --  @treturn table array containing positions of each group member
+  function mist.getGroupPoints(groupIdent)
+    -- search by groupId and allow groupId and groupName as inputs
     local gpId = groupIdent
     if type(groupIdent) == 'string' and not tonumber(groupIdent) then
       gpId = mist.DBs.MEgroupsByName[groupIdent].groupId
@@ -1184,24 +1200,26 @@ do -- the main scope
     end --for coa_name, coa_data in pairs(mission.coalition) do
   end
 
-  --[[ table attitude = getAttitude(string unitname) -- will work on any unit, even if not an aircraft.
-    attitude = {
-      Heading = number, -- in radians, range of 0 to 2*pi, relative to true north
-      Pitch = number, -- in radians, range of -pi/2 to pi/2
-      Roll = number, -- in radians, range of 0 to 2*pi, right roll is positive direction
+  --- getUnitAttitude(unit) return values.
+  -- Yaw, AoA, ClimbAngle - relative to earth reference
+  -- DOES NOT TAKE INTO ACCOUNT WIND.
+  -- @table attitude
+  -- @tfield number Heading in radians, range of 0 to 2*pi,
+  -- relative to true north.
+  -- @tfield number Pitch in radians, range of -pi/2 to pi/2
+  -- @tfield number Roll in radians, range of 0 to 2*pi,
+  -- right roll is positive direction.
+  -- @tfield number Yaw in radians, range of -pi to pi,
+  -- right yaw is positive direction.
+  -- @tfield number AoA in radians, range of -pi to pi,
+  -- rotation of aircraft to the right in comparison to
+  -- flight direction being positive.
+  -- @tfield number ClimbAngle in radians, range of -pi/2 to pi/2
 
-      --Yaw, AoA, ClimbAngle - relative to earth reference- DOES NOT TAKE INTO ACCOUNT WIND.
-      Yaw = number, -- in radians, range of -pi to pi, right yaw is positive direction
-      AoA = number, -- in radians, range of -pi to pi, rotation of aircraft to the right in comparison to flight direction being positive
-      ClimbAngle = number, -- in radians, range of -pi/2 to pi/2
-
-      --Maybe later?
-      AxialVel = table, velocity of the aircraft transformed into directions of aircraft axes
-      Speed = number -- absolute velocity in meters/sec
-
-      }
-
-    ]]
+  --- Returns the attitude of a given unit.
+  -- Will work on any unit, even if not an aircraft.
+  -- @tparam Unit unit unit whose attitude is returned.
+  -- @treturn table @{attitude}
   function mist.getAttitude(unit)
     local unitpos = unit:getPosition()
     if unitpos then
@@ -1279,6 +1297,10 @@ do -- the main scope
     end
   end
 
+  --- Returns heading of given unit.
+  -- @tparam Unit unit unit whose heading is returned.
+  -- @treturn number heading of the unit, in range
+  -- of 0 to 2*pi.
   function mist.getHeading(unit, rawHeading)
     local unitpos = unit:getPosition()
     if unitpos then
@@ -1293,6 +1315,9 @@ do -- the main scope
     end
   end
 
+  --- Returns given unit's pitch
+  -- @tparam Unit unit unit whose pitch is returned.
+  -- @treturn number pitch of given unit
   function mist.getPitch(unit)
     local unitpos = unit:getPosition()
     if unitpos then
@@ -1300,6 +1325,9 @@ do -- the main scope
     end
   end
 
+  --- Returns given unit's roll.
+  -- @tparam Unit unit unit whose roll is returned.
+  -- @treturn number roll of given unit
   function mist.getRoll(unit)
     local unitpos = unit:getPosition()
     if unitpos then
@@ -1326,6 +1354,9 @@ do -- the main scope
     end
   end
 
+  --- Returns given unit's yaw.
+  -- @tparam Unit unit unit whose yaw is returned.
+  -- @treturn number yaw of given unit.
   function mist.getYaw(unit)
     local unitpos = unit:getPosition()
     if unitpos then
@@ -1352,6 +1383,9 @@ do -- the main scope
     end
   end
 
+  --- Returns given unit's angle of attack.
+  -- @tparam Unit unit unit to get AoA from.
+  -- @treturn number angle of attack of the given unit.
   function mist.getAoA(unit)
     local unitpos = unit:getPosition()
     if unitpos then
@@ -1376,6 +1410,9 @@ do -- the main scope
     end
   end
 
+  --- Returns given unit's climb angle.
+  -- @tparam Unit unit unit to get climb angle from.
+  -- @treturn number climb angle of given unit.
   function mist.getClimbAngle(unit)
     local unitpos = unit:getPosition()
     if unitpos then
