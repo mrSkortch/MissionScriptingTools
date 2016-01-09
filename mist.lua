@@ -2823,34 +2823,30 @@ do -- mist.Logger scope
 
   --- Creates a new logger.
   -- Each logger has it's own tag and log level.
-  -- @tparam[opt] table l optional logger object.
-  -- @usage myLogger = mist.Logger:new
-  -- @usage myLogger = mist.Logger:new{tag = "MyScript", level = 2}
+  -- @tparam string tag tag which appears at the start of
+  -- every log line produced by this logger.
+  -- @tparam[opt] number|string level the log level defines which messages
+  -- will be logged and which will be omitted. Log level 3 beeing the most verbose
+  -- and 0 disabling all output. This can also be a string. Allowed strings are:
+  -- "none" (0), "error" (1), "warning" (2) and "info" (3).
+  -- @usage myLogger = mist.Logger:new("MyScript")
+  -- @usage myLogger = mist.Logger:new("MyScript", 2)
+  -- @usage myLogger = mist.Logger:new("MyScript", "info")
   -- @treturn mist.Logger
-  function mist.Logger:new(l)
-    l = l or {
-      tag = "MIST",
-      level = 1,
-    }
-    -- in case the user only supplied
-    -- either tag or level
-    if not l.tag then
-      l.tag = "MIST"
-    end
-    if not l.level then
-      l.level = 1
-    end
+  function mist.Logger:new(tag, level)
+    local l = {}
+    l.tag = tag
     setmetatable(l, self)
     self.__index = self
+    mist.Logger.setLevel(self, level)
     return l
   end
 
   --- Sets the level of verbosity for this logger.
-  -- "none" or 0 disables all logging
-  -- "error" or 1 shows error messages only
-  -- "warning" or 2 shows error and warning messages
-  -- "info" or 3 shows error, warning and info messages
-  -- @param level this can either be a string or an integer level
+  -- @tparam[opt] number|string level the log level defines which messages
+  -- will be logged and which will be omitted. Log level 3 beeing the most verbose
+  -- and 0 disabling all output. This can also be a string. Allowed strings are:
+  -- "none" (0), "error" (1), "warning" (2) and "info" (3).
   -- @usage myLogger:setLevel("info")
   -- @usage -- log everything
   --myLogger:setLevel(3)
@@ -2896,6 +2892,15 @@ do -- mist.Logger scope
     end
   end
 
+  local function serializeVar(var)
+    if type(var) == 'table' then
+      var = mist.utils.oneLineSerialize(var)
+    else
+      var = tostring(var)
+    end
+    return var
+  end
+
   --- Logs error and shows alert window.
   -- This logs an error to the dcs.log and shows a popup window,
   -- pausing the simulation. This works always even if logging is
@@ -2904,7 +2909,11 @@ do -- mist.Logger scope
   -- @param ... variables to be used for substitution.
   -- @usage myLogger:alert("Shit just hit the fan! WEEEE!!!11")
   function mist.Logger:alert(text, ...)
-    text = formatText(text, unpack(arg))
+    if type(text) ~= 'string' then
+      text = serializeVar(text)
+    else
+      text = formatText(text, unpack(arg))
+    end
     env.error(self.tag .. '|' .. text, true)
   end
 
@@ -2917,7 +2926,11 @@ do -- mist.Logger scope
   -- @usage myLogger:error("Foo is $1 instead of $2", foo, "bar")
   function mist.Logger:error(text, ...)
     if self.level >= 1 then
-      text = formatText(text, unpack(arg))
+      if type(text) ~= 'string' then
+        text = serializeVar(text)
+      else
+        text = formatText(text, unpack(arg))
+      end
       env.error(self.tag .. '|' .. text)
     end
   end
@@ -2930,7 +2943,11 @@ do -- mist.Logger scope
   -- @usage myLogger:warn("Mother warned you! Those $1 from the interwebs are $2", {"geeks", 1337})
   function mist.Logger:warn(text, ...)
     if self.level >= 2 then
-      text = formatText(text, unpack(arg))
+      if type(text) ~= 'string' then
+        text = serializeVar(text)
+      else
+        text = formatText(text, unpack(arg))
+      end
       env.warning(self.tag .. '|' .. text)
     end
   end
@@ -2943,7 +2960,11 @@ do -- mist.Logger scope
   -- @see warn
   function mist.Logger:info(text, ...)
     if self.level >= 3 then
-      text = formatText(text, unpack(arg))
+      if type(text) ~= 'string' then
+        text = serializeVar(text)
+      else
+        text = formatText(text, unpack(arg))
+      end
       env.info(self.tag .. '|' .. text)
     end
   end
