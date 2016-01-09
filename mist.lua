@@ -420,7 +420,7 @@ do -- the main scope
   -- and calls main the first time.
   function mist.init()
     -- create logger
-    mist.log = mist.Logger:new()
+    mist.log = mist.Logger:new("MIST")
     log = mist.log
     -- set info log level
     log:setLevel("info")
@@ -2838,7 +2838,7 @@ do -- mist.Logger scope
     l.tag = tag
     setmetatable(l, self)
     self.__index = self
-    mist.Logger.setLevel(self, level)
+    self:setLevel(level)
     return l
   end
 
