@@ -25,7 +25,7 @@ Development <https://github.com/mrSkortch/MissionScriptingTools>
 
 Official Releases <https://github.com/mrSkortch/MissionScriptingTools/tree/master>
 
-@script mist
+@script MIST
 @author Speed
 @author Grimes
 @author lukrop
@@ -40,9 +40,8 @@ mist.build = 61
 -- forward declaration of log shorthand
 local log
 
---- Functions
--- @section mist
 do -- the main scope
+
   local coroutines = {}
 
   local tempSpawnedUnits = {} -- birth events added here
@@ -558,6 +557,7 @@ do -- the main scope
   --- init function.
   -- creates logger, adds default event handler
   -- and calls main the first time.
+  -- @function mist.init
   function mist.init()
     -- create logger
     mist.log = mist.Logger:new("MIST")
@@ -1004,7 +1004,10 @@ do -- the main scope
     return false
   end
 
-  -- acc- the accuracy of each easting/northing.  0, 1, 2, 3, 4, or 5.
+  --- Returns MGRS coordinates as string.
+  -- @tparam string MGRS MGRS coordinates
+  -- @tparam number acc the accuracy of each easting/northing.
+  -- Can be: 0, 1, 2, 3, 4, or 5.
   function mist.tostringMGRS(MGRS, acc)
     if acc == 0 then
       return MGRS.UTMZone .. ' ' .. MGRS.MGRSDigraph
@@ -1427,15 +1430,23 @@ do -- the main scope
   end
 
   --[[--
-  Returns a table containing unit names.
-      Prefixes:
+  Unit name table.
+  Many Mist functions require tables of unit names, which are known
+  in Mist as UnitNameTables. These follow a special set of shortcuts
+  borrowed from Slmod. These shortcuts alleviate the problem of entering
+  huge lists of unit names by hand, and in many cases, they remove the
+  need to even know the names of the units in the first place!
+
+  These are the unit table "short-cut" commands:
+
+  Prefixes:
       "[-u]<unit name>" - subtract this unit if its in the table
       "[g]<group name>" - add this group to the table
       "[-g]<group name>" - subtract this group from the table
       "[c]<country name>"  - add this country's units
       "[-c]<country name>" - subtract this country's units if any are in the table
 
-      Stand-alone identifiers
+  Stand-alone identifiers
       "[all]" - add all units
       "[-all]" - subtract all units (not very useful by itself)
       "[blue]" - add all blue units
@@ -1443,7 +1454,7 @@ do -- the main scope
       "[red]" - add all red coalition units
       "[-red]" - subtract all red units
 
-      Compound Identifiers:
+  Compound Identifiers:
       "[c][helicopter]<country name>"  - add all of this country's helicopters
       "[-c][helicopter]<country name>" - subtract all of this country's helicopters
       "[c][plane]<country name>"  - add all of this country's planes
@@ -1480,29 +1491,90 @@ do -- the main scope
       "[red][vehicle]" - add all red coalition vehicles
       "[-red][vehicle]" - subtract all red coalition vehicles
 
+  Country names to be used in [c] and [-c] short-cuts:
+      Turkey
+      Norway
+      The Netherlands
+      Spain
+      11
+      UK
+      Denmark
+      USA
+      Georgia
+      Germany
+      Belgium
+      Canada
+      France
+      Israel
+      Ukraine
+      Russia
+      South Ossetia
+      Abkhazia
+      Italy
+      Australia
+      Austria
+      Belarus
+      Bulgaria
+      Czech Republic
+      China
+      Croatia
+      Finland
+      Greece
+      Hungary
+      India
+      Iran
+      Iraq
+      Japan
+      Kazakhstan
+      North Korea
+      Pakistan
+      Poland
+      Romania
+      Saudi Arabia
+      Serbia, Slovakia
+      South Korea
+      Sweden
+      Switzerland
+      Syria
+      USAF Aggressors
 
-      Country names to be used in [c] and [-c] short-cuts:
-      "Turkey"
-      "Norway"
-      "The Netherlands"
-      "Spain"
-      "UK"
-      "Denmark"
-      "USA"
-      "Georgia"
-      "Germany"
-      "Belgium"
-      "Canada"
-      "France"
-      "Israel"
-      "Ukraine"
-      "Russia"
-      "South Osetia"
-      "Abkhazia"
-      "Italy"
+  Do NOT use a '[u]' notation for single units. Single units are referenced
+  the same way as before: Simply input their names as strings.
 
-  @tparam table tbl sequential strings
+  These unit tables are evaluated in order, and you cannot subtract a unit
+  from a table before it is added. For example:
+
+      {'[blue]', '[-c]Georgia'}
+
+  will evaluate to all of blue coalition except those units owned by the
+  country named "Georgia"; however:
+
+      {'[-c]Georgia', '[blue]'}
+
+  will evaluate to all of the units in blue coalition, because the addition
+  of all units owned by blue coalition occurred AFTER the subtraction of all
+  units owned by Georgia (which actually subtracted nothing at all, since
+  there were no units in the table when the subtraction occurred).
+
+  More examples:
+
+      {'[blue][plane]', '[-c]Georgia', '[-g]Hawg 1'}
+
+  Evaluates to all blue planes, except those blue units owned by the country
+  named "Georgia" and the units in the group named "Hawg1".
+
+
+      {'[g]arty1', '[g]arty2', '[-u]arty1_AD', '[-u]arty2_AD', 'Shark 11' }
+
+  Evaluates to the unit named "Shark 11", plus all the units in groups named
+  "arty1" and "arty2" except those that are named "arty1\_AD" and "arty2\_AD".
+
+  @table UnitNameTable
   ]]
+
+  --- Returns a table containing unit names.
+  -- @tparam table tbl sequential strings
+  -- @treturn table @{UnitNameTable}
   function mist.makeUnitTable(tbl)
     --Assumption: will be passed a table of strings, sequential
     local units_by_name = {}
@@ -2905,7 +2977,6 @@ do -- group functions scope
     return newGroup
   end
 
-
   function mist.random(firstNum, secondNum) -- no support for decimals
     local lowNum, highNum
     if not secondNum then
@@ -2957,7 +3028,6 @@ do -- group functions scope
 
   mist.matchString = mist.stringMatch -- both commands work because order out type of I
 
-
   --[[ scope:
 {
   units = {...},  -- unit names.
@@ -2978,160 +3048,6 @@ scope examples:
 
 {unitTypes = { blue = {'A-10C'}}}
 ]]
-end
-
---- Logger class.
--- @type mist.Logger
-do -- mist.Logger scope
-  mist.Logger = {}
-
-  --- Creates a new logger.
-  -- Each logger has it's own tag and log level.
-  -- @tparam string tag tag which appears at the start of
-  -- every log line produced by this logger.
-  -- @tparam[opt] number|string level the log level defines which messages
-  -- will be logged and which will be omitted. Log level 3 beeing the most verbose
-  -- and 0 disabling all output. This can also be a string. Allowed strings are:
-  -- "none" (0), "error" (1), "warning" (2) and "info" (3).
-  -- @usage myLogger = mist.Logger:new("MyScript")
-  -- @usage myLogger = mist.Logger:new("MyScript", 2)
-  -- @usage myLogger = mist.Logger:new("MyScript", "info")
-  -- @treturn mist.Logger
-  function mist.Logger:new(tag, level)
-    local l = {}
-    l.tag = tag
-    setmetatable(l, self)
-    self.__index = self
-    self:setLevel(level)
-    return l
-  end
-
-  --- Sets the level of verbosity for this logger.
-  -- @tparam[opt] number|string level the log level defines which messages
-  -- will be logged and which will be omitted. Log level 3 beeing the most verbose
-  -- and 0 disabling all output. This can also be a string. Allowed strings are:
-  -- "none" (0), "error" (1), "warning" (2) and "info" (3).
-  -- @usage myLogger:setLevel("info")
-  -- @usage -- log everything
-  --myLogger:setLevel(3)
-  function mist.Logger:setLevel(level)
-    if type(level) == 'string' then
-      if level == 'none' or level == 'off' then
-        self.level = 0
-      elseif level == 'error' then
-        self.level = 1
-      elseif level == 'warning' then
-        self.level = 2
-      elseif level == 'info' then
-        self.level = 3
-      end
-    elseif type(level) == 'number' then
-      self.level = level
-    end
-  end
-
-  --- parses text and substitutes keywords with values from given array.
-  -- @tparam string text string containing keywords to substitute with values
-  -- @param ... variables to use for substitution
-  -- @treturn string new string with keywords substituted
-  local function formatText(text, ...)
-    for index,value in ipairs(arg) do
-      -- TODO: check for getmetatabel(value).__tostring
-      if type(value) == 'table' then
-        value = mist.utils.oneLineSerialize(value)
-      else
-        value = tostring(value)
-      end
-      text = text:gsub('$' .. index, value)
-    end
-    local dInfo = debug.getinfo(3)
-    local fName = dInfo.name
-    -- local fsrc = dinfo.short_src
-    --local fLine = dInfo.linedefined
-    local cLine = dInfo.currentline
-    if fName then
-      return fName .. '|' .. cLine .. ': ' .. text
-    else
-      return cLine .. ': ' .. text
-    end
-  end
-
-  local function serializeVar(var)
-    if type(var) == 'table' then
-      var = mist.utils.oneLineSerialize(var)
-    else
-      var = tostring(var)
-    end
-    return var
-  end
-
-  --- Logs error and shows alert window.
-  -- This logs an error to the dcs.log and shows a popup window,
-  -- pausing the simulation. This works always even if logging is
-  -- disabled by setting a log level of "none" or 0.
-  -- @tparam string text the text with keywords to substitute.
-  -- @param ... variables to be used for substitution.
-  -- @usage myLogger:alert("Shit just hit the fan! WEEEE!!!11")
-  function mist.Logger:alert(text, ...)
-    if type(text) ~= 'string' then
-      text = serializeVar(text)
-    else
-      text = formatText(text, unpack(arg))
-    end
-    env.error(self.tag .. '|' .. text, true)
-  end
-
-  --- Logs an error.
-  -- logs a message prefixed with this loggers tag to dcs.log as
-  -- long as at least the "error" log level (1) is set.
-  -- @tparam string text the text with keywords to substitute.
-  -- @param ... variables to be used for substitution.
-  -- @usage myLogger:error("Just an error!")
-  -- @usage myLogger:error("Foo is $1 instead of $2", foo, "bar")
-  function mist.Logger:error(text, ...)
-    if self.level >= 1 then
-      if type(text) ~= 'string' then
-        text = serializeVar(text)
-      else
-        text = formatText(text, unpack(arg))
-      end
-      env.error(self.tag .. '|' .. text)
-    end
-  end
-
-  --- Logs a warning.
-  -- logs a message prefixed with this loggers tag to dcs.log as
-  -- long as at least the "warning" log level (2) is set.
-  -- @tparam string text the text with keywords to substitute.
-  -- @param ... variables to be used for substitution.
-  -- @usage myLogger:warn("Mother warned you! Those $1 from the interwebs are $2", {"geeks", 1337})
-  function mist.Logger:warn(text, ...)
-    if self.level >= 2 then
-      if type(text) ~= 'string' then
-        text = serializeVar(text)
-      else
-        text = formatText(text, unpack(arg))
-      end
-      env.warning(self.tag .. '|' .. text)
-    end
-  end
-
-  --- Logs a info.
-  -- logs a message prefixed with this loggers tag to dcs.log as
-  -- long as the highest log level (3) "info" is set.
-  -- @tparam string text the text with keywords to substitute.
-  -- @param ... variables to be used for substitution.
-  -- @see warn
-  function mist.Logger:info(text, ...)
-    if self.level >= 3 then
-      if type(text) ~= 'string' then
-        text = serializeVar(text)
-      else
-        text = formatText(text, unpack(arg))
-      end
-      env.info(self.tag .. '|' .. text)
-    end
-  end
 end
 
 --- Utility functions.
@@ -3987,6 +3903,10 @@ initial_number
     end
   end
 
+
+  --- Sets a flag if unit(s) is/are inside a polygon.
+  -- @tparam table vars @{unitsInPolygonVars}
+  -- @todo document
   function mist.flagFunc.units_in_polygon(vars)
     --[[vars needs to be:
 units = table,
@@ -4058,6 +3978,8 @@ unitTableDef = table or nil
 
   end
 
+  --- Sets a flag if unit(s) is/are inside a trigger zone.
+  -- @todo document
   function mist.flagFunc.units_in_zones(vars)
     --[[vars needs to be:
   units = table,
@@ -4119,6 +4041,8 @@ unitTableDef = table or nil
 
   end
 
+  --- Sets a flag if unit(s) is/are inside a moving zone.
+  -- @todo document
   function mist.flagFunc.units_in_moving_zones(vars)
     --[[vars needs to be:
   units = table,
@@ -4193,6 +4117,8 @@ unitTableDef = table or nil
 
   end
 
+  --- Sets a flag if units have line of sight to each other.
+  -- @todo document
   function mist.flagFunc.units_LOS(vars)
     --[[vars needs to be:
 unitset1 = table,
@@ -4270,6 +4196,8 @@ toggle = boolean or nil
     end
   end
 
+  --- Sets a flag if group is alive.
+  -- @todo document
   function mist.flagFunc.group_alive(vars)
     --[[vars
 groupName
@@ -4315,6 +4243,8 @@ stopFlag
 
   end
 
+  --- Sets a flag if group is dead.
+  -- @todo document
   function mist.flagFunc.group_dead(vars)
     local type_tbl = {
       [{'group', 'groupname', 'gp', 'groupName'}] = 'string',
@@ -4351,6 +4281,8 @@ stopFlag
     end
   end
 
+  --- Sets a flag if less than given percent of group is alive.
+  -- @todo document
   function mist.flagFunc.group_alive_less_than(vars)
     local type_tbl = {
       [{'group', 'groupname', 'gp', 'groupName'}] = 'string',
@@ -4395,6 +4327,8 @@ stopFlag
     end
   end
 
+  --- Sets a flag if more than given percent of group is alive.
+  -- @todo document
   function mist.flagFunc.group_alive_more_than(vars)
     local type_tbl = {
       [{'group', 'groupname', 'gp', 'groupName'}] = 'string',
@@ -6408,6 +6342,169 @@ do -- mist unitID funcs
     end
     if idData.groupId > mist.nextGroupId then
       mist.nextGroupId = mist.utils.deepCopy(idData.groupId)
+    end
+  end
+end
+
+--- Tables used as parameters.
+-- @section varTables
+
+--- mist.flagFunc.units_in_polygon parameter table.
+-- @table unitsInPolygonVars
+-- @field unit name table @{UnitNameTable}.
+-- @field zone table defining a polygon.
+
+
+--- Logger class.
+-- @type mist.Logger
+do -- mist.Logger scope
+  mist.Logger = {}
+
+  --- Creates a new logger.
+  -- Each logger has it's own tag and log level.
+  -- @tparam string tag tag which appears at the start of
+  -- every log line produced by this logger.
+  -- @tparam[opt] number|string level the log level defines which messages
+  -- will be logged and which will be omitted. Log level 3 beeing the most verbose
+  -- and 0 disabling all output. This can also be a string. Allowed strings are:
+  -- "none" (0), "error" (1), "warning" (2) and "info" (3).
+  -- @usage myLogger = mist.Logger:new("MyScript")
+  -- @usage myLogger = mist.Logger:new("MyScript", 2)
+  -- @usage myLogger = mist.Logger:new("MyScript", "info")
+  -- @treturn mist.Logger
+  function mist.Logger:new(tag, level)
+    local l = {}
+    l.tag = tag
+    setmetatable(l, self)
+    self.__index = self
+    self:setLevel(level)
+    return l
+  end
+
+  --- Sets the level of verbosity for this logger.
+  -- @tparam[opt] number|string level the log level defines which messages
+  -- will be logged and which will be omitted. Log level 3 beeing the most verbose
+  -- and 0 disabling all output. This can also be a string. Allowed strings are:
+  -- "none" (0), "error" (1), "warning" (2) and "info" (3).
+  -- @usage myLogger:setLevel("info")
+  -- @usage -- log everything
+  --myLogger:setLevel(3)
+  function mist.Logger:setLevel(level)
+    if type(level) == 'string' then
+      if level == 'none' or level == 'off' then
+        self.level = 0
+      elseif level == 'error' then
+        self.level = 1
+      elseif level == 'warning' then
+        self.level = 2
+      elseif level == 'info' then
+        self.level = 3
+      end
+    elseif type(level) == 'number' then
+      self.level = level
+    end
+  end
+
+  --- parses text and substitutes keywords with values from given array.
+  -- @tparam string text string containing keywords to substitute with values
+  -- @param ... variables to use for substitution
+  -- @treturn string new string with keywords substituted
+  local function formatText(text, ...)
+    for index,value in ipairs(arg) do
+      -- TODO: check for getmetatabel(value).__tostring
+      if type(value) == 'table' then
+        value = mist.utils.oneLineSerialize(value)
+      else
+        value = tostring(value)
+      end
+      text = text:gsub('$' .. index, value)
+    end
+    local dInfo = debug.getinfo(3)
+    local fName = dInfo.name
+    -- local fsrc = dinfo.short_src
+    --local fLine = dInfo.linedefined
+    local cLine = dInfo.currentline
+    if fName then
+      return fName .. '|' .. cLine .. ': ' .. text
+    else
+      return cLine .. ': ' .. text
+    end
+  end
+
+  local function serializeVar(var)
+    if type(var) == 'table' then
+      var = mist.utils.oneLineSerialize(var)
+    else
+      var = tostring(var)
+    end
+    return var
+  end
+
+  --- Logs error and shows alert window.
+  -- This logs an error to the dcs.log and shows a popup window,
+  -- pausing the simulation. This works always even if logging is
+  -- disabled by setting a log level of "none" or 0.
+  -- @tparam string text the text with keywords to substitute.
+  -- @param ... variables to be used for substitution.
+  -- @usage myLogger:alert("Shit just hit the fan! WEEEE!!!11")
+  function mist.Logger:alert(text, ...)
+    if type(text) ~= 'string' then
+      text = serializeVar(text)
+    else
+      text = formatText(text, unpack(arg))
+    end
+    env.error(self.tag .. '|' .. text, true)
+  end
+
+  --- Logs an error.
+  -- logs a message prefixed with this loggers tag to dcs.log as
+  -- long as at least the "error" log level (1) is set.
+  -- @tparam string text the text with keywords to substitute.
+  -- @param ... variables to be used for substitution.
+  -- @usage myLogger:error("Just an error!")
+  -- @usage myLogger:error("Foo is $1 instead of $2", foo, "bar")
+  function mist.Logger:error(text, ...)
+    if self.level >= 1 then
+      if type(text) ~= 'string' then
+        text = serializeVar(text)
+      else
+        text = formatText(text, unpack(arg))
+      end
+      env.error(self.tag .. '|' .. text)
+    end
+  end
+
+  --- Logs a warning.
+  -- logs a message prefixed with this loggers tag to dcs.log as
+  -- long as at least the "warning" log level (2) is set.
+  -- @tparam string text the text with keywords to substitute.
+  -- @param ... variables to be used for substitution.
+  -- @usage myLogger:warn("Mother warned you! Those $1 from the interwebs are $2", {"geeks", 1337})
+  function mist.Logger:warn(text, ...)
+    if self.level >= 2 then
+      if type(text) ~= 'string' then
+        text = serializeVar(text)
+      else
+        text = formatText(text, unpack(arg))
+      end
+      env.warning(self.tag .. '|' .. text)
+    end
+  end
+
+  --- Logs a info.
+  -- logs a message prefixed with this loggers tag to dcs.log as
+  -- long as the highest log level (3) "info" is set.
+  -- @tparam string text the text with keywords to substitute.
+  -- @param ... variables to be used for substitution.
+  -- @see warn
+  function mist.Logger:info(text, ...)
+    if self.level >= 3 then
+      if type(text) ~= 'string' then
+        text = serializeVar(text)
+      else
+        text = formatText(text, unpack(arg))
+      end
+      env.info(self.tag .. '|' .. text)
     end
   end
 end
