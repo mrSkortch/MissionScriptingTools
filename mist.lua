@@ -34,8 +34,8 @@ mist = {}
 
 -- don't change these
 mist.majorVersion = 4
-mist.minorVersion = 0
-mist.build = 60
+mist.minorVersion = 1
+mist.build = 61
 
 -- forward declaration of log shorthand
 local log
@@ -3322,9 +3322,10 @@ do -- mist.util scope
   --- Creates a waypoint from a unit.
   -- This function also considers the units speed.
   -- The alt_type of this waypoint is set to "BARO".
-  -- @tparam Unit unit Unit whose position and speed will be used.
+  -- @tparam Unit pUnit Unit whose position and speed will be used.
   -- @treturn Waypoint new waypoint.
-  function mist.utils.unitToWP(unit)
+  function mist.utils.unitToWP(pUnit)
+    local unit = mist.utils.deepCopy(pUnit)
     if type(unit) == 'string' then
       if Unit.getByName(unit) then
         unit = Unit.getByName(unit)

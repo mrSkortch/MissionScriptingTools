@@ -1,3 +1,18 @@
+v61 - 4.1 release
+-Fixed locality issue with unitToWP
+
+v60
+-Fixed issue with country names in the editor not matching enum country
+name values. For example "Best Korea" could not match with "BEST_KOREA".
+Thanks lukrop of this fix
+-Fixed locality issue with mist.getNorthCorrection
+-Added function mist.utils.unitToWP
+-added function mist.utils.vecToWP
+
+Both of these functions deal with creating a WP table from the passed
+values. unitToWP also returns a speed variable based on the current
+velocity of the unit
+
 v59
 -removed the new 3rd variable from mist.utils.getDir and just made the 2nd variable optional instead
 -Added check to DB update functions to only update if data from the group has changed from what is currently in the DB. This fixes an issue I had where some data was lost if you spawned a group normally after mission start and then used a respawn, clone, or teleport function on said group
