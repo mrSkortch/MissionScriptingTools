@@ -40,6 +40,8 @@ mist.build = 61
 -- forward declaration of log shorthand
 local log
 
+--- Functions
+-- @section mist
 do -- the main scope
   local coroutines = {}
 
@@ -86,10 +88,10 @@ do -- the main scope
             local pos = unit:getPosition()
             local newtbl = ldeepcopy(lunits[i])
             if pos then
-              newtbl['pos'] = pos.p
+              newtbl.pos = pos.p
             end
-            newtbl['unit'] = unit
-            --newtbl['rt_id'] = unit.id_
+            newtbl.unit = unit
+            --newtbl.rt_id = unit.id_
             lalive_units[unit.id_] = newtbl
             updatedUnits[unit.id_] = true
           end
@@ -113,7 +115,7 @@ do -- the main scope
   local function dbUpdate(event)
     local newTable = {}
 
-    newTable['startTime'] =  0
+    newTable.startTime =  0
 
     if type(event) == 'string' then -- if name of an object.
       local newObject
@@ -146,11 +148,11 @@ do -- the main scope
       end
       for countryData, countryId in pairs(country.id) do
         if newTable.country and string.upper(countryData) == string.upper(newTable.country) or countryId == newTable.countryId then
-          newTable['countryId'] = countryId
-          newTable['country'] = string.lower(countryData)
+          newTable.countryId = countryId
+          newTable.country = string.lower(countryData)
           for coaData, coaId in pairs(coalition.side) do
             if coaId == coalition.getCountryCoalition(countryId) then
-              newTable['coalition'] = string.lower(coaData)
+              newTable.coalition = string.lower(coaData)
             end
           end
         end
@@ -158,11 +160,11 @@ do -- the main scope
       for catData, catId in pairs(Unit.Category) do
         if newType == 'group' and Group.getByName(newTable.groupName):isExist() then
           if catId == Group.getByName(newTable.groupName):getCategory() then
-            newTable['category'] = string.lower(catData)
+            newTable.category = string.lower(catData)
           end
         elseif newType == 'static' and StaticObject.getByName(newTable.groupName):isExist() then
           if catId == StaticObject.getByName(newTable.groupName):getCategory() then
-            newTable['category'] = string.lower(catData)
+            newTable.category = string.lower(catData)
           end
 
         end
@@ -276,7 +278,7 @@ do -- the main scope
       end
     end
     --mist.debug.writeData(mist.utils.serialize,{'msg', newTable}, timer.getAbsTime() ..'Group.lua')
-    newTable['timeAdded'] = timer.getAbsTime() -- only on the dynGroupsAdded table. For other reference, see start time
+    newTable.timeAdded = timer.getAbsTime() -- only on the dynGroupsAdded table. For other reference, see start time
     --mist.debug.dumpDBs()
     --end
 
@@ -369,18 +371,18 @@ do -- the main scope
           mistCategory = string.lower(newTable.category)
         end
 
-        if string.upper(newTable['category']) == 'GROUND_UNIT' then
+        if string.upper(newTable.category) == 'GROUND_UNIT' then
           mistCategory = 'vehicle'
-          newTable['category'] = mistCategory
-        elseif string.upper(newTable['category']) == 'AIRPLANE' then
+          newTable.category = mistCategory
+        elseif string.upper(newTable.category) == 'AIRPLANE' then
           mistCategory = 'plane'
-          newTable['category'] = mistCategory
-        elseif string.upper(newTable['category']) == 'HELICOPTER' then
+          newTable.category = mistCategory
+        elseif string.upper(newTable.category) == 'HELICOPTER' then
           mistCategory = 'helicopter'
-          newTable['category'] = mistCategory
-        elseif string.upper(newTable['category']) == 'SHIP' then
+          newTable.category = mistCategory
+        elseif string.upper(newTable.category) == 'SHIP' then
           mistCategory = 'ship'
-          newTable['category'] = mistCategory
+          newTable.category = mistCategory
         end
         for newId, newUnitData in pairs(newTable.units) do
           newUnitData.category = mistCategory
@@ -399,7 +401,7 @@ do -- the main scope
 
         if not mist.DBs.units[newTable.coalition][newTable.country] then
           mist.DBs.units[newTable.coalition][(newTable.country)] = {}
-          mist.DBs.units[newTable.coalition][(newTable.country)]['countryId'] = newTable.countryId
+          mist.DBs.units[newTable.coalition][(newTable.country)].countryId = newTable.countryId
         end
         if not mist.DBs.units[newTable.coalition][newTable.country][mistCategory] then
           mist.DBs.units[newTable.coalition][(newTable.country)][mistCategory] = {}
@@ -483,46 +485,46 @@ do -- the main scope
 
         if mist.DBs.aliveUnits and mist.DBs.aliveUnits[val.object.id_] then
           log:info('object found in alive_units')
-          val['objectData'] = mist.utils.deepCopy(mist.DBs.aliveUnits[val.object.id_])
+          val.objectData = mist.utils.deepCopy(mist.DBs.aliveUnits[val.object.id_])
           local pos = Object.getPosition(val.object)
           if pos then
-            val['objectPos'] = pos.p
+            val.objectPos = pos.p
           end
-          val['objectType'] = mist.DBs.aliveUnits[val.object.id_].category
+          val.objectType = mist.DBs.aliveUnits[val.object.id_].category
           --[[if mist.DBs.activeHumans[Unit.getName(val.object)] then
           --trigger.action.outText('remove via death: ' .. Unit.getName(val.object),20)
             mist.DBs.activeHumans[Unit.getName(val.object)] = nil
           end]]
         elseif mist.DBs.removedAliveUnits and mist.DBs.removedAliveUnits[val.object.id_] then  -- it didn't exist in alive_units, check old_alive_units
           log:info('object found in old_alive_units')
-          val['objectData'] = mist.utils.deepCopy(mist.DBs.removedAliveUnits[val.object.id_])
+          val.objectData = mist.utils.deepCopy(mist.DBs.removedAliveUnits[val.object.id_])
           local pos = Object.getPosition(val.object)
           if pos then
-            val['objectPos'] = pos.p
+            val.objectPos = pos.p
           end
-          val['objectType'] = mist.DBs.removedAliveUnits[val.object.id_].category
+          val.objectType = mist.DBs.removedAliveUnits[val.object.id_].category
 
         else  --attempt to determine if static object...
           log:info('object not found in alive units or old alive units')
           local pos = Object.getPosition(val.object)
           if pos then
             local static_found = false
-            for ind, static in pairs(mist.DBs.unitsByCat['static']) do
+            for ind, static in pairs(mist.DBs.unitsByCat.static) do
               if ((pos.p.x - static.point.x)^2 + (pos.p.z - static.point.y)^2)^0.5 < 0.1 then --really, it should be zero...
                 log:info('correlated dead static object to position')
-                val['objectData'] = static
-                val['objectPos'] = pos.p
-                val['objectType'] = 'static'
+                val.objectData = static
+                val.objectPos = pos.p
+                val.objectType = 'static'
                 static_found = true
                 break
               end
             end
             if not static_found then
-              val['objectPos'] = pos.p
-              val['objectType'] = 'building'
+              val.objectPos = pos.p
+              val.objectType = 'building'
             end
           else
-            val['objectType'] = 'unknown'
+            val.objectType = 'unknown'
           end
         end
         mist.DBs.deadObjects[id] = val
@@ -585,7 +587,7 @@ do -- the main scope
       write_DB_table_counter = 0
 
       if not coroutines.updateDBTables then
-        coroutines['updateDBTables'] = coroutine.create(updateDBTables)
+        coroutines.updateDBTables = coroutine.create(updateDBTables)
       end
 
       coroutine.resume(coroutines.updateDBTables)
@@ -601,7 +603,7 @@ do -- the main scope
       check_spawn_events_counter = 0
 
       if not coroutines.checkSpawnedEvents then
-        coroutines['checkSpawnedEvents'] = coroutine.create(checkSpawnedEvents)
+        coroutines.checkSpawnedEvents = coroutine.create(checkSpawnedEvents)
       end
 
       coroutine.resume(coroutines.checkSpawnedEvents)
@@ -617,7 +619,7 @@ do -- the main scope
       update_alive_units_counter = 0
 
       if not coroutines.update_alive_units then
-        coroutines['updateAliveUnits'] = coroutine.create(updateAliveUnits)
+        coroutines.updateAliveUnits = coroutine.create(updateAliveUnits)
       end
 
       coroutine.resume(coroutines.updateAliveUnits)
@@ -822,14 +824,14 @@ do -- the main scope
     end
     if newGroup.groupName or newGroup.name then
       if newGroup.groupName then
-        newGroup['name'] = newGroup.groupName
+        newGroup.name = newGroup.groupName
       elseif newGroup.name then
-        newGroup['name'] = newGroup.name
+        newGroup.name = newGroup.name
       end
     end
 
     if newGroup.clone and mist.DBs.groupsByName[newGroup.name] or not newGroup.name then
-      newGroup['name'] = tostring(tostring(country.name[cntry]) .. tostring(typeName) .. mistDynAddIndex)
+      newGroup.name = tostring(tostring(country.name[cntry]) .. tostring(typeName) .. mistDynAddIndex)
     end
 
     if not newGroup.hidden then
@@ -853,7 +855,7 @@ do -- the main scope
       local originalName = newGroup.units[unitIndex].unitName or newGroup.units[unitIndex].name
       if newGroup.clone or not unitData.unitId then
         mistUnitId = mistUnitId + 1
-        newGroup.units[unitIndex]['unitId'] = mistUnitId
+        newGroup.units[unitIndex].unitId = mistUnitId
       end
       if newGroup.units[unitIndex].unitName or newGroup.units[unitIndex].name then
         if newGroup.units[unitIndex].unitName then
@@ -1299,6 +1301,7 @@ do -- the main scope
 
   --- Returns heading of given unit.
   -- @tparam Unit unit unit whose heading is returned.
+  -- @param rawHeading
   -- @treturn number heading of the unit, in range
   -- of 0 to 2*pi.
   function mist.getHeading(unit, rawHeading)
@@ -1423,8 +1426,8 @@ do -- the main scope
     end
   end
 
-  function mist.makeUnitTable(tbl)
-    --[[
+  --[[--
+  Returns a table containing unit names.
       Prefixes:
       "[-u]<unit name>" - subtract this unit if its in the table
       "[g]<group name>" - add this group to the table
@@ -1497,8 +1500,10 @@ do -- the main scope
       "South Osetia"
       "Abkhazia"
       "Italy"
-      ]]
 
+  @tparam table tbl sequential strings
+  ]]
+  function mist.makeUnitTable(tbl)
     --Assumption: will be passed a table of strings, sequential
     local units_by_name = {}
 
@@ -1796,7 +1801,7 @@ do -- the main scope
   end
 
 
-  units_tbl['processed'] = timer.getTime()  --add the processed flag
+  units_tbl.processed = timer.getTime()  --add the processed flag
   return units_tbl
 end
 
@@ -2032,11 +2037,11 @@ function mist.getUnitsLOS(unitset1, altoffset1, unitset2, altoffset2, radius)
           if unit_added == false then
             unit_added = true
             LOS_data[#LOS_data + 1] = {}
-            LOS_data[#LOS_data]['unit'] = unit_info1[unit1_ind].unit
-            LOS_data[#LOS_data]['vis'] = {}
-            LOS_data[#LOS_data]['vis'][#LOS_data[#LOS_data]['vis'] + 1] = unit_info2[unit2_ind].unit
+            LOS_data[#LOS_data].unit = unit_info1[unit1_ind].unit
+            LOS_data[#LOS_data].vis = {}
+            LOS_data[#LOS_data].vis[#LOS_data[#LOS_data].vis + 1] = unit_info2[unit2_ind].unit
           else
-            LOS_data[#LOS_data]['vis'][#LOS_data[#LOS_data]['vis'] + 1] = unit_info2[unit2_ind].unit
+            LOS_data[#LOS_data].vis[#LOS_data[#LOS_data].vis + 1] = unit_info2[unit2_ind].unit
           end
         end
       end
@@ -2325,18 +2330,18 @@ do -- group functions scope
       for unitNum, unitData in pairs(newGroup:getUnits()) do
         newData.units[unitNum] = {}
         newData.units[unitNum]["unitId"] = tonumber(unitData:getID())
-        newData.units[unitNum]['point'] = unitData.point
-        newData.units[unitNum]['x'] = unitData:getPosition().p.x
-        newData.units[unitNum]['y'] = unitData:getPosition().p.z
+        newData.units[unitNum].point = unitData.point
+        newData.units[unitNum].x = unitData:getPosition().p.x
+        newData.units[unitNum].y = unitData:getPosition().p.z
         newData.units[unitNum]["type"] = unitData:getTypeName()
         newData.units[unitNum]["skill"] = mist.getUnitSkill(unitData:getName())
 
         -- get velocity needed
         newData.units[unitNum]["unitName"] = unitData:getName()
         newData.units[unitNum]["heading"] = mist.getHeading(unitData, true) -- added to DBs
-        newData.units[unitNum]['alt'] = unitData:getPosition().p.y
+        newData.units[unitNum].alt = unitData:getPosition().p.y
         newData.country = string.lower(country.name[unitData:getCountry()])
-        newData.units[unitNum]['callsign'] = unitData:getCallsign()
+        newData.units[unitNum].callsign = unitData:getCallsign()
       end
 
       return newData
@@ -2382,12 +2387,12 @@ do -- group functions scope
         newData.units[unitNum] = {}
 
         newData.units[unitNum]["unitId"] = unitData.unitId
-        --newData.units[unitNum]['point'] = unitData.point
-        newData.units[unitNum]['x'] = unitData.point.x
-        newData.units[unitNum]['y'] = unitData.point.y
-        newData.units[unitNum]['alt'] = unitData.alt
-        newData.units[unitNum]['alt_type'] = unitData.alt_type
-        newData.units[unitNum]['speed'] = unitData.speed
+        --newData.units[unitNum].point = unitData.point
+        newData.units[unitNum].x = unitData.point.x
+        newData.units[unitNum].y = unitData.point.y
+        newData.units[unitNum].alt = unitData.alt
+        newData.units[unitNum].alt_type = unitData.alt_type
+        newData.units[unitNum].speed = unitData.speed
         newData.units[unitNum]["type"] = unitData.type
         newData.units[unitNum]["skill"] = unitData.skill
         newData.units[unitNum]["unitName"] = unitData.unitName
@@ -2397,16 +2402,16 @@ do -- group functions scope
 
         if newData.category == 'plane' or newData.category == 'helicopter' then
           newData.units[unitNum]["payload"] = payloads[unitNum]
-          newData.units[unitNum]['livery_id'] = unitData.livery_id
-          newData.units[unitNum]['onboard_num'] = unitData.onboard_num
-          newData.units[unitNum]['callsign'] = unitData.callsign
-          newData.units[unitNum]['AddPropAircraft'] = unitData.AddPropAircraft
+          newData.units[unitNum].livery_id = unitData.livery_id
+          newData.units[unitNum].onboard_num = unitData.onboard_num
+          newData.units[unitNum].callsign = unitData.callsign
+          newData.units[unitNum].AddPropAircraft = unitData.AddPropAircraft
         end
         if newData.category == 'static' then
-          newData.units[unitNum]['categoryStatic'] = unitData.categoryStatic
-          newData.units[unitNum]['mass'] = unitData.mass
-          newData.units[unitNum]['canCargo'] = unitData.canCargo
-          newData.units[unitNum]['shape_name'] = unitData.shape_name
+          newData.units[unitNum].categoryStatic = unitData.categoryStatic
+          newData.units[unitNum].mass = unitData.mass
+          newData.units[unitNum].canCargo = unitData.canCargo
+          newData.units[unitNum].shape_name = unitData.shape_name
         end
       end
 
@@ -2543,7 +2548,7 @@ do -- group functions scope
       newGroupData = vars.groupData
     end
 
-    local diff = {['x'] = 0, ['y'] = 0}
+    local diff = {x = 0, y = 0}
     local newCoord, origCoord
     if point then
       local valid = false
@@ -2561,7 +2566,7 @@ do -- group functions scope
         newCoord = mist.getRandPointInCircle(point, radius, innerRadius)
         if mist.isTerrainValid(newCoord, validTerrain) then
           origCoord = mist.utils.deepCopy(newCoord)
-          diff = {['x'] = (newCoord.x - newGroupData.units[1].x), ['y'] = (newCoord.y - newGroupData.units[1].y)}
+          diff = {x = (newCoord.x - newGroupData.units[1].x), y = (newCoord.y - newGroupData.units[1].y)}
           valid = true
           break
         end
@@ -2586,8 +2591,8 @@ do -- group functions scope
           --newCoord = mist.getRandPointInCircle(zone.point, zone.radius)
         end
 
-        newGroupData.units[unitNum]['x'] = newCoord.x
-        newGroupData.units[unitNum]['y'] = newCoord.y
+        newGroupData.units[unitNum].x = newCoord.x
+        newGroupData.units[unitNum].y = newCoord.y
       else
         newGroupData.units[unitNum]["x"] = unitData.x + diff.x
         newGroupData.units[unitNum]["y"] = unitData.y + diff.y
@@ -4560,12 +4565,12 @@ do -- mist.msg scope
       ------- new display
 
       if caSlots == true and caMSGtoGroup == false then
-        if msgTableText['RED'] then
-          trigger.action.outTextForCoalition(coalition.side.RED, table.concat(msgTableText['RED'].text), msgTableText['RED'].displayTime, true)
+        if msgTableText.RED then
+          trigger.action.outTextForCoalition(coalition.side.RED, table.concat(msgTableText.RED.text), msgTableText.RED.displayTime, true)
 
         end
-        if msgTableText['BLUE'] then
-          trigger.action.outTextForCoalition(coalition.side.BLUE, table.concat(msgTableText['BLUE'].text), msgTableText['BLUE'].displayTime, true)
+        if msgTableText.BLUE then
+          trigger.action.outTextForCoalition(coalition.side.BLUE, table.concat(msgTableText.BLUE.text), msgTableText.BLUE.displayTime, true)
         end
       end
 
@@ -4575,11 +4580,11 @@ do -- mist.msg scope
         end
       end
       --- new audio
-      if msgTableSound['RED'] then
-        trigger.action.outSoundForCoalition(coalition.side.RED, msgTableSound['RED'])
+      if msgTableSound.RED then
+        trigger.action.outSoundForCoalition(coalition.side.RED, msgTableSound.RED)
       end
-      if msgTableSound['BLUE'] then
-        trigger.action.outSoundForCoalition(coalition.side.BLUE, msgTableSound['BLUE'])
+      if msgTableSound.BLUE then
+        trigger.action.outSoundForCoalition(coalition.side.BLUE, msgTableSound.BLUE)
       end
 
 
@@ -5836,11 +5841,11 @@ do -- group tasks scope
 
 
     if useRoads == true and ((point.x - posStart.x)^2 + (point.z - posStart.z)^2)^0.5 > radius * 1.3 then
-      path[#path + 1] = mist.ground.buildWP({['x'] = posStart.x + 11, ['z'] = posStart.z + 11}, 'off_road', speed)
+      path[#path + 1] = mist.ground.buildWP({x = posStart.x + 11, z = posStart.z + 11}, 'off_road', speed)
       path[#path + 1] = mist.ground.buildWP(posStart, 'on_road', speed)
       path[#path + 1] = mist.ground.buildWP(offset, 'on_road', speed)
     else
-      path[#path + 1] = mist.ground.buildWP({['x'] = posStart.x + 25, ['z'] = posStart.z + 25}, form, speed)
+      path[#path + 1] = mist.ground.buildWP({x = posStart.x + 25, z = posStart.z + 25}, form, speed)
     end
 
     path[#path + 1] = mist.ground.buildWP(offset, form, speed)
@@ -6007,20 +6012,21 @@ do -- mist.DBs scope
   mist.DBs.missionData = {}
   if env.mission then
 
-    mist.DBs.missionData['startTime'] = env.mission.start_time
-    mist.DBs.missionData['theatre'] = env.mission.theatre
-    mist.DBs.missionData['version'] = env.mission.version
-    mist.DBs.missionData['files'] = {}
+    mist.DBs.missionData.startTime = env.mission.start_time
+    mist.DBs.missionData.theatre = env.mission.theatre
+    mist.DBs.missionData.version = env.mission.version
+    mist.DBs.missionData.files = {}
     if type(env.mission.resourceCounter) == 'table' then
       for fIndex, fData in pairs (env.mission.resourceCounter) do
         mist.DBs.missionData.files[#mist.DBs.missionData.files + 1] =  mist.utils.deepCopy(fIndex)
       end
     end
-    mist.DBs.missionData['bullseye'] = {['red'] = {}, ['blue'] = {}} -- if we add more coalition specific data then bullsye should be categorized by coaliton. For now its just the bullseye table
-    mist.DBs.missionData.bullseye.red['x'] = env.mission.coalition.red.bullseye.x --should it be point.x?
-    mist.DBs.missionData.bullseye.red['y'] = env.mission.coalition.red.bullseye.y
-    mist.DBs.missionData.bullseye.blue['x'] = env.mission.coalition.blue.bullseye.x
-    mist.DBs.missionData.bullseye.blue['y'] = env.mission.coalition.blue.bullseye.y
+    -- if we add more coalition specific data then bullsye should be categorized by coaliton. For now its just the bullseye table
+    mist.DBs.missionData.bullseye = {red = {}, blue = {}}
+    mist.DBs.missionData.bullseye.red.x = env.mission.coalition.red.bullseye.x --should it be point.x?
+    mist.DBs.missionData.bullseye.red.y = env.mission.coalition.red.bullseye.y
+    mist.DBs.missionData.bullseye.blue.x = env.mission.coalition.blue.bullseye.x
+    mist.DBs.missionData.bullseye.blue.y = env.mission.coalition.blue.bullseye.y
   end
 
   mist.DBs.zonesByName = {}
@@ -6031,10 +6037,10 @@ do -- mist.DBs scope
     for zone_ind, zone_data in pairs(env.mission.triggers.zones) do
       if type(zone_data) == 'table' then
         local zone = mist.utils.deepCopy(zone_data)
-        zone['point'] = {}  -- point is used by SSE
-        zone['point']['x'] = zone_data.x
-        zone['point']['y'] = 0
-        zone['point']['z'] = zone_data.y
+        zone.point = {}  -- point is used by SSE
+        zone.point.x = zone_data.x
+        zone.point.y = 0
+        zone.point.z = zone_data.y
 
         mist.DBs.zonesByName[zone_data.name] = zone
         mist.DBs.zonesByNum[#mist.DBs.zonesByNum + 1] = mist.utils.deepCopy(zone)  --[[deepcopy so that the zone in zones_by_name and the zone in
@@ -6060,11 +6066,11 @@ do -- mist.DBs scope
           if type(nav_data) == 'table' then
             mist.DBs.navPoints[coa_name][nav_ind] = mist.utils.deepCopy(nav_data)
 
-            mist.DBs.navPoints[coa_name][nav_ind]['name'] = nav_data.callsignStr  -- name is a little bit more self-explanatory.
-            mist.DBs.navPoints[coa_name][nav_ind]['point'] = {}  -- point is used by SSE, support it.
-            mist.DBs.navPoints[coa_name][nav_ind]['point']['x'] = nav_data.x
-            mist.DBs.navPoints[coa_name][nav_ind]['point']['y'] = 0
-            mist.DBs.navPoints[coa_name][nav_ind]['point']['z'] = nav_data.y
+            mist.DBs.navPoints[coa_name][nav_ind].name = nav_data.callsignStr  -- name is a little bit more self-explanatory.
+            mist.DBs.navPoints[coa_name][nav_ind].point = {}  -- point is used by SSE, support it.
+            mist.DBs.navPoints[coa_name][nav_ind].point.x = nav_data.x
+            mist.DBs.navPoints[coa_name][nav_ind].point.y = 0
+            mist.DBs.navPoints[coa_name][nav_ind].point.z = nav_data.y
           end
         end
       end
@@ -6142,8 +6148,8 @@ do -- mist.DBs scope
                           units_tbl[unit_num]["point"]["x"] = unit_data.x
                           units_tbl[unit_num]["point"]["y"] = unit_data.y
                         end
-                        units_tbl[unit_num]['x'] = unit_data.x
-                        units_tbl[unit_num]['y'] = unit_data.y
+                        units_tbl[unit_num].x = unit_data.x
+                        units_tbl[unit_num].y = unit_data.y
 
                         units_tbl[unit_num]["callsign"] = unit_data.callsign
                         units_tbl[unit_num]["onboard_num"] = unit_data.onboard_num
@@ -6186,11 +6192,11 @@ do -- mist.DBs scope
   mist.DBs.unitsById = {}
   mist.DBs.unitsByCat = {}
 
-  mist.DBs.unitsByCat['helicopter'] = {}  -- adding default categories
-  mist.DBs.unitsByCat['plane'] = {}
-  mist.DBs.unitsByCat['ship'] = {}
-  mist.DBs.unitsByCat['static'] = {}
-  mist.DBs.unitsByCat['vehicle'] = {}
+  mist.DBs.unitsByCat.helicopter = {}  -- adding default categories
+  mist.DBs.unitsByCat.plane = {}
+  mist.DBs.unitsByCat.ship = {}
+  mist.DBs.unitsByCat.static = {}
+  mist.DBs.unitsByCat.vehicle = {}
 
   mist.DBs.unitsByNum = {}
 
@@ -6350,43 +6356,43 @@ do
 
     if mist.DBs.aliveUnits and mist.DBs.aliveUnits[val.object.id_] then
       log:info('object found in alive_units')
-      val['objectData'] = mist.utils.deepCopy(mist.DBs.aliveUnits[val.object.id_])
+      val.objectData = mist.utils.deepCopy(mist.DBs.aliveUnits[val.object.id_])
       local pos = Object.getPosition(val.object)
       if pos then
-        val['objectPos'] = pos.p
+        val.objectPos = pos.p
       end
-      val['objectType'] = mist.DBs.aliveUnits[val.object.id_].category
+      val.objectType = mist.DBs.aliveUnits[val.object.id_].category
 
     elseif mist.DBs.removedAliveUnits and mist.DBs.removedAliveUnits[val.object.id_] then  -- it didn't exist in alive_units, check old_alive_units
       log:info('object found in old_alive_units')
-      val['objectData'] = mist.utils.deepCopy(mist.DBs.removedAliveUnits[val.object.id_])
+      val.objectData = mist.utils.deepCopy(mist.DBs.removedAliveUnits[val.object.id_])
       local pos = Object.getPosition(val.object)
       if pos then
-        val['objectPos'] = pos.p
+        val.objectPos = pos.p
       end
-      val['objectType'] = mist.DBs.removedAliveUnits[val.object.id_].category
+      val.objectType = mist.DBs.removedAliveUnits[val.object.id_].category
 
     else  --attempt to determine if static object...
       log:info('object not found in alive units or old alive units')
       local pos = Object.getPosition(val.object)
       if pos then
         local static_found = false
-        for ind, static in pairs(mist.DBs.unitsByCat['static']) do
+        for ind, static in pairs(mist.DBs.unitsByCat.static) do
           if ((pos.p.x - static.point.x)^2 + (pos.p.z - static.point.y)^2)^0.5 < 0.1 then --really, it should be zero...
             log:info('correlated dead static object to position')
-            val['objectData'] = static
-            val['objectPos'] = pos.p
-            val['objectType'] = 'static'
+            val.objectData = static
+            val.objectPos = pos.p
+            val.objectType = 'static'
             static_found = true
             break
           end
         end
         if not static_found then
-          val['objectPos'] = pos.p
-          val['objectType'] = 'building'
+          val.objectPos = pos.p
+          val.objectType = 'building'
         end
       else
-        val['objectType'] = 'unknown'
+        val.objectType = 'unknown'
       end
     end
     rawset(t, key, val)
