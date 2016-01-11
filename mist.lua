@@ -82,7 +82,7 @@ do -- the main scope
         if lunits[i].category ~= 'static' then -- can't get statics with Unit.getByName :(
           local unit = lUnit.getByName(lunits[i].unitName)
           if unit then
-            --print('unit named ' .. lunits[i].unitName .. ' alive!')
+            log:info("unit named $1 alive!", lunits[i].unitName)
             local pos = unit:getPosition()
             local newtbl = ldeepcopy(lunits[i])
             if pos then
@@ -95,9 +95,9 @@ do -- the main scope
           end
         end
         if i%units_per_run == 0 then
-          --print('yielding at: ' .. tostring(i))
+          log:info("yielding at: $1", i)
           coroutine.yield()
-          --print('resuming at: ' .. tostring(i))
+          log:info("resuming at: $1", i)
         end
       end
       -- All units updated, remove any "alive" units that were not updated- they are dead!
@@ -476,13 +476,13 @@ do -- the main scope
         local original_id = id  --only for duplicate runtime IDs.
         local id_ind = 1
         while mist.DBs.deadObjects[id] do
-          --print('duplicate runtime id of previously dead object- id: ' .. tostring(id))
+          log:info('duplicate runtime id of previously dead object id: $1', id)
           id = tostring(original_id) .. ' #' .. tostring(id_ind)
           id_ind = id_ind + 1
         end
 
         if mist.DBs.aliveUnits and mist.DBs.aliveUnits[val.object.id_] then
-          --print('object found in alive_units')
+          log:info('object found in alive_units')
           val['objectData'] = mist.utils.deepCopy(mist.DBs.aliveUnits[val.object.id_])
           local pos = Object.getPosition(val.object)
           if pos then
@@ -494,7 +494,7 @@ do -- the main scope
             mist.DBs.activeHumans[Unit.getName(val.object)] = nil
           end]]
         elseif mist.DBs.removedAliveUnits and mist.DBs.removedAliveUnits[val.object.id_] then  -- it didn't exist in alive_units, check old_alive_units
-          --print('object found in old_alive_units')
+          log:info('object found in old_alive_units')
           val['objectData'] = mist.utils.deepCopy(mist.DBs.removedAliveUnits[val.object.id_])
           local pos = Object.getPosition(val.object)
           if pos then
@@ -503,13 +503,13 @@ do -- the main scope
           val['objectType'] = mist.DBs.removedAliveUnits[val.object.id_].category
 
         else  --attempt to determine if static object...
-          --print('object not found in alive units or old alive units')
+          log:info('object not found in alive units or old alive units')
           local pos = Object.getPosition(val.object)
           if pos then
             local static_found = false
             for ind, static in pairs(mist.DBs.unitsByCat['static']) do
               if ((pos.p.x - static.point.x)^2 + (pos.p.z - static.point.y)^2)^0.5 < 0.1 then --really, it should be zero...
-                --print('correlated dead static object to position')
+                log:info('correlated dead static object to position')
                 val['objectData'] = static
                 val['objectPos'] = pos.p
                 val['objectType'] = 'static'
@@ -3420,12 +3420,9 @@ do -- mist.util scope
   -- mist.utils.typeCheck(type_tbl, my_tb)
   -- @return true if table passes the check, false otherwise.
   function mist.utils.typeCheck(fname, type_tbl, var_tbl)
-    --log:info('type check')
+    -- log:info('type check')
     for type_key, type_val in pairs(type_tbl) do
-      --print('type_key:')
-      --print(type_key)
-      --print('type_val:')
-      --print(type_val)
+      -- log:info('type_key: $1 type_val: $2', type_key, type_val)
 
       --type_key can be a table of accepted keys- so try to find one that is not nil
       local type_key_str = ''
@@ -3449,8 +3446,7 @@ do -- mist.util scope
       local passed_check = false
 
       if type(type_tbl[type_key]) == 'table' then
-        --print('err_msg, before and after:')
-        --print(err_msg)
+        -- log:info('err_msg, before: $1', err_msg)
         for j = 1, #type_tbl[type_key] do
 
           if j == 1 then
@@ -3463,15 +3459,13 @@ do -- mist.util scope
             passed_check = true
           end
         end
-        --print(err_msg)
+        -- log:info('err_msg, after: $1', err_msg)
       else
-        --print('err_msg, before and after:')
-        --print(err_msg)
+        -- log:info('err_msg, before: $1', err_msg)
         err_msg = err_msg .. type_tbl[type_key]
-        --print(err_msg)
+        -- log:info('err_msg, after: $1', err_msg)
         if type(var_tbl[act_key]) == type_tbl[type_key] then
           passed_check = true
-
         end
 
       end
@@ -6310,7 +6304,7 @@ do -- mist.DBs scope
 
                 mist.DBs.unitsByCat[unit_data.category] = mist.DBs.unitsByCat[unit_data.category] or {} -- future-proofing against new categories...
                 table.insert(mist.DBs.unitsByCat[unit_data.category], mist.utils.deepCopy(unit_data))
-                --print('inserting ' .. unit_data.unitName)
+                log:info('inserting $1', unit_data.unitName)
                 table.insert(mist.DBs.unitsByNum, mist.utils.deepCopy(unit_data))
 
                 if unit_data.skill and (unit_data.skill == "Client" or unit_data.skill == "Player") then
@@ -6349,13 +6343,13 @@ do
     local original_key = key --only for duplicate runtime IDs.
     local key_ind = 1
     while mist.DBs.deadObjects[key] do
-      --print('duplicate runtime id of previously dead object- key: ' .. tostring(key))
+      log:warn('duplicate runtime id of previously dead object key: $1', key)
       key = tostring(original_key) .. ' #' .. tostring(key_ind)
       key_ind = key_ind + 1
     end
 
     if mist.DBs.aliveUnits and mist.DBs.aliveUnits[val.object.id_] then
-      --print('object found in alive_units')
+      log:info('object found in alive_units')
       val['objectData'] = mist.utils.deepCopy(mist.DBs.aliveUnits[val.object.id_])
       local pos = Object.getPosition(val.object)
       if pos then
@@ -6364,7 +6358,7 @@ do
       val['objectType'] = mist.DBs.aliveUnits[val.object.id_].category
 
     elseif mist.DBs.removedAliveUnits and mist.DBs.removedAliveUnits[val.object.id_] then  -- it didn't exist in alive_units, check old_alive_units
-      --print('object found in old_alive_units')
+      log:info('object found in old_alive_units')
       val['objectData'] = mist.utils.deepCopy(mist.DBs.removedAliveUnits[val.object.id_])
       local pos = Object.getPosition(val.object)
       if pos then
@@ -6373,13 +6367,13 @@ do
       val['objectType'] = mist.DBs.removedAliveUnits[val.object.id_].category
 
     else  --attempt to determine if static object...
-      --print('object not found in alive units or old alive units')
+      log:info('object not found in alive units or old alive units')
       local pos = Object.getPosition(val.object)
       if pos then
         local static_found = false
         for ind, static in pairs(mist.DBs.unitsByCat['static']) do
           if ((pos.p.x - static.point.x)^2 + (pos.p.z - static.point.y)^2)^0.5 < 0.1 then --really, it should be zero...
-            --print('correlated dead static object to position')
+            log:info('correlated dead static object to position')
             val['objectData'] = static
             val['objectPos'] = pos.p
             val['objectType'] = 'static'
