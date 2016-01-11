@@ -41,7 +41,6 @@ mist.build = 61
 local log
 
 do -- the main scope
-
   local coroutines = {}
 
   local tempSpawnedUnits = {} -- birth events added here
@@ -65,6 +64,413 @@ do -- the main scope
   mist.nextGroupId = 1
   mist.nextUnitId = 1
 
+  local function initDBs() -- mist.DBs scope
+    mist.DBs = {}
+
+    mist.DBs.missionData = {}
+    if env.mission then
+
+      mist.DBs.missionData.startTime = env.mission.start_time
+      mist.DBs.missionData.theatre = env.mission.theatre
+      mist.DBs.missionData.version = env.mission.version
+      mist.DBs.missionData.files = {}
+      if type(env.mission.resourceCounter) == 'table' then
+        for fIndex, fData in pairs (env.mission.resourceCounter) do
+          mist.DBs.missionData.files[#mist.DBs.missionData.files + 1] =  mist.utils.deepCopy(fIndex)
+        end
+      end
+      -- if we add more coalition specific data then bullsye should be categorized by coaliton. For now its just the bullseye table
+      mist.DBs.missionData.bullseye = {red = {}, blue = {}}
+      mist.DBs.missionData.bullseye.red.x = env.mission.coalition.red.bullseye.x --should it be point.x?
+      mist.DBs.missionData.bullseye.red.y = env.mission.coalition.red.bullseye.y
+      mist.DBs.missionData.bullseye.blue.x = env.mission.coalition.blue.bullseye.x
+      mist.DBs.missionData.bullseye.blue.y = env.mission.coalition.blue.bullseye.y
+    end
+
+    mist.DBs.zonesByName = {}
+    mist.DBs.zonesByNum = {}
+
+
+    if env.mission.triggers and env.mission.triggers.zones then
+      for zone_ind, zone_data in pairs(env.mission.triggers.zones) do
+        if type(zone_data) == 'table' then
+          local zone = mist.utils.deepCopy(zone_data)
+          zone.point = {}  -- point is used by SSE
+          zone.point.x = zone_data.x
+          zone.point.y = 0
+          zone.point.z = zone_data.y
+
+          mist.DBs.zonesByName[zone_data.name] = zone
+          mist.DBs.zonesByNum[#mist.DBs.zonesByNum + 1] = mist.utils.deepCopy(zone)  --[[deepcopy so that the zone in zones_by_name and the zone in
+                                                zones_by_num se are different objects.. don't want them linked.]]
+        end
+      end
+    end
+
+    mist.DBs.navPoints = {}
+    mist.DBs.units = {}
+    --Build mist.db.units and mist.DBs.navPoints
+    for coa_name, coa_data in pairs(env.mission.coalition) do
+
+      if (coa_name == 'red' or coa_name == 'blue') and type(coa_data) == 'table' then
+        mist.DBs.units[coa_name] = {}
+
+        -- build nav points DB
+        mist.DBs.navPoints[coa_name] = {}
+        if coa_data.nav_points then --navpoints
+          --mist.debug.writeData (mist.utils.serialize,{'NavPoints',coa_data.nav_points}, 'NavPoints.txt')
+          for nav_ind, nav_data in pairs(coa_data.nav_points) do
+
+            if type(nav_data) == 'table' then
+              mist.DBs.navPoints[coa_name][nav_ind] = mist.utils.deepCopy(nav_data)
+
+              mist.DBs.navPoints[coa_name][nav_ind].name = nav_data.callsignStr  -- name is a little bit more self-explanatory.
+              mist.DBs.navPoints[coa_name][nav_ind].point = {}  -- point is used by SSE, support it.
+              mist.DBs.navPoints[coa_name][nav_ind].point.x = nav_data.x
+              mist.DBs.navPoints[coa_name][nav_ind].point.y = 0
+              mist.DBs.navPoints[coa_name][nav_ind].point.z = nav_data.y
+            end
+          end
+        end
+        if coa_data.country then --there is a country table
+          for cntry_id, cntry_data in pairs(coa_data.country) do
+
+            local countryName = string.lower(cntry_data.name)
+            mist.DBs.units[coa_name][countryName] = {}
+            mist.DBs.units[coa_name][countryName]["countryId"] = cntry_data.id
+
+            if type(cntry_data) == 'table' then  --just making sure
+
+              for obj_type_name, obj_type_data in pairs(cntry_data) do
+
+                if obj_type_name == "helicopter" or obj_type_name == "ship" or obj_type_name == "plane" or obj_type_name == "vehicle" or obj_type_name == "static" then --should be an unncessary check
+
+                  local category = obj_type_name
+
+                  if ((type(obj_type_data) == 'table') and obj_type_data.group and (type(obj_type_data.group) == 'table') and (#obj_type_data.group > 0)) then  --there's a group!
+
+                    mist.DBs.units[coa_name][countryName][category] = {}
+
+                    for group_num, group_data in pairs(obj_type_data.group) do
+
+                      if group_data and group_data.units and type(group_data.units) == 'table' then  --making sure again- this is a valid group
+
+                        mist.DBs.units[coa_name][countryName][category][group_num] = {}
+                        local groupName = group_data.name
+                        if env.mission.version > 7 then
+                          groupName = env.getValueDictByKey(groupName)
+                        end
+                        mist.DBs.units[coa_name][countryName][category][group_num]["groupName"] = groupName
+                        mist.DBs.units[coa_name][countryName][category][group_num]["groupId"] = group_data.groupId
+                        mist.DBs.units[coa_name][countryName][category][group_num]["category"] = category
+                        mist.DBs.units[coa_name][countryName][category][group_num]["coalition"] = coa_name
+                        mist.DBs.units[coa_name][countryName][category][group_num]["country"] = countryName
+                        mist.DBs.units[coa_name][countryName][category][group_num]["countryId"] = cntry_data.id
+                        mist.DBs.units[coa_name][countryName][category][group_num]["startTime"] = group_data.start_time
+                        mist.DBs.units[coa_name][countryName][category][group_num]["task"] = group_data.task
+                        mist.DBs.units[coa_name][countryName][category][group_num]["hidden"] = group_data.hidden
+
+                        mist.DBs.units[coa_name][countryName][category][group_num]["units"] = {}
+
+                        mist.DBs.units[coa_name][countryName][category][group_num]["radioSet"] = group_data.radioSet
+                        mist.DBs.units[coa_name][countryName][category][group_num]["uncontrolled"] = group_data.uncontrolled
+                        mist.DBs.units[coa_name][countryName][category][group_num]["frequency"] = group_data.frequency
+                        mist.DBs.units[coa_name][countryName][category][group_num]["modulation"] = group_data.modulation
+
+                        for unit_num, unit_data in pairs(group_data.units) do
+                          local units_tbl = mist.DBs.units[coa_name][countryName][category][group_num]["units"]  --pointer to the units table for this group
+
+                          units_tbl[unit_num] = {}
+                          if env.mission.version > 7 then
+                            units_tbl[unit_num]["unitName"] = env.getValueDictByKey(unit_data.name)
+                          else
+                            units_tbl[unit_num]["unitName"] = unit_data.name
+                          end
+                          units_tbl[unit_num]["type"] = unit_data.type
+                          units_tbl[unit_num]["skill"] = unit_data.skill  --will be nil for statics
+                          units_tbl[unit_num]["unitId"] = unit_data.unitId
+                          units_tbl[unit_num]["category"] = category
+                          units_tbl[unit_num]["coalition"] = coa_name
+                          units_tbl[unit_num]["country"] = countryName
+                          units_tbl[unit_num]["countryId"] = cntry_data.id
+                          units_tbl[unit_num]["heading"] = unit_data.heading
+                          units_tbl[unit_num]["playerCanDrive"] = unit_data.playerCanDrive
+                          units_tbl[unit_num]["alt"] = unit_data.alt
+                          units_tbl[unit_num]["alt_type"] = unit_data.alt_type
+                          units_tbl[unit_num]["speed"] = unit_data.speed
+                          units_tbl[unit_num]["livery_id"] = unit_data.livery_id
+                          if unit_data.point then  --ME currently does not work like this, but it might one day
+                            units_tbl[unit_num]["point"] = unit_data.point
+                          else
+                            units_tbl[unit_num]["point"] = {}
+                            units_tbl[unit_num]["point"]["x"] = unit_data.x
+                            units_tbl[unit_num]["point"]["y"] = unit_data.y
+                          end
+                          units_tbl[unit_num].x = unit_data.x
+                          units_tbl[unit_num].y = unit_data.y
+
+                          units_tbl[unit_num]["callsign"] = unit_data.callsign
+                          units_tbl[unit_num]["onboard_num"] = unit_data.onboard_num
+                          units_tbl[unit_num]["hardpoint_racks"] = unit_data.hardpoint_racks
+                          units_tbl[unit_num]["psi"] = unit_data.psi
+
+
+                          units_tbl[unit_num]["groupName"] = groupName
+                          units_tbl[unit_num]["groupId"] = group_data.groupId
+
+                          if unit_data.AddPropAircraft then
+                            units_tbl[unit_num]["AddPropAircraft"] = unit_data.AddPropAircraft
+                          end
+
+                          if category == 'static' then
+                            units_tbl[unit_num]["categoryStatic"] = unit_data.category
+                            units_tbl[unit_num]["shape_name"] = unit_data.shape_name
+                            if unit_data.mass then
+                              units_tbl[unit_num]["mass"] = unit_data.mass
+                            end
+
+                            if unit_data.canCargo then
+                              units_tbl[unit_num]["canCargo"] = unit_data.canCargo
+                            end
+                          end
+
+                        end --for unit_num, unit_data in pairs(group_data.units) do
+                      end --if group_data and group_data.units then
+                    end --for group_num, group_data in pairs(obj_type_data.group) do
+                  end --if ((type(obj_type_data) == 'table') and obj_type_data.group and (type(obj_type_data.group) == 'table') and (#obj_type_data.group > 0)) then
+                end --if obj_type_name == "helicopter" or obj_type_name == "ship" or obj_type_name == "plane" or obj_type_name == "vehicle" or obj_type_name == "static" then
+              end --for obj_type_name, obj_type_data in pairs(cntry_data) do
+            end --if type(cntry_data) == 'table' then
+          end --for cntry_id, cntry_data in pairs(coa_data.country) do
+        end --if coa_data.country then --there is a country table
+      end --if coa_name == 'red' or coa_name == 'blue' and type(coa_data) == 'table' then
+    end --for coa_name, coa_data in pairs(mission.coalition) do
+
+    mist.DBs.unitsByName = {}
+    mist.DBs.unitsById = {}
+    mist.DBs.unitsByCat = {}
+
+    mist.DBs.unitsByCat.helicopter = {}  -- adding default categories
+    mist.DBs.unitsByCat.plane = {}
+    mist.DBs.unitsByCat.ship = {}
+    mist.DBs.unitsByCat.static = {}
+    mist.DBs.unitsByCat.vehicle = {}
+
+    mist.DBs.unitsByNum = {}
+
+    mist.DBs.groupsByName = {}
+    mist.DBs.groupsById = {}
+    mist.DBs.humansByName = {}
+    mist.DBs.humansById = {}
+
+    mist.DBs.dynGroupsAdded = {} -- will be filled by mist.dbUpdate from dynamically spawned groups
+    mist.DBs.activeHumans = {}
+
+    mist.DBs.aliveUnits = {}  -- will be filled in by the "updateAliveUnits" coroutine in mist.main.
+
+    mist.DBs.removedAliveUnits = {} -- will be filled in by the "updateAliveUnits" coroutine in mist.main.
+
+    mist.DBs.const = {}
+
+    -- not accessible by SSE, must use static list :-/
+    mist.DBs.const.callsigns = {
+      ['NATO'] = {
+        ['rules'] = {
+          ['groupLimit'] = 9,
+        },
+        ['AWACS'] = {
+          ['Overlord'] = 1,
+          ['Magic'] = 2,
+          ['Wizard'] = 3,
+          ['Focus'] =	 4,
+          ['Darkstar'] =	 5,
+        },
+        ['TANKER'] = {
+          ['Texaco'] = 1,
+          ['Arco'] = 2,
+          ['Shell'] = 3,
+        },
+        ['JTAC'] = {
+          ['Axeman'] = 1,
+          ['Darknight'] = 2,
+          ['Warrior']	= 3,
+          ['Pointer']	= 4,
+          ['Eyeball'] = 5,
+          ['Moonbeam'] = 6,
+          ['Whiplash'] = 7,
+          ['Finger'] = 8,
+          ['Pinpoint'] = 9,
+          ['Ferret'] = 10,
+          ['Shaba'] = 11,
+          ['Playboy'] = 12,
+          ['Hammer'] = 13,
+          ['Jaguar'] = 14,
+          ['Deathstar'] =	15,
+          ['Anvil'] = 16,
+          ['Firefly']	= 17,
+          ['Mantis'] = 18,
+          ['Badger'] = 19,
+        },
+        ['aircraft'] = {
+          ['Enfield'] = 1,
+          ['Springfield'] = 2,
+          ['Uzi']	= 3,
+          ['Colt'] = 4,
+          ['Dodge'] =	5,
+          ['Ford'] = 6,
+          ['Chevy'] = 7,
+          ['Pontiac'] = 8,
+        },
+
+        ['unique'] = {
+          ['A10'] = {
+            ['Hawg'] = 9,
+            ['Boar'] = 10,
+            ['Pig'] = 11,
+            ['Tusk'] = 12,
+            ['rules'] = {
+              ['canUseAircraft'] = true,
+              ['appliesTo'] = {
+                'A-10C',
+                'A-10A',
+              },
+            },
+          },
+        },
+      },
+    }
+    -- create mist.DBs.oldAliveUnits
+    -- do
+    -- local intermediate_alive_units = {}  -- between 0 and 0.5 secs old
+    -- local function make_old_alive_units() -- called every 0.5 secs, makes the old_alive_units DB which is just a copy of alive_units that is 0.5 to 1 sec old
+    -- if intermediate_alive_units then
+    -- mist.DBs.oldAliveUnits = mist.utils.deepCopy(intermediate_alive_units)
+    -- end
+    -- intermediate_alive_units = mist.utils.deepCopy(mist.DBs.aliveUnits)
+    -- timer.scheduleFunction(make_old_alive_units, nil, timer.getTime() + 0.5)
+    -- end
+
+    -- make_old_alive_units()
+    -- end
+
+    --Build DBs
+    for coa_name, coa_data in pairs(mist.DBs.units) do
+      for cntry_name, cntry_data in pairs(coa_data) do
+        for category_name, category_data in pairs(cntry_data) do
+          if type(category_data) == 'table' then
+            for group_ind, group_data in pairs(category_data) do
+              if type(group_data) == 'table' and group_data.units and type(group_data.units) == 'table' and #group_data.units > 0 then  -- OCD paradigm programming
+                mist.DBs.groupsByName[group_data.groupName] = mist.utils.deepCopy(group_data)
+                mist.DBs.groupsById[group_data.groupId] = mist.utils.deepCopy(group_data)
+                for unit_ind, unit_data in pairs(group_data.units) do
+                  mist.DBs.unitsByName[unit_data.unitName] = mist.utils.deepCopy(unit_data)
+                  mist.DBs.unitsById[unit_data.unitId] = mist.utils.deepCopy(unit_data)
+
+                  mist.DBs.unitsByCat[unit_data.category] = mist.DBs.unitsByCat[unit_data.category] or {} -- future-proofing against new categories...
+                  table.insert(mist.DBs.unitsByCat[unit_data.category], mist.utils.deepCopy(unit_data))
+                  log:info('inserting $1', unit_data.unitName)
+                  table.insert(mist.DBs.unitsByNum, mist.utils.deepCopy(unit_data))
+
+                  if unit_data.skill and (unit_data.skill == "Client" or unit_data.skill == "Player") then
+                    mist.DBs.humansByName[unit_data.unitName] = mist.utils.deepCopy(unit_data)
+                    mist.DBs.humansById[unit_data.unitId] = mist.utils.deepCopy(unit_data)
+                    --if Unit.getByName(unit_data.unitName) then
+                    --	mist.DBs.activeHumans[unit_data.unitName] = mist.utils.deepCopy(unit_data)
+                    --	mist.DBs.activeHumans[unit_data.unitName].playerName = Unit.getByName(unit_data.unitName):getPlayerName()
+                    --end
+                  end
+                end
+              end
+            end
+          end
+        end
+      end
+    end
+
+    --DynDBs
+    mist.DBs.MEunits = mist.utils.deepCopy(mist.DBs.units)
+    mist.DBs.MEunitsByName = mist.utils.deepCopy(mist.DBs.unitsByName)
+    mist.DBs.MEunitsById = mist.utils.deepCopy(mist.DBs.unitsById)
+    mist.DBs.MEunitsByCat = mist.utils.deepCopy(mist.DBs.unitsByCat)
+    mist.DBs.MEunitsByNum = mist.utils.deepCopy(mist.DBs.unitsByNum)
+    mist.DBs.MEgroupsByName = mist.utils.deepCopy(mist.DBs.groupsByName)
+    mist.DBs.MEgroupsById = mist.utils.deepCopy(mist.DBs.groupsById)
+
+    mist.DBs.deadObjects = {}
+
+    do
+      local mt = {}
+
+      function mt.__newindex(t, key, val)
+        local original_key = key --only for duplicate runtime IDs.
+        local key_ind = 1
+        while mist.DBs.deadObjects[key] do
+          log:warn('duplicate runtime id of previously dead object key: $1', key)
+          key = tostring(original_key) .. ' #' .. tostring(key_ind)
+          key_ind = key_ind + 1
+        end
+
+        if mist.DBs.aliveUnits and mist.DBs.aliveUnits[val.object.id_] then
+          log:info('object found in alive_units')
+          val.objectData = mist.utils.deepCopy(mist.DBs.aliveUnits[val.object.id_])
+          local pos = Object.getPosition(val.object)
+          if pos then
+            val.objectPos = pos.p
+          end
+          val.objectType = mist.DBs.aliveUnits[val.object.id_].category
+
+        elseif mist.DBs.removedAliveUnits and mist.DBs.removedAliveUnits[val.object.id_] then  -- it didn't exist in alive_units, check old_alive_units
+          log:info('object found in old_alive_units')
+          val.objectData = mist.utils.deepCopy(mist.DBs.removedAliveUnits[val.object.id_])
+          local pos = Object.getPosition(val.object)
+          if pos then
+            val.objectPos = pos.p
+          end
+          val.objectType = mist.DBs.removedAliveUnits[val.object.id_].category
+
+        else  --attempt to determine if static object...
+          log:info('object not found in alive units or old alive units')
+          local pos = Object.getPosition(val.object)
+          if pos then
+            local static_found = false
+            for ind, static in pairs(mist.DBs.unitsByCat.static) do
+              if ((pos.p.x - static.point.x)^2 + (pos.p.z - static.point.y)^2)^0.5 < 0.1 then --really, it should be zero...
+                log:info('correlated dead static object to position')
+                val.objectData = static
+                val.objectPos = pos.p
+                val.objectType = 'static'
+                static_found = true
+                break
+              end
+            end
+            if not static_found then
+              val.objectPos = pos.p
+              val.objectType = 'building'
+            end
+          else
+            val.objectType = 'unknown'
+          end
+        end
+        rawset(t, key, val)
+      end
+
+      setmetatable(mist.DBs.deadObjects, mt)
+    end
+
+    do -- mist unitID funcs
+      for id, idData in pairs(mist.DBs.unitsById) do
+        if idData.unitId > mist.nextUnitId then
+          mist.nextUnitId = mist.utils.deepCopy(idData.unitId)
+        end
+        if idData.groupId > mist.nextGroupId then
+          mist.nextGroupId = mist.utils.deepCopy(idData.groupId)
+        end
+      end
+    end
+
+
+  end
+
   local function updateAliveUnits()  -- coroutine function
     local lalive_units = mist.DBs.aliveUnits -- local references for faster execution
     local lunits = mist.DBs.unitsByNum
@@ -83,7 +489,7 @@ do -- the main scope
         if lunits[i].category ~= 'static' then -- can't get statics with Unit.getByName :(
           local unit = lUnit.getByName(lunits[i].unitName)
           if unit then
-            log:info("unit named $1 alive!", lunits[i].unitName)
+            --log:info("unit named $1 alive!", lunits[i].unitName) -- spammy
             local pos = unit:getPosition()
             local newtbl = ldeepcopy(lunits[i])
             if pos then
@@ -96,9 +502,7 @@ do -- the main scope
           end
         end
         if i%units_per_run == 0 then
-          log:info("yielding at: $1", i)
           coroutine.yield()
-          log:info("resuming at: $1", i)
         end
       end
       -- All units updated, remove any "alive" units that were not updated- they are dead!
@@ -564,6 +968,9 @@ do -- the main scope
     log = mist.log
     -- set info log level
     log:setLevel("info")
+
+    log:info("initializing databases")
+    initDBs()
 
     -- add event handler for group spawns
     mist.addEventHandler(groupSpawned)
@@ -5934,417 +6341,13 @@ end
 
 --- Database tables.
 -- @section mist.DBs
-do -- mist.DBs scope
-  mist.DBs = {}
 
-  --- Mission data
-  -- @table mist.DBs.missionData
-  -- @field startTime mission start time
-  -- @field theatre mission theatre/map e.g. Caucasus
-  -- @field version mission version
-  -- @field files mission resources
-  mist.DBs.missionData = {}
-  if env.mission then
-
-    mist.DBs.missionData.startTime = env.mission.start_time
-    mist.DBs.missionData.theatre = env.mission.theatre
-    mist.DBs.missionData.version = env.mission.version
-    mist.DBs.missionData.files = {}
-    if type(env.mission.resourceCounter) == 'table' then
-      for fIndex, fData in pairs (env.mission.resourceCounter) do
-        mist.DBs.missionData.files[#mist.DBs.missionData.files + 1] =  mist.utils.deepCopy(fIndex)
-      end
-    end
-    -- if we add more coalition specific data then bullsye should be categorized by coaliton. For now its just the bullseye table
-    mist.DBs.missionData.bullseye = {red = {}, blue = {}}
-    mist.DBs.missionData.bullseye.red.x = env.mission.coalition.red.bullseye.x --should it be point.x?
-    mist.DBs.missionData.bullseye.red.y = env.mission.coalition.red.bullseye.y
-    mist.DBs.missionData.bullseye.blue.x = env.mission.coalition.blue.bullseye.x
-    mist.DBs.missionData.bullseye.blue.y = env.mission.coalition.blue.bullseye.y
-  end
-
-  mist.DBs.zonesByName = {}
-  mist.DBs.zonesByNum = {}
-
-
-  if env.mission.triggers and env.mission.triggers.zones then
-    for zone_ind, zone_data in pairs(env.mission.triggers.zones) do
-      if type(zone_data) == 'table' then
-        local zone = mist.utils.deepCopy(zone_data)
-        zone.point = {}  -- point is used by SSE
-        zone.point.x = zone_data.x
-        zone.point.y = 0
-        zone.point.z = zone_data.y
-
-        mist.DBs.zonesByName[zone_data.name] = zone
-        mist.DBs.zonesByNum[#mist.DBs.zonesByNum + 1] = mist.utils.deepCopy(zone)  --[[deepcopy so that the zone in zones_by_name and the zone in
-                                                zones_by_num se are different objects.. don't want them linked.]]
-      end
-    end
-  end
-
-  mist.DBs.navPoints = {}
-  mist.DBs.units = {}
-  --Build mist.db.units and mist.DBs.navPoints
-  for coa_name, coa_data in pairs(env.mission.coalition) do
-
-    if (coa_name == 'red' or coa_name == 'blue') and type(coa_data) == 'table' then
-      mist.DBs.units[coa_name] = {}
-
-      -- build nav points DB
-      mist.DBs.navPoints[coa_name] = {}
-      if coa_data.nav_points then --navpoints
-        --mist.debug.writeData (mist.utils.serialize,{'NavPoints',coa_data.nav_points}, 'NavPoints.txt')
-        for nav_ind, nav_data in pairs(coa_data.nav_points) do
-
-          if type(nav_data) == 'table' then
-            mist.DBs.navPoints[coa_name][nav_ind] = mist.utils.deepCopy(nav_data)
-
-            mist.DBs.navPoints[coa_name][nav_ind].name = nav_data.callsignStr  -- name is a little bit more self-explanatory.
-            mist.DBs.navPoints[coa_name][nav_ind].point = {}  -- point is used by SSE, support it.
-            mist.DBs.navPoints[coa_name][nav_ind].point.x = nav_data.x
-            mist.DBs.navPoints[coa_name][nav_ind].point.y = 0
-            mist.DBs.navPoints[coa_name][nav_ind].point.z = nav_data.y
-          end
-        end
-      end
-      if coa_data.country then --there is a country table
-        for cntry_id, cntry_data in pairs(coa_data.country) do
-
-          local countryName = string.lower(cntry_data.name)
-          mist.DBs.units[coa_name][countryName] = {}
-          mist.DBs.units[coa_name][countryName]["countryId"] = cntry_data.id
-
-          if type(cntry_data) == 'table' then  --just making sure
-
-            for obj_type_name, obj_type_data in pairs(cntry_data) do
-
-              if obj_type_name == "helicopter" or obj_type_name == "ship" or obj_type_name == "plane" or obj_type_name == "vehicle" or obj_type_name == "static" then --should be an unncessary check
-
-                local category = obj_type_name
-
-                if ((type(obj_type_data) == 'table') and obj_type_data.group and (type(obj_type_data.group) == 'table') and (#obj_type_data.group > 0)) then  --there's a group!
-
-                  mist.DBs.units[coa_name][countryName][category] = {}
-
-                  for group_num, group_data in pairs(obj_type_data.group) do
-
-                    if group_data and group_data.units and type(group_data.units) == 'table' then  --making sure again- this is a valid group
-
-                      mist.DBs.units[coa_name][countryName][category][group_num] = {}
-                      local groupName = group_data.name
-                      if env.mission.version > 7 then
-                        groupName = env.getValueDictByKey(groupName)
-                      end
-                      mist.DBs.units[coa_name][countryName][category][group_num]["groupName"] = groupName
-                      mist.DBs.units[coa_name][countryName][category][group_num]["groupId"] = group_data.groupId
-                      mist.DBs.units[coa_name][countryName][category][group_num]["category"] = category
-                      mist.DBs.units[coa_name][countryName][category][group_num]["coalition"] = coa_name
-                      mist.DBs.units[coa_name][countryName][category][group_num]["country"] = countryName
-                      mist.DBs.units[coa_name][countryName][category][group_num]["countryId"] = cntry_data.id
-                      mist.DBs.units[coa_name][countryName][category][group_num]["startTime"] = group_data.start_time
-                      mist.DBs.units[coa_name][countryName][category][group_num]["task"] = group_data.task
-                      mist.DBs.units[coa_name][countryName][category][group_num]["hidden"] = group_data.hidden
-
-                      mist.DBs.units[coa_name][countryName][category][group_num]["units"] = {}
-
-                      mist.DBs.units[coa_name][countryName][category][group_num]["radioSet"] = group_data.radioSet
-                      mist.DBs.units[coa_name][countryName][category][group_num]["uncontrolled"] = group_data.uncontrolled
-                      mist.DBs.units[coa_name][countryName][category][group_num]["frequency"] = group_data.frequency
-                      mist.DBs.units[coa_name][countryName][category][group_num]["modulation"] = group_data.modulation
-
-                      for unit_num, unit_data in pairs(group_data.units) do
-                        local units_tbl = mist.DBs.units[coa_name][countryName][category][group_num]["units"]  --pointer to the units table for this group
-
-                        units_tbl[unit_num] = {}
-                        if env.mission.version > 7 then
-                          units_tbl[unit_num]["unitName"] = env.getValueDictByKey(unit_data.name)
-                        else
-                          units_tbl[unit_num]["unitName"] = unit_data.name
-                        end
-                        units_tbl[unit_num]["type"] = unit_data.type
-                        units_tbl[unit_num]["skill"] = unit_data.skill  --will be nil for statics
-                        units_tbl[unit_num]["unitId"] = unit_data.unitId
-                        units_tbl[unit_num]["category"] = category
-                        units_tbl[unit_num]["coalition"] = coa_name
-                        units_tbl[unit_num]["country"] = countryName
-                        units_tbl[unit_num]["countryId"] = cntry_data.id
-                        units_tbl[unit_num]["heading"] = unit_data.heading
-                        units_tbl[unit_num]["playerCanDrive"] = unit_data.playerCanDrive
-                        units_tbl[unit_num]["alt"] = unit_data.alt
-                        units_tbl[unit_num]["alt_type"] = unit_data.alt_type
-                        units_tbl[unit_num]["speed"] = unit_data.speed
-                        units_tbl[unit_num]["livery_id"] = unit_data.livery_id
-                        if unit_data.point then  --ME currently does not work like this, but it might one day
-                          units_tbl[unit_num]["point"] = unit_data.point
-                        else
-                          units_tbl[unit_num]["point"] = {}
-                          units_tbl[unit_num]["point"]["x"] = unit_data.x
-                          units_tbl[unit_num]["point"]["y"] = unit_data.y
-                        end
-                        units_tbl[unit_num].x = unit_data.x
-                        units_tbl[unit_num].y = unit_data.y
-
-                        units_tbl[unit_num]["callsign"] = unit_data.callsign
-                        units_tbl[unit_num]["onboard_num"] = unit_data.onboard_num
-                        units_tbl[unit_num]["hardpoint_racks"] = unit_data.hardpoint_racks
-                        units_tbl[unit_num]["psi"] = unit_data.psi
-
-
-                        units_tbl[unit_num]["groupName"] = groupName
-                        units_tbl[unit_num]["groupId"] = group_data.groupId
-
-                        if unit_data.AddPropAircraft then
-                          units_tbl[unit_num]["AddPropAircraft"] = unit_data.AddPropAircraft
-                        end
-
-                        if category == 'static' then
-                          units_tbl[unit_num]["categoryStatic"] = unit_data.category
-                          units_tbl[unit_num]["shape_name"] = unit_data.shape_name
-                          if unit_data.mass then
-                            units_tbl[unit_num]["mass"] = unit_data.mass
-                          end
-
-                          if unit_data.canCargo then
-                            units_tbl[unit_num]["canCargo"] = unit_data.canCargo
-                          end
-                        end
-
-                      end --for unit_num, unit_data in pairs(group_data.units) do
-                    end --if group_data and group_data.units then
-                  end --for group_num, group_data in pairs(obj_type_data.group) do
-                end --if ((type(obj_type_data) == 'table') and obj_type_data.group and (type(obj_type_data.group) == 'table') and (#obj_type_data.group > 0)) then
-              end --if obj_type_name == "helicopter" or obj_type_name == "ship" or obj_type_name == "plane" or obj_type_name == "vehicle" or obj_type_name == "static" then
-            end --for obj_type_name, obj_type_data in pairs(cntry_data) do
-          end --if type(cntry_data) == 'table' then
-        end --for cntry_id, cntry_data in pairs(coa_data.country) do
-      end --if coa_data.country then --there is a country table
-    end --if coa_name == 'red' or coa_name == 'blue' and type(coa_data) == 'table' then
-  end --for coa_name, coa_data in pairs(mission.coalition) do
-
-  mist.DBs.unitsByName = {}
-  mist.DBs.unitsById = {}
-  mist.DBs.unitsByCat = {}
-
-  mist.DBs.unitsByCat.helicopter = {}  -- adding default categories
-  mist.DBs.unitsByCat.plane = {}
-  mist.DBs.unitsByCat.ship = {}
-  mist.DBs.unitsByCat.static = {}
-  mist.DBs.unitsByCat.vehicle = {}
-
-  mist.DBs.unitsByNum = {}
-
-  mist.DBs.groupsByName = {}
-  mist.DBs.groupsById = {}
-  mist.DBs.humansByName = {}
-  mist.DBs.humansById = {}
-
-  mist.DBs.dynGroupsAdded = {} -- will be filled by mist.dbUpdate from dynamically spawned groups
-  mist.DBs.activeHumans = {}
-
-  mist.DBs.aliveUnits = {}  -- will be filled in by the "updateAliveUnits" coroutine in mist.main.
-
-  mist.DBs.removedAliveUnits = {} -- will be filled in by the "updateAliveUnits" coroutine in mist.main.
-
-  mist.DBs.const = {}
-
-  -- not accessible by SSE, must use static list :-/
-  mist.DBs.const.callsigns = {
-    ['NATO'] = {
-      ['rules'] = {
-        ['groupLimit'] = 9,
-      },
-      ['AWACS'] = {
-        ['Overlord'] = 1,
-        ['Magic'] = 2,
-        ['Wizard'] = 3,
-        ['Focus'] =	 4,
-        ['Darkstar'] =	 5,
-      },
-      ['TANKER'] = {
-        ['Texaco'] = 1,
-        ['Arco'] = 2,
-        ['Shell'] = 3,
-      },
-      ['JTAC'] = {
-        ['Axeman'] = 1,
-        ['Darknight'] = 2,
-        ['Warrior']	= 3,
-        ['Pointer']	= 4,
-        ['Eyeball'] = 5,
-        ['Moonbeam'] = 6,
-        ['Whiplash'] = 7,
-        ['Finger'] = 8,
-        ['Pinpoint'] = 9,
-        ['Ferret'] = 10,
-        ['Shaba'] = 11,
-        ['Playboy'] = 12,
-        ['Hammer'] = 13,
-        ['Jaguar'] = 14,
-        ['Deathstar'] =	15,
-        ['Anvil'] = 16,
-        ['Firefly']	= 17,
-        ['Mantis'] = 18,
-        ['Badger'] = 19,
-      },
-      ['aircraft'] = {
-        ['Enfield'] = 1,
-        ['Springfield'] = 2,
-        ['Uzi']	= 3,
-        ['Colt'] = 4,
-        ['Dodge'] =	5,
-        ['Ford'] = 6,
-        ['Chevy'] = 7,
-        ['Pontiac'] = 8,
-      },
-
-      ['unique'] = {
-        ['A10'] = {
-          ['Hawg'] = 9,
-          ['Boar'] = 10,
-          ['Pig'] = 11,
-          ['Tusk'] = 12,
-          ['rules'] = {
-            ['canUseAircraft'] = true,
-            ['appliesTo'] = {
-              'A-10C',
-              'A-10A',
-            },
-          },
-        },
-      },
-    },
-  }
-  -- create mist.DBs.oldAliveUnits
-  -- do
-  -- local intermediate_alive_units = {}  -- between 0 and 0.5 secs old
-  -- local function make_old_alive_units() -- called every 0.5 secs, makes the old_alive_units DB which is just a copy of alive_units that is 0.5 to 1 sec old
-  -- if intermediate_alive_units then
-  -- mist.DBs.oldAliveUnits = mist.utils.deepCopy(intermediate_alive_units)
-  -- end
-  -- intermediate_alive_units = mist.utils.deepCopy(mist.DBs.aliveUnits)
-  -- timer.scheduleFunction(make_old_alive_units, nil, timer.getTime() + 0.5)
-  -- end
-
-  -- make_old_alive_units()
-  -- end
-
-  --Build DBs
-  for coa_name, coa_data in pairs(mist.DBs.units) do
-    for cntry_name, cntry_data in pairs(coa_data) do
-      for category_name, category_data in pairs(cntry_data) do
-        if type(category_data) == 'table' then
-          for group_ind, group_data in pairs(category_data) do
-            if type(group_data) == 'table' and group_data.units and type(group_data.units) == 'table' and #group_data.units > 0 then  -- OCD paradigm programming
-              mist.DBs.groupsByName[group_data.groupName] = mist.utils.deepCopy(group_data)
-              mist.DBs.groupsById[group_data.groupId] = mist.utils.deepCopy(group_data)
-              for unit_ind, unit_data in pairs(group_data.units) do
-                mist.DBs.unitsByName[unit_data.unitName] = mist.utils.deepCopy(unit_data)
-                mist.DBs.unitsById[unit_data.unitId] = mist.utils.deepCopy(unit_data)
-
-                mist.DBs.unitsByCat[unit_data.category] = mist.DBs.unitsByCat[unit_data.category] or {} -- future-proofing against new categories...
-                table.insert(mist.DBs.unitsByCat[unit_data.category], mist.utils.deepCopy(unit_data))
-                log:info('inserting $1', unit_data.unitName)
-                table.insert(mist.DBs.unitsByNum, mist.utils.deepCopy(unit_data))
-
-                if unit_data.skill and (unit_data.skill == "Client" or unit_data.skill == "Player") then
-                  mist.DBs.humansByName[unit_data.unitName] = mist.utils.deepCopy(unit_data)
-                  mist.DBs.humansById[unit_data.unitId] = mist.utils.deepCopy(unit_data)
-                  --if Unit.getByName(unit_data.unitName) then
-                  --	mist.DBs.activeHumans[unit_data.unitName] = mist.utils.deepCopy(unit_data)
-                  --	mist.DBs.activeHumans[unit_data.unitName].playerName = Unit.getByName(unit_data.unitName):getPlayerName()
-                  --end
-                end
-              end
-            end
-          end
-        end
-      end
-    end
-  end
-
-  --DynDBs
-  mist.DBs.MEunits = mist.utils.deepCopy(mist.DBs.units)
-  mist.DBs.MEunitsByName = mist.utils.deepCopy(mist.DBs.unitsByName)
-  mist.DBs.MEunitsById = mist.utils.deepCopy(mist.DBs.unitsById)
-  mist.DBs.MEunitsByCat = mist.utils.deepCopy(mist.DBs.unitsByCat)
-  mist.DBs.MEunitsByNum = mist.utils.deepCopy(mist.DBs.unitsByNum)
-  mist.DBs.MEgroupsByName = mist.utils.deepCopy(mist.DBs.groupsByName)
-  mist.DBs.MEgroupsById = mist.utils.deepCopy(mist.DBs.groupsById)
-
-  mist.DBs.deadObjects = {}
-
-end
-
-do
-  local mt = {}
-
-  function mt.__newindex(t, key, val)
-    local original_key = key --only for duplicate runtime IDs.
-    local key_ind = 1
-    while mist.DBs.deadObjects[key] do
-      log:warn('duplicate runtime id of previously dead object key: $1', key)
-      key = tostring(original_key) .. ' #' .. tostring(key_ind)
-      key_ind = key_ind + 1
-    end
-
-    if mist.DBs.aliveUnits and mist.DBs.aliveUnits[val.object.id_] then
-      log:info('object found in alive_units')
-      val.objectData = mist.utils.deepCopy(mist.DBs.aliveUnits[val.object.id_])
-      local pos = Object.getPosition(val.object)
-      if pos then
-        val.objectPos = pos.p
-      end
-      val.objectType = mist.DBs.aliveUnits[val.object.id_].category
-
-    elseif mist.DBs.removedAliveUnits and mist.DBs.removedAliveUnits[val.object.id_] then  -- it didn't exist in alive_units, check old_alive_units
-      log:info('object found in old_alive_units')
-      val.objectData = mist.utils.deepCopy(mist.DBs.removedAliveUnits[val.object.id_])
-      local pos = Object.getPosition(val.object)
-      if pos then
-        val.objectPos = pos.p
-      end
-      val.objectType = mist.DBs.removedAliveUnits[val.object.id_].category
-
-    else  --attempt to determine if static object...
-      log:info('object not found in alive units or old alive units')
-      local pos = Object.getPosition(val.object)
-      if pos then
-        local static_found = false
-        for ind, static in pairs(mist.DBs.unitsByCat.static) do
-          if ((pos.p.x - static.point.x)^2 + (pos.p.z - static.point.y)^2)^0.5 < 0.1 then --really, it should be zero...
-            log:info('correlated dead static object to position')
-            val.objectData = static
-            val.objectPos = pos.p
-            val.objectType = 'static'
-            static_found = true
-            break
-          end
-        end
-        if not static_found then
-          val.objectPos = pos.p
-          val.objectType = 'building'
-        end
-      else
-        val.objectType = 'unknown'
-      end
-    end
-    rawset(t, key, val)
-  end
-
-  setmetatable(mist.DBs.deadObjects, mt)
-end
-
-do -- mist unitID funcs
-  for id, idData in pairs(mist.DBs.unitsById) do
-    if idData.unitId > mist.nextUnitId then
-      mist.nextUnitId = mist.utils.deepCopy(idData.unitId)
-    end
-    if idData.groupId > mist.nextGroupId then
-      mist.nextGroupId = mist.utils.deepCopy(idData.groupId)
-    end
-  end
-end
+--- Mission data
+-- @table mist.DBs.missionData
+-- @field startTime mission start time
+-- @field theatre mission theatre/map e.g. Caucasus
+-- @field version mission version
+-- @field files mission resources
 
 --- Tables used as parameters.
 -- @section varTables
@@ -6353,7 +6356,6 @@ end
 -- @table unitsInPolygonVars
 -- @field unit name table @{UnitNameTable}.
 -- @field zone table defining a polygon.
-
 
 --- Logger class.
 -- @type mist.Logger
