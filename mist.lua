@@ -14,8 +14,8 @@ mist = {}
 
 -- don't change these
 mist.majorVersion = 4
-mist.minorVersion = 0
-mist.build = 60
+mist.minorVersion = 1
+mist.build = 61
 
 --------------------------------------------------------------------------------------------------------------
 -- the main area
@@ -1011,7 +1011,8 @@ function mist.utils.vecToWP(vec)
 	return newWP
 end
 
-function mist.utils.unitToWP(unit)
+function mist.utils.unitToWP(pUnit)
+	local unit = mist.utils.deepCopy(pUnit)
 	if type(unit) == 'string' then
 		if Unit.getByName(unit) then
 			unit = Unit.getByName(unit)
