@@ -2763,27 +2763,24 @@ do -- group functions scope
   -- @treturn boolean true if a group can be spawned using
   -- this table, false otherwise.
   function mist.groupTableCheck(groupData)
-    local isOk = false
-
-    if groupData.country then
-      isOk = true
+    -- return false if country, category
+    -- or units are missing
+    if not groupData.country and
+      not groupData.category and
+      not groupData.units then
+      return false
     end
-    if groupData.category then
-      isOk = true
-    else
-      isOk = false
-    end
-    if groupData.units then
-      for unitId, unitData in pairs(groupData.units) do
-        if unitData.x and unitData.y and unitData.type then
-          isOk = true
-        end
+    -- return false if unitData misses
+    -- x, y or type
+    for unitId, unitData in pairs(groupData.units) do
+      if not unitData.x and
+        not unitData.y and
+        not unitData.type then
+          return false
       end
-    else
-      isOk = false
     end
-
-    return isOk
+    -- everything we need is here return true
+    return true
   end
 
   function mist.getCurrentGroupData(gpName)
@@ -5733,6 +5730,13 @@ do -- group tasks scope
   mist.air.fixedWing = {}
   mist.air.heli = {}
 
+  --- Tasks group to follow a route.
+  -- This sets the mission task for the given group.
+  -- Any wrapped actions inside the path (like enroute
+  -- tasks) will be executed.
+  -- @tparam Group group group to task.
+  -- @tparam table path containing
+  -- points defining a route.
   function mist.goRoute(group, path)
     local misTask = {
       id = 'Mission',
@@ -5745,15 +5749,13 @@ do -- group tasks scope
     if type(group) == 'string' then
       group = Group.getByName(group)
     end
-    local groupCon = nil
     if group then
-      groupCon = group:getController()
+      local groupCon = group:getController()
       if groupCon then
         groupCon:setTask(misTask)
         return true
       end
     end
-    --Controller.setTask(groupCon, misTask)
     return false
   end
 
