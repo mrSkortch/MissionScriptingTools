@@ -2765,16 +2765,16 @@ do -- group functions scope
   function mist.groupTableCheck(groupData)
     -- return false if country, category
     -- or units are missing
-    if not groupData.country and
-      not groupData.category and
+    if not groupData.country or
+      not groupData.category or
       not groupData.units then
       return false
     end
     -- return false if unitData misses
     -- x, y or type
     for unitId, unitData in pairs(groupData.units) do
-      if not unitData.x and
-        not unitData.y and
+      if not unitData.x or
+        not unitData.y or
         not unitData.type then
           return false
       end
