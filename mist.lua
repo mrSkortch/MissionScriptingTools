@@ -6362,6 +6362,53 @@ end
 do -- mist.Logger scope
   mist.Logger = {}
 
+  --- parses text and substitutes keywords with values from given array.
+  -- @param text string containing keywords to substitute with values
+  -- or a variable.
+  -- @param ... variables to use for substitution in string.
+  -- @treturn string new string with keywords substituted or
+  -- value of variable as string.
+  local function formatText(text, ...)
+    if type(text) ~= 'string' then
+      if type(text) == 'table' then
+        text = mist.utils.oneLineSerialize(text)
+      else
+        text = tostring(text)
+      end
+    else
+      for index,value in ipairs(arg) do
+        -- TODO: check for getmetatabel(value).__tostring
+        if type(value) == 'table' then
+          value = mist.utils.oneLineSerialize(value)
+        else
+          value = tostring(value)
+        end
+        text = text:gsub('$' .. index, value)
+      end
+    end
+    local dInfo = debug.getinfo(3)
+    local fName = dInfo.name
+    -- local fsrc = dinfo.short_src
+    --local fLine = dInfo.linedefined
+    local cLine = dInfo.currentline
+    if fName then
+      return fName .. '|' .. cLine .. ': ' .. text
+    else
+      return cLine .. ': ' .. text
+    end
+  end
+
+  local function splitText(text)
+    local tbl = {}
+    while text:len() > 4000 do
+      local sub = text:sub(1, 4000)
+      text = text:sub(4001)
+      table.insert(tbl, sub)
+    end
+    table.insert(tbl, text)
+    return tbl
+  end
+
   --- Creates a new logger.
   -- Each logger has it's own tag and log level.
   -- @tparam string tag tag which appears at the start of
@@ -6407,41 +6454,6 @@ do -- mist.Logger scope
     end
   end
 
-  --- parses text and substitutes keywords with values from given array.
-  -- @tparam string text string containing keywords to substitute with values
-  -- @param ... variables to use for substitution
-  -- @treturn string new string with keywords substituted
-  local function formatText(text, ...)
-    for index,value in ipairs(arg) do
-      -- TODO: check for getmetatabel(value).__tostring
-      if type(value) == 'table' then
-        value = mist.utils.oneLineSerialize(value)
-      else
-        value = tostring(value)
-      end
-      text = text:gsub('$' .. index, value)
-    end
-    local dInfo = debug.getinfo(3)
-    local fName = dInfo.name
-    -- local fsrc = dinfo.short_src
-    --local fLine = dInfo.linedefined
-    local cLine = dInfo.currentline
-    if fName then
-      return fName .. '|' .. cLine .. ': ' .. text
-    else
-      return cLine .. ': ' .. text
-    end
-  end
-
-  local function serializeVar(var)
-    if type(var) == 'table' then
-      var = mist.utils.oneLineSerialize(var)
-    else
-      var = tostring(var)
-    end
-    return var
-  end
-
   --- Logs error and shows alert window.
   -- This logs an error to the dcs.log and shows a popup window,
   -- pausing the simulation. This works always even if logging is
@@ -6450,12 +6462,19 @@ do -- mist.Logger scope
   -- @param ... variables to be used for substitution.
   -- @usage myLogger:alert("Shit just hit the fan! WEEEE!!!11")
   function mist.Logger:alert(text, ...)
-    if type(text) ~= 'string' then
-      text = serializeVar(text)
+    text = formatText(text, unpack(arg))
+    if text:len() > 4000 then
+      local texts = splitText(text)
+      for i = 1, #texts do
+        if i == 1 then
+          env.error(self.tag .. '|' .. texts[i], true)
+        else
+          env.error(texts[i])
+        end
+      end
     else
-      text = formatText(text, unpack(arg))
+      env.error(self.tag .. '|' .. text, true)
     end
-    env.error(self.tag .. '|' .. text, true)
   end
 
   --- Logs an error.
@@ -6467,12 +6486,19 @@ do -- mist.Logger scope
   -- @usage myLogger:error("Foo is $1 instead of $2", foo, "bar")
   function mist.Logger:error(text, ...)
     if self.level >= 1 then
-      if type(text) ~= 'string' then
-        text = serializeVar(text)
+      text = formatText(text, unpack(arg))
+      if text:len() > 4000 then
+        local texts = splitText(text)
+        for i = 1, #texts do
+          if i == 1 then
+            env.error(self.tag .. '|' .. texts[i])
+          else
+            env.error(texts[i])
+          end
+        end
       else
-        text = formatText(text, unpack(arg))
+        env.error(self.tag .. '|' .. text)
       end
-      env.error(self.tag .. '|' .. text)
     end
   end
 
@@ -6484,12 +6510,19 @@ do -- mist.Logger scope
   -- @usage myLogger:warn("Mother warned you! Those $1 from the interwebs are $2", {"geeks", 1337})
   function mist.Logger:warn(text, ...)
     if self.level >= 2 then
-      if type(text) ~= 'string' then
-        text = serializeVar(text)
+      text = formatText(text, unpack(arg))
+      if text:len() > 4000 then
+        local texts = splitText(text)
+        for i = 1, #texts do
+          if i == 1 then
+            env.warning(self.tag .. '|' .. texts[i])
+          else
+            env.warning(texts[i])
+          end
+        end
       else
-        text = formatText(text, unpack(arg))
+        env.warning(self.tag .. '|' .. text)
       end
-      env.warning(self.tag .. '|' .. text)
     end
   end
 
@@ -6501,14 +6534,22 @@ do -- mist.Logger scope
   -- @see warn
   function mist.Logger:info(text, ...)
     if self.level >= 3 then
-      if type(text) ~= 'string' then
-        text = serializeVar(text)
+      text = formatText(text, unpack(arg))
+      if text:len() > 4000 then
+        local texts = splitText(text)
+        for i = 1, #texts do
+          if i == 1 then
+            env.info(self.tag .. '|' .. texts[i])
+          else
+            env.info(texts[i])
+          end
+        end
       else
-        text = formatText(text, unpack(arg))
+        env.info(self.tag .. '|' .. text)
       end
-      env.info(self.tag .. '|' .. text)
     end
   end
+
 end
 
 -- initialize mist
