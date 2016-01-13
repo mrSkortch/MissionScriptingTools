@@ -137,7 +137,7 @@ do -- the main scope
 
             local countryName = string.lower(cntry_data.name)
             mist.DBs.units[coa_name][countryName] = {}
-            mist.DBs.units[coa_name][countryName]["countryId"] = cntry_data.id
+            mist.DBs.units[coa_name][countryName].countryId = cntry_data.id
 
             if type(cntry_data) == 'table' then  --just making sure
 
@@ -160,77 +160,77 @@ do -- the main scope
                         if env.mission.version > 7 then
                           groupName = env.getValueDictByKey(groupName)
                         end
-                        mist.DBs.units[coa_name][countryName][category][group_num]["groupName"] = groupName
-                        mist.DBs.units[coa_name][countryName][category][group_num]["groupId"] = group_data.groupId
-                        mist.DBs.units[coa_name][countryName][category][group_num]["category"] = category
-                        mist.DBs.units[coa_name][countryName][category][group_num]["coalition"] = coa_name
-                        mist.DBs.units[coa_name][countryName][category][group_num]["country"] = countryName
-                        mist.DBs.units[coa_name][countryName][category][group_num]["countryId"] = cntry_data.id
-                        mist.DBs.units[coa_name][countryName][category][group_num]["startTime"] = group_data.start_time
-                        mist.DBs.units[coa_name][countryName][category][group_num]["task"] = group_data.task
-                        mist.DBs.units[coa_name][countryName][category][group_num]["hidden"] = group_data.hidden
+                        mist.DBs.units[coa_name][countryName][category][group_num].groupName = groupName
+                        mist.DBs.units[coa_name][countryName][category][group_num].groupId = group_data.groupId
+                        mist.DBs.units[coa_name][countryName][category][group_num].category = category
+                        mist.DBs.units[coa_name][countryName][category][group_num].coalition = coa_name
+                        mist.DBs.units[coa_name][countryName][category][group_num].country = countryName
+                        mist.DBs.units[coa_name][countryName][category][group_num].countryId = cntry_data.id
+                        mist.DBs.units[coa_name][countryName][category][group_num].startTime = group_data.start_time
+                        mist.DBs.units[coa_name][countryName][category][group_num].task = group_data.task
+                        mist.DBs.units[coa_name][countryName][category][group_num].hidden = group_data.hidden
 
-                        mist.DBs.units[coa_name][countryName][category][group_num]["units"] = {}
+                        mist.DBs.units[coa_name][countryName][category][group_num].units = {}
 
-                        mist.DBs.units[coa_name][countryName][category][group_num]["radioSet"] = group_data.radioSet
-                        mist.DBs.units[coa_name][countryName][category][group_num]["uncontrolled"] = group_data.uncontrolled
-                        mist.DBs.units[coa_name][countryName][category][group_num]["frequency"] = group_data.frequency
-                        mist.DBs.units[coa_name][countryName][category][group_num]["modulation"] = group_data.modulation
+                        mist.DBs.units[coa_name][countryName][category][group_num].radioSet = group_data.radioSet
+                        mist.DBs.units[coa_name][countryName][category][group_num].uncontrolled = group_data.uncontrolled
+                        mist.DBs.units[coa_name][countryName][category][group_num].frequency = group_data.frequency
+                        mist.DBs.units[coa_name][countryName][category][group_num].modulation = group_data.modulation
 
                         for unit_num, unit_data in pairs(group_data.units) do
-                          local units_tbl = mist.DBs.units[coa_name][countryName][category][group_num]["units"]  --pointer to the units table for this group
+                          local units_tbl = mist.DBs.units[coa_name][countryName][category][group_num].units  --pointer to the units table for this group
 
                           units_tbl[unit_num] = {}
                           if env.mission.version > 7 then
-                            units_tbl[unit_num]["unitName"] = env.getValueDictByKey(unit_data.name)
+                            units_tbl[unit_num].unitName = env.getValueDictByKey(unit_data.name)
                           else
-                            units_tbl[unit_num]["unitName"] = unit_data.name
+                            units_tbl[unit_num].unitName = unit_data.name
                           end
-                          units_tbl[unit_num]["type"] = unit_data.type
-                          units_tbl[unit_num]["skill"] = unit_data.skill  --will be nil for statics
-                          units_tbl[unit_num]["unitId"] = unit_data.unitId
-                          units_tbl[unit_num]["category"] = category
-                          units_tbl[unit_num]["coalition"] = coa_name
-                          units_tbl[unit_num]["country"] = countryName
-                          units_tbl[unit_num]["countryId"] = cntry_data.id
-                          units_tbl[unit_num]["heading"] = unit_data.heading
-                          units_tbl[unit_num]["playerCanDrive"] = unit_data.playerCanDrive
-                          units_tbl[unit_num]["alt"] = unit_data.alt
-                          units_tbl[unit_num]["alt_type"] = unit_data.alt_type
-                          units_tbl[unit_num]["speed"] = unit_data.speed
-                          units_tbl[unit_num]["livery_id"] = unit_data.livery_id
+                          units_tbl[unit_num].type = unit_data.type
+                          units_tbl[unit_num].skill = unit_data.skill  --will be nil for statics
+                          units_tbl[unit_num].unitId = unit_data.unitId
+                          units_tbl[unit_num].category = category
+                          units_tbl[unit_num].coalition = coa_name
+                          units_tbl[unit_num].country = countryName
+                          units_tbl[unit_num].countryId = cntry_data.id
+                          units_tbl[unit_num].heading = unit_data.heading
+                          units_tbl[unit_num].playerCanDrive = unit_data.playerCanDrive
+                          units_tbl[unit_num].alt = unit_data.alt
+                          units_tbl[unit_num].alt_type = unit_data.alt_type
+                          units_tbl[unit_num].speed = unit_data.speed
+                          units_tbl[unit_num].livery_id = unit_data.livery_id
                           if unit_data.point then  --ME currently does not work like this, but it might one day
-                            units_tbl[unit_num]["point"] = unit_data.point
+                            units_tbl[unit_num].point = unit_data.point
                           else
-                            units_tbl[unit_num]["point"] = {}
-                            units_tbl[unit_num]["point"]["x"] = unit_data.x
-                            units_tbl[unit_num]["point"]["y"] = unit_data.y
+                            units_tbl[unit_num].point = {}
+                            units_tbl[unit_num].point.x = unit_data.x
+                            units_tbl[unit_num].point.y = unit_data.y
                           end
                           units_tbl[unit_num].x = unit_data.x
                           units_tbl[unit_num].y = unit_data.y
 
-                          units_tbl[unit_num]["callsign"] = unit_data.callsign
-                          units_tbl[unit_num]["onboard_num"] = unit_data.onboard_num
-                          units_tbl[unit_num]["hardpoint_racks"] = unit_data.hardpoint_racks
-                          units_tbl[unit_num]["psi"] = unit_data.psi
+                          units_tbl[unit_num].callsign = unit_data.callsign
+                          units_tbl[unit_num].onboard_num = unit_data.onboard_num
+                          units_tbl[unit_num].hardpoint_racks = unit_data.hardpoint_racks
+                          units_tbl[unit_num].psi = unit_data.psi
 
 
-                          units_tbl[unit_num]["groupName"] = groupName
-                          units_tbl[unit_num]["groupId"] = group_data.groupId
+                          units_tbl[unit_num].groupName = groupName
+                          units_tbl[unit_num].groupId = group_data.groupId
 
                           if unit_data.AddPropAircraft then
-                            units_tbl[unit_num]["AddPropAircraft"] = unit_data.AddPropAircraft
+                            units_tbl[unit_num].AddPropAircraft = unit_data.AddPropAircraft
                           end
 
                           if category == 'static' then
-                            units_tbl[unit_num]["categoryStatic"] = unit_data.category
-                            units_tbl[unit_num]["shape_name"] = unit_data.shape_name
+                            units_tbl[unit_num].categoryStatic = unit_data.category
+                            units_tbl[unit_num].shape_name = unit_data.shape_name
                             if unit_data.mass then
-                              units_tbl[unit_num]["mass"] = unit_data.mass
+                              units_tbl[unit_num].mass = unit_data.mass
                             end
 
                             if unit_data.canCargo then
-                              units_tbl[unit_num]["canCargo"] = unit_data.canCargo
+                              units_tbl[unit_num].canCargo = unit_data.canCargo
                             end
                           end
 
@@ -2490,8 +2490,8 @@ function mist.getUnitsLOS(unitset1, altoffset1, unitset2, altoffset2, radius)
     local unit1 = Unit.getByName(unitset1[unitset1_ind])
     if unit1 and unit1:isActive() == true then
       unit_info1[#unit_info1 + 1] = {}
-      unit_info1[#unit_info1]["unit"] = unit1
-      unit_info1[#unit_info1]["pos"]  = unit1:getPosition().p
+      unit_info1[#unit_info1].unit = unit1
+      unit_info1[#unit_info1].pos  = unit1:getPosition().p
     end
   end
 
@@ -2499,8 +2499,8 @@ function mist.getUnitsLOS(unitset1, altoffset1, unitset2, altoffset2, radius)
     local unit2 = Unit.getByName(unitset2[unitset2_ind])
     if unit2 and unit2:isActive() == true then
       unit_info2[#unit_info2 + 1] = {}
-      unit_info2[#unit_info2]["unit"] = unit2
-      unit_info2[#unit_info2]["pos"]  = unit2:getPosition().p
+      unit_info2[#unit_info2].unit = unit2
+      unit_info2[#unit_info2].pos  = unit2:getPosition().p
     end
   end
 
@@ -2806,16 +2806,16 @@ do -- group functions scope
       local newUnits = newGroup:getUnits()
       for unitNum, unitData in pairs(newGroup:getUnits()) do
         newData.units[unitNum] = {}
-        newData.units[unitNum]["unitId"] = tonumber(unitData:getID())
+        newData.units[unitNum].unitId = tonumber(unitData:getID())
         newData.units[unitNum].point = unitData.point
         newData.units[unitNum].x = unitData:getPosition().p.x
         newData.units[unitNum].y = unitData:getPosition().p.z
-        newData.units[unitNum]["type"] = unitData:getTypeName()
-        newData.units[unitNum]["skill"] = mist.getUnitSkill(unitData:getName())
+        newData.units[unitNum].type = unitData:getTypeName()
+        newData.units[unitNum].skill = mist.getUnitSkill(unitData:getName())
 
         -- get velocity needed
-        newData.units[unitNum]["unitName"] = unitData:getName()
-        newData.units[unitNum]["heading"] = mist.getHeading(unitData, true) -- added to DBs
+        newData.units[unitNum].unitName = unitData:getName()
+        newData.units[unitNum].heading = mist.getHeading(unitData, true) -- added to DBs
         newData.units[unitNum].alt = unitData:getPosition().p.y
         newData.country = string.lower(country.name[unitData:getCountry()])
         newData.units[unitNum].callsign = unitData:getCallsign()
@@ -2863,22 +2863,22 @@ do -- group functions scope
       for unitNum, unitData in pairs(newData.units) do
         newData.units[unitNum] = {}
 
-        newData.units[unitNum]["unitId"] = unitData.unitId
+        newData.units[unitNum].unitId = unitData.unitId
         --newData.units[unitNum].point = unitData.point
         newData.units[unitNum].x = unitData.point.x
         newData.units[unitNum].y = unitData.point.y
         newData.units[unitNum].alt = unitData.alt
         newData.units[unitNum].alt_type = unitData.alt_type
         newData.units[unitNum].speed = unitData.speed
-        newData.units[unitNum]["type"] = unitData.type
-        newData.units[unitNum]["skill"] = unitData.skill
-        newData.units[unitNum]["unitName"] = unitData.unitName
-        newData.units[unitNum]["heading"] = unitData.heading -- added to DBs
-        newData.units[unitNum]["playerCanDrive"] = unitData.playerCanDrive -- added to DBs
+        newData.units[unitNum].type = unitData.type
+        newData.units[unitNum].skill = unitData.skill
+        newData.units[unitNum].unitName = unitData.unitName
+        newData.units[unitNum].heading = unitData.heading -- added to DBs
+        newData.units[unitNum].playerCanDrive = unitData.playerCanDrive -- added to DBs
 
 
         if newData.category == 'plane' or newData.category == 'helicopter' then
-          newData.units[unitNum]["payload"] = payloads[unitNum]
+          newData.units[unitNum].payload = payloads[unitNum]
           newData.units[unitNum].livery_id = unitData.livery_id
           newData.units[unitNum].onboard_num = unitData.onboard_num
           newData.units[unitNum].callsign = unitData.callsign
@@ -3071,18 +3071,18 @@ do -- group functions scope
         newGroupData.units[unitNum].x = newCoord.x
         newGroupData.units[unitNum].y = newCoord.y
       else
-        newGroupData.units[unitNum]["x"] = unitData.x + diff.x
-        newGroupData.units[unitNum]["y"] = unitData.y + diff.y
+        newGroupData.units[unitNum].x = unitData.x + diff.x
+        newGroupData.units[unitNum].y = unitData.y + diff.y
       end
       if point then
         if (newGroupData.category == 'plane' or newGroupData.category == 'helicopter')  then
-          if point.z and point.y > 0 and point.y > land.getHeight({newGroupData.units[unitNum]["x"], newGroupData.units[unitNum]["y"]}) + 10 then
-            newGroupData.units[unitNum]["alt"] = point.y
+          if point.z and point.y > 0 and point.y > land.getHeight({newGroupData.units[unitNum].x, newGroupData.units[unitNum].y}) + 10 then
+            newGroupData.units[unitNum].alt = point.y
           else
             if newGroupData.category == 'plane' then
-              newGroupData.units[unitNum]["alt"] = land.getHeight({newGroupData.units[unitNum]["x"], newGroupData.units[unitNum]["y"]}) + math.random(300, 9000)
+              newGroupData.units[unitNum].alt = land.getHeight({newGroupData.units[unitNum].x, newGroupData.units[unitNum].y}) + math.random(300, 9000)
             else
-              newGroupData.units[unitNum]["alt"] = land.getHeight({newGroupData.units[unitNum]["x"], newGroupData.units[unitNum]["y"]}) + math.random(200, 3000)
+              newGroupData.units[unitNum].alt = land.getHeight({newGroupData.units[unitNum].x, newGroupData.units[unitNum].y}) + math.random(200, 3000)
             end
           end
         end
