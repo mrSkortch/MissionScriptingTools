@@ -2783,6 +2783,7 @@ do -- group functions scope
     return true
   end
 
+  --- Returns group data table of give group.
   function mist.getCurrentGroupData(gpName)
     local dbData = mist.getGroupData(gpName)
 
@@ -4307,10 +4308,16 @@ initial_number
     end
   end
 
-
   --- Sets a flag if unit(s) is/are inside a polygon.
   -- @tparam table vars @{unitsInPolygonVars}
-  -- @todo document
+  -- @usage -- set flag 11 to true as soon as any blue vehicles
+  -- -- are inside the polygon shape created off of the waypoints
+  -- -- of the group forest1
+  -- mist.flagFunc.units_in_polygon {
+  --    units = {'[blue][vehicle]'},
+  --    zone = mist.getGroupPoints('forest1'),
+  --    flag = 11
+  -- }
   function mist.flagFunc.units_in_polygon(vars)
     --[[vars needs to be:
 units = table,
@@ -4955,7 +4962,6 @@ do -- mist.msg scope
 end]]
 
   mist.message = {
-
 
     add = function(vars)
       local function msgSpamFilter(recList, spamBlockOn)
@@ -6356,8 +6362,20 @@ end
 
 --- mist.flagFunc.units_in_polygon parameter table.
 -- @table unitsInPolygonVars
--- @field unit name table @{UnitNameTable}.
--- @field zone table defining a polygon.
+-- @tfield table unit name table @{UnitNameTable}.
+-- @tfield table zone table defining a polygon.
+-- @tfield number|string flag flag to set to true.
+-- @tfield[opt] number|string stopflag if set to true the function
+-- will stop evaluating.
+-- @tfield[opt] number maxalt maximum altitude (MSL) for the
+-- polygon.
+-- @tfield[opt] number req_num minimum number of units that have
+-- to be in the polygon.
+-- @tfield[opt] number interval sets the interval for
+-- checking if units are inside of the polygon in seconds. Default: 1.
+-- @tfield[opt] boolean toggle switch the flag to false if required
+-- conditions are not met. Default: false.
+-- @tfield[opt] table unitTableDef
 
 --- Logger class.
 -- @type mist.Logger
