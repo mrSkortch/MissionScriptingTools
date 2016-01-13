@@ -845,7 +845,7 @@ do -- the main scope
           table.remove(scheduledTasks, i)
           local err, errmsg = pcall(task.f, unpack(task.vars, 1, table.maxn(task.vars)))
           if not err then
-            log:error('mist.scheduleFunction, error in scheduled function: $1', errmsg)
+            log:error('Error in scheduled function: $1', errmsg)
           end
           --task.f(unpack(task.vars, 1, table.maxn(task.vars)))  -- do the task, do not increment i
         else
@@ -859,7 +859,7 @@ do -- the main scope
           task.t = timer.getTime() + task.rep  --schedule next run
           local err, errmsg = pcall(task.f, unpack(task.vars, 1, table.maxn(task.vars)))
           if not err then
-            log:error('mist.scheduleFunction, error in scheduled function: $1' .. errmsg)
+            log:error('Error in scheduled function: $1' .. errmsg)
           end
           --scheduledTasks[i].f(unpack(scheduledTasks[i].vars, 1, table.maxn(scheduledTasks[i].vars)))  -- do the task
           i = i + 1
@@ -965,9 +965,10 @@ do -- the main scope
   function mist.init()
     -- create logger
     mist.log = mist.Logger:new("MIST")
-    log = mist.log
-    -- set info log level
-    log:setLevel("info")
+    log = mist.log -- log shorthand
+    -- set warning log level, showing only
+    -- warnings and errors
+    log:setLevel("warning")
 
     log:info("initializing databases")
     initDBs()
@@ -979,7 +980,7 @@ do -- the main scope
     -- call main the first time therafter it reschedules itself.
     mist.main()
 
-    log:info('MIST version $1.$2.$3 loaded', mist.majorVersion, mist.minorVersion, mist.build)
+    log:msg('MIST version $1.$2.$3 loaded', mist.majorVersion, mist.minorVersion, mist.build)
   end
 
   --- The main function.
@@ -6492,6 +6493,26 @@ do -- mist.Logger scope
       end
     else
       env.error(self.tag .. '|' .. text, true)
+    end
+  end
+
+  --- Logs a message, disregarding the log level.
+  -- @tparam string text the text with keywords to substitute.
+  -- @param ... variables to be used for substitution.
+  -- @usage myLogger:msg("Always logged!")
+  function mist.Logger:msg(text, ...)
+    text = formatText(text, unpack(arg))
+    if text:len() > 4000 then
+      local texts = splitText(text)
+      for i = 1, #texts do
+        if i == 1 then
+          env.info(self.tag .. '|' .. texts[i])
+        else
+          env.info(texts[i])
+        end
+      end
+    else
+      env.info(self.tag .. '|' .. text)
     end
   end
 
