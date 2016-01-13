@@ -49,16 +49,16 @@ do -- the main scope
   local writeGroups = {}
   local lastUpdateTime = 0
 
-  local update_alive_units_counter = 0
-  local write_DB_table_counter = 0
-  local check_spawn_events_counter = 0
+  local updateAliveUnitsCounter = 0
+  local writeDbTableCounter = 0
+  local checkSpawnEventsCounter = 0
 
   local mistGpId = 7000
   local mistUnitId = 7000
   local mistDynAddIndex = 1
 
-  local Tasks = {}
-  local task_id = 0
+  local scheduledTasks = {}
+  local taskId = 0
   local idNum = 0
 
   mist.nextGroupId = 1
@@ -838,30 +838,30 @@ do -- the main scope
 
   local function doScheduledFunctions()
     local i = 1
-    while i <= #Tasks do
-      if not Tasks[i].rep then -- not a repeated process
-        if Tasks[i].t <= timer.getTime() then
-          local Task = Tasks[i] -- local reference
-          table.remove(Tasks, i)
-          local err, errmsg = pcall(Task.f, unpack(Task.vars, 1, table.maxn(Task.vars)))
+    while i <= #scheduledTasks do
+      if not scheduledTasks[i].rep then -- not a repeated process
+        if scheduledTasks[i].t <= timer.getTime() then
+          local task = scheduledTasks[i] -- local reference
+          table.remove(scheduledTasks, i)
+          local err, errmsg = pcall(task.f, unpack(task.vars, 1, table.maxn(task.vars)))
           if not err then
             log:error('mist.scheduleFunction, error in scheduled function: $1', errmsg)
           end
-          --Task.f(unpack(Task.vars, 1, table.maxn(Task.vars)))  -- do the task, do not increment i
+          --task.f(unpack(task.vars, 1, table.maxn(task.vars)))  -- do the task, do not increment i
         else
           i = i + 1
         end
       else
-        if Tasks[i].st and Tasks[i].st <= timer.getTime() then   --if a stoptime was specified, and the stop time exceeded
-          table.remove(Tasks, i) -- stop time exceeded, do not execute, do not increment i
-        elseif Tasks[i].t <= timer.getTime() then
-          local Task = Tasks[i] -- local reference
-          Task.t = timer.getTime() + Task.rep  --schedule next run
-          local err, errmsg = pcall(Task.f, unpack(Task.vars, 1, table.maxn(Task.vars)))
+        if scheduledTasks[i].st and scheduledTasks[i].st <= timer.getTime() then   --if a stoptime was specified, and the stop time exceeded
+          table.remove(scheduledTasks, i) -- stop time exceeded, do not execute, do not increment i
+        elseif scheduledTasks[i].t <= timer.getTime() then
+          local task = scheduledTasks[i] -- local reference
+          task.t = timer.getTime() + task.rep  --schedule next run
+          local err, errmsg = pcall(task.f, unpack(task.vars, 1, table.maxn(task.vars)))
           if not err then
             log:error('mist.scheduleFunction, error in scheduled function: $1' .. errmsg)
           end
-          --Tasks[i].f(unpack(Tasks[i].vars, 1, table.maxn(Tasks[i].vars)))  -- do the task
+          --scheduledTasks[i].f(unpack(scheduledTasks[i].vars, 1, table.maxn(scheduledTasks[i].vars)))  -- do the task
           i = i + 1
         else
           i = i + 1
@@ -988,10 +988,9 @@ do -- the main scope
   function mist.main()
     timer.scheduleFunction(mist.main, {}, timer.getTime() + 0.01)  --reschedule first in case of Lua error
 
-    write_DB_table_counter = write_DB_table_counter + 1
-    if write_DB_table_counter == 10 then
-
-      write_DB_table_counter = 0
+    writeDbTableCounter = writeDbTableCounter + 1
+    if writeDbTableCounter == 10 then
+      writeDbTableCounter = 0
 
       if not coroutines.updateDBTables then
         coroutines.updateDBTables = coroutine.create(updateDBTables)
@@ -1004,10 +1003,9 @@ do -- the main scope
       end
     end
 
-    check_spawn_events_counter = check_spawn_events_counter + 1
-    if check_spawn_events_counter == 10 then
-
-      check_spawn_events_counter = 0
+    checkSpawnEventsCounter = checkSpawnEventsCounter + 1
+    if checkSpawnEventsCounter == 10 then
+      checkSpawnEventsCounter = 0
 
       if not coroutines.checkSpawnedEvents then
         coroutines.checkSpawnedEvents = coroutine.create(checkSpawnedEvents)
@@ -1021,9 +1019,9 @@ do -- the main scope
     end
 
     --updating alive units
-    update_alive_units_counter = update_alive_units_counter + 1
-    if update_alive_units_counter == 5 then
-      update_alive_units_counter = 0
+    updateAliveUnitsCounter = updateAliveUnitsCounter + 1
+    if updateAliveUnitsCounter == 5 then
+      updateAliveUnitsCounter = 0
 
       if not coroutines.update_alive_units then
         coroutines.updateAliveUnits = coroutine.create(updateAliveUnits)
@@ -1364,9 +1362,9 @@ do -- the main scope
     if not vars then
       vars = {}
     end
-    task_id = task_id + 1
-    table.insert(Tasks, {f = f, vars = vars, t = t, rep = rep, st = st, id = task_id})
-    return task_id
+    taskId = taskId + 1
+    table.insert(scheduledTasks, {f = f, vars = vars, t = t, rep = rep, st = st, id = taskId})
+    return taskId
   end
 
   --- Removes a scheduled function.
@@ -1374,9 +1372,9 @@ do -- the main scope
   -- @treturn boolean true if function was successfully removed, false otherwise.
   function mist.removeFunction(id)
     local i = 1
-    while i <= #Tasks do
-      if Tasks[i].id == id then
-        table.remove(Tasks, i)
+    while i <= #scheduledTasks do
+      if scheduledTasks[i].id == id then
+        table.remove(scheduledTasks, i)
       else
         i = i + 1
       end
