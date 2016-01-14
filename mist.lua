@@ -5376,7 +5376,6 @@ mist.teleportToPoint = function(vars) -- main teleport function that all of tele
 end
 
 mist.respawnInZone = function(gpName, zone, disperse, maxDisp)
-
 	if type(gpName) == 'table' and gpName:getName() then
 		gpName = gpName:getName()
 	elseif type(gpName) == 'table' and gpName[1]:getName() then
