@@ -4217,7 +4217,7 @@ initial_number
 		local type_tbl = {
 			[{'zones', 'zone'}] = {'table', 'string'},
 			flag = {'number', 'string'},
-			stopflag = {'number', 'string', 'nil'},
+			[{'stopflag', 'stopFlag'}] = {'number', 'string', 'nil'},
 			[{'req_num', 'reqnum'}] = {'number', 'nil'},
 		}
 
@@ -4225,7 +4225,7 @@ initial_number
 		assert(err, errmsg)
 		local zones = vars.zones or vars.zone
 		local flag = vars.flag
-		local stopflag = vars.stopflag or -1
+		local stopflag = vars.stopflag or vars.stopFlag or -1
 		local req_num = vars.req_num or vars.reqnum or 1
 		local initial_number = vars.initial_number
 
@@ -4282,7 +4282,7 @@ initial_number
 		local type_tbl = {
 			[{'zone', 'polyzone'}] = 'table',
 			flag = {'number', 'string'},
-			stopflag = {'number', 'string', 'nil'},
+			[{'stopflag', 'stopFlag'}] = {'number', 'string', 'nil'},
 			[{'req_num', 'reqnum'}] = {'number', 'nil'},
 		}
 
@@ -4290,7 +4290,7 @@ initial_number
 		assert(err, errmsg)
 		local zone = vars.zone or vars.polyzone
 		local flag = vars.flag
-		local stopflag = vars.stopflag or -1
+		local stopflag = vars.stopflag or vars.stopFlag or -1
 		local req_num = vars.req_num or vars.reqnum or 1
 		local initial_number = vars.initial_number
 
@@ -4335,7 +4335,7 @@ unitTableDef = table or nil
 			[{'units', 'unit'}] = 'table',
 			[{'zone', 'polyzone'}] = 'table',
 			flag = {'number', 'string'},
-			stopflag = {'number', 'string', 'nil'},
+			[{'stopflag', 'stopFlag'}] = {'number', 'string', 'nil'},
 			[{'maxalt', 'alt'}] = {'number', 'nil'},
 			interval = {'number', 'nil'},
 			[{'req_num', 'reqnum'}] = {'number', 'nil'},
@@ -4348,7 +4348,7 @@ unitTableDef = table or nil
 		local units = vars.units or vars.unit
 		local zone = vars.zone or vars.polyzone
 		local flag = vars.flag
-		local stopflag = vars.stopflag or -1
+		local stopflag = vars.stopflag or vars.stopFlag or -1
 		local interval = vars.interval or 1
 		local maxalt = vars.maxalt or vars.alt
 		local req_num = vars.req_num or vars.reqnum or 1
@@ -4407,7 +4407,7 @@ unitTableDef = table or nil
 			units = 'table',
 			zones = 'table',
 			flag = {'number', 'string'},
-			stopflag = {'number', 'string', 'nil'},
+			[{'stopflag', 'stopFlag'}] = {'number', 'string', 'nil'},
 			[{'zone_type', 'zonetype'}] = {'string', 'nil'},
 			[{'req_num', 'reqnum'}] = {'number', 'nil'},
 			interval = {'number', 'nil'},
@@ -4420,7 +4420,7 @@ unitTableDef = table or nil
 		local units = vars.units
 		local zones = vars.zones
 		local flag = vars.flag
-		local stopflag = vars.stopflag or -1
+		local stopflag = vars.stopflag or vars.stopFlag or -1
 		local zone_type = vars.zone_type or vars.zonetype or 'cylinder'
 		local req_num = vars.req_num or vars.reqnum or 1
 		local interval = vars.interval or 1
@@ -4472,7 +4472,7 @@ unitTableDef = table or nil
 			[{'zone_units', 'zoneunits'}]	= 'table',
 			radius = 'number',
 			flag = {'number', 'string'},
-			stopflag = {'number', 'string', 'nil'},
+			[{'stopflag', 'stopFlag'}] = {'number', 'string', 'nil'},
 			[{'zone_type', 'zonetype'}] = {'string', 'nil'},
 			[{'req_num', 'reqnum'}] = {'number', 'nil'},
 			interval = {'number', 'nil'},
@@ -4487,7 +4487,7 @@ unitTableDef = table or nil
 		local zone_units = vars.zone_units or vars.zoneunits
 		local radius = vars.radius
 		local flag = vars.flag
-		local stopflag = vars.stopflag or -1
+		local stopflag = vars.stopflag or vars.stopFlag or -1
 		local zone_type = vars.zone_type or vars.zonetype or 'cylinder'
 		local req_num = vars.req_num or vars.reqnum or 1
 		local interval = vars.interval or 1
@@ -4550,7 +4550,7 @@ toggle = boolean or nil
 			[{'unitset2', 'units2'}] = 'table',
 			[{'altoffset2', 'alt2'}] = 'number',
 			flag = {'number', 'string'},
-			stopflag = {'number', 'string', 'nil'},
+			[{'stopflag', 'stopFlag'}] = {'number', 'string', 'nil'},
 			[{'req_num', 'reqnum'}] = {'number', 'nil'},
 			interval = {'number', 'nil'},
 			radius = {'number', 'nil'},
@@ -4566,7 +4566,7 @@ toggle = boolean or nil
 		local unitset2 = vars.unitset2 or vars.units2
 		local altoffset2 = vars.altoffset2 or vars.alt2
 		local flag = vars.flag
-		local stopflag = vars.stopflag or -1
+		local stopflag = vars.stopflag or vars.stopFlag or -1
 		local interval = vars.interval or 1
 		local radius = vars.radius or math.huge
 		local req_num = vars.req_num or vars.reqnum or 1
@@ -4621,7 +4621,7 @@ stopFlag
 		local type_tbl = {
 			[{'group', 'groupname', 'gp', 'groupName'}] = 'string',
 			flag = {'number', 'string'},
-			stopflag = {'number', 'string', 'nil'},
+			[{'stopflag', 'stopFlag'}] = {'number', 'string', 'nil'},
 			interval = {'number', 'nil'},
 			toggle = {'boolean', 'nil'},
 		}
@@ -4631,7 +4631,7 @@ stopFlag
 
 		local groupName = vars.groupName or vars.group or vars.gp or vars.Groupname
 		local flag = vars.flag
-		local stopflag = vars.stopflag or -1
+		local stopflag = vars.stopflag or vars.stopFlag or -1
 		local interval = vars.interval or 1
 		local toggle = vars.toggle or nil
 
@@ -4660,7 +4660,7 @@ stopFlag
 		local type_tbl = {
 			[{'group', 'groupname', 'gp', 'groupName'}] = 'string',
 			flag = {'number', 'string'},
-			stopflag = {'number', 'string', 'nil'},
+			[{'stopflag', 'stopFlag'}] = {'number', 'string', 'nil'},
 			interval = {'number', 'nil'},
 			toggle = {'boolean', 'nil'},
 		}
@@ -4670,7 +4670,7 @@ stopFlag
 
 		local groupName = vars.groupName or vars.group or vars.gp or vars.Groupname
 		local flag = vars.flag
-		local stopflag = vars.stopflag or -1
+		local stopflag = vars.stopflag or vars.stopFlag or -1
 		local interval = vars.interval or 1
 		local toggle = vars.toggle or nil
 
@@ -4699,7 +4699,7 @@ stopFlag
 			[{'group', 'groupname', 'gp', 'groupName'}] = 'string',
 			percent = 'number',
 			flag = {'number', 'string'},
-			stopflag = {'number', 'string', 'nil'},
+			[{'stopflag', 'stopFlag'}] = {'number', 'string', 'nil'},
 			interval = {'number', 'nil'},
 			toggle = {'boolean', 'nil'},
 		}
@@ -4710,7 +4710,7 @@ stopFlag
 		local groupName = vars.groupName or vars.group or vars.gp or vars.Groupname
 		local flag = vars.flag
 		local percent = vars.percent
-		local stopflag = vars.stopflag or -1
+		local stopflag = vars.stopflag or vars.stopFlag or -1
 		local interval = vars.interval or 1
 		local toggle = vars.toggle or nil
 
@@ -4745,7 +4745,7 @@ stopFlag
 			[{'group', 'groupname', 'gp', 'groupName'}] = 'string',
 			percent = 'number',
 			flag = {'number', 'string'},
-			stopflag = {'number', 'string', 'nil'},
+			[{'stopflag', 'stopFlag'}] = {'number', 'string', 'nil'},
 			interval = {'number', 'nil'},
 			toggle = {'boolean', 'nil'},
 		}
@@ -4756,7 +4756,7 @@ stopFlag
 		local groupName = vars.groupName or vars.group or vars.gp or vars.Groupname
 		local flag = vars.flag
 		local percent = vars.percent
-		local stopflag = vars.stopflag or -1
+		local stopflag = vars.stopflag or vars.stopFlag or -1
 		local interval = vars.interval or 1
 		local toggle = vars.toggle or nil
 
@@ -4783,6 +4783,17 @@ stopFlag
 			mist.scheduleFunction(mist.flagFunc.group_alive_more_than, {{groupName = groupName, flag = flag, stopflag = stopflag, interval = interval, toggle = toggle, percent = percent}}, timer.getTime() + interval)
 		end
 	end
+	
+	function mist.flagFunc.mapobjsDeadPolygon = mist.flagFunc.mapobjs_dead_polygon
+	function mist.flagFunc.mapobjsDeadZones = mist.flagFunc.Mapobjs_dead_zones
+	function mist.flagFunc.unitsInZones = mist.flagFunc.units_in_zones
+	function mist.flagFunc.unitsInMovingZones = mist.flagFunc.units_in_moving_zones
+	function mist.flagFunc.unitsInPolygon = mist.flagFunc.units_in_polygon
+	function mist.flagFunc.unitsLOS = mist.flagFunc.units_LOS
+	function mist.flagFunc.groupAlive = mist.flagFunc.group_alive
+	function mist.flagFunc.groupDead = mist.flagFunc.group_dead
+	function mist.flagFunc.groupAliveMoreThan = mist.flagFunc.group_alive_more_than
+	function mist.flagFunc.groupAliveLessThan = mist.flagFunc.group_alive_less_than
 
 end
 
