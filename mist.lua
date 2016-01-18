@@ -4784,16 +4784,16 @@ stopFlag
 		end
 	end
 	
-	function mist.flagFunc.mapobjsDeadPolygon = mist.flagFunc.mapobjs_dead_polygon
-	function mist.flagFunc.mapobjsDeadZones = mist.flagFunc.Mapobjs_dead_zones
-	function mist.flagFunc.unitsInZones = mist.flagFunc.units_in_zones
-	function mist.flagFunc.unitsInMovingZones = mist.flagFunc.units_in_moving_zones
-	function mist.flagFunc.unitsInPolygon = mist.flagFunc.units_in_polygon
-	function mist.flagFunc.unitsLOS = mist.flagFunc.units_LOS
-	function mist.flagFunc.groupAlive = mist.flagFunc.group_alive
-	function mist.flagFunc.groupDead = mist.flagFunc.group_dead
-	function mist.flagFunc.groupAliveMoreThan = mist.flagFunc.group_alive_more_than
-	function mist.flagFunc.groupAliveLessThan = mist.flagFunc.group_alive_less_than
+	mist.flagFunc.mapobjsDeadPolygon = mist.flagFunc.mapobjs_dead_polygon
+	mist.flagFunc.mapobjsDeadZones = mist.flagFunc.Mapobjs_dead_zones
+	mist.flagFunc.unitsInZones = mist.flagFunc.units_in_zones
+	mist.flagFunc.unitsInMovingZones = mist.flagFunc.units_in_moving_zones
+	mist.flagFunc.unitsInPolygon = mist.flagFunc.units_in_polygon
+	mist.flagFunc.unitsLOS = mist.flagFunc.units_LOS
+	mist.flagFunc.groupAlive = mist.flagFunc.group_alive
+	mist.flagFunc.groupDead = mist.flagFunc.group_dead
+	mist.flagFunc.groupAliveMoreThan = mist.flagFunc.group_alive_more_than
+	mist.flagFunc.groupAliveLessThan = mist.flagFunc.group_alive_less_than
 
 end
 
