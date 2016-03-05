@@ -6417,15 +6417,19 @@ do -- mist.Logger scope
 				text = text:gsub('$' .. index, value)
 			end
 		end
-		local dInfo = debug.getinfo(3)
-		local fName = dInfo.name
-		-- local fsrc = dinfo.short_src
-		--local fLine = dInfo.linedefined
-		local cLine = dInfo.currentline
-		if fName then
+		if debug then
+			local dInfo = debug.getinfo(3)
+			local fName = dInfo.name
+			local cLine = dInfo.currentline
+			-- local fsrc = dinfo.short_src
+			--local fLine = dInfo.linedefined
+		end
+		if fName and cLine then
 			return fName .. '|' .. cLine .. ': ' .. text
-		else
+		elseif cLine then
 			return cLine .. ': ' .. text
+		else
+			return ' ' .. text
 		end
 	end
 
