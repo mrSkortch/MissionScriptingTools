@@ -6415,8 +6415,8 @@ do -- mist.Logger scope
 				text = text:gsub('$' .. index, value)
 			end
 		end
-        local fName = nil
-        local cLine = nil
+    local fName = nil
+    local cLine = nil
 		if debug then
 			local dInfo = debug.getinfo(3)
 			fName = dInfo.name
@@ -6610,3 +6610,5 @@ end
 -- initialize mist
 mist.init()
 env.info(('Mist version ' .. mist.majorVersion .. '.' .. mist.minorVersion .. '.' .. mist.build .. ' loaded.'))
+
+-- vim: noet:ts=2:sw=2
