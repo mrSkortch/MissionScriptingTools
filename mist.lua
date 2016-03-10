@@ -1023,7 +1023,7 @@ do -- the main scope
 		if updateAliveUnitsCounter == 5 then
 			updateAliveUnitsCounter = 0
 
-			if not coroutines.update_alive_units then
+			if not coroutines.updateAliveUnits then
 				coroutines.updateAliveUnits = coroutine.create(updateAliveUnits)
 			end
 
