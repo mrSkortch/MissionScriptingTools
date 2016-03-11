@@ -1512,10 +1512,10 @@ do -- the main scope
 	end
 
 	--[[ required: az - radian
-		 required: dist - meters
-	 optional: alt - meters (set to false or nil if you don't want to use it).
-	 optional: metric - set true to get dist and alt in km and m.
-	 precision will always be nearest degree and NM or km.]]
+		required: dist - meters
+		optional: alt - meters (set to false or nil if you don't want to use it).
+		optional: metric - set true to get dist and alt in km and m.
+		precision will always be nearest degree and NM or km.]]
 	function mist.tostringBR(az, dist, alt, metric)
 		az = mist.utils.round(mist.utils.toDegree(az), 0)
 
@@ -4783,7 +4783,7 @@ stopFlag
 			mist.scheduleFunction(mist.flagFunc.group_alive_more_than, {{groupName = groupName, flag = flag, stopflag = stopflag, interval = interval, toggle = toggle, percent = percent}}, timer.getTime() + interval)
 		end
 	end
-	
+
 	mist.flagFunc.mapobjsDeadPolygon = mist.flagFunc.mapobjs_dead_polygon
 	mist.flagFunc.mapobjsDeadZones = mist.flagFunc.Mapobjs_dead_zones
 	mist.flagFunc.unitsInZones = mist.flagFunc.units_in_zones
@@ -4834,10 +4834,10 @@ do -- mist.msg scope
 
 	local function mistdisplayV5()
 		--[[thoughts to improve upon
-	 event handler based activeClients table.
-	 display messages only when there is an update
-	 possibly co-routine it.
-]]
+		event handler based activeClients table.
+		display messages only when there is an update
+		possibly co-routine it.
+		]]
 	end
 
 	local function mistdisplayV4()
@@ -5512,11 +5512,9 @@ do -- mist.demos scope
 					end
 
 					trigger.action.outText(string.format('%-25s', 'Heading: ') .. Heading .. ' degrees\n' .. string.format('%-25s', 'Roll: ') .. Roll .. ' degrees\n' .. string.format('%-25s', 'Pitch: ') .. Pitch
-																 .. ' degrees\n' .. string.format('%-25s', 'Yaw: ') .. Yaw .. ' degrees\n' .. string.format('%-25s', 'AoA: ') .. AoA .. ' degrees\n' .. string.format('%-25s', 'AoA plus Yaw: ') .. AoAplusYaw .. ' degrees\n' .. string.format('%-25s', 'Climb Angle: ') ..
-																 ClimbAngle .. ' degrees\n' .. string.format('%-25s', 'Absolute Velocity: ') .. absVel .. ' m/s\n' .. string.format('%-25s', 'Absolute Acceleration: ') .. unitAcc ..' m/s^2\n'
-																 .. string.format('%-25s', 'Axial G loading: ') .. axialGs .. ' g\n' .. string.format('%-25s', 'Transverse G loading: ') .. transGs .. ' g\n' .. string.format('%-25s', 'Absolute G loading: ') .. Gs .. ' g\n' .. string.format('%-25s', 'Energy: ') .. energy .. ' J/kg\n' .. string.format('%-25s', 'dE/dt: ') .. dEdt ..
-																 ' J/(kg*s)', 1)
-
+							.. ' degrees\n' .. string.format('%-25s', 'Yaw: ') .. Yaw .. ' degrees\n' .. string.format('%-25s', 'AoA: ') .. AoA .. ' degrees\n' .. string.format('%-25s', 'AoA plus Yaw: ') .. AoAplusYaw .. ' degrees\n' .. string.format('%-25s', 'Climb Angle: ') ..
+							ClimbAngle .. ' degrees\n' .. string.format('%-25s', 'Absolute Velocity: ') .. absVel .. ' m/s\n' .. string.format('%-25s', 'Absolute Acceleration: ') .. unitAcc ..' m/s^2\n'
+							.. string.format('%-25s', 'Axial G loading: ') .. axialGs .. ' g\n' .. string.format('%-25s', 'Transverse G loading: ') .. transGs .. ' g\n' .. string.format('%-25s', 'Absolute G loading: ') .. Gs .. ' g\n' .. string.format('%-25s', 'Energy: ') .. energy .. ' J/kg\n' .. string.format('%-25s', 'dE/dt: ') .. dEdt ..' J/(kg*s)', 1)
 					return unitVel, E, curTime
 				end
 			end
@@ -6417,15 +6415,21 @@ do -- mist.Logger scope
 				text = text:gsub('$' .. index, value)
 			end
 		end
-		local dInfo = debug.getinfo(3)
-		local fName = dInfo.name
-		-- local fsrc = dinfo.short_src
-		--local fLine = dInfo.linedefined
-		local cLine = dInfo.currentline
-		if fName then
+    local fName = nil
+    local cLine = nil
+		if debug then
+			local dInfo = debug.getinfo(3)
+			fName = dInfo.name
+			cLine = dInfo.currentline
+			-- local fsrc = dinfo.short_src
+			--local fLine = dInfo.linedefined
+		end
+		if fName and cLine then
 			return fName .. '|' .. cLine .. ': ' .. text
-		else
+		elseif cLine then
 			return cLine .. ': ' .. text
+		else
+			return ' ' .. text
 		end
 	end
 
@@ -6606,3 +6610,5 @@ end
 -- initialize mist
 mist.init()
 env.info(('Mist version ' .. mist.majorVersion .. '.' .. mist.minorVersion .. '.' .. mist.build .. ' loaded.'))
+
+-- vim: noet:ts=2:sw=2
