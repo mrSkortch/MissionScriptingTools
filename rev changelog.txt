@@ -1,3 +1,12 @@
+v65
+-Fixed update db tables not updating
+
+v64
+-Fixes to debug code
+
+v62 and v63
+-Donno
+
 v61 - 4.1 release
 -Fixed locality issue with unitToWP
 
