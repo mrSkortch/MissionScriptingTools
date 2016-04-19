@@ -1,3 +1,7 @@
+v66
+-Added default setting for logger if no value present
+-Added documentation for logger
+
 v65
 -Fixed update db tables not updating
 
