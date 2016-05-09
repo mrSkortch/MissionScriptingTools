@@ -1026,12 +1026,12 @@ do -- the main scope
 	function mist.init()
 		-- create logger
 		mist.log = mist.Logger:new("MIST")
-		dbLog = mist.Logger:new('MISTDB', 'info')
+		dbLog = mist.Logger:new('MISTDB', 'warning')
 		
 		log = mist.log -- log shorthand
 		-- set warning log level, showing only
 		-- warnings and errors
-		log:setLevel("info")
+		log:setLevel("warning")
 
 		log:info("initializing databases")
 		initDBs()
@@ -6515,7 +6515,7 @@ do -- mist.Logger scope
 					self.level = 0
 				elseif level == 'error' then
 					self.level = 1
-				elseif level == 'warning' then
+				elseif level == 'warning' or level == 'warn' then
 					self.level = 2
 				elseif level == 'info' then
 					self.level = 3
