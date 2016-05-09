@@ -35,7 +35,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 2
-mist.build = 68
+mist.build = 69
 
 -- forward declaration of log shorthand
 local log
@@ -53,12 +53,11 @@ do -- the main scope
 	local lastUpdateTime = 0
 
 	local updateAliveUnitsCounter = 0
-	local writeDbTableCounter = 0
-	local checkSpawnEventsCounter = 0
-
+	local updateTenthSecond = 0
+	
 	local mistGpId = 7000
 	local mistUnitId = 7000
-	local mistDynAddIndex = 1
+	local mistDynAddIndex = {[' air '] = 0, [' hel '] = 0, [' gnd '] = 0, [' bld '] = 0, [' static '] = 0, [' shp '] = 0}
 
 	local scheduledTasks = {}
 	local taskId = 0
@@ -703,7 +702,7 @@ do -- the main scope
 	-- this function then checks DBs to see if data has changed
 	]]
 	local function checkSpawnedEventsNew()
-		if tempSpawnedGroupsCounter > 0 then
+		if tempSpawnGroupsCounter > 0 then
 			--[[local updatesPerRun = math.ceil(#tempSpawnedGroupsCounter/20)
 			if updatesPerRun < 5 then
 				updatesPerRun = 5
@@ -753,7 +752,7 @@ do -- the main scope
 				end
 				-- Work done, so remove
 				tempSpawnedGroups[name] = nil
-				tempSpawnedGroupsCounter = tempSpawnedGroupsCounter - 1
+				tempSpawnGroupsCounter = tempSpawnGroupsCounter - 1
 			end			
 		end	
 	end
@@ -876,26 +875,26 @@ do -- the main scope
 		-- dont need to add units spawned in at the start of the mission if mist is loaded in init line
 		if event.id == world.event.S_EVENT_BIRTH and timer.getTime0() < timer.getAbsTime() then
 			dbLog:info('unitSpawnEvent')
-			if not Unit.getPlayerName(event.initiator) then -- simple player check, will need to later check to see if unit was spawned with a player in a flight
-				table.insert(tempSpawnedUnits,(event.initiator))
+			
+				--table.insert(tempSpawnedUnits,(event.initiator))
 				-------
 				-- New functionality below. 
 				-------
-				if Object.getCategory(event.initiator) == 1 then
-					dbLog:info('Object is a Unit')
-					dbLog:info(Unit.getGroup(event.initiator):getName())
-					if not tempSpawnedGroups[Unit.getGroup(event.initiator):getName()] then
-						dbLog:info('added')
-						tempSpawnedGroups[Unit.getGroup(event.initiator):getName()] = 'group'
-						tempSpawnedGroupsCounter = tempSpawnGroupsCounter + 1
-					end
-				elseif Object.getCategory(event.initiator) == 3 or Object.getCategory(event.initiator) == 6 then
-					dbLog:info('Object is Static')
-					tempSpawnedGroups[StaticObject.getName(event.initiator)] = 'static'
-					tempSpawnedGroupsCounter = tempSpawnGroupsCounter + 1
+			if Object.getCategory(event.initiator) == 1 and not Unit.getPlayerName(event.initiator) then -- simple player check, will need to later check to see if unit was spawned with a player in a flight
+				dbLog:info('Object is a Unit')
+				dbLog:info(Unit.getGroup(event.initiator):getName())
+				if not tempSpawnedGroups[Unit.getGroup(event.initiator):getName()] then
+					dbLog:info('added')
+					tempSpawnedGroups[Unit.getGroup(event.initiator):getName()] = 'group'
+					tempSpawnGroupsCounter = tempSpawnGroupsCounter + 1
 				end
-				
+			elseif Object.getCategory(event.initiator) == 3 or Object.getCategory(event.initiator) == 6 then
+				dbLog:info('Object is Static')
+				tempSpawnedGroups[StaticObject.getName(event.initiator)] = 'static'
+				tempSpawnGroupsCounter = tempSpawnGroupsCounter + 1
 			end
+				
+			
 		end
 	end
 
@@ -1118,62 +1117,37 @@ do -- the main scope
 	--- Spawns a static object to the game world.
 	-- @todo write good docs
 	-- @tparam table staticObj table containing data needed for the object creation
-	function mist.dynAddStatic(staticObj)
-		local newObj = {}
-		newObj.groupId = staticObj.groupId
-		newObj.category = staticObj.category
-		newObj.type = staticObj.type
-		newObj.unitId = staticObj.unitId
-		newObj.y = staticObj.y
-		newObj.x = staticObj.x
-		newObj.heading = staticObj.heading
-		newObj.name = staticObj.name
-		newObj.dead = staticObj.dead
-		newObj.country = staticObj.country
-		newObj.countryId = staticObj.countryId
-		newObj.clone = staticObj.clone
-		newObj.shape_name = staticObj.shape_name
-		newObj.canCargo = staticObj.canCargo
-		newObj.mass = staticObj.mass
-		newObj.categoryStatic = staticObj.categoryStatic
-		if staticObj.units then -- if its mist format
-			newObj.groupId = staticObj.units[1].groupId
-			newObj.category = staticObj.units[1].category
-			newObj.type = staticObj.units[1].type
-			newObj.unitId = staticObj.units[1].unitId
-			newObj.y = staticObj.units[1].y
-			newObj.x = staticObj.units[1].x
-			newObj.heading = staticObj.units[1].heading
-			newObj.name = staticObj.units[1].name
-			newObj.dead = staticObj.units[1].dead
-			newObj.country = staticObj.units[1].country
-			newObj.countryId = staticObj.units[1].countryId
-			newObj.shape_name = staticObj.units[1].shape_name
-			newObj.canCargo = staticObj.units[1].canCargo
-			newObj.mass = staticObj.units[1].mass
-			newObj.categoryStatic = staticObj.units[1].categoryStatic
-		end
+	function mist.dynAddStatic(newObj)
 
-		if not newObj.country then
-			return false
+		if newObj.units and newObj.units[1] then -- if its mist format
+			for entry, val in pairs(newObj.units[1]) do
+				if newObj[entry] and newObj[entry] ~= val or not newObj[entry] then
+					newObj[entry] = val
+				end
+			end
 		end
-
-		local newCountry = newObj.country
+		--log:info(newObj)
+		
+		local cntry = newObj.country
 		if newObj.countryId then
-			newCountry = newObj.countryId
+			cntry = newObj.countryId
 		end
+				
+		local newCountry = ''
+
 		for countryId, countryName in pairs(country.name) do
-			if type(newObj.country) == 'string' then
-				if tostring(countryName) == string.upper(newObj.country) then
+			if type(cntry) == 'string' then
+				cntry = cntry:gsub("%s+", "_")
+				if tostring(countryName) == string.upper(cntry) then
 					newCountry = countryName
 				end
-			elseif type(newObj.country) == 'number' then
-				if countryId == newObj.country then
+			elseif type(cntry) == 'number' then
+				if countryId == cntry then
 					newCountry = countryName
 				end
 			end
 		end
-
+		
 		if newObj.clone or not newObj.groupId then
 			mistGpId = mistGpId + 1
 			newObj.groupId = mistGpId
@@ -1185,8 +1159,8 @@ do -- the main scope
 		end
 
 		if newObj.clone or not newObj.name then
-			mistDynAddIndex = mistDynAddIndex + 1
-			newObj.name = (country.name[newCountry] .. ' static ' .. mistDynAddIndex)
+			mistDynAddIndex[' static '] = mistDynAddIndex[' static '] + 1
+			newObj.name = (country.name[cntry] .. ' static ' .. mistDynAddIndex[' static '])
 		end
 
 		if not newObj.dead then
@@ -1196,7 +1170,7 @@ do -- the main scope
 		if not newObj.heading then
 			newObj.heading = math.random(360)
 		end
-
+		
 		if newObj.categoryStatic then
 			newObj.category = newObj.categoryStatic
 		end
@@ -1205,6 +1179,7 @@ do -- the main scope
 		end
 		mistAddedObjects[#mistAddedObjects + 1] = mist.utils.deepCopy(newObj)
 		if newObj.x and newObj.y and newObj.type and type(newObj.x) == 'number' and type(newObj.y) == 'number' and type(newObj.type) == 'string' then
+			--log:info('addStaticObject')
 			coalition.addStaticObject(country.id[newCountry], newObj)
 
 			return newObj
@@ -1275,7 +1250,7 @@ do -- the main scope
 			typeName = ' bld '
 		end
 		if newGroup.clone or not newGroup.groupId then
-			mistDynAddIndex = mistDynAddIndex + 1
+			mistDynAddIndex[typeName] = mistDynAddIndex[typeName] + 1
 			mistGpId = mistGpId + 1
 			newGroup.groupId = mistGpId
 		end
@@ -1288,7 +1263,7 @@ do -- the main scope
 		end
 
 		if newGroup.clone and mist.DBs.groupsByName[newGroup.name] or not newGroup.name then
-			newGroup.name = tostring(tostring(country.name[cntry]) .. tostring(typeName) .. mistDynAddIndex)
+			newGroup.name = tostring(tostring(country.name[cntry]) .. tostring(typeName) .. mistDynAddIndex[typeName])
 		end
 
 		if not newGroup.hidden then
@@ -2944,7 +2919,7 @@ do -- group functions scope
 					newData.units[unitNum].shape_name = unitData.shape_name
 				end
 			end
-
+			--log:info(newData)
 			return newData
 		else
 			log:error('$1 not found in MIST database', gpName)
@@ -3077,7 +3052,8 @@ do -- group functions scope
 			action = 'tele'
 			newGroupData = vars.groupData
 		end
-
+		
+		--log:info('get Randomized Point')
 		local diff = {x = 0, y = 0}
 		local newCoord, origCoord
 		if point then
@@ -3161,6 +3137,7 @@ do -- group functions scope
 		end
 		--mist.debug.writeData(mist.utils.serialize,{'teleportToPoint', newGroupData}, 'newGroupData.lua')
 		if string.lower(newGroupData.category) == 'static' then
+			--log:info(newGroupData)
 			return mist.dynAddStatic(newGroupData)
 		end
 		return mist.dynAdd(newGroupData)
@@ -3193,7 +3170,7 @@ do -- group functions scope
 	end
 
 	function mist.cloneInZone(gpName, zone, disperse, maxDisp)
-
+		--log:info('cloneInZone')
 		if type(gpName) == 'table' then
 			gpName = gpName:getName()
 		else
@@ -3212,6 +3189,7 @@ do -- group functions scope
 		vars.radius = zone.radius
 		vars.disperse = disperse
 		vars.maxDisp = maxDisp
+		--log:info('do teleport')
 		return mist.teleportToPoint(vars)
 	end
 
