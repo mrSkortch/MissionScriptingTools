@@ -35,7 +35,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 2
-mist.build = 69
+mist.build = 70
 
 -- forward declaration of log shorthand
 local log
@@ -531,7 +531,7 @@ do -- the main scope
 				newObject = StaticObject.getByName(event)
 				--	log:info('its static')
 			else
-				log:info('WTF')
+				log:warn('$1 is not a Unit or Static Object. This should not be possible', event)
 				return false
 			end
 
@@ -1148,6 +1148,11 @@ do -- the main scope
 			end
 		end
 		
+		if newCountry == '' then
+			log:error("Country not found: $1", cntry)
+			return false
+		end
+				
 		if newObj.clone or not newObj.groupId then
 			mistGpId = mistGpId + 1
 			newObj.groupId = mistGpId
@@ -1184,6 +1189,7 @@ do -- the main scope
 
 			return newObj
 		end
+		log:error("Failed to add static object due to missing or incorrect value. X: $1, Y: $2, Type: $3", newObj.x, newObj.y, newObj.type)
 		return false
 	end
 
@@ -1216,6 +1222,7 @@ do -- the main scope
 		end
 
 		if newCountry == '' then
+			log:error("Country not found: $1", cntry)
 			return false
 		end
 
@@ -1590,6 +1597,7 @@ do
 				end
 			end
 		end
+		log:error("Unit not found in DB: $1", unitName)
 		return false
 	end
 
@@ -1605,7 +1613,11 @@ do
 		-- search by groupId and allow groupId and groupName as inputs
 		local gpId = groupIdent
 		if type(groupIdent) == 'string' and not tonumber(groupIdent) then
-			gpId = mist.DBs.MEgroupsByName[groupIdent].groupId
+			if mist.DBs.MEgroupsByName[groupIdent] then
+				gpId = mist.DBs.MEgroupsByName[groupIdent].groupId
+			else
+				log:error("Group not found in mist.DBs.MEgroupsByName: $1", groupIdent)
+			end
 		end
 
 		for coa_name, coa_data in pairs(env.mission.coalition) do
@@ -2931,7 +2943,11 @@ do -- group functions scope
 		-- refactor to search by groupId and allow groupId and groupName as inputs
 		local unitId = unitIdent
 		if type(unitIdent) == 'string' and not tonumber(unitIdent) then
-			unitId = mist.DBs.MEunitsByName[unitIdent].unitId
+			if mist.DBs.MEunitsByName[unitIdent] then
+				unitId = mist.DBs.MEunitsByName[unitIdent].unitId
+			else
+				log:error("Unit not found in mist.DBs.MEunitsByName: $1", unitIdent)
+			end
 		end
 		local gpId = mist.DBs.MEunitsById[unitId].groupId
 
@@ -2970,7 +2986,11 @@ do -- group functions scope
 	function mist.getGroupPayload(groupIdent)
 		local gpId = groupIdent
 		if type(groupIdent) == 'string' and not tonumber(groupIdent) then
-			gpId = mist.DBs.MEgroupsByName[groupIdent].groupId
+			if mist.DBs.MEgroupsByName[groupIdent] then
+				gpId = mist.DBs.MEgroupsByName[groupIdent].groupId
+			else
+				log:error('$1 not found in mist.DBs.MEgroupsByName', groupIdent)
+			end
 		end
 
 		if gpId then
@@ -3078,7 +3098,7 @@ do -- group functions scope
 				end
 			end
 			if valid == false then
-				log:error('point supplied in variable table is not a valid coordinate.')
+				log:error('Point supplied in variable table is not a valid coordinate. Valid coords: $1', validTerrain)
 				return false
 			end
 		end
@@ -3608,12 +3628,16 @@ do -- mist.util scope
 	--- Returns the center of a zone as Vec3.
 	-- @tparam string|table zone trigger zone name or table
 	-- @treturn Vec3 center of the zone
-	function mist.utils.zoneToVec3 (zone)
+	function mist.utils.zoneToVec3(zone)
 		local new = {}
-		if type(zone) == 'table' and zone.point then
-			new.x = zone.point.x
-			new.y = zone.point.y
-			new.z = zone.point.z
+		if type(zone) == 'table' then
+			if zone.point then
+				new.x = zone.point.x
+				new.y = zone.point.y
+				new.z = zone.point.z
+			elseif zone.x and zone.y and zone.z then
+				return zone
+			end
 			return new
 		elseif type(zone) == 'string' then
 			zone = trigger.misc.getZone(zone)
@@ -3695,6 +3719,7 @@ do -- mist.util scope
 
 			return new
 		end
+		log:error("$1 not found or doesn't exist", pUnit)
 		return false
 	end
 
@@ -5811,9 +5836,11 @@ do -- group tasks scope
 	function mist.getGroupRoute(groupIdent, task)
 		-- refactor to search by groupId and allow groupId and groupName as inputs
 		local gpId = groupIdent
-		if type(groupIdent) == 'string' and not tonumber(groupIdent) then
-			gpId = mist.DBs.MEgroupsByName[groupIdent].groupId
-		end
+			if mist.DBs.MEgroupsByName[groupIdent] then
+				gpId = mist.DBs.MEgroupsByName[groupIdent].groupId
+			else
+				log:error('$1 not found in mist.DBs.MEgroupsByName', groupIdent)
+			end
 
 		for coa_name, coa_data in pairs(env.mission.coalition) do
 			if (coa_name == 'red' or coa_name == 'blue') and type(coa_data) == 'table' then
@@ -5851,6 +5878,7 @@ do -- group tasks scope
 
 												return points
 											end
+											log:error('Group route not defined in mission editor for groupId: $1', gpId)
 											return
 										end	--if group_data and group_data.name and group_data.name == 'groupname'
 									end --for group_num, group_data in pairs(obj_type_data.group) do
