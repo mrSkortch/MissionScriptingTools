@@ -35,7 +35,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 2
-mist.build = 70
+mist.build = 71
 
 -- forward declaration of log shorthand
 local log
@@ -343,6 +343,98 @@ do -- the main scope
 				},
 			},
 		}
+		mist.DBs.const.shapeNames = {
+			["Landmine"] = "landmine",
+			["FARP CP Blindage"] = "kp_ug",
+			["Subsidiary structure C"] = "saray-c",
+			["Barracks 2"] = "kazarma2",
+			["Small house 2C"] = "dom2c",
+			["Military staff"] = "aviashtab",
+			["Tech hangar A"] = "ceh_ang_a",
+			["Oil derrick"] = "neftevyshka",
+			["Tech combine"] = "kombinat",
+			["Garage B"] = "garage_b",
+			["Airshow_Crowd"] = "Crowd1",
+			["Hangar A"] = "angar_a",
+			["Repair workshop"] = "tech",
+			["Subsidiary structure D"] = "saray-d",
+			["FARP Ammo Dump Coating"] = "SetkaKP",
+			["Small house 1C area"] = "dom2c-all",
+			["Tank 2"] = "airbase_tbilisi_tank_01",
+			["Boiler-house A"] = "kotelnaya_a",
+			["Workshop A"] = "tec_a",
+			["Small werehouse 1"] = "s1",
+			["Garage small B"] = "garagh-small-b",
+			["Small werehouse 4"] = "s4",
+			["Shop"] = "magazin",
+			["Subsidiary structure B"] = "saray-b",
+			["FARP Fuel Depot"] = "GSM Rus",
+			["Coach cargo"] = "wagon-gruz",
+			["Electric power box"] = "tr_budka",
+			["Tank 3"] = "airbase_tbilisi_tank_02",
+			["Red_Flag"] = "H-flag_R",
+			["Container red 3"] = "konteiner_red3",
+			["Garage A"] = "garage_a",
+			["Hangar B"] = "angar_b",
+			["Black_Tyre"] = "H-tyre_B",
+			["Cafe"] = "stolovaya",
+			["Restaurant 1"] = "restoran1",
+			["Subsidiary structure A"] = "saray-a",
+			["Container white"] = "konteiner_white",
+			["Warehouse"] = "sklad",
+			["Tank"] = "bak",
+			["Railway crossing B"] = "pereezd_small",
+			["Subsidiary structure F"] = "saray-f",
+			["Farm A"] = "ferma_a",
+			["Small werehouse 3"] = "s3",
+			["Water tower A"] = "wodokachka_a",
+			["Railway station"] = "r_vok_sd",
+			["Coach a tank blue"] = "wagon-cisterna_blue",
+			["Supermarket A"] = "uniwersam_a",
+			["Coach a platform"] = "wagon-platforma",
+			["Garage small A"] = "garagh-small-a",
+			["TV tower"] = "tele_bash",
+			["Comms tower M"] = "tele_bash_m",
+			["Small house 1A"] = "domik1a",
+			["Farm B"] = "ferma_b",
+			["GeneratorF"] = "GeneratorF",
+			["Cargo1"] = "ab-212_cargo",
+			["Container red 2"] = "konteiner_red2",
+			["Subsidiary structure E"] = "saray-e",
+			["Coach a passenger"] = "wagon-pass",
+			["Black_Tyre_WF"] = "H-tyre_B_WF",
+			["Electric locomotive"] = "elektrowoz",
+			["Shelter"] = "ukrytie",
+			["Coach a tank yellow"] = "wagon-cisterna_yellow",
+			["Railway crossing A"] = "pereezd_big",
+			[".Ammunition depot"] = "SkladC",
+			["Small werehouse 2"] = "s2",
+			["Windsock"] = "H-Windsock_RW",
+			["Shelter B"] = "ukrytie_b",
+			["Fuel tank"] = "toplivo-bak",
+			["Locomotive"] = "teplowoz",
+			[".Command Center"] = "ComCenter",
+			["Pump station"] = "nasos",
+			["Black_Tyre_RF"] = "H-tyre_B_RF",
+			["Coach cargo open"] = "wagon-gruz-otkr",
+			["Subsidiary structure 3"] = "hozdomik3",
+			["FARP Tent"] = "PalatkaB",
+			["White_Tyre"] = "H-tyre_W",
+			["Subsidiary structure G"] = "saray-g",
+			["Container red 1"] = "konteiner_red1",
+			["Small house 1B area"] = "domik1b-all",
+			["Subsidiary structure 1"] = "hozdomik1",
+			["Container brown"] = "konteiner_brown",
+			["Small house 1B"] = "domik1b",
+			["Subsidiary structure 2"] = "hozdomik2",
+			["Chemical tank A"] = "him_bak_a",
+			["WC"] = "WC",
+			["Small house 1A area"] = "domik1a-all",
+			["White_Flag"] = "H-Flag_W",
+			["Airshow_Cone"] = "Comp_cone",
+		}
+		
+		
 		-- create mist.DBs.oldAliveUnits
 		-- do
 		-- local intermediate_alive_units = {}	-- between 0 and 0.5 secs old
@@ -1182,6 +1274,13 @@ do -- the main scope
 		if newObj.mass then
 			newObj.category = 'Cargos'
 		end
+		
+		if not newObj.shape_name then
+			if mist.DBs.const.shapeNames[newObj.type] then
+				newObj.shape_name = mist.DBs.const.shapeNames[newObj.type]
+			end
+		end
+		
 		mistAddedObjects[#mistAddedObjects + 1] = mist.utils.deepCopy(newObj)
 		if newObj.x and newObj.y and newObj.type and type(newObj.x) == 'number' and type(newObj.y) == 'number' and type(newObj.type) == 'string' then
 			--log:info('addStaticObject')
