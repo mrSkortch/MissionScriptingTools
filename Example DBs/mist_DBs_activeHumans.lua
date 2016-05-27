@@ -1,0 +1,3 @@
+activeHumans = 
+{
+} -- end of activeHumans
