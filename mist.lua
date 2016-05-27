@@ -34,7 +34,7 @@ mist = {}
 
 -- don't change these
 mist.majorVersion = 4
-mist.minorVersion = 2
+mist.minorVersion = 3
 mist.build = 71
 
 -- forward declaration of log shorthand
@@ -1224,7 +1224,7 @@ do -- the main scope
 		if newObj.countryId then
 			cntry = newObj.countryId
 		end
-				
+	
 		local newCountry = ''
 
 		for countryId, countryName in pairs(country.name) do
@@ -1244,7 +1244,7 @@ do -- the main scope
 			log:error("Country not found: $1", cntry)
 			return false
 		end
-				
+	
 		if newObj.clone or not newObj.groupId then
 			mistGpId = mistGpId + 1
 			newObj.groupId = mistGpId
@@ -1257,7 +1257,7 @@ do -- the main scope
 
 		if newObj.clone or not newObj.name then
 			mistDynAddIndex[' static '] = mistDynAddIndex[' static '] + 1
-			newObj.name = (country.name[cntry] .. ' static ' .. mistDynAddIndex[' static '])
+			newObj.name = (newCountry .. ' static ' .. mistDynAddIndex[' static '])
 		end
 
 		if not newObj.dead then
@@ -1275,7 +1275,12 @@ do -- the main scope
 			newObj.category = 'Cargos'
 		end
 		
+		if newObj.shapeName then
+			newObj.shape_name = newObj.shapeName
+		end
+		
 		if not newObj.shape_name then
+			log:info('shape_name not present')
 			if mist.DBs.const.shapeNames[newObj.type] then
 				newObj.shape_name = mist.DBs.const.shapeNames[newObj.type]
 			end
@@ -1369,7 +1374,7 @@ do -- the main scope
 		end
 
 		if newGroup.clone and mist.DBs.groupsByName[newGroup.name] or not newGroup.name then
-			newGroup.name = tostring(tostring(country.name[cntry]) .. tostring(typeName) .. mistDynAddIndex[typeName])
+			newGroup.name = tostring(newCountry .. tostring(typeName) .. mistDynAddIndex[typeName])
 		end
 
 		if not newGroup.hidden then
