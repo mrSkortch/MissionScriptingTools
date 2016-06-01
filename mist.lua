@@ -35,7 +35,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 3
-mist.build = 71
+mist.build = 72
 
 -- forward declaration of log shorthand
 local log
@@ -2128,6 +2128,7 @@ do
 	-- @treturn table @{UnitNameTable}
 	function mist.makeUnitTable(tbl)
 		--Assumption: will be passed a table of strings, sequential
+		log:info(tbl)
 		local units_by_name = {}
 
 		local l_munits = mist.DBs.units	--local reference for faster execution
@@ -4522,7 +4523,9 @@ unitTableDef = table or nil
 		end
 
 		if (units.processed and units.processed < mist.getLastDBUpdateTime()) or not units.processed then -- run unit table short cuts
-			units = mist.makeUnitTable(unitTableDef)
+			if unitTableDef then
+				units = mist.makeUnitTable(unitTableDef)
+			end
 		end
 
 		if stopflag == -1 or (type(trigger.misc.getUserFlag(stopflag)) == 'number' and trigger.misc.getUserFlag(stopflag) == 0) or (type(trigger.misc.getUserFlag(stopflag)) == 'boolean' and trigger.misc.getUserFlag(stopflag) == 0) then
@@ -4592,9 +4595,11 @@ unitTableDef = table or nil
 		if not units.processed then
 			unitTableDef = mist.utils.deepCopy(units)
 		end
-
+		
 		if (units.processed and units.processed < mist.getLastDBUpdateTime()) or not units.processed then -- run unit table short cuts
-			units = mist.makeUnitTable(unitTableDef)
+			if unitTableDef then
+				units = mist.makeUnitTable(unitTableDef)
+			end
 		end
 
 		if stopflag == -1 or (type(trigger.misc.getUserFlag(stopflag)) == 'number' and trigger.misc.getUserFlag(stopflag) == 0) or (type(trigger.misc.getUserFlag(stopflag)) == 'boolean' and trigger.misc.getUserFlag(stopflag) == false) then
@@ -4666,11 +4671,16 @@ unitTableDef = table or nil
 		end
 
 		if (units.processed and units.processed < mist.getLastDBUpdateTime()) or not units.processed then -- run unit table short cuts
-			units = mist.makeUnitTable(unitTableDef)
+			if unitTableDef then
+				units = mist.makeUnitTable(unitTableDef)
+			end
 		end
 
 		if (zone_units.processed and zone_units.processed < mist.getLastDBUpdateTime()) or not zone_units.processed then -- run unit table short cuts
-			zone_units = mist.makeUnitTable(zUnitTableDef)
+			if zUnitTableDef then
+				zone_units = mist.makeUnitTable(zUnitTableDef)
+			end
+			
 		end
 
 		if stopflag == -1 or (type(trigger.misc.getUserFlag(stopflag)) == 'number' and trigger.misc.getUserFlag(stopflag) == 0) or (type(trigger.misc.getUserFlag(stopflag)) == 'boolean' and trigger.misc.getUserFlag(stopflag) == false) then
@@ -4745,11 +4755,15 @@ toggle = boolean or nil
 		end
 
 		if (unitset1.processed and unitset1.processed < mist.getLastDBUpdateTime()) or not unitset1.processed then -- run unit table short cuts
-			unitset1 = mist.makeUnitTable(unitTableDef1)
+			if unitTableDef1 then
+				unitset1 = mist.makeUnitTable(unitTableDef1)
+			end
 		end
 
 		if (unitset2.processed and unitset2.processed < mist.getLastDBUpdateTime()) or not unitset2.processed then -- run unit table short cuts
-			unitset2 = mist.makeUnitTable(unitTableDef2)
+			if unitTableDef2 then
+				unitset2 = mist.makeUnitTable(unitTableDef2)
+			end
 		end
 
 

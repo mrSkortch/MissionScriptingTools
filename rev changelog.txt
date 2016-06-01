@@ -1,3 +1,28 @@
+v72
+fixed bug with flagFuncs to correctly check and assign unitTableDef entries.
+
+v71
+added shapename DB entry
+dynAddStatic will now add a shapename if the object type matches a shapename DB entry
+
+v70
+Added assorted error checking on a few functions
+v69
+- Updated mission used to create DBs. There should no longer be any unit
+names that are the same as group names.
+
+Dynamically generated names will now be indexed accordingly to their
+category. Used to be just a single counter shared between all.
+
+Several changes and fixes to dynAddStatic
+-Fixed function wasn't working when given certain params.
+-fixed country checker to better account for country names with spaces.
+This fix was applied to dynAdd but not dynAddStatic, I corrected this.
+-Optimized it slightly. Trimmed the fat of some of the code.
+
+v68
+-DB refactor-start
+
 v66
 -Added default setting for logger if no value present
 -Added documentation for logger
