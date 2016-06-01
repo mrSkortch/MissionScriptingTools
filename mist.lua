@@ -4756,11 +4756,13 @@ toggle = boolean or nil
 
 		if (unitset1.processed and unitset1.processed < mist.getLastDBUpdateTime()) or not unitset1.processed then -- run unit table short cuts
 			if unitTableDef1 then
+				unitset1 = mist.makeUnitTable(unitTableDef1)
 			end
 		end
 
 		if (unitset2.processed and unitset2.processed < mist.getLastDBUpdateTime()) or not unitset2.processed then -- run unit table short cuts
 			if unitTableDef2 then
+				unitset2 = mist.makeUnitTable(unitTableDef2)
 			end
 		end
 
