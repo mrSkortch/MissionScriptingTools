@@ -1,3 +1,7 @@
+v73
+-fixed mist.time.getDate to account for changes made to the mission file format related to how the mission start time and date are saved. Also added in code to correctly account for leap years.
+- fixed issue in DB updating checking the incorrect value
+- fixed mist.getUnitSkill. Slightly reworked how the function got the data.
 v72
 fixed bug with flagFuncs to correctly check and assign unitTableDef entries.
 
