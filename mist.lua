@@ -35,7 +35,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 3
-mist.build = 72
+mist.build = 73
 
 -- forward declaration of log shorthand
 local log
@@ -809,18 +809,21 @@ do -- the main scope
 					-- first check group level properties, groupId, countryId, coalition
 					dbLog:info('Found in DBs, check if updated')
 					local dbTable = mist.DBs.groupsByName[name]
-					local _u 
+					dbLog:info(dbTable)
 					if gType ~= 'static' then
+						dbLog:info('Not static')
 						local _g = Group.getByName(name)
-						_u = _g:getUnit(1)
-						if dbTable.groupId ~= _g:getID() or _u:getCountry() ~= dbTable.countryId or _u:getCoalition() ~= coalition.side[string.upper(dbTable.coaltionId)] then
+						local _u = _g:getUnit(1)
+						if dbTable.groupId ~= tonumber(_g:getID()) or _u:getCountry() ~= dbTable.countryId or _u:getCoalition() ~= dbTable.coaltionId then
 							dbLog:info('Group Data mismatch')
 							updated = true
+						else
+							dbLog:info('No Mismatch')
 						end
 
 					end
 				end			
-				
+				dbLog:info('Updated: $1', updated)
 				if updated == false and gType ~= 'static' then -- time to check units
 					dbLog:info('No Group Mismatch, Check Units')
 					for index, uObject in pairs(Group.getByName(name):getUnits()) do
@@ -828,7 +831,7 @@ do -- the main scope
 						if mist.DBs.unitsByName[uObject:getName()] then
 							dbLog:info('UnitByName table exists')
 							local uTable = mist.DBs.unitsByName[uObject:getName()]
-							if uObject:getID() ~= uTable.unitId or uObject:getTypeName() ~= uTable.type  then
+							if tonumber(uObject:getID()) ~= uTable.unitId or uObject:getTypeName() ~= uTable.type  then
 								dbLog:info('Unit Data mismatch')
 								updated = true
 								break
@@ -1693,10 +1696,11 @@ do
 	-- @tparam string unitName unit name
 	-- @return skill of the unit
 	function mist.getUnitSkill(unitName)
-		if Unit.getByName(unitName) and Unit.getByName(unitName):isExist() == true then
-			local lunit = Unit.getByName(unitName)
-			for name, data in pairs(mist.DBs.unitsByName) do
-				if name == unitName and data.type == lunit:getTypeName() and data.unitId == lunit:getID() and data.skill then
+		if mist.DBs.unitsByName[unitName] then
+			if Unit.getByName(unitName) then
+				local lunit = Unit.getByName(unitName)
+				local data = mist.DBs.unitsByName[unitName]
+				if data.unitName == unitName and data.type == lunit:getTypeName() and data.unitId == tonumber(lunit:getID()) and data.skill then
 					return data.skill
 				end
 			end
@@ -3575,7 +3579,7 @@ do -- group functions scope
 				s1 = string.lower(s1)
 				s2 = string.lower(s2)
 			end
-
+			log:info('Comparing: $1 and $2', s1, s2)
 			if s1 == s2 then
 				return true
 			else
@@ -5815,34 +5819,45 @@ do -- mist.time scope
 	-- first val returns with the month as a string
 	-- 2nd val defins if it should be written the American way or the wrong way.
 	function mist.time.getDate(convert)
-		local cal = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31} -- starts at june. 2011. 2012 is leap year, sigh. add a simple check for leap year
+		local cal = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31} -- 
 		local date = {}
-		date.d = 0
-		date.m = 6
-		date.y = 2011
-
-		local start = 0
+		
+		if not env.mission.date then -- Not likely to happen. Resaving mission auto updates this to remove it.
+			date.d = 0
+			date.m = 6
+			date.y = 2011
+		else 
+			date.d = env.mission.date.Day
+			date.m = env.mission.date.Month
+			date.y = env.mission.date.Year
+		end
+		local start = 86400
 		local timeInSec = mist.utils.round(timer.getAbsTime())
 		if convert and type(convert) == 'number' then
 			timeInSec = convert
 		end
-
-		while start < timeInSec do
-
-			if date.d == cal[date.m] then
-				--if y % 4 >= 0 and i == 2 then -- for leap year. DCS doesnt do leapyear, but I am keeping the code dormant because maybe with WW2 the mission year may become relevant
-
-				--else
-				date.m = date.m + 1
-				date.d = 0
-				--end
+		if timeInSec > 86400 then
+			while start < timeInSec do
+				if date.d >= cal[date.m] then
+					if date.m == 2 and date.d == 28 then -- HOLY COW we can edit years now. Gotta re-add this!
+						if date.y % 4 == 0 and date.y % 100 == 0 and date.y % 400 ~= 0 or date.y % 4 > 0 then
+							date.m = date.m + 1
+							date.d = 0
+						end
+						--date.d = 29
+					else
+						date.m = date.m + 1
+						date.d = 0
+					end
+				end
+				if date.m == 13 then
+					date.m = 1
+					date.y = date.y + 1
+				end
+				date.d = date.d + 1
+				start = start + 86400
+				
 			end
-			if date.m == 13 then
-				date.m = 1
-				date.y = date.y + 1
-			end
-			date.d = date.d + 1
-			start = start + 86400
 		end
 		return date
 	end
