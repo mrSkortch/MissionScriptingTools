@@ -35,7 +35,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 3
-mist.build = 73
+mist.build = 74
 
 -- forward declaration of log shorthand
 local log
@@ -289,7 +289,7 @@ do -- the main scope
 					['Focus'] =	 4,
 					['Darkstar'] =	 5,
 				},
-				['TANKER'] = {
+                ['TANKER'] = {
 					['Texaco'] = 1,
 					['Arco'] = 2,
 					['Shell'] = 3,
@@ -2629,8 +2629,8 @@ function mist.getUnitsInMovingZones(unit_names, zone_unit_names, radius, zone_ty
 end
 
 function mist.getUnitsLOS(unitset1, altoffset1, unitset2, altoffset2, radius)
+	log:info("$1, $2, $3, $4, $5", unitset1, altoffset1, unitset2, altoffset2, radius)
 	radius = radius or math.huge
-
 	local unit_info1 = {}
 	local unit_info2 = {}
 
@@ -2955,19 +2955,26 @@ do -- group functions scope
 			local newUnits = newGroup:getUnits()
 			for unitNum, unitData in pairs(newGroup:getUnits()) do
 				newData.units[unitNum] = {}
-				newData.units[unitNum].unitId = tonumber(unitData:getID())
-				newData.units[unitNum].point = unitData.point
+                local uName = unitData:getName()
+
+                if mist.DBs.unitsByName[uName] and unitData:getTypeName() ==  mist.DBs.unitsByName[uName].type and mist.DBs.unitsByName[uName].unitId == tonumber(unitData:getID()) then -- If old data matches most of new data
+                    newData.units[unitNum] = mist.utils.deepCopy(mist.DBs.unitsByName[uName])
+                else
+                    newData.units[unitNum].unitId = tonumber(unitData:getID())
+                    newData.units[unitNum].type = unitData:getTypeName()
+                    newData.units[unitNum].skill = mist.getUnitSkill(uName)
+                    newData.country = string.lower(country.name[unitData:getCountry()])
+                    newData.units[unitNum].callsign = unitData:getCallsign()
+                    newData.units[unitNum].unitName = uName
+                end
+
 				newData.units[unitNum].x = unitData:getPosition().p.x
 				newData.units[unitNum].y = unitData:getPosition().p.z
-				newData.units[unitNum].type = unitData:getTypeName()
-				newData.units[unitNum].skill = mist.getUnitSkill(unitData:getName())
-
-				-- get velocity needed
-				newData.units[unitNum].unitName = unitData:getName()
-				newData.units[unitNum].heading = mist.getHeading(unitData, true) -- added to DBs
+                newData.units[unitNum].point = {x = newData.units[unitNum].x, y = newData.units[unitNum].y}
+                newData.units[unitNum].heading = mist.getHeading(unitData, true) -- added to DBs
 				newData.units[unitNum].alt = unitData:getPosition().p.y
-				newData.country = string.lower(country.name[unitData:getCountry()])
-				newData.units[unitNum].callsign = unitData:getCallsign()
+                newData.units[unitNum].speed = mist.vec.mag(unitData:getVelocity())
+               
 			end
 
 			return newData
@@ -6027,6 +6034,7 @@ do -- group tasks scope
 	-- function mist.ground.buildPath() end -- ????
 
 	function mist.ground.patrolRoute(vars)
+		log:info('patrol')
 		local tempRoute = {}
 		local useRoute = {}
 		local gpData = vars.gpData
@@ -6117,9 +6125,9 @@ do -- group tasks scope
 				},
 			},
 		}
-
-
+		
 		useRoute[#useRoute].task = tempTask
+		log:info(useRoute)
 		mist.goRoute(gpData, useRoute)
 
 		return
