@@ -1,3 +1,6 @@
+v74
+-fixed mist.getCurrentGroupData to return more data
+
 v73
 -fixed mist.time.getDate to account for changes made to the mission file format related to how the mission start time and date are saved. Also added in code to correctly account for leap years.
 - fixed issue in DB updating checking the incorrect value
