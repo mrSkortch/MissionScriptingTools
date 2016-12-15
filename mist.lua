@@ -6395,23 +6395,24 @@ do -- group tasks scope
 		local offset = {}
 		local posStart = mist.getLeadPos(group)
 
-		offset.x = mist.utils.round(math.sin(heading - (math.pi/2)) * 50 + rndCoord.x, 3)
-		offset.z = mist.utils.round(math.cos(heading + (math.pi/2)) * 50 + rndCoord.y, 3)
-		path[#path + 1] = mist.ground.buildWP(posStart, form, speed)
+		if posStart then
+			offset.x = mist.utils.round(math.sin(heading - (math.pi/2)) * 50 + rndCoord.x, 3)
+			offset.z = mist.utils.round(math.cos(heading + (math.pi/2)) * 50 + rndCoord.y, 3)
+			path[#path + 1] = mist.ground.buildWP(posStart, form, speed)
 
+			if useRoads == true and ((point.x - posStart.x)^2 + (point.z - posStart.z)^2)^0.5 > radius * 1.3 then
+				path[#path + 1] = mist.ground.buildWP({x = posStart.x + 11, z = posStart.z + 11}, 'off_road', speed)
+				path[#path + 1] = mist.ground.buildWP(posStart, 'on_road', speed)
+				path[#path + 1] = mist.ground.buildWP(offset, 'on_road', speed)
+			else
+				path[#path + 1] = mist.ground.buildWP({x = posStart.x + 25, z = posStart.z + 25}, form, speed)
+			end
 
-		if useRoads == true and ((point.x - posStart.x)^2 + (point.z - posStart.z)^2)^0.5 > radius * 1.3 then
-			path[#path + 1] = mist.ground.buildWP({x = posStart.x + 11, z = posStart.z + 11}, 'off_road', speed)
-			path[#path + 1] = mist.ground.buildWP(posStart, 'on_road', speed)
-			path[#path + 1] = mist.ground.buildWP(offset, 'on_road', speed)
-		else
-			path[#path + 1] = mist.ground.buildWP({x = posStart.x + 25, z = posStart.z + 25}, form, speed)
+			path[#path + 1] = mist.ground.buildWP(offset, form, speed)
+			path[#path + 1] = mist.ground.buildWP(rndCoord, form, speed)
+
+			mist.goRoute(group, path)
 		end
-
-		path[#path + 1] = mist.ground.buildWP(offset, form, speed)
-		path[#path + 1] = mist.ground.buildWP(rndCoord, form, speed)
-
-		mist.goRoute(group, path)
 
 		return
 	end
