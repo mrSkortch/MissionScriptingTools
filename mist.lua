@@ -35,7 +35,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 4
-mist.build = 76
+mist.build = 77
 
 -- forward declaration of log shorthand
 local log
@@ -6703,11 +6703,10 @@ do -- mist.Logger scope
 	-- @usage myLogger = mist.Logger:new("MyScript", "info")
 	-- @treturn mist.Logger
 	function mist.Logger:new(tag, level)
-		local l = {}
-		l.tag = tag
+		local l = {tag = tag}
 		setmetatable(l, self)
 		self.__index = self
-		self:setLevel(level)
+		l:setLevel(level)
 		return l
 	end
 
