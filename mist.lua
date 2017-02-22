@@ -35,7 +35,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 4
-mist.build = 77
+mist.build = 78
 
 -- forward declaration of log shorthand
 local log
@@ -3701,15 +3701,170 @@ do -- mist.util scope
 		return kmph/3.6
 	end
 	
-	function mist.utils.getQFE(point, inchHg)
-		local h = land.getHeight(mist.utils.makeVec2(point))/0.3048 -- convert to feet
-		local qnh = env.mission.weather.qnh
-		
-		if inchHg then
-			return (qnh - (h/30)) * 0.0295299830714
-		else
-			return qnh - (h/30)
+	function mist.utils.kelvinToCelcius(t)
+		return t - 273.15
+	end
+	
+	function mist.utils.FarenheitToCelcius(f)
+		return (f - 32) * (5/9)
+	end
+	
+	function mist.utils.celciusToFarenheit(c)
+		return c*(9/5)+32
+	end
+	
+	function mist.utils.converter(t1, t2, val)
+		if type(t1) == 'string' then
+			t1 = string.lower(t1)
 		end
+		if type(t2) == 'string' then
+			t2 = string.lower(t2)
+		end
+		if val and type(val) ~= 'number' then
+			if tonumber(val) then
+				val = tonumber(val)
+			else
+				log:warn("Value given is not a number: $1", val)
+				return 0
+			end
+		end
+		
+		-- speed
+		if t1 == 'mps' then
+			if t2 == 'kmph' then
+				return val * 3.6
+			elseif t2 == 'knots' or t2 == 'knot' then
+				return val * 3600/1852
+			end
+		elseif t1 == 'kmph' then
+			if t2 == 'mps' then
+				return val/3.6
+			elseif t2 == 'knots' or t2 == 'knot' then
+				return  val*0.539957
+			end
+		elseif t1 == 'knot' or t1 == 'knots' then
+			if t2 == 'kmph' then
+				return val * 1.852
+			elseif t2 == 'mps' then
+				return  val * 0.514444	
+			end
+			
+		-- Distance
+		elseif t1 == 'feet' or t1 == 'ft' then
+			if t2 == 'nm' then
+				return val/6076.12
+			elseif t2 == 'km' then
+				return (val*0.3048)/1000
+			elseif t2 == 'm' then
+				return val*0.3048
+			end
+		elseif t1 == 'nm' then
+			if t2 == 'feet' or t2 == 'ft' then
+				return val*6076.12
+			elseif t2 == 'km' then
+				return val*1.852
+			elseif t2 == 'm' then
+				return val*1852
+			end
+		elseif t1 == 'km' then
+			if t2 == 'nm' then
+				return val/1.852
+			elseif t2 == 'feet' or t2 == 'ft' then
+				return	(val/0.3048)*1000
+			elseif t2 == 'm' then
+				return val*1000
+			end
+		elseif t1 == 'm' then
+			if t2 == 'nm' then
+				return val/1852
+			elseif t2 == 'km' then
+				return val/1000
+			elseif t2 == 'feet' or t2 == 'ft' then
+				return val/0.3048
+			end
+			
+		-- Temperature
+		elseif t1 == 'f' or t1 == 'farenheit' then
+			if t2 == 'c' or t2 == 'celcius' then
+				return (val - 32) * (5/9)
+			elseif t2 == 'k' or t2 == 'kelvin' then
+				return (val + 459.67) * (5/9)
+			end
+		elseif t1 == 'c' or t1 == 'celcius' then
+			if t2 == 'f' or t2 == 'farenheit' then
+				return val*(9/5)+32
+			elseif t2 == 'k' or t2 == 'kelvin' then
+				return val + 273.15
+			end
+		elseif t1 == 'k' or t1 == 'kelvin' then
+			if t2 == 'c' or t2 == 'celcius' then
+				return val - 273.15
+			elseif t2 == 'f' or t2 == 'farenheit' then
+				return ((val*(9/5))-459.67)
+			end
+		
+		-- Pressure
+		elseif t1 == 'p' or t1 == 'pascal' or t1 == 'pascals' then
+			if t2 == 'hpa' or t2 == 'hectopascal' then
+				return val/100
+			elseif t2 == 'mmhg' then
+				return val * 0.00750061561303
+			elseif t2 == 'inhg' then
+				return val * 0.0002953
+			end
+		elseif t1 == 'hpa' or t1 == 'hectopascal' then
+			if t2 == 'p' or t2 == 'pascal' or t2 == 'pascals' then
+				return val*100
+			elseif t2 == 'mmhg' then
+				return val * 0.00750061561303
+			elseif t2 == 'inhg' then
+				return val * 0.02953
+			end
+		elseif t1 == 'mmhg' then
+			if t2 == 'p' or t2 == 'pascal' or t2 == 'pascals' then
+				return  val / 0.00750061561303
+			elseif t2 == 'hpa' or t2 == 'hectopascal' then
+				return val * 1.33322
+			elseif t2 == 'inhg' then
+				return val/25.4
+			end
+		elseif t1 == 'inhg' then
+			if t2 == 'p' or t2 == 'pascal' or t2 == 'pascals' then
+				return val*3386.39
+			elseif t2 == 'mmhg' then
+				return val*25.4
+			elseif t2 == 'hpa' or t2 == 'hectopascal' then
+				return val * 33.8639
+			end
+		else
+			log:warn("First value doesn't match with list. Value given: $1", t1)
+		end
+		log:warn("Match not found. Unable to convert: $1 into $2", t1, t2)
+	
+	end
+	
+	mist.converter = mist.utils.converter
+	
+	function mist.utils.getQFE(point, inchHg)
+		
+		local t, p = 0, 0
+		if atmosphere.getTemperatureAndPressure then
+		end
+		if p == 0 then
+			local h = land.getHeight(mist.utils.makeVec2(point))/0.3048 -- convert to feet
+			if inchHg then
+				return (env.mission.weather.qnh - (h/30)) * 0.0295299830714
+			else
+				return env.mission.weather.qnh - (h/30)
+			end
+		else 
+			if inchHg then
+				return mist.converter('p', 'inhg', p)
+			else
+				return mist.converter('p', 'hpa', p)
+			end
+		end
+
 	end
 	--- Converts a Vec3 to a Vec2.
 	-- @tparam Vec3 vec the 3D vector
@@ -6579,10 +6734,12 @@ do -- group tasks scope
 	end
 
 	function mist.getLeadPos(group)
+		env.info(group)
 		if type(group) == 'string' then -- group name
+			env.info('isstring')
 			group = Group.getByName(group)
 		end
-
+		
 		local units = group:getUnits()
 
 		local leader = units[1]

@@ -34,8 +34,8 @@ mist = {}
 
 -- don't change these
 mist.majorVersion = 4
-mist.minorVersion = 3
-mist.build = 74
+mist.minorVersion = 4
+mist.build = 78
 
 -- forward declaration of log shorthand
 local log
@@ -977,11 +977,15 @@ do -- the main scope
 				-------
 			if Object.getCategory(event.initiator) == 1 and not Unit.getPlayerName(event.initiator) then -- simple player check, will need to later check to see if unit was spawned with a player in a flight
 				dbLog:info('Object is a Unit')
-				dbLog:info(Unit.getGroup(event.initiator):getName())
-				if not tempSpawnedGroups[Unit.getGroup(event.initiator):getName()] then
-					dbLog:info('added')
-					tempSpawnedGroups[Unit.getGroup(event.initiator):getName()] = 'group'
-					tempSpawnGroupsCounter = tempSpawnGroupsCounter + 1
+				if Unit.getGroup(event.initiator) then
+					dbLog:info(Unit.getGroup(event.initiator):getName())
+					if not tempSpawnedGroups[Unit.getGroup(event.initiator):getName()] then
+						dbLog:info('added')
+						tempSpawnedGroups[Unit.getGroup(event.initiator):getName()] = 'group'
+						tempSpawnGroupsCounter = tempSpawnGroupsCounter + 1
+					end
+				else
+					log:error('Group not accessible by unit in event handler. This is a DCS bug')
 				end
 			elseif Object.getCategory(event.initiator) == 3 or Object.getCategory(event.initiator) == 6 then
 				dbLog:info('Object is Static')
@@ -1187,8 +1191,8 @@ do -- the main scope
 	-- @treturn number next unit id.
 	function mist.getNextUnitId()
 		mist.nextUnitId = mist.nextUnitId + 1
-		if mist.nextUnitId > 6900 then
-			mist.nextUnitId = 14000
+		if mist.nextUnitId > 6900 and mist.nextUnitId < 30000 then
+			mist.nextUnitId = 30000
 		end
 		return mist.nextUnitId
 	end
@@ -1197,8 +1201,8 @@ do -- the main scope
 	-- @treturn number next group id.
 	function mist.getNextGroupId()
 		mist.nextGroupId = mist.nextGroupId + 1
-		if mist.nextGroupId > 6900 then
-			mist.nextGroupId = 14000
+		if mist.nextGroupId > 6900 and mist.nextGroupId < 30000 then
+			mist.nextGroupId = 30000
 		end
 		return mist.nextGroupId
 	end
@@ -1418,24 +1422,6 @@ do -- the main scope
 				newGroup.units[unitIndex].skill = 'Random'
 			end
 
-			if not unitData.alt then
-				if newCat == 'AIRPLANE' then
-					newGroup.units[unitIndex].alt = 2000
-					newGroup.units[unitIndex].alt_type = 'RADIO'
-					newGroup.units[unitIndex].speed = 150
-				elseif newCat == 'HELICOPTER' then
-					newGroup.units[unitIndex].alt = 500
-					newGroup.units[unitIndex].alt_type = 'RADIO'
-					newGroup.units[unitIndex].speed = 60
-				else
-					--[[log:info('check height')
-					newGroup.units[unitIndex].alt = land.getHeight({x = newGroup.units[unitIndex].x, y = newGroup.units[unitIndex].y})
-					newGroup.units[unitIndex].alt_type = 'BARO']]
-				end
-
-
-			end
-
 			if newCat == 'AIRPLANE' or newCat == 'HELICOPTER' then
 				if newGroup.units[unitIndex].alt_type and newGroup.units[unitIndex].alt_type ~= 'BARO' or not newGroup.units[unitIndex].alt_type then
 					newGroup.units[unitIndex].alt_type = 'RADIO'
@@ -1450,6 +1436,23 @@ do -- the main scope
 				if not unitData.payload then
 					newGroup.units[unitIndex].payload = mist.getPayload(originalName)
 				end
+				if not unitData.alt then
+					if newCat == 'AIRPLANE' then
+						newGroup.units[unitIndex].alt = 2000
+						newGroup.units[unitIndex].alt_type = 'RADIO'
+						newGroup.units[unitIndex].speed = 150
+					elseif newCat == 'HELICOPTER' then
+						newGroup.units[unitIndex].alt = 500
+						newGroup.units[unitIndex].alt_type = 'RADIO'
+						newGroup.units[unitIndex].speed = 60
+					end
+				end
+				
+			elseif newCat == 'GROUND_UNIT' then
+				if not unitData.playerCanDrive then
+					unitData.playerCanDrive = true
+				end
+			
 			end
 			mistAddedObjects[#mistAddedObjects + 1] = mist.utils.deepCopy(newGroup.units[unitIndex])
 		end
@@ -2517,7 +2520,7 @@ function mist.getUnitsInPolygon(unit_names, polyZone, max_alt)
 	local inZoneUnits = {}
 	for i =1, #units do
 		if units[i]:isActive() and mist.pointInPolygon(units[i]:getPosition().p, polyZone, max_alt) then
-			inZoneUnits[inZoneUnits + 1] = units[i]
+			inZoneUnits[#inZoneUnits + 1] = units[i]
 		end
 	end
 
@@ -3697,7 +3700,173 @@ do -- mist.util scope
 	function mist.utils.kmphToMps(kmph)
 		return kmph/3.6
 	end
+	
+	function mist.utils.kelvinToCelcius(t)
+		return t - 273.15
+	end
+	
+	function mist.utils.FarenheitToCelcius(f)
+		return (f - 32) * (5/9)
+	end
+	
+	function mist.utils.celciusToFarenheit(c)
+		return c*(9/5)+32
+	end
+	
+	function mist.utils.converter(t1, t2, val)
+		if type(t1) == 'string' then
+			t1 = string.lower(t1)
+		end
+		if type(t2) == 'string' then
+			t2 = string.lower(t2)
+		end
+		if val and type(val) ~= 'number' then
+			if tonumber(val) then
+				val = tonumber(val)
+			else
+				log:warn("Value given is not a number: $1", val)
+				return 0
+			end
+		end
+		
+		-- speed
+		if t1 == 'mps' then
+			if t2 == 'kmph' then
+				return val * 3.6
+			elseif t2 == 'knots' or t2 == 'knot' then
+				return val * 3600/1852
+			end
+		elseif t1 == 'kmph' then
+			if t2 == 'mps' then
+				return val/3.6
+			elseif t2 == 'knots' or t2 == 'knot' then
+				return  val*0.539957
+			end
+		elseif t1 == 'knot' or t1 == 'knots' then
+			if t2 == 'kmph' then
+				return val * 1.852
+			elseif t2 == 'mps' then
+				return  val * 0.514444	
+			end
+			
+		-- Distance
+		elseif t1 == 'feet' or t1 == 'ft' then
+			if t2 == 'nm' then
+				return val/6076.12
+			elseif t2 == 'km' then
+				return (val*0.3048)/1000
+			elseif t2 == 'm' then
+				return val*0.3048
+			end
+		elseif t1 == 'nm' then
+			if t2 == 'feet' or t2 == 'ft' then
+				return val*6076.12
+			elseif t2 == 'km' then
+				return val*1.852
+			elseif t2 == 'm' then
+				return val*1852
+			end
+		elseif t1 == 'km' then
+			if t2 == 'nm' then
+				return val/1.852
+			elseif t2 == 'feet' or t2 == 'ft' then
+				return	(val/0.3048)*1000
+			elseif t2 == 'm' then
+				return val*1000
+			end
+		elseif t1 == 'm' then
+			if t2 == 'nm' then
+				return val/1852
+			elseif t2 == 'km' then
+				return val/1000
+			elseif t2 == 'feet' or t2 == 'ft' then
+				return val/0.3048
+			end
+			
+		-- Temperature
+		elseif t1 == 'f' or t1 == 'farenheit' then
+			if t2 == 'c' or t2 == 'celcius' then
+				return (val - 32) * (5/9)
+			elseif t2 == 'k' or t2 == 'kelvin' then
+				return (val + 459.67) * (5/9)
+			end
+		elseif t1 == 'c' or t1 == 'celcius' then
+			if t2 == 'f' or t2 == 'farenheit' then
+				return val*(9/5)+32
+			elseif t2 == 'k' or t2 == 'kelvin' then
+				return val + 273.15
+			end
+		elseif t1 == 'k' or t1 == 'kelvin' then
+			if t2 == 'c' or t2 == 'celcius' then
+				return val - 273.15
+			elseif t2 == 'f' or t2 == 'farenheit' then
+				return ((val*(9/5))-459.67)
+			end
+		
+		-- Pressure
+		elseif t1 == 'p' or t1 == 'pascal' or t1 == 'pascals' then
+			if t2 == 'hpa' or t2 == 'hectopascal' then
+				return val/100
+			elseif t2 == 'mmhg' then
+				return val * 0.00750061561303
+			elseif t2 == 'inhg' then
+				return val * 0.0002953
+			end
+		elseif t1 == 'hpa' or t1 == 'hectopascal' then
+			if t2 == 'p' or t2 == 'pascal' or t2 == 'pascals' then
+				return val*100
+			elseif t2 == 'mmhg' then
+				return val * 0.00750061561303
+			elseif t2 == 'inhg' then
+				return val * 0.02953
+			end
+		elseif t1 == 'mmhg' then
+			if t2 == 'p' or t2 == 'pascal' or t2 == 'pascals' then
+				return  val / 0.00750061561303
+			elseif t2 == 'hpa' or t2 == 'hectopascal' then
+				return val * 1.33322
+			elseif t2 == 'inhg' then
+				return val/25.4
+			end
+		elseif t1 == 'inhg' then
+			if t2 == 'p' or t2 == 'pascal' or t2 == 'pascals' then
+				return val*3386.39
+			elseif t2 == 'mmhg' then
+				return val*25.4
+			elseif t2 == 'hpa' or t2 == 'hectopascal' then
+				return val * 33.8639
+			end
+		else
+			log:warn("First value doesn't match with list. Value given: $1", t1)
+		end
+		log:warn("Match not found. Unable to convert: $1 into $2", t1, t2)
+	
+	end
+	
+	mist.converter = mist.utils.converter
+	
+	function mist.utils.getQFE(point, inchHg)
+		
+		local t, p = 0, 0
+		if atmosphere.getTemperatureAndPressure then
+			t, p = atmosphere.getTemperatureAndPressure(mist.utils.makeVec3GL(point))
+		end
+		if p == 0 then
+			local h = land.getHeight(mist.utils.makeVec2(point))/0.3048 -- convert to feet
+			if inchHg then
+				return (env.mission.weather.qnh - (h/30)) * 0.0295299830714
+			else
+				return env.mission.weather.qnh - (h/30)
+			end
+		else 
+			if inchHg then
+				return mist.converter('p', 'inhg', p)
+			else
+				return mist.converter('p', 'hpa', p)
+			end
+		end
 
+	end
 	--- Converts a Vec3 to a Vec2.
 	-- @tparam Vec3 vec the 3D vector
 	-- @return vector converted to Vec2
@@ -4017,7 +4186,7 @@ function mist.utils.serialize(name, value, level)
 	local function serializeToTbl(name, value, level)
 		local var_str_tbl = {}
 		if level == nil then level = "" end
-		if level ~= "" then level = level.."	" end
+		if level ~= "" then level = level.."    " end
 
 		table.insert(var_str_tbl, level .. name .. " = ")
 
@@ -4187,7 +4356,7 @@ function mist.utils.tableShow(tbl, loc, indent, tableshow_tbls) --based on seria
 				else
 					tableshow_tbls[val] = loc ..	'[' .. mist.utils.basicSerialize(ind) .. ']'
 					tbl_str[#tbl_str + 1] = tostring(val) .. ' '
-					tbl_str[#tbl_str + 1] = mist.utils.tableShow(val,	loc .. '[' .. mist.utils.basicSerialize(ind).. ']', indent .. '		', tableshow_tbls)
+					tbl_str[#tbl_str + 1] = mist.utils.tableShow(val,	loc .. '[' .. mist.utils.basicSerialize(ind).. ']', indent .. '    ', tableshow_tbls)
 					tbl_str[#tbl_str + 1] = ',\n'
 				end
 			elseif type(val) == 'function' then
@@ -6328,8 +6497,13 @@ do -- group tasks scope
 	end
 
 	-- need to return a Vec3 or Vec2?
-	function mist.getRandPointInCircle(point, radius, innerRadius)
+	function mist.getRandPointInCircle(point, radius, innerRadius, maxA, minA)
 		local theta = 2*math.pi*math.random()
+		if maxA and not minA then
+			theta = math.rad(math.random(0, maxA))
+		elseif maxA and minA then
+			theta = math.rad(math.random(minA, maxA))
+		end
 		local rad = math.random() + math.random()
 		if rad > 1 then
 			rad = 2 - rad
@@ -6341,7 +6515,7 @@ do -- group tasks scope
 		else
 			radMult = radius*rad
 		end
-
+		-- radius  = (maxR - minR)*math.sqrt(math.random()) + minR
 		if not point.z then --might as well work with vec2/3
 			point.z = point.y
 		end
@@ -6360,6 +6534,32 @@ do -- group tasks scope
 			return mist.getRandPointInCircle(trigger.misc.getZone(zoneName).point, trigger.misc.getZone(zoneName).radius, innerRadius)
 		end
 		return false
+	end
+	
+	function mist.getRandomPointInPoly(zone)
+		local avg = mist.getAvgPoint(zone)
+		local radius = 0
+		local minR = math.huge
+		local newCoord = {}
+		for i = 1, #zone do
+			if mist.utils.get2DDist(avg, zone[i]) > radius then
+				radius = mist.utils.get2DDist(avg, zone[i])
+			end
+			if mist.utils.get2DDist(avg, zone[i]) < minR then
+				minR = mist.utils.get2DDist(avg, zone[i])
+			end
+		end
+		local lSpawnPos = {}
+		for j = 1, 100 do
+			newCoord = mist.getRandPointInCircle(avg, radius)
+			if mist.pointInPolygon(newCoord, zone) then
+				break
+			end
+			if j == 100 then
+				newCoord = mist.getRandPointInCircle(avg, 50000)
+			end
+		end
+		return newCoord
 	end
 
 	function mist.groupToRandomPoint(vars)
@@ -6394,20 +6594,20 @@ do -- group tasks scope
 
 		local offset = {}
 		local posStart = mist.getLeadPos(group)
+		if posStart then
+			offset.x = mist.utils.round(math.sin(heading - (math.pi/2)) * 50 + rndCoord.x, 3)
+			offset.z = mist.utils.round(math.cos(heading + (math.pi/2)) * 50 + rndCoord.y, 3)
+			path[#path + 1] = mist.ground.buildWP(posStart, form, speed)
 
-		offset.x = mist.utils.round(math.sin(heading - (math.pi/2)) * 50 + rndCoord.x, 3)
-		offset.z = mist.utils.round(math.cos(heading + (math.pi/2)) * 50 + rndCoord.y, 3)
-		path[#path + 1] = mist.ground.buildWP(posStart, form, speed)
 
-
-		if useRoads == true and ((point.x - posStart.x)^2 + (point.z - posStart.z)^2)^0.5 > radius * 1.3 then
-			path[#path + 1] = mist.ground.buildWP({x = posStart.x + 11, z = posStart.z + 11}, 'off_road', speed)
-			path[#path + 1] = mist.ground.buildWP(posStart, 'on_road', speed)
-			path[#path + 1] = mist.ground.buildWP(offset, 'on_road', speed)
-		else
-			path[#path + 1] = mist.ground.buildWP({x = posStart.x + 25, z = posStart.z + 25}, form, speed)
+			if useRoads == true and ((point.x - posStart.x)^2 + (point.z - posStart.z)^2)^0.5 > radius * 1.3 then
+				path[#path + 1] = mist.ground.buildWP({x = posStart.x + 11, z = posStart.z + 11}, 'off_road', speed)
+				path[#path + 1] = mist.ground.buildWP(posStart, 'on_road', speed)
+				path[#path + 1] = mist.ground.buildWP(offset, 'on_road', speed)
+			else
+				path[#path + 1] = mist.ground.buildWP({x = posStart.x + 25, z = posStart.z + 25}, form, speed)
+			end
 		end
-
 		path[#path + 1] = mist.ground.buildWP(offset, form, speed)
 		path[#path + 1] = mist.ground.buildWP(rndCoord, form, speed)
 
@@ -6535,14 +6735,16 @@ do -- group tasks scope
 	end
 
 	function mist.getLeadPos(group)
+		env.info(group)
 		if type(group) == 'string' then -- group name
+			env.info('isstring')
 			group = Group.getByName(group)
 		end
-
+		
 		local units = group:getUnits()
 
 		local leader = units[1]
-		if not Unit.isExist(leader) then	-- SHOULD be good, but if there is a bug, this code future-proofs it then.
+		if Unit.getLife(leader) == 0 or not Unit.isExist(leader) then	-- SHOULD be good, but if there is a bug, this code future-proofs it then.
 			local lowestInd = math.huge
 			for ind, unit in pairs(units) do
 				if Unit.isExist(unit) and ind < lowestInd then
@@ -6659,11 +6861,10 @@ do -- mist.Logger scope
 	-- @usage myLogger = mist.Logger:new("MyScript", "info")
 	-- @treturn mist.Logger
 	function mist.Logger:new(tag, level)
-		local l = {}
-		l.tag = tag
+		local l = {tag = tag}
 		setmetatable(l, self)
 		self.__index = self
-		self:setLevel(level)
+		l:setLevel(level)
 		return l
 	end
 
