@@ -35,7 +35,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 4
-mist.build = 78
+mist.build = 79
 
 -- forward declaration of log shorthand
 local log
@@ -3849,6 +3849,7 @@ do -- mist.util scope
 		
 		local t, p = 0, 0
 		if atmosphere.getTemperatureAndPressure then
+			t, p = atmosphere.getTemperatureAndPressure(mist.utils.makeVec3GL(point))
 		end
 		if p == 0 then
 			local h = land.getHeight(mist.utils.makeVec2(point))/0.3048 -- convert to feet
