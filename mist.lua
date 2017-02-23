@@ -35,10 +35,16 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 4
-mist.build = 79
+mist.build = 80
 
 -- forward declaration of log shorthand
 local log
+
+local mistSettings = {
+	errorPopup = false, -- errors printed by mist logger will create popup warning you
+	warnPopup = false,
+	infoPopup = false,
+}
 
 do -- the main scope
 	local coroutines = {}
@@ -3705,11 +3711,11 @@ do -- mist.util scope
 		return t - 273.15
 	end
 	
-	function mist.utils.FarenheitToCelcius(f)
+	function mist.utils.FahrenheitToCelcius(f)
 		return (f - 32) * (5/9)
 	end
 	
-	function mist.utils.celciusToFarenheit(c)
+	function mist.utils.celciusToFahrenheit(c)
 		return c*(9/5)+32
 	end
 	
@@ -3784,14 +3790,14 @@ do -- mist.util scope
 			end
 			
 		-- Temperature
-		elseif t1 == 'f' or t1 == 'farenheit' then
+		elseif t1 == 'f' or t1 == 'fahrenheit' then
 			if t2 == 'c' or t2 == 'celcius' then
 				return (val - 32) * (5/9)
 			elseif t2 == 'k' or t2 == 'kelvin' then
 				return (val + 459.67) * (5/9)
 			end
 		elseif t1 == 'c' or t1 == 'celcius' then
-			if t2 == 'f' or t2 == 'farenheit' then
+			if t2 == 'f' or t2 == 'fahrenheit' then
 				return val*(9/5)+32
 			elseif t2 == 'k' or t2 == 'kelvin' then
 				return val + 273.15
@@ -3799,7 +3805,7 @@ do -- mist.util scope
 		elseif t1 == 'k' or t1 == 'kelvin' then
 			if t2 == 'c' or t2 == 'celcius' then
 				return val - 273.15
-			elseif t2 == 'f' or t2 == 'farenheit' then
+			elseif t2 == 'f' or t2 == 'fahrenheit' then
 				return ((val*(9/5))-459.67)
 			end
 		
@@ -6499,10 +6505,11 @@ do -- group tasks scope
 	-- need to return a Vec3 or Vec2?
 	function mist.getRandPointInCircle(point, radius, innerRadius, maxA, minA)
 		local theta = 2*math.pi*math.random()
+		local minR = innerRadius or 0
 		if maxA and not minA then
-			theta = math.rad(math.random(0, maxA))
-		elseif maxA and minA then
-			theta = math.rad(math.random(minA, maxA))
+			theta = math.rad(math.random(0, maxA - math.random()))
+		elseif maxA and minA and minA < maxA then
+			theta = math.rad(math.random(minA, maxA) - math.random())
 		end
 		local rad = math.random() + math.random()
 		if rad > 1 then
@@ -6510,12 +6517,13 @@ do -- group tasks scope
 		end
 
 		local radMult
-		if innerRadius and innerRadius <= radius then
-			radMult = (radius - innerRadius)*rad + innerRadius
+		if minR and minR <= radius then
+			--radMult = (radius - innerRadius)*rad + innerRadius
+			radMult = radius * math.sqrt((minR^2 + (radius^2 - minR^2) * math.random()) / radius^2)
 		else
 			radMult = radius*rad
 		end
-		-- radius  = (maxR - minR)*math.sqrt(math.random()) + minR
+		
 		if not point.z then --might as well work with vec2/3
 			point.z = point.y
 		end
@@ -6529,9 +6537,9 @@ do -- group tasks scope
 		return rndCoord
 	end
 
-	function mist.getRandomPointInZone(zoneName, innerRadius)
+	function mist.getRandomPointInZone(zoneName, innerRadius, maxA, minA)
 		if type(zoneName) == 'string' and type(trigger.misc.getZone(zoneName)) == 'table' then
-			return mist.getRandPointInCircle(trigger.misc.getZone(zoneName).point, trigger.misc.getZone(zoneName).radius, innerRadius)
+			return mist.getRandPointInCircle(trigger.misc.getZone(zoneName).point, trigger.misc.getZone(zoneName).radius, innerRadius, maxA, minA)
 		end
 		return false
 	end
@@ -6557,6 +6565,7 @@ do -- group tasks scope
 			end
 			if j == 100 then
 				newCoord = mist.getRandPointInCircle(avg, 50000)
+				log:warn("Failed to find point in poly; Giving random point from center of the poly")
 			end
 		end
 		return newCoord
@@ -6735,9 +6744,7 @@ do -- group tasks scope
 	end
 
 	function mist.getLeadPos(group)
-		env.info(group)
 		if type(group) == 'string' then -- group name
-			env.info('isstring')
 			group = Group.getByName(group)
 		end
 		
@@ -6961,7 +6968,7 @@ do -- mist.Logger scope
 					end
 				end
 			else
-				env.error(self.tag .. '|' .. text)
+				env.error(self.tag .. '|' .. text, mistSettings.errorPopup)
 			end
 		end
 	end
@@ -6985,7 +6992,7 @@ do -- mist.Logger scope
 					end
 				end
 			else
-				env.warning(self.tag .. '|' .. text)
+				env.warning(self.tag .. '|' .. text, mistSettings.warnPopup)
 			end
 		end
 	end
@@ -7009,7 +7016,7 @@ do -- mist.Logger scope
 					end
 				end
 			else
-				env.info(self.tag .. '|' .. text)
+				env.info(self.tag .. '|' .. text, mistSettings.infoPopup)
 			end
 		end
 	end
