@@ -35,7 +35,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 4
-mist.build = 80
+mist.build = 81
 
 -- forward declaration of log shorthand
 local log
@@ -44,6 +44,7 @@ local mistSettings = {
 	errorPopup = false, -- errors printed by mist logger will create popup warning you
 	warnPopup = false,
 	infoPopup = false,
+	logLevel = 'info',
 }
 
 do -- the main scope
@@ -731,6 +732,9 @@ do -- the main scope
 							newTable.units[unitId].skill = "High"
 							newTable.units[unitId].alt_type = "BARO"
 						end
+						if newTable.units[unitId].alt_type == "RADIO" then -- raw postition MSL was grabbed for group, but spawn is AGL, so re-offset it
+							newTable.units[unitId].alt = (newTable.units[unitId].alt - land.getHeight({x = newTable.units[unitId].x, y = newTable.units[unitId].y}))
+						end
 					end
 
 				end
@@ -1130,13 +1134,13 @@ do -- the main scope
 	-- @function mist.init
 	function mist.init()
 		-- create logger
-		mist.log = mist.Logger:new("MIST")
+		mist.log = mist.Logger:new("MIST", mistSettings.logLevel)
 		dbLog = mist.Logger:new('MISTDB', 'warning')
 		
 		log = mist.log -- log shorthand
 		-- set warning log level, showing only
 		-- warnings and errors
-		log:setLevel("warning")
+		--log:setLevel("warning")
 
 		log:info("initializing databases")
 		initDBs()
@@ -1468,6 +1472,12 @@ do -- the main scope
 				local copyRoute = newGroup.route
 				newGroup.route = {}
 				newGroup.route.points = copyRoute
+			end
+		else -- if aircraft and no route assigned. make a quick and stupid route so AI doesnt RTB immediately
+			if newCat == 'AIRPLANE' or newCat == 'HELICOPTER' then
+				newGroup.route = {}
+				newGroup.route.points = {}
+				newGroup.route.points[1] = {}
 			end
 		end
 		newGroup.country = newCountry
@@ -2520,7 +2530,7 @@ function mist.getUnitsInPolygon(unit_names, polyZone, max_alt)
 	local units = {}
 
 	for i = 1, #unit_names do
-		units[#units + 1] = Unit.getByName(unitNames[i])
+		units[#units + 1] = Unit.getByName(unit_names[i])
 	end
 
 	local inZoneUnits = {}
@@ -3201,7 +3211,7 @@ do -- group functions scope
 		--log:info('get Randomized Point')
 		local diff = {x = 0, y = 0}
 		local newCoord, origCoord
-		if point then
+		if point and radius > 0 then
 			local valid = false
 
 			local validTerrain
@@ -3252,8 +3262,11 @@ do -- group functions scope
 				if (newGroupData.category == 'plane' or newGroupData.category == 'helicopter')	then
 					if point.z and point.y > 0 and point.y > land.getHeight({newGroupData.units[unitNum].x, newGroupData.units[unitNum].y}) + 10 then
 						newGroupData.units[unitNum].alt = point.y
+						log:info('far enough from ground')
 					else
+						
 						if newGroupData.category == 'plane' then
+							log:info('setNewAlt')
 							newGroupData.units[unitNum].alt = land.getHeight({newGroupData.units[unitNum].x, newGroupData.units[unitNum].y}) + math.random(300, 9000)
 						else
 							newGroupData.units[unitNum].alt = land.getHeight({newGroupData.units[unitNum].x, newGroupData.units[unitNum].y}) + math.random(200, 3000)
@@ -3280,6 +3293,7 @@ do -- group functions scope
 		if route then
 			newGroupData.route = route
 		end
+		log:info(newGroupData)
 		--mist.debug.writeData(mist.utils.serialize,{'teleportToPoint', newGroupData}, 'newGroupData.lua')
 		if string.lower(newGroupData.category) == 'static' then
 			--log:info(newGroupData)
@@ -3707,15 +3721,15 @@ do -- mist.util scope
 		return kmph/3.6
 	end
 	
-	function mist.utils.kelvinToCelcius(t)
+	function mist.utils.kelvinToCelsius(t)
 		return t - 273.15
 	end
 	
-	function mist.utils.FahrenheitToCelcius(f)
+	function mist.utils.FahrenheitToCelsius(f)
 		return (f - 32) * (5/9)
 	end
 	
-	function mist.utils.celciusToFahrenheit(c)
+	function mist.utils.celsiusToFahrenheit(c)
 		return c*(9/5)+32
 	end
 	
@@ -3791,19 +3805,19 @@ do -- mist.util scope
 			
 		-- Temperature
 		elseif t1 == 'f' or t1 == 'fahrenheit' then
-			if t2 == 'c' or t2 == 'celcius' then
+			if t2 == 'c' or t2 == 'celsius' then
 				return (val - 32) * (5/9)
 			elseif t2 == 'k' or t2 == 'kelvin' then
 				return (val + 459.67) * (5/9)
 			end
-		elseif t1 == 'c' or t1 == 'celcius' then
+		elseif t1 == 'c' or t1 == 'celsius' then
 			if t2 == 'f' or t2 == 'fahrenheit' then
 				return val*(9/5)+32
 			elseif t2 == 'k' or t2 == 'kelvin' then
 				return val + 273.15
 			end
 		elseif t1 == 'k' or t1 == 'kelvin' then
-			if t2 == 'c' or t2 == 'celcius' then
+			if t2 == 'c' or t2 == 'celsius' then
 				return val - 273.15
 			elseif t2 == 'f' or t2 == 'fahrenheit' then
 				return ((val*(9/5))-459.67)
@@ -4191,9 +4205,12 @@ function mist.utils.serialize(name, value, level)
 
 	local function serializeToTbl(name, value, level)
 		local var_str_tbl = {}
-		if level == nil then level = "" end
-		if level ~= "" then level = level.."    " end
-
+		if level == nil then
+			level = ""
+		end
+		if level ~= "" then 
+			level = level.."" 
+		end
 		table.insert(var_str_tbl, level .. name .. " = ")
 
 		if type(value) == "number" or type(value) == "string" or type(value) == "boolean" then
@@ -4208,7 +4225,6 @@ function mist.utils.serialize(name, value, level)
 				else
 					key = string.format("[%q]", k)
 				end
-
 				table.insert(var_str_tbl, mist.utils.serialize(key, v, level.."	"))
 
 			end
@@ -5902,7 +5918,213 @@ do -- mist.demos scope
 	end
 
 end
+do
+	--[[ stuff for marker panels
+		marker.add() add marker. Point of these functions is to simplify process and to store all mark panels added. 
+		-- generates Id if not specified or if multiple marks created.
+		-- makes marks for countries by creating a mark for each client group in the country
+		-- can create multiple marks if needed for groups and countries.
+		-- adds marks to table for parsing and removing
+		-- Uses similar structure as messages. Big differences is it doesn't only mark to groups.
+			If to All, then mark is for All
+			if to coa mark is to coa
+			if to specific units, mark is to group
+			
+			
+		--------
+		STUFF TO Check
+		--------
+		If mark added to a group before a client joins slot is synced.
+		Mark made for cliet A in Slot A. Client A leaves, Client B joins in slot A. What do they see?
+		
+		May need to automate process...
 
+	]]
+		local typeBase = {
+		['Mi-8MT'] = {'Mi-8MTV2', 'Mi-8MTV', 'Mi-8'},
+		['MiG-21Bis'] = {'Mig-21'},
+		['MiG-15bis'] = {'Mig-15'},
+		['FW-190D9'] = {'FW-190'},
+		['Bf-109K-4'] = {'Bf-109'},
+	}
+	
+	
+	local mId = 1337
+	
+	mist.marker = {}
+	mist.marker.list = {}
+	local function markSpamFilter(recList, spamBlockOn)
+		
+		for id, name in pairs(recList) do
+			if name == spamBlockOn then
+				log:info('already on recList')
+				return recList
+			end
+		end
+		log:info('add to recList')
+		table.insert(recList, spamBlockOn)
+		return recList
+	end
+	
+	local function iterate()
+		mId = mId + 1
+		return mId
+	end
+	
+	function mist.marker.add(pos, text, markFor, id)
+		log:warn('markerFunc')
+		log:info('Pos: $1, Text: $2, markFor: $3, id: $4', pos, text, markFor, id)
+		if not id then
+
+		else
+
+		end
+		local markType = 'all'
+		local markForTable = {}
+		if pos then
+			pos = mist.utils.makeVec3(pos)
+		end
+		if text and type(text) ~= string then
+			text = tostring(text)
+		else
+			text = ''
+		end
+
+		if markFor then
+			if type(markFor) == 'number' then -- groupId
+				if mist.DBs.groupsById[markFor] then	
+					markType = 'group'
+				end
+			elseif type(markFor) == 'string' then -- groupName
+				if mist.DBs.groupsByName[markFor] then	
+					markType = 'group'
+					markFor = mist.DBs.groupsByName[markFor].groupId
+				end
+			elseif type(markFor) == 'table' then -- multiple groupName, country, coalition, all
+				markType = 'table'
+				log:info(markFor)
+				for forIndex, forData in pairs(markFor) do -- need to rethink this part and organization. Gotta be a more logical way to send messages to coa, groups, or all. 
+					log:info(forIndex)
+					log:info(forData)
+					for list, listData in pairs(forData) do
+						log:info(listData)
+						forIndex = string.lower(forIndex)
+						if type(listData) == 'string' then
+							listData = string.lower(listData)
+						end
+						if listData == 'all' then
+							markType = 'all'
+							break
+						elseif (forIndex == 'coa' or forIndex == 'ca') then -- mark for coa or CA. 
+							for name, index in pairs (coalition.side) do
+								if listData == string.lower(name) then
+									markType = 'coalition'
+								end
+							end
+						elseif (forIndex == 'countries' and string.lower(clientData.country) == listData) or (forIndex == 'units' and string.lower(clientData.unitName) == listData) then
+							markForTable = markSpamFilter(markForTable, clientData.groupId)
+						elseif forIndex == 'unittypes' then -- mark to group
+						-- iterate play units
+							for clientId, clientData in pairs(mist.DBs.humansById) do
+								for typeId, typeData in pairs(listData) do
+									log:info(typeData)
+									local found = false
+									if list == 'all' or clientData.coalition and type(clientData.coalition) == 'string' and mist.stringMatch(clientData.coalition, list) then
+										if mist.matchString(typeData, clientData.type) then
+											found = true
+										else
+											-- check other known names for aircraft
+										end
+									end
+									if found == true then
+										markForTable = markSpamFilter(markForTable, clientData.groupId) -- sends info to other function to see if client is already recieving the current message.
+									end
+									--[[for clientDataEntry, clientDataVal in pairs(clientData) do
+										if type(clientDataVal) == 'string' then
+											
+											if mist.matchString(list, clientDataVal) == true or list == 'all' then
+												local sString = typeData
+												for rName, pTbl in pairs(typeBase) do -- just a quick check to see if the user may have meant something and got the specific type of the unit wrong
+													for pIndex, pName in pairs(pTbl) do
+														if mist.stringMatch(sString, pName) then
+															sString = rName
+														end
+													end
+												end
+												if mist.stringMatch(sString, clientData.type) then
+													found = true
+													markForTable = markSpamFilter(markForTable, clientData.groupId) -- sends info oto other function to see if client is already recieving the current message.
+													--table.insert(newMsgFor, clientId)
+												end
+											end
+										end
+										if found == true then	-- shouldn't this be elsewhere too?
+											break
+										end
+									end]]
+								end
+
+							end
+						end
+					end
+				end
+			end
+		else
+			markType = 'all'
+		end
+		
+
+		
+
+		
+		
+		if markType ~= 'table' then
+			local newId = iterate()
+			local data = {markId = newId, text = text, pos = pos, markType = markType, markFor = markFor}
+
+			-- create marks
+			if markType == 'coa' then
+				trigger.action.markToCoalition(newId, text, pos, markFor)
+			elseif markType == 'group' then
+				trigger.action.markToGroup(newId, text, pos, markFor)
+			else
+				trigger.action.markToAll(iterate(), text, pos)
+			end
+			table.insert(mist.marker.list, data) -- add to the DB
+		else
+			if #markForTable > 0 then
+				log:info('iterate')
+				for i = 1, #markForTable do
+					local newId = iterate()
+					local data = {markId = newId, text = text, pos = pos, markFor = markFor}
+					log:info(data)
+					table.insert(mist.marker.list, data)
+					trigger.action.markToGroup(newId, text, pos, markForTable[i])
+				end
+			end
+		end
+		
+		
+		
+	end
+	
+	function mist.marker.remove(id)
+		for i, data in pairs(mist.marker.list) do
+			if id == data.markId then
+				trigger.action.removeMark(id)
+			end
+		end
+	end
+	
+	function mist.marker.get(id)
+	
+	end
+	
+	function mist.marker.coords(pos, cType, markFor, id) -- wrapper function to just display coordinates of a specific format at location
+		
+	
+	end
+end
 --- Time conversion functions.
 -- @section mist.time
 do -- mist.time scope
@@ -6796,7 +7018,6 @@ end
 -- @tfield[opt] boolean toggle switch the flag to false if required
 -- conditions are not met. Default: false.
 -- @tfield[opt] table unitTableDef
-
 --- Logger class.
 -- @type mist.Logger
 do -- mist.Logger scope
@@ -6878,7 +7099,7 @@ do -- mist.Logger scope
 	--- Sets the level of verbosity for this logger.
 	-- @tparam[opt] number|string level the log level defines which messages
 	-- will be logged and which will be omitted. Log level 3 beeing the most verbose
-	-- and 0 disabling all output. This can also be a string. Allowed strings are:
+	-- and 0 disabling all output. This can also[ be a string. Allowed strings are:
 	-- "none" (0), "error" (1), "warning" (2) and "info" (3).
 	-- @usage myLogger:setLevel("info")
 	-- @usage -- log everything
@@ -7022,6 +7243,7 @@ do -- mist.Logger scope
 	end
 
 end
+
 
 -- initialize mist
 mist.init()
