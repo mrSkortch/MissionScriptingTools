@@ -6678,7 +6678,7 @@ do -- group tasks scope
 		elseif type(terrainTypes) == 'table' then -- if its a table it does this check
 			for typeId, typeData in pairs(terrainTypes) do
 				for constId, constData in pairs(land.SurfaceType) do
-					if string.lower(constId) == string.lower(typeData) or string.lower(constData) == string.lower(typeId) then
+					if string.lower(constId) == string.lower(typeData) or string.lower(constData) == string.lower(typeData) then
 						table.insert(typeConverted, constId)
 					end
 				end
