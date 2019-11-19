@@ -34,8 +34,8 @@ mist = {}
 
 -- don't change these
 mist.majorVersion = 4
-mist.minorVersion = 4
-mist.build = 81
+mist.minorVersion = 2
+mist.build = 84
 
 -- forward declaration of log shorthand
 local log
@@ -44,7 +44,7 @@ local mistSettings = {
 	errorPopup = false, -- errors printed by mist logger will create popup warning you
 	warnPopup = false,
 	infoPopup = false,
-	logLevel = 'info',
+	logLevel = 'warn',
 }
 
 do -- the main scope
@@ -471,7 +471,7 @@ do -- the main scope
 
 									mist.DBs.unitsByCat[unit_data.category] = mist.DBs.unitsByCat[unit_data.category] or {} -- future-proofing against new categories...
 									table.insert(mist.DBs.unitsByCat[unit_data.category], mist.utils.deepCopy(unit_data))
-									dbLog:info('inserting $1', unit_data.unitName)
+									--dbLog:info('inserting $1', unit_data.unitName)
 									table.insert(mist.DBs.unitsByNum, mist.utils.deepCopy(unit_data))
 
 									if unit_data.skill and (unit_data.skill == "Client" or unit_data.skill == "Player") then
@@ -508,13 +508,13 @@ do -- the main scope
 				local original_key = key --only for duplicate runtime IDs.
 				local key_ind = 1
 				while mist.DBs.deadObjects[key] do
-					dbLog:warn('duplicate runtime id of previously dead object key: $1', key)
+					--dbLog:warn('duplicate runtime id of previously dead object key: $1', key)
 					key = tostring(original_key) .. ' #' .. tostring(key_ind)
 					key_ind = key_ind + 1
 				end
 
 				if mist.DBs.aliveUnits and mist.DBs.aliveUnits[val.object.id_] then
-					--dbLog:info('object found in alive_units')
+					----dbLog:info('object found in alive_units')
 					val.objectData = mist.utils.deepCopy(mist.DBs.aliveUnits[val.object.id_])
 					local pos = Object.getPosition(val.object)
 					if pos then
@@ -523,7 +523,7 @@ do -- the main scope
 					val.objectType = mist.DBs.aliveUnits[val.object.id_].category
 
 				elseif mist.DBs.removedAliveUnits and mist.DBs.removedAliveUnits[val.object.id_] then	-- it didn't exist in alive_units, check old_alive_units
-					--dbLog:info('object found in old_alive_units')
+					----dbLog:info('object found in old_alive_units')
 					val.objectData = mist.utils.deepCopy(mist.DBs.removedAliveUnits[val.object.id_])
 					local pos = Object.getPosition(val.object)
 					if pos then
@@ -532,13 +532,13 @@ do -- the main scope
 					val.objectType = mist.DBs.removedAliveUnits[val.object.id_].category
 
 				else	--attempt to determine if static object...
-					--dbLog:info('object not found in alive units or old alive units')
+					----dbLog:info('object not found in alive units or old alive units')
 					local pos = Object.getPosition(val.object)
 					if pos then
 						local static_found = false
 						for ind, static in pairs(mist.DBs.unitsByCat.static) do
 							if ((pos.p.x - static.point.x)^2 + (pos.p.z - static.point.y)^2)^0.5 < 0.1 then --really, it should be zero...
-								dbLog:info('correlated dead static object to position')
+								--dbLog:info('correlated dead static object to position')
 								val.objectData = static
 								val.objectPos = pos.p
 								val.objectType = 'static'
@@ -592,7 +592,7 @@ do -- the main scope
 				if lunits[i].category ~= 'static' then -- can't get statics with Unit.getByName :(
 					local unit = lUnit.getByName(lunits[i].unitName)
 					if unit then
-						--dbLog:info("unit named $1 alive!", lunits[i].unitName) -- spammy
+						----dbLog:info("unit named $1 alive!", lunits[i].unitName) -- spammy
 						local pos = unit:getPosition()
 						local newtbl = ldeepcopy(lunits[i])
 						if pos then
@@ -619,7 +619,7 @@ do -- the main scope
 	end
 
 	local function dbUpdate(event, objType)
-		dbLog:info('dbUpdate')
+		--dbLog:info('dbUpdate')
 		local newTable = {}
 		newTable.startTime =	0
 		if type(event) == 'string' then -- if name of an object.
@@ -787,7 +787,7 @@ do -- the main scope
 		newTable.timeAdded = timer.getAbsTime() -- only on the dynGroupsAdded table. For other reference, see start time
 		--mist.debug.dumpDBs()
 		--end
-		dbLog:info('endDbUpdate')
+		--dbLog:info('endDbUpdate')
 		return newTable
 	end
 
@@ -810,39 +810,39 @@ do -- the main scope
 				updatesPerRun = 5
 			end]]
 			
-			dbLog:info('iterate')
+			--dbLog:info('iterate')
 			for name, gType in pairs(tempSpawnedGroups) do
-				dbLog:info(name)
+				--dbLog:info(name)
 				local updated = false
 				
 				if mist.DBs.groupsByName[name] then
 					-- first check group level properties, groupId, countryId, coalition
-					dbLog:info('Found in DBs, check if updated')
+					--dbLog:info('Found in DBs, check if updated')
 					local dbTable = mist.DBs.groupsByName[name]
-					dbLog:info(dbTable)
+					--dbLog:info(dbTable)
 					if gType ~= 'static' then
-						dbLog:info('Not static')
+						--dbLog:info('Not static')
 						local _g = Group.getByName(name)
 						local _u = _g:getUnit(1)
 						if dbTable.groupId ~= tonumber(_g:getID()) or _u:getCountry() ~= dbTable.countryId or _u:getCoalition() ~= dbTable.coaltionId then
-							dbLog:info('Group Data mismatch')
+							--dbLog:info('Group Data mismatch')
 							updated = true
 						else
-							dbLog:info('No Mismatch')
+							--dbLog:info('No Mismatch')
 						end
 
 					end
 				end			
-				dbLog:info('Updated: $1', updated)
+				--dbLog:info('Updated: $1', updated)
 				if updated == false and gType ~= 'static' then -- time to check units
-					dbLog:info('No Group Mismatch, Check Units')
+					--dbLog:info('No Group Mismatch, Check Units')
 					for index, uObject in pairs(Group.getByName(name):getUnits()) do
-						dbLog:info(index)
+						--dbLog:info(index)
 						if mist.DBs.unitsByName[uObject:getName()] then
-							dbLog:info('UnitByName table exists')
+							--dbLog:info('UnitByName table exists')
 							local uTable = mist.DBs.unitsByName[uObject:getName()]
 							if tonumber(uObject:getID()) ~= uTable.unitId or uObject:getTypeName() ~= uTable.type  then
-								dbLog:info('Unit Data mismatch')
+								--dbLog:info('Unit Data mismatch')
 								updated = true
 								break
 							end
@@ -851,7 +851,7 @@ do -- the main scope
 				end
 				
 				if updated == true or not mist.DBs.groupsByName[name] then
-					dbLog:info('Get Table')
+					--dbLog:info('Get Table')
 					writeGroups[#writeGroups+1] = {data = dbUpdate(name, gType), isUpdated = updated}
 				
 				end
@@ -870,10 +870,10 @@ do -- the main scope
 			savesPerRun = 5
 		end
 		if i > 0 then
-			dbLog:info('updateDBTables')
+			--dbLog:info('updateDBTables')
 			local ldeepCopy = mist.utils.deepCopy
 			for x = 1, i do
-				dbLog:info(writeGroups[x])
+				--dbLog:info(writeGroups[x])
 				local newTable = writeGroups[x].data
 				local updated = writeGroups[x].isUpdated
 				local mistCategory
@@ -894,34 +894,34 @@ do -- the main scope
 					mistCategory = 'ship'
 					newTable.category = mistCategory
 				end
-				dbLog:info('Update unitsBy')
+				--dbLog:info('Update unitsBy')
 				for newId, newUnitData in pairs(newTable.units) do
-					dbLog:info(newId)
+					--dbLog:info(newId)
 					newUnitData.category = mistCategory
 					if newUnitData.unitId then
-						dbLog:info('byId')
+						--dbLog:info('byId')
 						mist.DBs.unitsById[tonumber(newUnitData.unitId)] = ldeepCopy(newUnitData)
 					end
-					dbLog:info(updated)
+					--dbLog:info(updated)
 					if mist.DBs.unitsByName[newUnitData.unitName] and updated == true then--if unit existed before and something was updated, write over the entry for a given unit name just in case.
-						dbLog:info('Updating Unit Tables')
+						--dbLog:info('Updating Unit Tables')
 						for i = 1, #mist.DBs.unitsByCat[mistCategory] do
 							if mist.DBs.unitsByCat[mistCategory][i].unitName == newUnitData.unitName then
-								dbLog:info('Entry Found, Rewriting for unitsByCat')
+								--dbLog:info('Entry Found, Rewriting for unitsByCat')
 								mist.DBs.unitsByCat[mistCategory][i] = ldeepCopy(newUnitData)
 								break
 							end
 						end 
 						for i = 1, #mist.DBs.unitsByNum do
 							if mist.DBs.unitsByNum[i].unitName == newUnitData.unitName then
-								dbLog:info('Entry Found, Rewriting for unitsByNum')
+								--dbLog:info('Entry Found, Rewriting for unitsByNum')
 								mist.DBs.unitsByNum[i] = ldeepCopy(newUnitData)
 								break
 							end
 						end
 						
 					else
-						dbLog:info('Unitname not in use, add as normal')
+						--dbLog:info('Unitname not in use, add as normal')
 						mist.DBs.unitsByCat[mistCategory][#mist.DBs.unitsByCat[mistCategory] + 1] = ldeepCopy(newUnitData)
 						mist.DBs.unitsByNum[#mist.DBs.unitsByNum + 1] = ldeepCopy(newUnitData)
 					end
@@ -930,7 +930,7 @@ do -- the main scope
 					
 				end
 				-- this is a really annoying DB to populate. Gotta create new tables in case its missing
-				dbLog:info('write mist.DBs.units')
+				--dbLog:info('write mist.DBs.units')
 				if not mist.DBs.units[newTable.coalition] then
 					mist.DBs.units[newTable.coalition] = {}
 				end
@@ -944,10 +944,10 @@ do -- the main scope
 				end
 				
 				if updated == true then
-					dbLog:info('Updating DBsUnits')
+					--dbLog:info('Updating DBsUnits')
 					for i = 1, #mist.DBs.units[newTable.coalition][(newTable.country)][mistCategory] do
 						if mist.DBs.units[newTable.coalition][(newTable.country)][mistCategory][i].groupName == newTable.groupName then
-							dbLog:info('Entry Found, Rewriting')
+							--dbLog:info('Entry Found, Rewriting')
 							mist.DBs.units[newTable.coalition][(newTable.country)][mistCategory][i] = ldeepCopy(newTable)
 							break
 						end
@@ -972,25 +972,25 @@ do -- the main scope
 			if timer.getTime() > lastUpdateTime then
 				lastUpdateTime = timer.getTime()
 			end
-			dbLog:info('endUpdateTables')
+			--dbLog:info('endUpdateTables')
 		end
 	end
 
 	local function groupSpawned(event)
 		-- dont need to add units spawned in at the start of the mission if mist is loaded in init line
 		if event.id == world.event.S_EVENT_BIRTH and timer.getTime0() < timer.getAbsTime() then
-			dbLog:info('unitSpawnEvent')
+			--dbLog:info('unitSpawnEvent')
 			
 				--table.insert(tempSpawnedUnits,(event.initiator))
 				-------
 				-- New functionality below. 
 				-------
 			if Object.getCategory(event.initiator) == 1 and not Unit.getPlayerName(event.initiator) then -- simple player check, will need to later check to see if unit was spawned with a player in a flight
-				dbLog:info('Object is a Unit')
+				--dbLog:info('Object is a Unit')
 				if Unit.getGroup(event.initiator) then
-					dbLog:info(Unit.getGroup(event.initiator):getName())
+					--dbLog:info(Unit.getGroup(event.initiator):getName())
 					if not tempSpawnedGroups[Unit.getGroup(event.initiator):getName()] then
-						dbLog:info('added')
+						--dbLog:info('added')
 						tempSpawnedGroups[Unit.getGroup(event.initiator):getName()] = 'group'
 						tempSpawnGroupsCounter = tempSpawnGroupsCounter + 1
 					end
@@ -998,7 +998,7 @@ do -- the main scope
 					log:error('Group not accessible by unit in event handler. This is a DCS bug')
 				end
 			elseif Object.getCategory(event.initiator) == 3 or Object.getCategory(event.initiator) == 6 then
-				dbLog:info('Object is Static')
+				--dbLog:info('Object is Static')
 				tempSpawnedGroups[StaticObject.getName(event.initiator)] = 'static'
 				tempSpawnGroupsCounter = tempSpawnGroupsCounter + 1
 			end
@@ -2744,8 +2744,8 @@ function mist.getAvgGroupPos(groupName)
 		groupName = Group.getByName(groupName)
 	end
 	local units = {}
-	for i = 1, #groupName:getSize() do
-		table.insert(units, groupName.getUnit(i):getName())
+	for i = 1, groupName:getSize() do
+		table.insert(units, groupName:getUnit(i):getName())
 	end
 
 	return mist.getAvgPos(units)
@@ -3163,7 +3163,7 @@ do -- group functions scope
 
 	function mist.teleportToPoint(vars) -- main teleport function that all of teleport/respawn functions call
 		local point = vars.point
-
+        log:info(point)
 		local gpName
 		if vars.gpName then
 			gpName = vars.gpName
@@ -3243,7 +3243,7 @@ do -- group functions scope
 		if not newGroupData.category and mist.DBs.groupsByName[newGroupData.groupName].category then
 			newGroupData.category = mist.DBs.groupsByName[newGroupData.groupName].category
 		end
-
+        log:info(point)
 		for unitNum, unitData in pairs(newGroupData.units) do
 			if disperse then
 				if maxDisp and type(maxDisp) == 'number' and unitNum ~= 1 then
@@ -3260,7 +3260,7 @@ do -- group functions scope
 			end
 			if point then
 				if (newGroupData.category == 'plane' or newGroupData.category == 'helicopter')	then
-					if point.z and point.y > 0 and point.y > land.getHeight({newGroupData.units[unitNum].x, newGroupData.units[unitNum].y}) + 10 then
+                    if point.z and point.y > 0 and point.y > land.getHeight({newGroupData.units[unitNum].x, newGroupData.units[unitNum].y}) + 10 then
 						newGroupData.units[unitNum].alt = point.y
 						log:info('far enough from ground')
 					else
@@ -3609,7 +3609,7 @@ do -- group functions scope
 				s1 = string.lower(s1)
 				s2 = string.lower(s2)
 			end
-			log:info('Comparing: $1 and $2', s1, s2)
+			--log:info('Comparing: $1 and $2', s1, s2)
 			if s1 == s2 then
 				return true
 			else
@@ -5940,7 +5940,8 @@ do
 		May need to automate process...
 
 	]]
-		local typeBase = {
+	--[[
+	local typeBase = {
 		['Mi-8MT'] = {'Mi-8MTV2', 'Mi-8MTV', 'Mi-8'},
 		['MiG-21Bis'] = {'Mig-21'},
 		['MiG-15bis'] = {'Mig-15'},
@@ -6039,7 +6040,7 @@ do
 									if found == true then
 										markForTable = markSpamFilter(markForTable, clientData.groupId) -- sends info to other function to see if client is already recieving the current message.
 									end
-									--[[for clientDataEntry, clientDataVal in pairs(clientData) do
+									for clientDataEntry, clientDataVal in pairs(clientData) do
 										if type(clientDataVal) == 'string' then
 											
 											if mist.matchString(list, clientDataVal) == true or list == 'all' then
@@ -6061,7 +6062,7 @@ do
 										if found == true then	-- shouldn't this be elsewhere too?
 											break
 										end
-									end]]
+									end
 								end
 
 							end
@@ -6124,6 +6125,7 @@ do
 		
 	
 	end
+    ]]
 end
 --- Time conversion functions.
 -- @section mist.time
@@ -6725,8 +6727,9 @@ do -- group tasks scope
 	end
 
 	-- need to return a Vec3 or Vec2?
-	function mist.getRandPointInCircle(point, radius, innerRadius, maxA, minA)
-		local theta = 2*math.pi*math.random()
+	function mist.getRandPointInCircle(p, radius, innerRadius, maxA, minA)
+		local point = mist.utils.makeVec3(p)
+        local theta = 2*math.pi*math.random()
 		local minR = innerRadius or 0
 		if maxA and not minA then
 			theta = math.rad(math.random(0, maxA - math.random()))
@@ -6744,10 +6747,6 @@ do -- group tasks scope
 			radMult = radius * math.sqrt((minR^2 + (radius^2 - minR^2) * math.random()) / radius^2)
 		else
 			radMult = radius*rad
-		end
-		
-		if not point.z then --might as well work with vec2/3
-			point.z = point.y
 		end
 
 		local rndCoord
