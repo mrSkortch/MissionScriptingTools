@@ -34,8 +34,8 @@ mist = {}
 
 -- don't change these
 mist.majorVersion = 4
-mist.minorVersion = 2
-mist.build = 84
+mist.minorVersion = 4
+mist.build = 82
 
 -- forward declaration of log shorthand
 local log
