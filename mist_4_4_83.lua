@@ -35,7 +35,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 4
-mist.build = 82
+mist.build = 83
 
 -- forward declaration of log shorthand
 local log
@@ -3210,8 +3210,8 @@ do -- group functions scope
 		
 		--log:info('get Randomized Point')
 		local diff = {x = 0, y = 0}
-		local newCoord, origCoord
-		if point and radius > 0 then
+		local newCoord, origCoord 
+		if point and radius >= 0 then
 			local valid = false
 
 			local validTerrain
@@ -3243,7 +3243,7 @@ do -- group functions scope
 		if not newGroupData.category and mist.DBs.groupsByName[newGroupData.groupName].category then
 			newGroupData.category = mist.DBs.groupsByName[newGroupData.groupName].category
 		end
-        log:info(point)
+        --log:info(point)
 		for unitNum, unitData in pairs(newGroupData.units) do
 			if disperse then
 				if maxDisp and type(maxDisp) == 'number' and unitNum ~= 1 then
@@ -3262,11 +3262,11 @@ do -- group functions scope
 				if (newGroupData.category == 'plane' or newGroupData.category == 'helicopter')	then
                     if point.z and point.y > 0 and point.y > land.getHeight({newGroupData.units[unitNum].x, newGroupData.units[unitNum].y}) + 10 then
 						newGroupData.units[unitNum].alt = point.y
-						log:info('far enough from ground')
+						--log:info('far enough from ground')
 					else
 						
 						if newGroupData.category == 'plane' then
-							log:info('setNewAlt')
+							--log:info('setNewAlt')
 							newGroupData.units[unitNum].alt = land.getHeight({newGroupData.units[unitNum].x, newGroupData.units[unitNum].y}) + math.random(300, 9000)
 						else
 							newGroupData.units[unitNum].alt = land.getHeight({newGroupData.units[unitNum].x, newGroupData.units[unitNum].y}) + math.random(200, 3000)
@@ -3293,7 +3293,7 @@ do -- group functions scope
 		if route then
 			newGroupData.route = route
 		end
-		log:info(newGroupData)
+		--log:info(newGroupData)
 		--mist.debug.writeData(mist.utils.serialize,{'teleportToPoint', newGroupData}, 'newGroupData.lua')
 		if string.lower(newGroupData.category) == 'static' then
 			--log:info(newGroupData)
