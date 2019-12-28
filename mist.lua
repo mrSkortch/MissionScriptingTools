@@ -4323,7 +4323,7 @@ function mist.utils.oneLineSerialize(tbl)
 				tbl_str[#tbl_str + 1] = mist.utils.oneLineSerialize(val)
 				tbl_str[#tbl_str + 1] = ', '	 --I think this is right, I just added it
 			else
-				log:war('Unable to serialize value type $1 at index $2', mist.utils.basicSerialize(type(val)), tostring(ind))
+				log:warn('Unable to serialize value type $1 at index $2', mist.utils.basicSerialize(type(val)), tostring(ind))
 			end
 
 		end
