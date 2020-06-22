@@ -1459,7 +1459,7 @@ do -- the main scope
 				end
 				
 			elseif newCat == 'GROUND_UNIT' then
-				if not unitData.playerCanDrive then
+				if nil == unitData.playerCanDrive then
 					unitData.playerCanDrive = true
 				end
 			
