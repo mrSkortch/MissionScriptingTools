@@ -35,13 +35,13 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 4
-mist.build = 83
+mist.build = 85
 
 -- forward declaration of log shorthand
 local log
 
 local mistSettings = {
-	errorPopup = false, -- errors printed by mist logger will create popup warning you
+	errorPopup = true, -- errors printed by mist logger will create popup warning you
 	warnPopup = false,
 	infoPopup = false,
 	logLevel = 'warn',
@@ -1204,7 +1204,7 @@ do -- the main scope
 		if mist.nextUnitId > 6900 and mist.nextUnitId < 30000 then
 			mist.nextUnitId = 30000
 		end
-		return mist.nextUnitId
+		return mist.utils.deepCopy(mist.nextUnitId)
 	end
 
 	--- Returns next group id.
@@ -1214,7 +1214,7 @@ do -- the main scope
 		if mist.nextGroupId > 6900 and mist.nextGroupId < 30000 then
 			mist.nextGroupId = 30000
 		end
-		return mist.nextGroupId
+		return mist.utils.deepCopy(mist.nextGroupId)
 	end
 
 	--- Returns timestamp of last database update.
@@ -1227,7 +1227,7 @@ do -- the main scope
 	-- @todo write good docs
 	-- @tparam table staticObj table containing data needed for the object creation
 	function mist.dynAddStatic(newObj)
-
+        log:info(newObj)
 		if newObj.units and newObj.units[1] then -- if its mist format
 			for entry, val in pairs(newObj.units[1]) do
 				if newObj[entry] and newObj[entry] ~= val or not newObj[entry] then
@@ -1271,7 +1271,8 @@ do -- the main scope
 			mistUnitId = mistUnitId + 1
 			newObj.unitId = mistUnitId
 		end
-
+        
+        newObj.name = newObj.unitName
 		if newObj.clone or not newObj.name then
 			mistDynAddIndex[' static '] = mistDynAddIndex[' static '] + 1
 			newObj.name = (newCountry .. ' static ' .. mistDynAddIndex[' static '])
@@ -1305,7 +1306,7 @@ do -- the main scope
 		
 		mistAddedObjects[#mistAddedObjects + 1] = mist.utils.deepCopy(newObj)
 		if newObj.x and newObj.y and newObj.type and type(newObj.x) == 'number' and type(newObj.y) == 'number' and type(newObj.type) == 'string' then
-			--log:info('addStaticObject')
+			log:info(newObj)
 			coalition.addStaticObject(country.id[newCountry], newObj)
 
 			return newObj
@@ -1467,12 +1468,14 @@ do -- the main scope
 			mistAddedObjects[#mistAddedObjects + 1] = mist.utils.deepCopy(newGroup.units[unitIndex])
 		end
 		mistAddedGroups[#mistAddedGroups + 1] = mist.utils.deepCopy(newGroup)
-		if newGroup.route and not newGroup.route.points then
-			if not newGroup.route.points and newGroup.route[1] then
-				local copyRoute = newGroup.route
-				newGroup.route = {}
-				newGroup.route.points = copyRoute
-			end
+		if newGroup.route then
+            if newGroup.route and not newGroup.route.points then
+                if newGroup.route[1] then
+                    local copyRoute = mist.utils.deepCopy(newGroup.route)
+                    newGroup.route = {}
+                    newGroup.route.points = copyRoute
+                end
+            end
 		else -- if aircraft and no route assigned. make a quick and stupid route so AI doesnt RTB immediately
 			if newCat == 'AIRPLANE' or newCat == 'HELICOPTER' then
 				newGroup.route = {}
@@ -1484,7 +1487,7 @@ do -- the main scope
 
 
 		--mist.debug.writeData(mist.utils.serialize,{'msg', newGroup}, 'newGroup.lua')
-
+        --log:warn(newGroup)
 		-- sanitize table
 		newGroup.groupName = nil
 		newGroup.clone = nil
@@ -2584,7 +2587,7 @@ function mist.getUnitsInZones(unit_names, zone_names, zone_type)
 				end
 			end
 			local unit_pos = units[units_ind]:getPosition().p
-			if unit_pos and units[units_ind]:isActive() == true then
+            if unit_pos and units[units_ind]:isActive() == true then
 				if zone_type == 'cylinder' and (((unit_pos.x - zones[zones_ind].x)^2 + (unit_pos.z - zones[zones_ind].z)^2)^0.5 <= zones[zones_ind].radius) then
 					in_zone_units[#in_zone_units + 1] = units[units_ind]
 					break
@@ -3160,10 +3163,15 @@ do -- group functions scope
 		return
 
 	end
+    
+    function mist.getValidRandomPoint(vars)
+    
+    
+    end
 
 	function mist.teleportToPoint(vars) -- main teleport function that all of teleport/respawn functions call
-		local point = vars.point
-        log:info(point)
+		log:info(vars)
+        local point = vars.point
 		local gpName
 		if vars.gpName then
 			gpName = vars.gpName
@@ -3176,12 +3184,7 @@ do -- group functions scope
 		local action = vars.action
 
 		local disperse = vars.disperse or false
-		local maxDisp = vars.maxDisp
-		if not vars.maxDisp then
-			maxDisp = 200
-		else
-			maxDisp = vars.maxDisp
-		end
+		local maxDisp = vars.maxDisp or 200
 		local radius = vars.radius or 0
 		local innerRadius = vars.innerRadius
 
@@ -3211,18 +3214,31 @@ do -- group functions scope
 		--log:info('get Randomized Point')
 		local diff = {x = 0, y = 0}
 		local newCoord, origCoord 
+        
+        local validTerrain = {'LAND', 'ROAD', 'SHALLOW_WATER', 'WATER', 'RUNWAY'}
+        if string.lower(newGroupData.category) == 'ship' then
+            validTerrain = {'SHALLOW_WATER' , 'WATER'}
+        elseif string.lower(newGroupData.category) == 'vehicle' then
+            validTerrain = {'LAND', 'ROAD'}
+        end
+        local offsets = {}
 		if point and radius >= 0 then
 			local valid = false
+            -- new thoughts
+            -- Get AVG position of group and max radius distance to that avg point, otherwise use disperse data to get zone area to check
+            if disperse then
+            
+            else
+                
+            end
+            -- 
+            
+            
+            
 
-			local validTerrain
-			if string.lower(newGroupData.category) == 'ship' then
-				validTerrain = {'SHALLOW_WATER' , 'WATER'}
-			elseif string.lower(newGroupData.category) == 'vehicle' then
-				validTerrain = {'LAND', 'ROAD'}
-			else
-				validTerrain = {'LAND', 'ROAD', 'SHALLOW_WATER', 'WATER', 'RUNWAY'}
-			end
+            
 
+             ---- old
 			for i = 1, 100	do
 				newCoord = mist.getRandPointInCircle(point, radius, innerRadius)
 				if mist.isTerrainValid(newCoord, validTerrain) then
@@ -3245,15 +3261,28 @@ do -- group functions scope
 		end
         --log:info(point)
 		for unitNum, unitData in pairs(newGroupData.units) do
-			if disperse then
-				if maxDisp and type(maxDisp) == 'number' and unitNum ~= 1 then
-					newCoord = mist.getRandPointInCircle(origCoord, maxDisp)
+			log:info(unitNum)
+            if disperse then
+                local unitCoord 
+                if maxDisp and type(maxDisp) == 'number' and unitNum ~= 1 then
+					for i = 1, 100 do 
+                        unitCoord = mist.getRandPointInCircle(origCoord, maxDisp)
+                        if mist.isTerrainValid(unitCoord, validTerrain) == true then
+                            log:warn('Index: $1, Itered: $2. AT: $3', unitNum, i, unitCoord)
+                            break
+                        end                        
+                    end
+                    
 					--else
 					--newCoord = mist.getRandPointInCircle(zone.point, zone.radius)
 				end
-
-				newGroupData.units[unitNum].x = newCoord.x
-				newGroupData.units[unitNum].y = newCoord.y
+                if unitNum == 1 then
+                    unitCoord = mist.utils.deepCopy(newCoord)
+                end
+                if unitCoord then 
+                    newGroupData.units[unitNum].x = unitCoord.x
+                    newGroupData.units[unitNum].y = unitCoord.y
+                end
 			else
 				newGroupData.units[unitNum].x = unitData.x + diff.x
 				newGroupData.units[unitNum].y = unitData.y + diff.y
@@ -4323,12 +4352,14 @@ function mist.utils.oneLineSerialize(tbl)
 				tbl_str[#tbl_str + 1] = mist.utils.oneLineSerialize(val)
 				tbl_str[#tbl_str + 1] = ', '	 --I think this is right, I just added it
 			else
-				log:war('Unable to serialize value type $1 at index $2', mist.utils.basicSerialize(type(val)), tostring(ind))
+				log:warn('Unable to serialize value type $1 at index $2', mist.utils.basicSerialize(type(val)), tostring(ind))
 			end
 
 		end
 		tbl_str[#tbl_str + 1] = '}'
 		return table.concat(tbl_str)
+    else
+        return  mist.utils.basicSerialize(tbl)
 	end
 end
 
@@ -6137,7 +6168,7 @@ do -- mist.time scope
 	-- if number or table the time is converted into mil tim
 	function mist.time.convertToSec(timeTable)
 
-		timeInSec = 0
+		local timeInSec = 0
 		if timeTable and type(timeTable) == 'number' then
 			timeInSec = timeTable
 		elseif timeTable and type(timeTable) == 'table' and (timeTable.d or timeTable.h or timeTable.m or timeTable.s) then
@@ -6912,7 +6943,8 @@ do -- group tasks scope
 		end
 		for validIndex, validData in pairs(typeConverted) do
 			if land.getSurfaceType(coord) == land.SurfaceType[validData] then
-				return true
+				log:info('Surface is : $1', validData)
+                return true
 			end
 		end
 		return false
