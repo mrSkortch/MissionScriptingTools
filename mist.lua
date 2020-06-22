@@ -6395,6 +6395,11 @@ do -- group tasks scope
 
 												for point_num, point in pairs(group_data.route.points) do
 													local routeData = {}
+													if env.mission.version > 7 then
+														routeData.name = env.getValueDictByKey(point.name)
+													else
+														routeData.name = point.name
+													end
 													if not point.point then
 														routeData.x = point.x
 														routeData.y = point.y
