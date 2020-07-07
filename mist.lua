@@ -35,7 +35,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 4
-mist.build = 85
+mist.build = 86
 
 -- forward declaration of log shorthand
 local log
@@ -1271,8 +1271,10 @@ do -- the main scope
 			mistUnitId = mistUnitId + 1
 			newObj.unitId = mistUnitId
 		end
+
+
+        newObj.name = newObj.name or newObj.unitName
         
-        newObj.name = newObj.unitName
 		if newObj.clone or not newObj.name then
 			mistDynAddIndex[' static '] = mistDynAddIndex[' static '] + 1
 			newObj.name = (newCountry .. ' static ' .. mistDynAddIndex[' static '])
