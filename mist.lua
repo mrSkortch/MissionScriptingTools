@@ -35,7 +35,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 4
-mist.build = 86
+mist.build = 87
 
 -- forward declaration of log shorthand
 local log
@@ -811,53 +811,67 @@ do -- the main scope
 			end]]
 			
 			--dbLog:info('iterate')
-			for name, gType in pairs(tempSpawnedGroups) do
-				--dbLog:info(name)
+			for name, gData in pairs(tempSpawnedGroups) do
+				--env.info(name)
 				local updated = false
-				
-				if mist.DBs.groupsByName[name] then
-					-- first check group level properties, groupId, countryId, coalition
-					--dbLog:info('Found in DBs, check if updated')
-					local dbTable = mist.DBs.groupsByName[name]
-					--dbLog:info(dbTable)
-					if gType ~= 'static' then
-						--dbLog:info('Not static')
-						local _g = Group.getByName(name)
-						local _u = _g:getUnit(1)
-						if dbTable.groupId ~= tonumber(_g:getID()) or _u:getCountry() ~= dbTable.countryId or _u:getCoalition() ~= dbTable.coaltionId then
-							--dbLog:info('Group Data mismatch')
-							updated = true
-						else
-							--dbLog:info('No Mismatch')
-						end
+                local stillExists = false
+                if not gData.checked then 
+                    tempSpawnedGroups[name].checked = true -- so if there was an error it will get cleared.
+                    local _g = gData.gp or Group.getByName(name)
+                    if mist.DBs.groupsByName[name] then
+                        -- first check group level properties, groupId, countryId, coalition
+                       -- dbLog:info('Found in DBs, check if updated')
+                        local dbTable = mist.DBs.groupsByName[name]
+                       -- dbLog:info(dbTable)
+                        if gData.type ~= 'static' then
+                           -- dbLog:info('Not static')
+                          
+                            if _g and _g:isExist() == true then 
+                                stillExists = true
+                                local _u = _g:getUnit(1)
 
-					end
-				end			
-				--dbLog:info('Updated: $1', updated)
-				if updated == false and gType ~= 'static' then -- time to check units
-					--dbLog:info('No Group Mismatch, Check Units')
-					for index, uObject in pairs(Group.getByName(name):getUnits()) do
-						--dbLog:info(index)
-						if mist.DBs.unitsByName[uObject:getName()] then
-							--dbLog:info('UnitByName table exists')
-							local uTable = mist.DBs.unitsByName[uObject:getName()]
-							if tonumber(uObject:getID()) ~= uTable.unitId or uObject:getTypeName() ~= uTable.type  then
-								--dbLog:info('Unit Data mismatch')
-								updated = true
-								break
-							end
-						end
-					end
-				end
-				
-				if updated == true or not mist.DBs.groupsByName[name] then
-					--dbLog:info('Get Table')
-					writeGroups[#writeGroups+1] = {data = dbUpdate(name, gType), isUpdated = updated}
-				
-				end
-				-- Work done, so remove
-				tempSpawnedGroups[name] = nil
-				tempSpawnGroupsCounter = tempSpawnGroupsCounter - 1
+                                if _u and (dbTable.groupId ~= tonumber(_g:getID()) or _u:getCountry() ~= dbTable.countryId or _u:getCoalition() ~= dbTable.coaltionId) then
+                                    --dbLog:info('Group Data mismatch')
+                                    updated = true
+                                else
+                                  --  dbLog:info('No Mismatch')
+                                end
+                            else
+                                --env.info('getByName failed')
+                            end
+                        end
+                    end			
+                    --dbLog:info('Updated: $1', updated)
+                    if updated == false and gData.type ~= 'static' then -- time to check units
+                        --dbLog:info('No Group Mismatch, Check Units')
+                        if _g and _g:isExist() == true then 
+                            stillExists = true
+                            for index, uObject in pairs(_g:getUnits()) do
+                                --dbLog:info(index)
+                                if mist.DBs.unitsByName[uObject:getName()] then
+                                    --dbLog:info('UnitByName table exists')
+                                    local uTable = mist.DBs.unitsByName[uObject:getName()]
+                                    if tonumber(uObject:getID()) ~= uTable.unitId or uObject:getTypeName() ~= uTable.type  then
+                                        --dbLog:info('Unit Data mismatch')
+                                        updated = true
+                                        break
+                                    end
+                                end
+                            end
+                        end
+                    else
+                        stillExists = true
+                    end
+
+                    if stillExists == true and (updated == true or not mist.DBs.groupsByName[name]) then
+                        --dbLog:info('Get Table')
+                        writeGroups[#writeGroups+1] = {data = dbUpdate(name, gData.type), isUpdated = updated}
+                    
+                    end
+                    -- Work done, so remove
+                end
+                tempSpawnedGroups[name] = nil
+                tempSpawnGroupsCounter = tempSpawnGroupsCounter - 1
 			end			
 		end	
 	end
@@ -989,9 +1003,10 @@ do -- the main scope
 				--dbLog:info('Object is a Unit')
 				if Unit.getGroup(event.initiator) then
 					--dbLog:info(Unit.getGroup(event.initiator):getName())
-					if not tempSpawnedGroups[Unit.getGroup(event.initiator):getName()] then
+                    local g = Unit.getGroup(event.initiator)
+					if not tempSpawnedGroups[g:getName()] then
 						--dbLog:info('added')
-						tempSpawnedGroups[Unit.getGroup(event.initiator):getName()] = 'group'
+						tempSpawnedGroups[g:getName()] = {type = 'group', gp = g}
 						tempSpawnGroupsCounter = tempSpawnGroupsCounter + 1
 					end
 				else
@@ -999,7 +1014,7 @@ do -- the main scope
 				end
 			elseif Object.getCategory(event.initiator) == 3 or Object.getCategory(event.initiator) == 6 then
 				--dbLog:info('Object is Static')
-				tempSpawnedGroups[StaticObject.getName(event.initiator)] = 'static'
+				tempSpawnedGroups[StaticObject.getName(event.initiator)] = {type = 'static'}
 				tempSpawnGroupsCounter = tempSpawnGroupsCounter + 1
 			end
 				
@@ -1135,7 +1150,7 @@ do -- the main scope
 	function mist.init()
 		-- create logger
 		mist.log = mist.Logger:new("MIST", mistSettings.logLevel)
-		dbLog = mist.Logger:new('MISTDB', 'warning')
+		dbLog = mist.Logger:new('MISTDB', 'warn')
 		
 		log = mist.log -- log shorthand
 		-- set warning log level, showing only
@@ -1162,7 +1177,7 @@ do -- the main scope
 		timer.scheduleFunction(mist.main, {}, timer.getTime() + 0.01)	--reschedule first in case of Lua error
 
 		updateTenthSecond = updateTenthSecond + 1
-		if updateTenthSecond == 10 then
+		if updateTenthSecond == 20 then
 			updateTenthSecond = 0
 
 			checkSpawnedEventsNew()
