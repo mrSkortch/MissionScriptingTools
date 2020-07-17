@@ -12,21 +12,25 @@ MEgroupsById =
 			[1] = 
 			{
 				["alt"] = 500,
-				["point"] = 
-				{
-					["y"] = 631857.14285714,
-					["x"] = -297857.14285714,
-				}, -- end of ["point"]
+				["hardpoint_racks"] = true,
 				["alt_type"] = "BARO",
 				["livery_id"] = "standard",
 				["onboard_num"] = "50",
 				["category"] = "helicopter",
 				["unitName"] = "AH-1s_1_1",
-				["type"] = "AH-1W",
+				["type"] = "AH-64D",
 				["country"] = "usa",
-				["psi"] = -0.017389551289373,
 				["groupId"] = 1,
+				["psi"] = 1.1797251024108,
+				["skill"] = "High",
 				["groupName"] = "AH-1s_1",
+				["point"] = 
+				{
+					["y"] = 631655.14285713,
+					["x"] = -297748.28571428,
+				}, -- end of ["point"]
+				["y"] = 631655.14285713,
+				["x"] = -297748.28571428,
 				["callsign"] = 
 				{
 					[1] = 1,
@@ -34,12 +38,9 @@ MEgroupsById =
 					[3] = 1,
 					["name"] = "Enfield11",
 				}, -- end of ["callsign"]
-				["countryId"] = 2,
-				["x"] = -297857.14285714,
-				["skill"] = "High",
-				["heading"] = 0.017389551289373,
+				["heading"] = -1.1797251024108,
 				["unitId"] = 1,
-				["y"] = 631857.14285714,
+				["countryId"] = 2,
 				["coalition"] = "blue",
 				["speed"] = 55.555555555556,
 			}, -- end of [1]
@@ -48,17 +49,17 @@ MEgroupsById =
 				["alt"] = 500,
 				["point"] = 
 				{
-					["y"] = 631897.14285714,
-					["x"] = -297897.14285714,
+					["y"] = 631695.14285713,
+					["x"] = -297788.28571428,
 				}, -- end of ["point"]
 				["alt_type"] = "BARO",
 				["livery_id"] = "standard",
 				["onboard_num"] = "51",
 				["category"] = "helicopter",
 				["unitName"] = "AH-1s_1_2",
-				["type"] = "AH-1W",
+				["type"] = "AH-64D",
 				["country"] = "usa",
-				["psi"] = -0.017389551289373,
+				["psi"] = 1.1797251024108,
 				["groupId"] = 1,
 				["groupName"] = "AH-1s_1",
 				["callsign"] = 
@@ -69,11 +70,11 @@ MEgroupsById =
 					["name"] = "Enfield12",
 				}, -- end of ["callsign"]
 				["countryId"] = 2,
-				["x"] = -297897.14285714,
+				["x"] = -297788.28571428,
 				["skill"] = "High",
-				["heading"] = 0.017389551289373,
+				["heading"] = -1.1797251024108,
 				["unitId"] = 2,
-				["y"] = 631897.14285714,
+				["y"] = 631695.14285713,
 				["coalition"] = "blue",
 				["speed"] = 55.555555555556,
 			}, -- end of [2]
@@ -164,7 +165,7 @@ MEgroupsById =
 	}, -- end of [2]
 	[3] = 
 	{
-		["modulation"] = 1,
+		["modulation"] = 0,
 		["groupId"] = 3,
 		["frequency"] = 127.5,
 		["country"] = "russia",
@@ -186,8 +187,11 @@ MEgroupsById =
 				["unitName"] = "Mi-8s_1_1",
 				["AddPropAircraft"] = 
 				{
-					["AdditionalArmor"] = true,
 					["ExhaustScreen"] = true,
+					["CargoHalfdoor"] = true,
+					["GunnersAISkill"] = 90,
+					["AdditionalArmor"] = true,
+					["NS430allow"] = true,
 				}, -- end of ["AddPropAircraft"]
 				["type"] = "Mi-8MT",
 				["country"] = "russia",
@@ -219,8 +223,11 @@ MEgroupsById =
 				["unitName"] = "Mi-8s_1_1 #1",
 				["AddPropAircraft"] = 
 				{
-					["AdditionalArmor"] = true,
 					["ExhaustScreen"] = true,
+					["CargoHalfdoor"] = true,
+					["GunnersAISkill"] = 90,
+					["AdditionalArmor"] = true,
+					["NS430allow"] = true,
 				}, -- end of ["AddPropAircraft"]
 				["type"] = "Mi-8MT",
 				["country"] = "russia",
@@ -470,20 +477,20 @@ MEgroupsById =
 				["type"] = "TICONDEROG",
 				["point"] = 
 				{
-					["y"] = 443857.14285714,
-					["x"] = -355285.71428571,
+					["y"] = 443853.03529495,
+					["x"] = -355279.94684414,
 				}, -- end of ["point"]
 				["groupId"] = 8,
 				["groupName"] = "US Ships",
 				["skill"] = "Average",
 				["country"] = "usa",
 				["coalition"] = "blue",
-				["x"] = -355285.71428571,
+				["x"] = -355279.94684414,
 				["heading"] = 0,
 				["category"] = "ship",
 				["unitName"] = "US Ship #1",
 				["unitId"] = 13,
-				["y"] = 443857.14285714,
+				["y"] = 443853.03529495,
 				["countryId"] = 2,
 			}, -- end of [1]
 			[2] = 
@@ -491,20 +498,20 @@ MEgroupsById =
 				["type"] = "TICONDEROG",
 				["point"] = 
 				{
-					["y"] = 444657.14285714,
-					["x"] = -356085.71428571,
+					["y"] = 444653.03529495,
+					["x"] = -356079.94684414,
 				}, -- end of ["point"]
 				["groupId"] = 8,
 				["groupName"] = "US Ships",
 				["skill"] = "Average",
 				["country"] = "usa",
 				["coalition"] = "blue",
-				["x"] = -356085.71428571,
+				["x"] = -356079.94684414,
 				["heading"] = 0,
 				["category"] = "ship",
 				["unitName"] = "US Ship #2",
 				["unitId"] = 14,
-				["y"] = 444657.14285714,
+				["y"] = 444653.03529495,
 				["countryId"] = 2,
 			}, -- end of [2]
 		}, -- end of ["units"]
@@ -1200,15 +1207,15 @@ MEgroupsById =
 				["type"] = "FARP Tent",
 				["point"] = 
 				{
-					["y"] = 617962.85714285,
-					["x"] = -258642.85714286,
+					["y"] = 617976.57142856,
+					["x"] = -258649.71428571,
 				}, -- end of ["point"]
 				["categoryStatic"] = "Fortifications",
 				["country"] = "russia",
 				["groupName"] = "RuTent1",
 				["heading"] = 0,
-				["y"] = 617962.85714285,
-				["x"] = -258642.85714286,
+				["y"] = 617976.57142856,
+				["x"] = -258649.71428571,
 				["unitId"] = 40,
 				["category"] = "static",
 				["unitName"] = "RuTent1",
@@ -1234,15 +1241,15 @@ MEgroupsById =
 				["type"] = "FARP Tent",
 				["point"] = 
 				{
-					["y"] = 617691.42857143,
-					["x"] = -259071.42857143,
+					["y"] = 617319.42857142,
+					["x"] = -259804,
 				}, -- end of ["point"]
 				["categoryStatic"] = "Fortifications",
 				["country"] = "russia",
 				["groupName"] = "RuTent2",
 				["heading"] = 0,
-				["y"] = 617691.42857143,
-				["x"] = -259071.42857143,
+				["y"] = 617319.42857142,
+				["x"] = -259804,
 				["unitId"] = 41,
 				["category"] = "static",
 				["unitName"] = "RuTent2",
@@ -1373,18 +1380,17 @@ MEgroupsById =
 					["y"] = 684605.71428571,
 					["x"] = -279949.99999999,
 				}, -- end of ["point"]
-				["groupId"] = 30,
+				["categoryStatic"] = "Fortifications",
 				["country"] = "usa",
-				["heading"] = 0,
 				["groupName"] = "static",
-				["x"] = -279949.99999999,
+				["heading"] = 0,
 				["coalition"] = "blue",
-				["mass"] = 1000,
+				["x"] = -279949.99999999,
 				["unitId"] = 44,
 				["category"] = "static",
 				["unitName"] = "static",
+				["groupId"] = 30,
 				["y"] = 684605.71428571,
-				["categoryStatic"] = "Fortifications",
 				["countryId"] = 2,
 			}, -- end of [1]
 		}, -- end of ["units"]
@@ -1402,7 +1408,7 @@ MEgroupsById =
 			[1] = 
 			{
 				["shape_name"] = "ab-212_cargo",
-				["type"] = "Cargo1",
+				["type"] = "uh1h_cargo",
 				["point"] = 
 				{
 					["y"] = 675199.99999999,
@@ -1437,7 +1443,7 @@ MEgroupsById =
 			[1] = 
 			{
 				["shape_name"] = "ab-212_cargo",
-				["type"] = "Cargo1",
+				["type"] = "uh1h_cargo",
 				["point"] = 
 				{
 					["y"] = 674842.85714285,
@@ -1459,4 +1465,507 @@ MEgroupsById =
 			}, -- end of [1]
 		}, -- end of ["units"]
 	}, -- end of [32]
+	[33] = 
+	{
+		["country"] = "usa",
+		["groupName"] = "gavinstack",
+		["units"] = 
+		{
+			[1] = 
+			{
+				["type"] = "M-113",
+				["point"] = 
+				{
+					["y"] = 686871.42857143,
+					["x"] = -286407.14285714,
+				}, -- end of ["point"]
+				["groupId"] = 33,
+				["skill"] = "Average",
+				["country"] = "usa",
+				["groupName"] = "gavinstack",
+				["y"] = 686871.42857143,
+				["coalition"] = "blue",
+				["x"] = -286407.14285714,
+				["unitId"] = 49,
+				["category"] = "vehicle",
+				["unitName"] = "Unit #1",
+				["playerCanDrive"] = true,
+				["heading"] = 0,
+				["countryId"] = 2,
+			}, -- end of [1]
+			[2] = 
+			{
+				["type"] = "M-113",
+				["point"] = 
+				{
+					["y"] = 686871.42857143,
+					["x"] = -286447.14285714,
+				}, -- end of ["point"]
+				["groupId"] = 33,
+				["skill"] = "Average",
+				["country"] = "usa",
+				["groupName"] = "gavinstack",
+				["y"] = 686871.42857143,
+				["coalition"] = "blue",
+				["x"] = -286447.14285714,
+				["unitId"] = 51,
+				["category"] = "vehicle",
+				["unitName"] = "Unit #001",
+				["playerCanDrive"] = true,
+				["heading"] = 0,
+				["countryId"] = 2,
+			}, -- end of [2]
+		}, -- end of ["units"]
+		["countryId"] = 2,
+		["hidden"] = false,
+		["category"] = "vehicle",
+		["coalition"] = "blue",
+		["startTime"] = 0,
+		["task"] = "Ground Nothing",
+		["groupId"] = 33,
+	}, -- end of [33]
+	[35] = 
+	{
+		["country"] = "usa",
+		["groupName"] = "teleGroup",
+		["units"] = 
+		{
+			[1] = 
+			{
+				["type"] = "Hawk tr",
+				["point"] = 
+				{
+					["y"] = 681535.14285714,
+					["x"] = -286916.85714286,
+				}, -- end of ["point"]
+				["groupId"] = 35,
+				["skill"] = "Average",
+				["country"] = "usa",
+				["groupName"] = "teleGroup",
+				["y"] = 681535.14285714,
+				["coalition"] = "blue",
+				["x"] = -286916.85714286,
+				["unitId"] = 52,
+				["category"] = "vehicle",
+				["unitName"] = "Unit #002",
+				["playerCanDrive"] = true,
+				["heading"] = 0,
+				["countryId"] = 2,
+			}, -- end of [1]
+			[2] = 
+			{
+				["type"] = "Hawk sr",
+				["point"] = 
+				{
+					["y"] = 681535.14285714,
+					["x"] = -286956.85714286,
+				}, -- end of ["point"]
+				["groupId"] = 35,
+				["skill"] = "Average",
+				["country"] = "usa",
+				["groupName"] = "teleGroup",
+				["y"] = 681535.14285714,
+				["coalition"] = "blue",
+				["x"] = -286956.85714286,
+				["unitId"] = 53,
+				["category"] = "vehicle",
+				["unitName"] = "Unit #003",
+				["playerCanDrive"] = true,
+				["heading"] = 0,
+				["countryId"] = 2,
+			}, -- end of [2]
+			[3] = 
+			{
+				["type"] = "Hawk pcp",
+				["point"] = 
+				{
+					["y"] = 681535.14285714,
+					["x"] = -286996.85714286,
+				}, -- end of ["point"]
+				["groupId"] = 35,
+				["skill"] = "Average",
+				["country"] = "usa",
+				["groupName"] = "teleGroup",
+				["y"] = 681535.14285714,
+				["coalition"] = "blue",
+				["x"] = -286996.85714286,
+				["unitId"] = 54,
+				["category"] = "vehicle",
+				["unitName"] = "Unit #004",
+				["playerCanDrive"] = true,
+				["heading"] = 0,
+				["countryId"] = 2,
+			}, -- end of [3]
+			[4] = 
+			{
+				["type"] = "Hawk ln",
+				["point"] = 
+				{
+					["y"] = 681535.14285714,
+					["x"] = -287036.85714286,
+				}, -- end of ["point"]
+				["groupId"] = 35,
+				["skill"] = "Average",
+				["country"] = "usa",
+				["groupName"] = "teleGroup",
+				["y"] = 681535.14285714,
+				["coalition"] = "blue",
+				["x"] = -287036.85714286,
+				["unitId"] = 55,
+				["category"] = "vehicle",
+				["unitName"] = "Unit #005",
+				["playerCanDrive"] = true,
+				["heading"] = 0,
+				["countryId"] = 2,
+			}, -- end of [4]
+			[5] = 
+			{
+				["type"] = "Hawk ln",
+				["point"] = 
+				{
+					["y"] = 681535.14285714,
+					["x"] = -287076.85714286,
+				}, -- end of ["point"]
+				["groupId"] = 35,
+				["skill"] = "Average",
+				["country"] = "usa",
+				["groupName"] = "teleGroup",
+				["y"] = 681535.14285714,
+				["coalition"] = "blue",
+				["x"] = -287076.85714286,
+				["unitId"] = 56,
+				["category"] = "vehicle",
+				["unitName"] = "Unit #006",
+				["playerCanDrive"] = true,
+				["heading"] = 0,
+				["countryId"] = 2,
+			}, -- end of [5]
+			[6] = 
+			{
+				["type"] = "Hawk ln",
+				["point"] = 
+				{
+					["y"] = 681535.14285714,
+					["x"] = -287116.85714286,
+				}, -- end of ["point"]
+				["groupId"] = 35,
+				["skill"] = "Average",
+				["country"] = "usa",
+				["groupName"] = "teleGroup",
+				["y"] = 681535.14285714,
+				["coalition"] = "blue",
+				["x"] = -287116.85714286,
+				["unitId"] = 57,
+				["category"] = "vehicle",
+				["unitName"] = "Unit #007",
+				["playerCanDrive"] = true,
+				["heading"] = 0,
+				["countryId"] = 2,
+			}, -- end of [6]
+			[7] = 
+			{
+				["type"] = "Hawk cwar",
+				["point"] = 
+				{
+					["y"] = 681535.14285714,
+					["x"] = -287156.85714286,
+				}, -- end of ["point"]
+				["groupId"] = 35,
+				["skill"] = "Average",
+				["country"] = "usa",
+				["groupName"] = "teleGroup",
+				["y"] = 681535.14285714,
+				["coalition"] = "blue",
+				["x"] = -287156.85714286,
+				["unitId"] = 58,
+				["category"] = "vehicle",
+				["unitName"] = "Unit #008",
+				["playerCanDrive"] = true,
+				["heading"] = 0,
+				["countryId"] = 2,
+			}, -- end of [7]
+		}, -- end of ["units"]
+		["countryId"] = 2,
+		["hidden"] = false,
+		["category"] = "vehicle",
+		["coalition"] = "blue",
+		["startTime"] = 0,
+		["task"] = "Ground Nothing",
+		["groupId"] = 35,
+	}, -- end of [35]
+	[37] = 
+	{
+		["modulation"] = 0,
+		["groupId"] = 37,
+		["frequency"] = 251,
+		["country"] = "usa",
+		["groupName"] = "New Airplane Group",
+		["units"] = 
+		{
+			[1] = 
+			{
+				["alt"] = 2000,
+				["hardpoint_racks"] = true,
+				["alt_type"] = "BARO",
+				["livery_id"] = "335th Fighter SQN (SJ)",
+				["onboard_num"] = "053",
+				["category"] = "plane",
+				["unitName"] = "Pilot #002",
+				["type"] = "F-15E",
+				["country"] = "usa",
+				["groupId"] = 37,
+				["psi"] = -2.4599772899911,
+				["skill"] = "High",
+				["groupName"] = "New Airplane Group",
+				["point"] = 
+				{
+					["y"] = 665265.71428571,
+					["x"] = -274373.14285715,
+				}, -- end of ["point"]
+				["y"] = 665265.71428571,
+				["x"] = -274373.14285715,
+				["callsign"] = 
+				{
+					[1] = 5,
+					[2] = 1,
+					[3] = 1,
+					["name"] = "Dodge11",
+				}, -- end of ["callsign"]
+				["heading"] = 2.4599772899911,
+				["unitId"] = 60,
+				["countryId"] = 2,
+				["coalition"] = "blue",
+				["speed"] = 138.88888888889,
+			}, -- end of [1]
+		}, -- end of ["units"]
+		["countryId"] = 2,
+		["radioSet"] = false,
+		["hidden"] = false,
+		["category"] = "plane",
+		["coalition"] = "blue",
+		["startTime"] = 0,
+		["task"] = "Ground Attack",
+		["uncontrolled"] = false,
+	}, -- end of [37]
+	[39] = 
+	{
+		["coalition"] = "red",
+		["country"] = "russia",
+		["groupId"] = 39,
+		["countryId"] = 0,
+		["category"] = "static",
+		["groupName"] = "tent #002",
+		["units"] = 
+		{
+			[1] = 
+			{
+				["shape_name"] = "elektrowoz",
+				["type"] = "Electric locomotive",
+				["point"] = 
+				{
+					["y"] = 652535.98623348,
+					["x"] = -296017.9062429,
+				}, -- end of ["point"]
+				["groupId"] = 39,
+				["groupName"] = "tent #002",
+				["unitId"] = 62,
+				["countryId"] = 0,
+				["x"] = -296017.9062429,
+				["heading"] = 0,
+				["category"] = "static",
+				["unitName"] = "tent #002",
+				["country"] = "russia",
+				["y"] = 652535.98623348,
+				["coalition"] = "red",
+			}, -- end of [1]
+		}, -- end of ["units"]
+	}, -- end of [39]
+	[41] = 
+	{
+		["coalition"] = "blue",
+		["country"] = "usa",
+		["groupId"] = 41,
+		["countryId"] = 2,
+		["category"] = "static",
+		["groupName"] = "static_on_ship1 #001",
+		["units"] = 
+		{
+			[1] = 
+			{
+				["heading"] = 0,
+				["point"] = 
+				{
+					["y"] = 443849.03844635,
+					["x"] = -355322.27295572,
+				}, -- end of ["point"]
+				["categoryStatic"] = "Helicopters",
+				["groupId"] = 41,
+				["livery_id"] = "USA Marines",
+				["groupName"] = "static_on_ship1 #001",
+				["country"] = "usa",
+				["coalition"] = "blue",
+				["x"] = -355322.27295572,
+				["type"] = "AH-1W",
+				["category"] = "static",
+				["unitName"] = "static_on_ship1 #001",
+				["unitId"] = 64,
+				["y"] = 443849.03844635,
+				["countryId"] = 2,
+			}, -- end of [1]
+		}, -- end of ["units"]
+	}, -- end of [41]
+	[34] = 
+	{
+		["modulation"] = 0,
+		["groupId"] = 34,
+		["frequency"] = 251,
+		["country"] = "usa",
+		["groupName"] = "cloneAir",
+		["units"] = 
+		{
+			[1] = 
+			{
+				["alt"] = 2000,
+				["point"] = 
+				{
+					["y"] = 682714.28571429,
+					["x"] = -288607.14285714,
+				}, -- end of ["point"]
+				["alt_type"] = "BARO",
+				["livery_id"] = "usaf standard",
+				["onboard_num"] = "010",
+				["category"] = "plane",
+				["unitName"] = "Pilot #001",
+				["type"] = "B-52H",
+				["country"] = "usa",
+				["psi"] = -1.6162196062162,
+				["groupId"] = 34,
+				["groupName"] = "cloneAir",
+				["callsign"] = 
+				{
+					[1] = 4,
+					[2] = 1,
+					[3] = 1,
+					["name"] = "Colt11",
+				}, -- end of ["callsign"]
+				["countryId"] = 2,
+				["x"] = -288607.14285714,
+				["skill"] = "High",
+				["heading"] = 1.6162196062162,
+				["unitId"] = 50,
+				["y"] = 682714.28571429,
+				["coalition"] = "blue",
+				["speed"] = 138.88888888889,
+			}, -- end of [1]
+		}, -- end of ["units"]
+		["countryId"] = 2,
+		["radioSet"] = false,
+		["hidden"] = false,
+		["category"] = "plane",
+		["coalition"] = "blue",
+		["startTime"] = 0,
+		["task"] = "Ground Attack",
+		["uncontrolled"] = false,
+	}, -- end of [34]
+	[36] = 
+	{
+		["coalition"] = "red",
+		["country"] = "russia",
+		["groupId"] = 36,
+		["countryId"] = 0,
+		["category"] = "static",
+		["groupName"] = "tent",
+		["units"] = 
+		{
+			[1] = 
+			{
+				["shape_name"] = "PalatkaB",
+				["type"] = "FARP Tent",
+				["point"] = 
+				{
+					["y"] = 626847.99999999,
+					["x"] = -296048.28571428,
+				}, -- end of ["point"]
+				["categoryStatic"] = "Fortifications",
+				["country"] = "russia",
+				["groupName"] = "tent",
+				["heading"] = 0,
+				["y"] = 626847.99999999,
+				["x"] = -296048.28571428,
+				["unitId"] = 59,
+				["category"] = "static",
+				["unitName"] = "tent",
+				["groupId"] = 36,
+				["countryId"] = 0,
+				["coalition"] = "red",
+			}, -- end of [1]
+		}, -- end of ["units"]
+	}, -- end of [36]
+	[38] = 
+	{
+		["coalition"] = "red",
+		["country"] = "russia",
+		["groupId"] = 38,
+		["countryId"] = 0,
+		["category"] = "static",
+		["groupName"] = "tent #001",
+		["units"] = 
+		{
+			[1] = 
+			{
+				["shape_name"] = "teplowoz",
+				["type"] = "Locomotive",
+				["point"] = 
+				{
+					["y"] = 652535.98623348,
+					["x"] = -295992.90575084,
+				}, -- end of ["point"]
+				["groupId"] = 38,
+				["groupName"] = "tent #001",
+				["unitId"] = 61,
+				["countryId"] = 0,
+				["x"] = -295992.90575084,
+				["heading"] = 0,
+				["category"] = "static",
+				["unitName"] = "tent #001",
+				["country"] = "russia",
+				["y"] = 652535.98623348,
+				["coalition"] = "red",
+			}, -- end of [1]
+		}, -- end of ["units"]
+	}, -- end of [38]
+	[40] = 
+	{
+		["coalition"] = "blue",
+		["country"] = "usa",
+		["groupId"] = 40,
+		["countryId"] = 2,
+		["category"] = "static",
+		["groupName"] = "static_on_ship1",
+		["units"] = 
+		{
+			[1] = 
+			{
+				["heading"] = 0,
+				["point"] = 
+				{
+					["y"] = 443856.28948724,
+					["x"] = -355322.45423175,
+				}, -- end of ["point"]
+				["categoryStatic"] = "Helicopters",
+				["groupId"] = 40,
+				["livery_id"] = "USA Marines",
+				["groupName"] = "static_on_ship1",
+				["country"] = "usa",
+				["coalition"] = "blue",
+				["x"] = -355322.45423175,
+				["type"] = "AH-1W",
+				["category"] = "static",
+				["unitName"] = "static_on_ship1",
+				["unitId"] = 63,
+				["y"] = 443856.28948724,
+				["countryId"] = 2,
+			}, -- end of [1]
+		}, -- end of ["units"]
+	}, -- end of [40]
 } -- end of MEgroupsById
