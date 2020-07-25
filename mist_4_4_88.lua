@@ -35,7 +35,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 4
-mist.build = 87
+mist.build = 88
 
 -- forward declaration of log shorthand
 local log
@@ -630,7 +630,7 @@ do -- the main scope
 				newObject = StaticObject.getByName(event)
 				--	log:info('its static')
 			else
-				log:warn('$1 is not a Unit or Static Object. This should not be possible', event)
+				log:warn('$1 is not a Group or Static Object. This should not be possible. Sent category is: $2', event, objType)
 				return false
 			end
 
@@ -837,7 +837,7 @@ do -- the main scope
                                   --  dbLog:info('No Mismatch')
                                 end
                             else
-                                --env.info('getByName failed')
+                                dbLog:warn('$1 : Group was not accessible', name)
                             end
                         end
                     end			
@@ -1555,10 +1555,12 @@ do -- the main scope
 		while i <= #scheduledTasks do
 			if scheduledTasks[i].id == id then
 				table.remove(scheduledTasks, i)
+                return true
 			else
 				i = i + 1
 			end
 		end
+        return false
 	end
 
 	--- Registers an event handler.
