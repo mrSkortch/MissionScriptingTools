@@ -1,6 +1,6 @@
 missionData = 
 {
-	["version"] = 11,
+	["version"] = 18,
 	["files"] = 
 	{
 	}, -- end of ["files"]
@@ -8,6 +8,11 @@ missionData =
 	["theatre"] = "Caucasus",
 	["bullseye"] = 
 	{
+		["neutral"] = 
+		{
+			["y"] = 23527.410527318,
+			["x"] = -740.03186333284,
+		}, -- end of ["neutral"]
 		["blue"] = 
 		{
 			["y"] = 617414,

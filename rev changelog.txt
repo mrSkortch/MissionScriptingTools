@@ -1,3 +1,8 @@
+v82
+-Its been 3 years since I last published an update apparently, so I barely remember
+-Fixed a locality issue that caused altitudes to become silly if spawning groups a specific way
+-Added conversion code for assorted useful things like speed, temperature, distance, etc. 
+
 v74
 -fixed mist.getCurrentGroupData to return more data
 

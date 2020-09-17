@@ -1,5 +1,8 @@
 navPoints = 
 {
+	["neutral"] = 
+	{
+	}, -- end of ["neutral"]
 	["blue"] = 
 	{
 		[1] = 
