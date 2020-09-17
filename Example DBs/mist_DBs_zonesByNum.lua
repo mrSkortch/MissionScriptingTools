@@ -46,6 +46,31 @@ zonesByNum =
 	}, -- end of [2]
 	[3] = 
 	{
+		["radius"] = 3000,
+		["zoneId"] = 174,
+		["color"] = 
+		{
+			[1] = 1,
+			[2] = 1,
+			[3] = 1,
+			[4] = 0.15,
+		}, -- end of ["color"]
+		["properties"] = 
+		{
+		}, -- end of ["properties"]
+		["hidden"] = false,
+		["y"] = 267139.69375223,
+		["x"] = -163182.90396786,
+		["name"] = "shipZone",
+		["point"] = 
+		{
+			["y"] = 0,
+			["x"] = -163182.90396786,
+			["z"] = 267139.69375223,
+		}, -- end of ["point"]
+	}, -- end of [3]
+	[4] = 
+	{
 		["y"] = 673819.99999999,
 		["radius"] = 3000,
 		["point"] = 
@@ -65,5 +90,5 @@ zonesByNum =
 		["x"] = -271900,
 		["hidden"] = false,
 		["zoneId"] = 1,
-	}, -- end of [3]
+	}, -- end of [4]
 } -- end of zonesByNum

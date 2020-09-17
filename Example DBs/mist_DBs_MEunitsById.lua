@@ -1490,4 +1490,141 @@ MEunitsById =
 		["y"] = 443849.03844635,
 		["countryId"] = 2,
 	}, -- end of [64]
+	[65] = 
+	{
+		["alt"] = 2000,
+		["point"] = 
+		{
+			["y"] = 319582.08692347,
+			["x"] = -198551.02959497,
+		}, -- end of ["point"]
+		["alt_type"] = "BARO",
+		["livery_id"] = "Australian 75th Squadron",
+		["onboard_num"] = "010",
+		["category"] = "plane",
+		["unitName"] = "Aerial-1-1",
+		["AddPropAircraft"] = 
+		{
+		}, -- end of ["AddPropAircraft"]
+		["type"] = "FA-18C_hornet",
+		["country"] = "australia",
+		["psi"] = -2.1995926132104,
+		["groupId"] = 42,
+		["groupName"] = "cloneNeut",
+		["skill"] = "High",
+		["coalition"] = "neutral",
+		["x"] = -198551.02959497,
+		["callsign"] = 
+		{
+			[1] = 1,
+			[2] = 1,
+			[3] = 1,
+			["name"] = "Enfield11",
+		}, -- end of ["callsign"]
+		["heading"] = 2.1995926132104,
+		["unitId"] = 65,
+		["y"] = 319582.08692347,
+		["countryId"] = 21,
+		["speed"] = 180.55555555556,
+	}, -- end of [65]
+	[66] = 
+	{
+		["type"] = "M-113",
+		["point"] = 
+		{
+			["y"] = 445199.91242668,
+			["x"] = -146108.63642373,
+		}, -- end of ["point"]
+		["groupId"] = 43,
+		["skill"] = "Average",
+		["country"] = "australia",
+		["groupName"] = "Ground-1",
+		["y"] = 445199.91242668,
+		["coalition"] = "neutral",
+		["x"] = -146108.63642373,
+		["unitId"] = 66,
+		["category"] = "vehicle",
+		["unitName"] = "Ground-1-1",
+		["playerCanDrive"] = true,
+		["heading"] = 0,
+		["countryId"] = 21,
+	}, -- end of [66]
+	[67] = 
+	{
+		["type"] = "PERRY",
+		["point"] = 
+		{
+			["y"] = 342754.30716193,
+			["x"] = -153426.17965693,
+		}, -- end of ["point"]
+		["groupId"] = 44,
+		["groupName"] = "perry",
+		["livery_id"] = "ReubenJames",
+		["skill"] = "Average",
+		["country"] = "australia",
+		["coalition"] = "neutral",
+		["x"] = -153426.17965693,
+		["heading"] = 0,
+		["category"] = "ship",
+		["unitName"] = "Naval-1-1",
+		["unitId"] = 67,
+		["y"] = 342754.30716193,
+		["countryId"] = 21,
+	}, -- end of [67]
+	[68] = 
+	{
+		["alt"] = 500,
+		["point"] = 
+		{
+			["y"] = 405888.85058741,
+			["x"] = -155967.80633993,
+		}, -- end of ["point"]
+		["alt_type"] = "BARO",
+		["livery_id"] = "Australia RAAF",
+		["onboard_num"] = "050",
+		["category"] = "helicopter",
+		["unitName"] = "Rotary-1-1",
+		["type"] = "CH-47D",
+		["country"] = "australia",
+		["psi"] = -2.6461357622286,
+		["groupId"] = 45,
+		["groupName"] = "nH",
+		["callsign"] = 
+		{
+			[1] = 2,
+			[2] = 1,
+			[3] = 1,
+			["name"] = "Springfield11",
+		}, -- end of ["callsign"]
+		["countryId"] = 21,
+		["x"] = -155967.80633993,
+		["skill"] = "High",
+		["heading"] = 2.6461357622286,
+		["unitId"] = 68,
+		["y"] = 405888.85058741,
+		["coalition"] = "neutral",
+		["speed"] = 44.444444444444,
+	}, -- end of [68]
+	[69] = 
+	{
+		["shape_name"] = "stolovaya",
+		["type"] = "Cafe",
+		["point"] = 
+		{
+			["y"] = 464123.689023,
+			["x"] = -115514.59796101,
+		}, -- end of ["point"]
+		["categoryStatic"] = "Fortifications",
+		["country"] = "australia",
+		["groupName"] = "Static Cafe-1",
+		["heading"] = 0,
+		["y"] = 464123.689023,
+		["x"] = -115514.59796101,
+		["unitId"] = 69,
+		["category"] = "static",
+		["unitName"] = "Static Cafe-1",
+		["groupId"] = 46,
+		["countryId"] = 21,
+		["coalition"] = "neutral",
+	}, -- end of [69]
 } -- end of MEunitsById

@@ -35,13 +35,13 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 4
-mist.build = 88
+mist.build = 90
 
 -- forward declaration of log shorthand
 local log
 
 local mistSettings = {
-	errorPopup = true, -- errors printed by mist logger will create popup warning you
+	errorPopup = false, -- errors printed by mist logger will create popup warning you
 	warnPopup = false,
 	infoPopup = false,
 	logLevel = 'warn',
@@ -91,11 +91,7 @@ do -- the main scope
 				end
 			end
 			-- if we add more coalition specific data then bullsye should be categorized by coaliton. For now its just the bullseye table
-			mist.DBs.missionData.bullseye = {red = {}, blue = {}}
-			mist.DBs.missionData.bullseye.red.x = env.mission.coalition.red.bullseye.x --should it be point.x?
-			mist.DBs.missionData.bullseye.red.y = env.mission.coalition.red.bullseye.y
-			mist.DBs.missionData.bullseye.blue.x = env.mission.coalition.blue.bullseye.x
-			mist.DBs.missionData.bullseye.blue.y = env.mission.coalition.blue.bullseye.y
+            mist.DBs.missionData.bullseye = {}
 		end
 
 		mist.DBs.zonesByName = {}
@@ -121,11 +117,19 @@ do -- the main scope
 		mist.DBs.navPoints = {}
 		mist.DBs.units = {}
 		--Build mist.db.units and mist.DBs.navPoints
-		for coa_name, coa_data in pairs(env.mission.coalition) do
-
-			if (coa_name == 'red' or coa_name == 'blue') and type(coa_data) == 'table' then
+		for coa_name_miz, coa_data in pairs(env.mission.coalition) do
+            local coa_name = coa_name_miz
+            if string.lower(coa_name_miz) == 'neutrals' then
+                coa_name = 'neutral'
+            end
+			if type(coa_data) == 'table' then
 				mist.DBs.units[coa_name] = {}
-
+                
+                if coa_data.bullseye then 
+                    mist.DBs.missionData.bullseye[coa_name] = {}
+                    mist.DBs.missionData.bullseye[coa_name].x = coa_data.bullseye.x
+                    mist.DBs.missionData.bullseye[coa_name].y = coa_data.bullseye.y
+                end
 				-- build nav points DB
 				mist.DBs.navPoints[coa_name] = {}
 				if coa_data.nav_points then --navpoints
@@ -739,7 +743,7 @@ do -- the main scope
 
 				end
 			else -- its a static
-				newTable.category = 'static'
+                newTable.category = 'static'
 				newTable.units[1] = {}
 				newTable.units[1].unitName = newObject:getName()
 				newTable.units[1].category = 'static'
@@ -777,8 +781,9 @@ do -- the main scope
 						newTable.units[1].mass = data.mass
 						newTable.units[1].canCargo = data.canCargo
 						newTable.units[1].categoryStatic = data.categoryStatic
-						newTable.units[1].type = 'cargo1'
+						newTable.units[1].type = data.type
 						mistAddedObjects[index] = nil
+                        break
 					end
 				end
 			end
@@ -1142,12 +1147,46 @@ do -- the main scope
 
 	mist.addEventHandler(addClientsToActive)
 	]]
+    local function verifyDB()
+        --log:warn('verfy Run')
+        for coaName, coaId in pairs(coalition.side) do
+            --env.info(coaName)
+            local gps = coalition.getGroups(coaId)
+            for i = 1, #gps do
+                if gps[i] and Group.getSize(gps[i]) > 0 then
+                    local gName = Group.getName(gps[i])
+                    if not mist.DBs.groupsByName[gName] then
+                            --env.info(Unit.getID(gUnits[j]) .. ' Not found in DB yet')
+                        if not tempSpawnedGroups[gName] then
+                            --dbLog:info('added')
+                            tempSpawnedGroups[gName] = {type = 'group', gp = gps[i]}
+                            tempSpawnGroupsCounter = tempSpawnGroupsCounter + 1
+                        end
+                    end
+                end
+            end
+            local st = coalition.getStaticObjects(coaId)
+            for i = 1, #st do
+                local s = st[i]
+                if StaticObject.isExist(s) then
+                    if not mist.DBs.unitsByName[s:getName()] then
+                        --env.info(StaticObject.getID(s) .. ' Not found in DB yet')
+                        tempSpawnedGroups[s:getName()] = {type = 'static'}
+                        tempSpawnGroupsCounter = tempSpawnGroupsCounter + 1
+                    end
+                end
+            end
+        
+        end
+    
+    end
 
 	--- init function.
 	-- creates logger, adds default event handler
 	-- and calls main the first time.
 	-- @function mist.init
 	function mist.init()
+        
 		-- create logger
 		mist.log = mist.Logger:new("MIST", mistSettings.logLevel)
 		dbLog = mist.Logger:new('MISTDB', 'warn')
@@ -1163,10 +1202,14 @@ do -- the main scope
 		-- add event handler for group spawns
 		mist.addEventHandler(groupSpawned)
 		mist.addEventHandler(addDeadObject)
+        
+        log:warn('Init time: $1', timer.getTime())
 
 		-- call main the first time therafter it reschedules itself.
 		mist.main()
 		--log:msg('MIST version $1.$2.$3 loaded', mist.majorVersion, mist.minorVersion, mist.build)
+        
+        mist.scheduleFunction(verifyDB, {}, timer.getTime() + 1)
 		return
 	end
 
@@ -1770,7 +1813,7 @@ do
 		end
 
 		for coa_name, coa_data in pairs(env.mission.coalition) do
-			if (coa_name == 'red' or coa_name == 'blue') and type(coa_data) == 'table' then
+			if  type(coa_data) == 'table' then
 				if coa_data.country then --there is a country table
 					for cntry_id, cntry_data in pairs(coa_data.country) do
 						for obj_type_name, obj_type_data in pairs(cntry_data) do
@@ -2173,7 +2216,7 @@ do
 	-- @treturn table @{UnitNameTable}
 	function mist.makeUnitTable(tbl)
 		--Assumption: will be passed a table of strings, sequential
-		log:info(tbl)
+		--log:info(tbl)
 		local units_by_name = {}
 
 		local l_munits = mist.DBs.units	--local reference for faster execution
@@ -3152,7 +3195,7 @@ do -- group functions scope
 
 		if gpId then
 			for coa_name, coa_data in pairs(env.mission.coalition) do
-				if (coa_name == 'red' or coa_name == 'blue') and type(coa_data) == 'table' then
+				if type(coa_data) == 'table' then
 					if coa_data.country then --there is a country table
 						for cntry_id, cntry_data in pairs(coa_data.country) do
 							for obj_type_name, obj_type_data in pairs(cntry_data) do
@@ -3189,7 +3232,7 @@ do -- group functions scope
     end
 
 	function mist.teleportToPoint(vars) -- main teleport function that all of teleport/respawn functions call
-		log:info(vars)
+		--log:info(vars)
         local point = vars.point
 		local gpName
 		if vars.gpName then
@@ -3244,13 +3287,13 @@ do -- group functions scope
 		if point and radius >= 0 then
 			local valid = false
             -- new thoughts
-            -- Get AVG position of group and max radius distance to that avg point, otherwise use disperse data to get zone area to check
+            --[[ Get AVG position of group and max radius distance to that avg point, otherwise use disperse data to get zone area to check
             if disperse then
             
             else
                 
             end
-            -- 
+            -- ]]
             
             
             
@@ -3280,14 +3323,14 @@ do -- group functions scope
 		end
         --log:info(point)
 		for unitNum, unitData in pairs(newGroupData.units) do
-			log:info(unitNum)
+			--log:info(unitNum)
             if disperse then
                 local unitCoord 
                 if maxDisp and type(maxDisp) == 'number' and unitNum ~= 1 then
 					for i = 1, 100 do 
                         unitCoord = mist.getRandPointInCircle(origCoord, maxDisp)
                         if mist.isTerrainValid(unitCoord, validTerrain) == true then
-                            log:warn('Index: $1, Itered: $2. AT: $3', unitNum, i, unitCoord)
+                            --log:warn('Index: $1, Itered: $2. AT: $3', unitNum, i, unitCoord)
                             break
                         end                        
                     end
@@ -5245,12 +5288,11 @@ do -- mist.msg scope
 			if type(value) == 'table' then
 				for roleName, roleVal in pairs(value) do
 					for rIndex, rVal in pairs(roleVal) do
-						if rIndex == 'red' or rIndex == 'blue' then
-							if env.mission.groundControl[index][roleName][rIndex] > 0 then
-								caSlots = true
-								break
-							end
-						end
+                        if env.mission.groundControl[index][roleName][rIndex] > 0 then
+                            caSlots = true
+                            break
+                        end
+						
 					end
 				end
 			elseif type(value) == 'boolean' and value == true then
@@ -5692,11 +5734,8 @@ vars.displayTime
 vars.msgFor - scope
 ]]
 	function mist.msgBullseye(vars)
-		if string.lower(vars.ref) == 'red' then
-			vars.ref = mist.DBs.missionData.bullseye.red
-			mist.msgBR(vars)
-		elseif string.lower(vars.ref) == 'blue' then
-			vars.ref = mist.DBs.missionData.bullseye.blue
+		if mist.DBs.missionData.bullseye[string.lower(vars.ref)] then
+			vars.ref = mist.DBs.missionData.bullseye[string.lower(vars.ref)]
 			mist.msgBR(vars)
 		end
 	end
@@ -6414,6 +6453,7 @@ do -- group tasks scope
 		if group then
 			local groupCon = group:getController()
 			if groupCon then
+                log:warn(misTask)
 				groupCon:setTask(misTask)
 				return true
 			end
@@ -6432,7 +6472,7 @@ do -- group tasks scope
 			end
 
 		for coa_name, coa_data in pairs(env.mission.coalition) do
-			if (coa_name == 'red' or coa_name == 'blue') and type(coa_data) == 'table' then
+			if type(coa_data) == 'table' then
 				if coa_data.country then --there is a country table
 					for cntry_id, cntry_data in pairs(coa_data.country) do
 						for obj_type_name, obj_type_data in pairs(cntry_data) do
@@ -6488,7 +6528,7 @@ do -- group tasks scope
 	-- function mist.ground.buildPath() end -- ????
 
 	function mist.ground.patrolRoute(vars)
-		log:info('patrol')
+		--log:info('patrol')
 		local tempRoute = {}
 		local useRoute = {}
 		local gpData = vars.gpData
