@@ -35,7 +35,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 4
-mist.build = 90
+mist.build = 91
 
 -- forward declaration of log shorthand
 local log
@@ -2859,13 +2859,13 @@ function mist.getBRString(vars)
 	local metric = vars.metric
 	local avgPos = mist.getAvgPos(units)
 	if avgPos then
-		local vec = {x = avgPos.x - ref.x, y = avgPos.y - ref.y, z = avgPos.z - ref.z}
-		local dir = mist.utils.getDir(vec, ref)
-		local dist = mist.utils.get2DDist(avgPos, ref)
-		if alt then
-			alt = avgPos.y
-		end
-		return mist.tostringBR(dir, dist, alt, metric)
+        local vec = {x = avgPos.x - ref.x, y = avgPos.y - ref.y, z = avgPos.z - ref.z}
+        local dir = mist.utils.getDir(vec, ref)
+        local dist = mist.utils.get2DDist(avgPos, ref)
+        if alt then
+            alt = avgPos.y
+        end
+        return mist.tostringBR(dir, dist, alt, metric)
 	end
 end
 
@@ -5288,7 +5288,7 @@ do -- mist.msg scope
 			if type(value) == 'table' then
 				for roleName, roleVal in pairs(value) do
 					for rIndex, rVal in pairs(roleVal) do
-                        if env.mission.groundControl[index][roleName][rIndex] > 0 then
+                        if type(rVal) == 'number' and rVal > 0 then
                             caSlots = true
                             break
                         end
