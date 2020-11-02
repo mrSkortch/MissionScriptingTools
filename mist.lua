@@ -34,8 +34,8 @@ mist = {}
 
 -- don't change these
 mist.majorVersion = 4
-mist.minorVersion = 4
-mist.build = 91
+mist.minorVersion = 5
+mist.build = 94
 
 -- forward declaration of log shorthand
 local log
@@ -443,6 +443,42 @@ do -- the main scope
 			["Small house 1A area"] = "domik1a-all",
 			["White_Flag"] = "H-Flag_W",
 			["Airshow_Cone"] = "Comp_cone",
+            ["Bulk Cargo Ship Ivanov"] = "barge-1",
+            ["Bulk Cargo Ship Yakushev"] = "barge-2",
+            ["Outpost"]="block",
+            ["Road outpost"]="block-onroad",
+            ["Container camo"] = "bw_container_cargo",
+            ["Tech Hangar A"] = "ceh_ang_a",
+            ["Bunker 1"] = "dot",
+            ["Bunker 2"] = "dot2",
+            ["Tanker Elnya 160"] = "elnya",
+            ["F-shape barrier"] = "f_bar_cargo",
+            ["Helipad Single"] = "farp",
+            ["FARP"] = "farps",
+            ["Fueltank"] = "fueltank_cargo",
+            ["Gate"] = "gate",
+            ["FARP Fuel Depot"] = "gsm rus",
+            ["Armed house"] = "home1_a",
+            ["FARP Command Post"] = "kp-ug",
+            ["Watch Tower Armed"] = "ohr-vyshka",
+            ["Oiltank"] = "oiltank_cargo",
+            ["Pipes small"] = "pipes_small_cargo",
+            ["Pipes big"] = "pipes_big_cargo",
+            ["Oil platform"] = "plavbaza",
+            ["Tetrapod"] = "tetrapod_cargo",
+            ["Fuel tank"] = "toplivo",
+            ["Trunks long"] = "trunks_long_cargo",
+            ["Trunks small"] = "trunks_small_cargo",
+            ["Passenger liner"] = "yastrebow",
+            ["Passenger boat"] = "zwezdny",
+            ["Oil rig"] = "oil_platform",
+            ["Gas platform"] = "gas_platform",
+            ["Container 20ft"] = "container_20ft",
+            ["Container 40ft"] = "container_40ft",
+            ["Downed pilot"] = "cadaver",
+            ["Parachute"] = "parash",
+            ["Pilot F15 Parachute"] = "pilot_f15_parachute",
+            ["Pilot standing"] = "pilot_parashut",
 		}
 		
 		
@@ -2985,7 +3021,146 @@ function mist.getLeadingBRString(vars)
 	end
 end
 
+--[[getPathLength from GSH
+-- Returns the length between the defined set of points. Can also return the point index before the cutoff was achieved
+p - table of path points, vec2 or vec3
+cutoff - number distance after which to stop at
+topo  - boolean for if it should get the topographical distance
+
+]]
+
+function mist.getPathLength(p, cutoff, topo)
+    local l = 0
+    local cut = 0 or cutOff
+    local path = {}
+
+    for i = 1, #p do
+        if topo then
+            table.insert(path, mist.utils.makeVec3GL(p[i]))
+        else
+            table.insert(path, mist.utils.makeVec3(p[i]))
+        end
+    end
+    
+    for i = 1, #path do
+        if i + 1 <= #path then 
+            if topo then 
+                l = mist.utils.get3DDist(path[i], path[i+1]) + l
+            else
+                l = mist.utils.get2DDist(path[i], path[i+1]) + l
+            end
+        end
+        if cut ~= 0 and l > cut  then
+            return l, i
+        end
+    end
+    return l
 end
+
+--[[
+Return a series of points to simplify the input table. Best used in conjunction with findPathOnRoads to turn the massive table into a list of X points. 
+p - table of path points, can be vec2 or vec3
+num - number of segments. 
+exact - boolean for whether or not it returns the exact distance or uses the first WP to that distance. 
+
+
+]]
+
+function mist.getPathInSegments(p, num, exact)
+    local tot = mist.getPathLength(p)
+    local checkDist = tot/num
+    local typeUsed = 'vec2'
+
+    local points = {[1] = p[1]}
+    local curDist = 0
+    for i = 1, #p do
+        if i + 1 <= #p then
+            curDist = mist.utils.get2DDist(p[i], p[i+1]) + curDist
+            if curDist > checkDist then
+                curDist = 0
+                if exact then
+                    -- get avg point between the two
+                    -- insert into point table
+                    -- need to be accurate... maybe reassign the point for the value it is checking?
+                    -- insert into p table?
+                else
+                    table.insert(points, p[i])                
+                end
+            end
+        
+        end
+
+    end
+    return points
+
+end
+
+
+function mist.getPointAtDistanceOnPath(p, dist, r, rtn)
+    log:info('find distance: $1', dist)
+    local rType = r or 'roads'
+    local point = {x= 0, y = 0, z = 0}
+    local path = {}
+    local ret = rtn or 'vec2'
+    local l = 0
+    if p[1] and #p == 2 then
+        path = land.findPathOnRoads(rType, p[1].x, p[1].y, p[2].x, p[2].y)
+    else
+        path = p
+    end
+    for i = 1, #path do
+        if i + 1 <= #path then 
+            nextPoint = path[i+1]
+            if topo then 
+                l = mist.utils.get3DDist(path[i], path[i+1]) + l
+            else
+                l = mist.utils.get2DDist(path[i], path[i+1]) + l
+            end
+        end
+        if l > dist then
+            local diff = dist
+            if i ~= 1 then -- get difference
+                diff = l - dist
+            end
+            local dir = mist.utils.getHeadingPoints(mist.utils.makeVec3(path[i]), mist.utils.makeVec3(path[i+1]))
+            local x, y 
+            if r then 
+                x, y = land.getClosestPointOnRoads(rType, mist.utils.round((math.cos(dir) * diff) + path[i].x,1),  mist.utils.round((math.sin(dir) * diff) + path[i].y,1))
+            else
+                x, y = mist.utils.round((math.cos(dir) * diff) + path[i].x,1),  mist.utils.round((math.sin(dir) * diff) + path[i].y,1)
+            end
+            
+            if ret == 'vec2' then
+                return {x = x, y = y}, dir
+            elseif ret == 'vec3' then
+                return {x = x, y = 0, z = y}, dir
+            end
+            
+            return {x = x, y = y}, dir
+        end
+    end
+    log:warn('Find point at distance: $1, path distance $2', dist, l)
+    return false
+end
+
+
+function mist.projectPoint(point, dist, theta)
+    local newPoint = {}
+    if point.z then
+       newPoint.z = mist.utils.round(math.sin(theta) * dist + point.z, 3)
+       newPoint.y = mist.utils.deepCopy(point.y)
+    else
+       newPoint.y = mist.utils.round(math.sin(theta) * dist + point.y, 3)
+    end
+    newPoint.x = mist.utils.round(math.cos(theta) * dist + point.x, 3)
+
+    return newPoint
+end
+
+end
+
+
+
 
 --- Group functions.
 -- @section groups
@@ -3272,16 +3447,24 @@ do -- group functions scope
 			action = 'tele'
 			newGroupData = vars.groupData
 		end
+        
+        if vars.newGroupName then
+            newGroupData.groupName = vars.newGroupName
+        end
 		
 		--log:info('get Randomized Point')
 		local diff = {x = 0, y = 0}
 		local newCoord, origCoord 
         
         local validTerrain = {'LAND', 'ROAD', 'SHALLOW_WATER', 'WATER', 'RUNWAY'}
-        if string.lower(newGroupData.category) == 'ship' then
-            validTerrain = {'SHALLOW_WATER' , 'WATER'}
-        elseif string.lower(newGroupData.category) == 'vehicle' then
-            validTerrain = {'LAND', 'ROAD'}
+        if vars.validTerrain then
+            validTerrain = vars.validTerrain
+        else
+            if string.lower(newGroupData.category) == 'ship' then
+                validTerrain = {'SHALLOW_WATER' , 'WATER'}
+            elseif string.lower(newGroupData.category) == 'vehicle' then
+                validTerrain = {'LAND', 'ROAD'}
+            end
         end
         local offsets = {}
 		if point and radius >= 0 then
@@ -4046,6 +4229,13 @@ do -- mist.util scope
 		end
 	end
 
+    function mist.utils.getHeadingPoints(point1, point2, north) -- sick of writing this out. 
+        if north then 
+            return mist.utils.getDir(mist.vec.sub(mist.utils.makeVec3(point2), mist.utils.makeVec3(point1)), (mist.utils.makeVec3(point1)))
+        else
+            return mist.utils.getDir(mist.vec.sub(mist.utils.makeVec3(point2), mist.utils.makeVec3(point1))) 
+        end
+    end
 	--- Returns heading-error corrected direction.
 	-- True-north corrected direction from point along vector vec.
 	-- @tparam Vec3 vec
@@ -6430,6 +6620,7 @@ do -- group tasks scope
 	mist.air = {}
 	mist.air.fixedWing = {}
 	mist.air.heli = {}
+    mist.ship = {}
 
 	--- Tasks group to follow a route.
 	-- This sets the mission task for the given group.
@@ -6861,7 +7052,9 @@ do -- group tasks scope
 	end
 	
 	function mist.getRandomPointInPoly(zone)
-		local avg = mist.getAvgPoint(zone)
+		--env.info('Zone Size: '.. #zone)
+        local avg = mist.getAvgPoint(zone)
+        log:warn(avg)
 		local radius = 0
 		local minR = math.huge
 		local newCoord = {}
@@ -6873,6 +7066,8 @@ do -- group tasks scope
 				minR = mist.utils.get2DDist(avg, zone[i])
 			end
 		end
+        --log:warn('Radius: $1', radius)
+        --log:warn('minR: $1', minR)
 		local lSpawnPos = {}
 		for j = 1, 100 do
 			newCoord = mist.getRandPointInCircle(avg, radius)
