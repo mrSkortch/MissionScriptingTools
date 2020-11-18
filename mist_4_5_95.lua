@@ -35,7 +35,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 5
-mist.build = 94
+mist.build = 95
 
 -- forward declaration of log shorthand
 local log
@@ -2250,9 +2250,25 @@ do
 	--- Returns a table containing unit names.
 	-- @tparam table tbl sequential strings
 	-- @treturn table @{UnitNameTable}
-	function mist.makeUnitTable(tbl)
+	function mist.makeUnitTable(tbl, exclude)
 		--Assumption: will be passed a table of strings, sequential
 		--log:info(tbl)
+        
+        
+        local excludeType = {}
+        if exclude then
+            if type(exclude) == 'table' then
+                for x, y in pairs(exclude) do
+                    excludeType[x] = true
+                    excludeType[y] = true
+                end
+            else
+                excludeType[exclude] = true
+            end
+        
+        end
+        
+        
 		local units_by_name = {}
 
 		local l_munits = mist.DBs.units	--local reference for faster execution
@@ -2313,12 +2329,15 @@ do
 			elseif unit:sub(4,12) == '[vehicle]' then
 				category = 'vehicle'
 				country_start = 13
+            elseif unit:sub(4, 11) == '[static]' then
+				category = 'static'
+                country_start = 12
 			end
 			for coa, coa_tbl in pairs(l_munits) do
 				for country, country_table in pairs(coa_tbl) do
 					if country == string.lower(unit:sub(country_start)) then	 -- match
 						for unit_type, unit_type_tbl in pairs(country_table) do
-							if type(unit_type_tbl) == 'table' and (category == '' or unit_type == category) then
+							if type(unit_type_tbl) == 'table' and (category == '' or unit_type == category) and not excludeType[unit_type] then then
 								for group_ind, group_tbl in pairs(unit_type_tbl) do
 									if type(group_tbl) == 'table' then
 										for unit_ind, unit in pairs(group_tbl.units) do
@@ -2346,12 +2365,15 @@ do
 			elseif unit:sub(5,13) == '[vehicle]' then
 				category = 'vehicle'
 				country_start = 14
+            elseif unit:sub(5, 12) == '[static]' then
+				category = 'static'
+                country_start = 13
 			end
 			for coa, coa_tbl in pairs(l_munits) do
 				for country, country_table in pairs(coa_tbl) do
 					if country == string.lower(unit:sub(country_start)) then	 -- match
 						for unit_type, unit_type_tbl in pairs(country_table) do
-							if type(unit_type_tbl) == 'table' and (category == '' or unit_type == category) then
+							if type(unit_type_tbl) == 'table' and (category == '' or unit_type == category) and not excludeType[unit_type] then then
 								for group_ind, group_tbl in pairs(unit_type_tbl) do
 									if type(group_tbl) == 'table' then
 										for unit_ind, unit in pairs(group_tbl.units) do
@@ -2376,12 +2398,14 @@ do
 				category = 'ship'
 			elseif unit:sub(7) == '[vehicle]' then
 				category = 'vehicle'
-			end
+            elseif unit:sub(7) == '[static]'  then
+				category = 'static'
+            end
 			for coa, coa_tbl in pairs(l_munits) do
 				if coa == 'blue' then
 					for country, country_table in pairs(coa_tbl) do
 						for unit_type, unit_type_tbl in pairs(country_table) do
-							if type(unit_type_tbl) == 'table' and (category == '' or unit_type == category) then
+							if type(unit_type_tbl) == 'table' and (category == '' or unit_type == category) and not excludeType[unit_type] then then
 								for group_ind, group_tbl in pairs(unit_type_tbl) do
 									if type(group_tbl) == 'table' then
 										for unit_ind, unit in pairs(group_tbl.units) do
@@ -2404,12 +2428,14 @@ do
 				category = 'ship'
 			elseif unit:sub(8) == '[vehicle]' then
 				category = 'vehicle'
+            elseif unit:sub(8) == '[static]' then
+				category = 'static'
 			end
 			for coa, coa_tbl in pairs(l_munits) do
 				if coa == 'blue' then
 					for country, country_table in pairs(coa_tbl) do
 						for unit_type, unit_type_tbl in pairs(country_table) do
-							if type(unit_type_tbl) == 'table' and (category == '' or unit_type == category) then
+							if type(unit_type_tbl) == 'table' and (category == '' or unit_type == category) and not excludeType[unit_type] thenthen
 								for group_ind, group_tbl in pairs(unit_type_tbl) do
 									if type(group_tbl) == 'table' then
 										for unit_ind, unit in pairs(group_tbl.units) do
@@ -2434,12 +2460,14 @@ do
 				category = 'ship'
 			elseif unit:sub(6) == '[vehicle]' then
 				category = 'vehicle'
+            elseif unit:sub(6) == '[static]'  then
+				category = 'static'
 			end
 			for coa, coa_tbl in pairs(l_munits) do
 				if coa == 'red' then
 					for country, country_table in pairs(coa_tbl) do
 						for unit_type, unit_type_tbl in pairs(country_table) do
-							if type(unit_type_tbl) == 'table' and (category == '' or unit_type == category) then
+							if type(unit_type_tbl) == 'table' and (category == '' or unit_type == category) and not excludeType[unit_type] then
 								for group_ind, group_tbl in pairs(unit_type_tbl) do
 									if type(group_tbl) == 'table' then
 										for unit_ind, unit in pairs(group_tbl.units) do
@@ -2462,12 +2490,14 @@ do
 				category = 'ship'
 			elseif unit:sub(7) == '[vehicle]' then
 				category = 'vehicle'
+            elseif unit:sub(7) == '[static]'  then
+				category = 'static'
 			end
 			for coa, coa_tbl in pairs(l_munits) do
 				if coa == 'red' then
 					for country, country_table in pairs(coa_tbl) do
 						for unit_type, unit_type_tbl in pairs(country_table) do
-							if type(unit_type_tbl) == 'table' and (category == '' or unit_type == category) then
+							if type(unit_type_tbl) == 'table' and (category == '' or unit_type == category) and not excludeType[unit_type] then
 								for group_ind, group_tbl in pairs(unit_type_tbl) do
 									if type(group_tbl) == 'table' then
 										for unit_ind, unit in pairs(group_tbl.units) do
@@ -2492,11 +2522,13 @@ do
 				category = 'ship'
 			elseif unit:sub(6) == '[vehicle]' then
 				category = 'vehicle'
+            elseif unit:sub(6) == '[static]' then
+				category = 'static'
 			end
 			for coa, coa_tbl in pairs(l_munits) do
 				for country, country_table in pairs(coa_tbl) do
 					for unit_type, unit_type_tbl in pairs(country_table) do
-						if type(unit_type_tbl) == 'table' and (category == '' or unit_type == category) then
+						if type(unit_type_tbl) == 'table' and (category == '' or unit_type == category) and not excludeType[unit_type] then
 							for group_ind, group_tbl in pairs(unit_type_tbl) do
 								if type(group_tbl) == 'table' then
 									for unit_ind, unit in pairs(group_tbl.units) do
@@ -2518,11 +2550,13 @@ do
 				category = 'ship'
 			elseif unit:sub(7) == '[vehicle]' then
 				category = 'vehicle'
+            elseif unit:sub(7) == '[static]'  then
+				category = 'static'
 			end
 			for coa, coa_tbl in pairs(l_munits) do
 				for country, country_table in pairs(coa_tbl) do
 					for unit_type, unit_type_tbl in pairs(country_table) do
-						if type(unit_type_tbl) == 'table' and (category == '' or unit_type == category) then
+						if type(unit_type_tbl) == 'table' and (category == '' or unit_type == category) and not excludeType[unit_type] then
 							for group_ind, group_tbl in pairs(unit_type_tbl) do
 								if type(group_tbl) == 'table' then
 									for unit_ind, unit in pairs(group_tbl.units) do
@@ -2631,13 +2665,15 @@ function mist.getUnitsInPolygon(unit_names, polyZone, max_alt)
 	local units = {}
 
 	for i = 1, #unit_names do
-		units[#units + 1] = Unit.getByName(unit_names[i])
+		units[#units + 1] = Unit.getByName(unit_names[i]) or StaticObject.getByName(unit_names[i])
 	end
 
 	local inZoneUnits = {}
 	for i =1, #units do
-		if units[i]:isActive() and mist.pointInPolygon(units[i]:getPosition().p, polyZone, max_alt) then
-			inZoneUnits[#inZoneUnits + 1] = units[i]
+		local lUnit = units[i]
+        local lCat = lUnit:getCategory()
+        if ((lCat == 14 and lUnit:isActive()) or lCat ~= 1) and mist.pointInPolygon(lUnit:getPosition().p, polyZone, max_alt) then
+			inZoneUnits[#inZoneUnits + 1] = lUnit
 		end
 	end
 
@@ -2645,8 +2681,7 @@ function mist.getUnitsInPolygon(unit_names, polyZone, max_alt)
 end
 
 function mist.getUnitsInZones(unit_names, zone_names, zone_type)
-
-	zone_type = zone_type or 'cylinder'
+    zone_type = zone_type or 'cylinder'
 	if zone_type == 'c' or zone_type == 'cylindrical' or zone_type == 'C' then
 		zone_type = 'cylinder'
 	end
@@ -2660,7 +2695,8 @@ function mist.getUnitsInZones(unit_names, zone_names, zone_type)
 	local zones = {}
 
 	for k = 1, #unit_names do
-		local unit = Unit.getByName(unit_names[k])
+		
+        local unit = Unit.getByName(unit_names[k]) or StaticObject.getByName(unit_names[k])
 		if unit then
 			units[#units + 1] = unit
 		end
@@ -2677,20 +2713,23 @@ function mist.getUnitsInZones(unit_names, zone_names, zone_type)
 	local in_zone_units = {}
 
 	for units_ind = 1, #units do
-		for zones_ind = 1, #zones do
+        local lUnit = units[units_ind]
+        local unit_pos = lUnit:getPosition().p
+        local lCat = lUnit:getCategory()
+        for zones_ind = 1, #zones do
 			if zone_type == 'sphere' then	--add land height value for sphere zone type
 				local alt = land.getHeight({x = zones[zones_ind].x, y = zones[zones_ind].z})
 				if alt then
 					zones[zones_ind].y = alt
 				end
 			end
-			local unit_pos = units[units_ind]:getPosition().p
-            if unit_pos and units[units_ind]:isActive() == true then
+
+            if unit_pos and ((lCat == 1 and lUnit:isActive() == true) or lCat ~= 1) then -- it is a unit and is active or it is not a unit
 				if zone_type == 'cylinder' and (((unit_pos.x - zones[zones_ind].x)^2 + (unit_pos.z - zones[zones_ind].z)^2)^0.5 <= zones[zones_ind].radius) then
-					in_zone_units[#in_zone_units + 1] = units[units_ind]
+					in_zone_units[#in_zone_units + 1] = lUnit
 					break
 				elseif zone_type == 'sphere' and (((unit_pos.x - zones[zones_ind].x)^2 + (unit_pos.y - zones[zones_ind].y)^2 + (unit_pos.z - zones[zones_ind].z)^2)^0.5 <= zones[zones_ind].radius) then
-					in_zone_units[#in_zone_units + 1] = units[units_ind]
+					in_zone_units[#in_zone_units + 1] = lUnit
 					break
 				end
 			end
@@ -2715,14 +2754,14 @@ function mist.getUnitsInMovingZones(unit_names, zone_unit_names, radius, zone_ty
 	local zone_units = {}
 
 	for k = 1, #unit_names do
-		local unit = Unit.getByName(unit_names[k])
+		local unit = Unit.getByName(unit_names[k]) or StaticObject.getByName(unit_names[k])
 		if unit then
 			units[#units + 1] = unit
 		end
 	end
 
 	for k = 1, #zone_unit_names do
-		local unit = Unit.getByName(zone_unit_names[k])
+		local unit = Unit.getByName(zone_unit_names[k]) or StaticObject.getByName(zone_unit_names[k])
 		if unit then
 			zone_units[#zone_units + 1] = unit
 		end
@@ -2731,15 +2770,18 @@ function mist.getUnitsInMovingZones(unit_names, zone_unit_names, radius, zone_ty
 	local in_zone_units = {}
 
 	for units_ind = 1, #units do
+        local lUnit = units[units_ind]
+        local lCat = lUnit:getCategory()
+        local unit_pos = lUnit:getPosition().p
 		for zone_units_ind = 1, #zone_units do
-			local unit_pos = units[units_ind]:getPosition().p
+			
 			local zone_unit_pos = zone_units[zone_units_ind]:getPosition().p
-			if unit_pos and zone_unit_pos and units[units_ind]:isActive() == true then
+			if unit_pos and zone_unit_pos and ((lCat == 1 and lUnit:isActive()) or lCat ~= 1) then
 				if zone_type == 'cylinder' and (((unit_pos.x - zone_unit_pos.x)^2 + (unit_pos.z - zone_unit_pos.z)^2)^0.5 <= radius) then
-					in_zone_units[#in_zone_units + 1] = units[units_ind]
+					in_zone_units[#in_zone_units + 1] = lUnit
 					break
 				elseif zone_type == 'sphere' and (((unit_pos.x - zone_unit_pos.x)^2 + (unit_pos.y - zone_unit_pos.y)^2 + (unit_pos.z - zone_unit_pos.z)^2)^0.5 <= radius) then
-					in_zone_units[#in_zone_units + 1] = units[units_ind]
+					in_zone_units[#in_zone_units + 1] = lUnit
 					break
 				end
 			end
@@ -2757,7 +2799,8 @@ function mist.getUnitsLOS(unitset1, altoffset1, unitset2, altoffset2, radius)
 	-- get the positions all in one step, saves execution time.
 	for unitset1_ind = 1, #unitset1 do
 		local unit1 = Unit.getByName(unitset1[unitset1_ind])
-		if unit1 and unit1:isActive() == true then
+        local lCat = unit1:getCategory()
+		if unit1 and ((lCat == 1 and unit1:isActive()) or lCat ~= 1) then
 			unit_info1[#unit_info1 + 1] = {}
 			unit_info1[#unit_info1].unit = unit1
 			unit_info1[#unit_info1].pos	= unit1:getPosition().p
@@ -2766,7 +2809,8 @@ function mist.getUnitsLOS(unitset1, altoffset1, unitset2, altoffset2, radius)
 
 	for unitset2_ind = 1, #unitset2 do
 		local unit2 = Unit.getByName(unitset2[unitset2_ind])
-		if unit2 and unit2:isActive() == true then
+        local lCat = unit2:getCategory()
+		if unit2 and ((lCat == 1 and unit2:isActive()) or lCat ~= 1) then
 			unit_info2[#unit_info2 + 1] = {}
 			unit_info2[#unit_info2].unit = unit2
 			unit_info2[#unit_info2].pos	= unit2:getPosition().p
@@ -5016,7 +5060,7 @@ unitTableDef = table or nil
 		if stopflag == -1 or (type(trigger.misc.getUserFlag(stopflag)) == 'number' and trigger.misc.getUserFlag(stopflag) == 0) or (type(trigger.misc.getUserFlag(stopflag)) == 'boolean' and trigger.misc.getUserFlag(stopflag) == 0) then
 			local num_in_zone = 0
 			for i = 1, #units do
-				local unit = Unit.getByName(units[i])
+				local unit = Unit.getByName(units[i]) or StaticObject.getByName(units[i])
 				if unit then
 					local pos = unit:getPosition().p
 					if mist.pointInPolygon(pos, zone, maxalt) then
