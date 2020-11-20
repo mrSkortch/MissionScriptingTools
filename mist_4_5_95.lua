@@ -2337,7 +2337,7 @@ do
 				for country, country_table in pairs(coa_tbl) do
 					if country == string.lower(unit:sub(country_start)) then	 -- match
 						for unit_type, unit_type_tbl in pairs(country_table) do
-							if type(unit_type_tbl) == 'table' and (category == '' or unit_type == category) and not excludeType[unit_type] then then
+							if type(unit_type_tbl) == 'table' and (category == '' or unit_type == category) and not excludeType[unit_type] then
 								for group_ind, group_tbl in pairs(unit_type_tbl) do
 									if type(group_tbl) == 'table' then
 										for unit_ind, unit in pairs(group_tbl.units) do
@@ -2373,7 +2373,7 @@ do
 				for country, country_table in pairs(coa_tbl) do
 					if country == string.lower(unit:sub(country_start)) then	 -- match
 						for unit_type, unit_type_tbl in pairs(country_table) do
-							if type(unit_type_tbl) == 'table' and (category == '' or unit_type == category) and not excludeType[unit_type] then then
+							if type(unit_type_tbl) == 'table' and (category == '' or unit_type == category) and not excludeType[unit_type]  then
 								for group_ind, group_tbl in pairs(unit_type_tbl) do
 									if type(group_tbl) == 'table' then
 										for unit_ind, unit in pairs(group_tbl.units) do
@@ -2405,7 +2405,7 @@ do
 				if coa == 'blue' then
 					for country, country_table in pairs(coa_tbl) do
 						for unit_type, unit_type_tbl in pairs(country_table) do
-							if type(unit_type_tbl) == 'table' and (category == '' or unit_type == category) and not excludeType[unit_type] then then
+							if type(unit_type_tbl) == 'table' and (category == '' or unit_type == category) and not excludeType[unit_type]  then
 								for group_ind, group_tbl in pairs(unit_type_tbl) do
 									if type(group_tbl) == 'table' then
 										for unit_ind, unit in pairs(group_tbl.units) do
@@ -2435,7 +2435,7 @@ do
 				if coa == 'blue' then
 					for country, country_table in pairs(coa_tbl) do
 						for unit_type, unit_type_tbl in pairs(country_table) do
-							if type(unit_type_tbl) == 'table' and (category == '' or unit_type == category) and not excludeType[unit_type] thenthen
+							if type(unit_type_tbl) == 'table' and (category == '' or unit_type == category) and not excludeType[unit_type] then
 								for group_ind, group_tbl in pairs(unit_type_tbl) do
 									if type(group_tbl) == 'table' then
 										for unit_ind, unit in pairs(group_tbl.units) do
