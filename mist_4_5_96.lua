@@ -35,7 +35,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 5
-mist.build = 95
+mist.build = 96
 
 -- forward declaration of log shorthand
 local log
@@ -151,6 +151,9 @@ do -- the main scope
 					for cntry_id, cntry_data in pairs(coa_data.country) do
 
 						local countryName = string.lower(cntry_data.name)
+                        if cntry_data.id and country.names[cntry_data.id] then
+                            countryName = string.lower(country.names[cntry_data.id])
+                        end
 						mist.DBs.units[coa_name][countryName] = {}
 						mist.DBs.units[coa_name][countryName].countryId = cntry_data.id
 
@@ -172,7 +175,7 @@ do -- the main scope
 
 												mist.DBs.units[coa_name][countryName][category][group_num] = {}
 												local groupName = group_data.name
-												if env.mission.version > 7 then
+												if env.mission.version > 7 and env.mission.version < 19 then
 													groupName = env.getValueDictByKey(groupName)
 												end
 												mist.DBs.units[coa_name][countryName][category][group_num].groupName = groupName
@@ -196,7 +199,7 @@ do -- the main scope
 													local units_tbl = mist.DBs.units[coa_name][countryName][category][group_num].units	--pointer to the units table for this group
 
 													units_tbl[unit_num] = {}
-													if env.mission.version > 7 then
+													if env.mission.version > 7 and env.mission.version < 19 then
 														units_tbl[unit_num].unitName = env.getValueDictByKey(unit_data.name)
 													else
 														units_tbl[unit_num].unitName = unit_data.name
@@ -685,9 +688,14 @@ do -- the main scope
 				newTable.category = 'static'
 			else
 				unitOneRef = newObject:getUnits()
-				newTable.countryId = tonumber(unitOneRef[1]:getCountry())
-				newTable.coalitionId = tonumber(unitOneRef[1]:getCoalition())
-				newTable.category = tonumber(newObject:getCategory())
+				if #unitOneRef > 0 and unitOneRef[1] and type(unitOneRef[1]) == 'table' then
+                    newTable.countryId = tonumber(unitOneRef[1]:getCountry())
+                    newTable.coalitionId = tonumber(unitOneRef[1]:getCoalition())
+                    newTable.category = tonumber(newObject:getCategory())
+                else
+                    log:warn('getUnits failed to return on $1 ; Built Data: $2.', event, newTable)
+                    return false
+                end
 			end
 			for countryData, countryId in pairs(country.id) do
 				if newTable.country and string.upper(countryData) == string.upper(newTable.country) or countryId == newTable.countryId then
@@ -1416,7 +1424,7 @@ do -- the main scope
 	-- Will generate groupId, groupName, unitId, and unitName if needed
 	-- @tparam table newGroup table containting values needed for spawning a group.
 	function mist.dynAdd(newGroup)
-
+        --log:warn(newGroup)
 		--mist.debug.writeData(mist.utils.serialize,{'msg', newGroup}, 'newGroupOrig.lua')
 		local cntry = newGroup.country
 		if newGroup.countryId then
@@ -3256,6 +3264,9 @@ do -- group functions scope
 
 			newData.units = {}
 			local newUnits = newGroup:getUnits()
+            if #newUnits == 0 then
+                log:warn('getCurrentGroupData has returned no units for: $1', gpName)
+            end
 			for unitNum, unitData in pairs(newGroup:getUnits()) do
 				newData.units[unitNum] = {}
                 local uName = unitData:getName()
@@ -3496,6 +3507,11 @@ do -- group functions scope
             newGroupData.groupName = vars.newGroupName
         end
 		
+        if #newGroupData.units == 0 then
+            log:warn('$1 has no units in group table', gpName)
+            return
+        end
+        
 		--log:info('get Randomized Point')
 		local diff = {x = 0, y = 0}
 		local newCoord, origCoord 
@@ -6688,7 +6704,7 @@ do -- group tasks scope
 		if group then
 			local groupCon = group:getController()
 			if groupCon then
-                log:warn(misTask)
+                --log:warn(misTask)
 				groupCon:setTask(misTask)
 				return true
 			end
@@ -6720,7 +6736,7 @@ do -- group tasks scope
 
 												for point_num, point in pairs(group_data.route.points) do
 													local routeData = {}
-													if env.mission.version > 7 then
+													if env.mission.version > 7 and env.mission.version < 19 then
 														routeData.name = env.getValueDictByKey(point.name)
 													else
 														routeData.name = point.name
@@ -7098,7 +7114,7 @@ do -- group tasks scope
 	function mist.getRandomPointInPoly(zone)
 		--env.info('Zone Size: '.. #zone)
         local avg = mist.getAvgPoint(zone)
-        log:warn(avg)
+        --log:warn(avg)
 		local radius = 0
 		local minR = math.huge
 		local newCoord = {}
@@ -7180,17 +7196,17 @@ do -- group tasks scope
 		return
 	end
 
-	function mist.groupRandomDistSelf(gpData, dist, form, heading, speed)
+	function mist.groupRandomDistSelf(gpData, dist, form, heading, speed, disableRoads)
 		local pos = mist.getLeadPos(gpData)
 		local fakeZone = {}
 		fakeZone.radius = dist or math.random(300, 1000)
 		fakeZone.point = {x = pos.x, y = pos.y, z = pos.z}
-		mist.groupToRandomZone(gpData, fakeZone, form, heading, speed)
+		mist.groupToRandomZone(gpData, fakeZone, form, heading, speed, disableRoads)
 
 		return
 	end
 
-	function mist.groupToRandomZone(gpData, zone, form, heading, speed)
+	function mist.groupToRandomZone(gpData, zone, form, heading, speed, disableRoads)
 		if type(gpData) == 'string' then
 			gpData = Group.getByName(gpData)
 		end
@@ -7212,7 +7228,7 @@ do -- group tasks scope
 		vars.headingDegrees = heading
 		vars.speed = speed
 		vars.point = mist.utils.zoneToVec3(zone)
-
+        vars.disableRoads = disableRoads
 		mist.groupToRandomPoint(vars)
 
 		return
