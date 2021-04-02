@@ -35,7 +35,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 5
-mist.build = 96
+mist.build = 97
 
 -- forward declaration of log shorthand
 local log
@@ -2701,7 +2701,10 @@ function mist.getUnitsInZones(unit_names, zone_names, zone_type)
 
 	local units = {}
 	local zones = {}
-
+    
+    if zone_names and type(zone_names) == 'string' then
+        zone_names = {zoneNames}
+    end
 	for k = 1, #unit_names do
 		
         local unit = Unit.getByName(unit_names[k]) or StaticObject.getByName(unit_names[k])
@@ -2712,9 +2715,9 @@ function mist.getUnitsInZones(unit_names, zone_names, zone_type)
 
 
 	for k = 1, #zone_names do
-		local zone = trigger.misc.getZone(zone_names[k])
+		local zone = mist.DBs.zonesByName[zone_names[k]]
 		if zone then
-			zones[#zones + 1] = {radius = zone.radius, x = zone.point.x, y = zone.point.y, z = zone.point.z}
+			zones[#zones + 1] = {radius = zone.radius, x = zone.point.x, y = zone.point.y, z = zone.point.z, verts = zone.vertices}
 		end
 	end
 
@@ -2733,13 +2736,20 @@ function mist.getUnitsInZones(unit_names, zone_names, zone_type)
 			end
 
             if unit_pos and ((lCat == 1 and lUnit:isActive() == true) or lCat ~= 1) then -- it is a unit and is active or it is not a unit
-				if zone_type == 'cylinder' and (((unit_pos.x - zones[zones_ind].x)^2 + (unit_pos.z - zones[zones_ind].z)^2)^0.5 <= zones[zones_ind].radius) then
-					in_zone_units[#in_zone_units + 1] = lUnit
-					break
-				elseif zone_type == 'sphere' and (((unit_pos.x - zones[zones_ind].x)^2 + (unit_pos.y - zones[zones_ind].y)^2 + (unit_pos.z - zones[zones_ind].z)^2)^0.5 <= zones[zones_ind].radius) then
-					in_zone_units[#in_zone_units + 1] = lUnit
-					break
-				end
+				if zones[zones_ind].verts  then
+                    if mist.pointInPolygon(unit_pos, zones[zones_ind].verts) then
+                        in_zone_units[#in_zone_units + 1] = lUnit
+                    end
+
+                else
+                    if zone_type == 'cylinder' and (((unit_pos.x - zones[zones_ind].x)^2 + (unit_pos.z - zones[zones_ind].z)^2)^0.5 <= zones[zones_ind].radius) then
+                        in_zone_units[#in_zone_units + 1] = lUnit
+                        break
+                    elseif zone_type == 'sphere' and (((unit_pos.x - zones[zones_ind].x)^2 + (unit_pos.y - zones[zones_ind].y)^2 + (unit_pos.z - zones[zones_ind].z)^2)^0.5 <= zones[zones_ind].radius) then
+                        in_zone_units[#in_zone_units + 1] = lUnit
+                        break
+                    end
+                end
 			end
 		end
 	end
@@ -3648,9 +3658,9 @@ do -- group functions scope
 		end
 
 		if type(zone) == 'string' then
-			zone = trigger.misc.getZone(zone)
-		elseif type(zone) == 'table' and not zone.radius then
-			zone = trigger.misc.getZone(zone[math.random(1, #zone)])
+			zone = mist.DBs.zonesByName[zone]
+        elseif type(zone) == 'table' and not zone.radius then
+			zone = mist.DBs.zonesByName[zone[math.random(1, #zone)]]
 		end
 		local vars = {}
 		vars.gpName = gpName
@@ -3671,9 +3681,9 @@ do -- group functions scope
 		end
 
 		if type(zone) == 'string' then
-			zone = trigger.misc.getZone(zone)
-		elseif type(zone) == 'table' and not zone.radius then
-			zone = trigger.misc.getZone(zone[math.random(1, #zone)])
+			zone = mist.DBs.zonesByName[zone]
+        elseif type(zone) == 'table' and not zone.radius then
+			zone = mist.DBs.zonesByName[zone[math.random(1, #zone)]]
 		end
 		local vars = {}
 		vars.gpName = gpName
@@ -3694,9 +3704,9 @@ do -- group functions scope
 		end
 
 		if type(zone) == 'string' then
-			zone = trigger.misc.getZone(zone)
-		elseif type(zone) == 'table' and not zone.radius then
-			zone = trigger.misc.getZone(zone[math.random(1, #zone)])
+			zone = mist.DBs.zonesByName[zone]
+        elseif type(zone) == 'table' and not zone.radius then
+			zone = mist.DBs.zonesByName[zone[math.random(1, #zone)]]
 		end
 
 		local vars = {}
@@ -4267,7 +4277,7 @@ do -- mist.util scope
 	--- Returns the center of a zone as Vec3.
 	-- @tparam string|table zone trigger zone name or table
 	-- @treturn Vec3 center of the zone
-	function mist.utils.zoneToVec3(zone)
+	function mist.utils.zoneToVec3(zone, gl)
 		local new = {}
 		if type(zone) == 'table' then
 			if zone.point then
@@ -4275,7 +4285,7 @@ do -- mist.util scope
 				new.y = zone.point.y
 				new.z = zone.point.z
 			elseif zone.x and zone.y and zone.z then
-				return zone
+                new = mist.utils.deepCopy(zone)
 			end
 			return new
 		elseif type(zone) == 'string' then
@@ -4284,9 +4294,12 @@ do -- mist.util scope
 				new.x = zone.point.x
 				new.y = zone.point.y
 				new.z = zone.point.z
-				return new
 			end
 		end
+        if new.x and gl then
+            new.y = land.getHeight({x = new.x, y = new.z})
+        end
+        return new
 	end
 
     function mist.utils.getHeadingPoints(point1, point2, north) -- sick of writing this out. 
@@ -4883,6 +4896,13 @@ do -- mist.vec scope
 	function mist.vec.rotateVec2(vec2, theta)
 		return { x = vec2.x*math.cos(theta) - vec2.y*math.sin(theta), y = vec2.x*math.sin(theta) + vec2.y*math.cos(theta)}
 	end
+    
+    function mist.vec.normalize(vec3)
+        local mag =  mist.vec.mag(vec3)
+        if mag ~= 0 then 
+            return mist.vec.scalar_mult(vec3, 1.0 / mag)
+        end
+    end
 end
 
 --- Flag functions.
@@ -7073,9 +7093,10 @@ do -- group tasks scope
 	end
 
 	-- need to return a Vec3 or Vec2?
-	function mist.getRandPointInCircle(p, radius, innerRadius, maxA, minA)
+	function mist.getRandPointInCircle(p, r, innerRadius, maxA, minA)
 		local point = mist.utils.makeVec3(p)
         local theta = 2*math.pi*math.random()
+        local radius = r or 1000
 		local minR = innerRadius or 0
 		if maxA and not minA then
 			theta = math.rad(math.random(0, maxA - math.random()))
@@ -7105,9 +7126,14 @@ do -- group tasks scope
 	end
 
 	function mist.getRandomPointInZone(zoneName, innerRadius, maxA, minA)
-		if type(zoneName) == 'string' and type(trigger.misc.getZone(zoneName)) == 'table' then
-			return mist.getRandPointInCircle(trigger.misc.getZone(zoneName).point, trigger.misc.getZone(zoneName).radius, innerRadius, maxA, minA)
-		end
+		if type(zoneName) == 'string'  then 
+            local zone = mist.DBs.zoneByName[zoneName]
+            if zone.type and zone.type == 2 then
+                return mist.getRandomPointInPoly(zone.vertices)
+            else
+                return mist.getRandPointInCircle(zone.point, zone.radius, innerRadius, maxA, minA)
+            end
+        end
 		return false
 	end
 	
@@ -7212,9 +7238,9 @@ do -- group tasks scope
 		end
 
 		if type(zone) == 'string' then
-			zone = trigger.misc.getZone(zone)
+			zone = mist.DBs.zonesByName[zone]
 		elseif type(zone) == 'table' and not zone.radius then
-			zone = trigger.misc.getZone(zone[math.random(1, #zone)])
+			zone =  mist.DBs.zonesByName[zone[math.random(1, #zone)]]
 		end
 
 		if speed then
@@ -7297,7 +7323,7 @@ do -- group tasks scope
 
 	function mist.groupToPoint(gpData, point, form, heading, speed, useRoads)
 		if type(point) == 'string' then
-			point = trigger.misc.getZone(point)
+			point = mist.DBs.zonesByName[point]
 		end
 		if speed then
 			speed = mist.utils.kmphToMps(speed)
