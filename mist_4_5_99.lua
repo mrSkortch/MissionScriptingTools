@@ -106,6 +106,14 @@ do -- the main scope
 					zone.point.x = zone_data.x
 					zone.point.y = 0
 					zone.point.z = zone_data.y
+                    zone.properties = {}
+                    if zone_data.properties then
+                        for propInd, prop in pairs(zone_data.properties) do
+                            if prop.value and type(prop.value) == 'string' and prop.value ~= "" then
+                                zone.properties[prop.key] = prop.value                                
+                            end
+                        end
+                    end
 
 					mist.DBs.zonesByName[zone_data.name] = zone
 					mist.DBs.zonesByNum[#mist.DBs.zonesByNum + 1] = mist.utils.deepCopy(zone)	--[[deepcopy so that the zone in zones_by_name and the zone in
@@ -159,17 +167,17 @@ do -- the main scope
 
 						if type(cntry_data) == 'table' then	--just making sure
 
-							for obj_type_name, obj_type_data in pairs(cntry_data) do
+							for obj_cat_name, obj_cat_data in pairs(cntry_data) do
 
-								if obj_type_name == "helicopter" or obj_type_name == "ship" or obj_type_name == "plane" or obj_type_name == "vehicle" or obj_type_name == "static" then --should be an unncessary check
+								if obj_cat_name == "helicopter" or obj_cat_name == "ship" or obj_cat_name == "plane" or obj_cat_name == "vehicle" or obj_cat_name == "static" then --should be an unncessary check
 
-									local category = obj_type_name
+									local category = obj_cat_name
 
-									if ((type(obj_type_data) == 'table') and obj_type_data.group and (type(obj_type_data.group) == 'table') and (#obj_type_data.group > 0)) then	--there's a group!
+									if ((type(obj_cat_data) == 'table') and obj_cat_data.group and (type(obj_cat_data.group) == 'table') and (#obj_cat_data.group > 0)) then	--there's a group!
 
 										mist.DBs.units[coa_name][countryName][category] = {}
 
-										for group_num, group_data in pairs(obj_type_data.group) do
+										for group_num, group_data in pairs(obj_cat_data.group) do
 
 											if group_data and group_data.units and type(group_data.units) == 'table' then	--making sure again- this is a valid group
 
@@ -254,10 +262,10 @@ do -- the main scope
 
 												end --for unit_num, unit_data in pairs(group_data.units) do
 											end --if group_data and group_data.units then
-										end --for group_num, group_data in pairs(obj_type_data.group) do
-									end --if ((type(obj_type_data) == 'table') and obj_type_data.group and (type(obj_type_data.group) == 'table') and (#obj_type_data.group > 0)) then
-								end --if obj_type_name == "helicopter" or obj_type_name == "ship" or obj_type_name == "plane" or obj_type_name == "vehicle" or obj_type_name == "static" then
-							end --for obj_type_name, obj_type_data in pairs(cntry_data) do
+										end --for group_num, group_data in pairs(obj_cat_data.group) do
+									end --if ((type(obj_cat_data) == 'table') and obj_cat_data.group and (type(obj_cat_data.group) == 'table') and (#obj_cat_data.group > 0)) then
+								end --if obj_cat_name == "helicopter" or obj_cat_name == "ship" or obj_cat_name == "plane" or obj_cat_name == "vehicle" or obj_cat_name == "static" then
+							end --for obj_cat_name, obj_cat_data in pairs(cntry_data) do
 						end --if type(cntry_data) == 'table' then
 					end --for cntry_id, cntry_data in pairs(coa_data.country) do
 				end --if coa_data.country then --there is a country table
@@ -1328,8 +1336,9 @@ do -- the main scope
 	--- Spawns a static object to the game world.
 	-- @todo write good docs
 	-- @tparam table staticObj table containing data needed for the object creation
-	function mist.dynAddStatic(newObj)
-        log:info(newObj)
+	function mist.dynAddStatic(n)
+        --log:info(newObj)
+        local newObj = mist.utils.deepCopy(n)
 		if newObj.units and newObj.units[1] then -- if its mist format
 			for entry, val in pairs(newObj.units[1]) do
 				if newObj[entry] and newObj[entry] ~= val or not newObj[entry] then
@@ -1423,7 +1432,9 @@ do -- the main scope
 	-- Same as coalition.add function in SSE. checks the passed data to see if its valid.
 	-- Will generate groupId, groupName, unitId, and unitName if needed
 	-- @tparam table newGroup table containting values needed for spawning a group.
-	function mist.dynAdd(newGroup)
+	function mist.dynAdd(ng)
+        
+        local newGroup = mist.utils.deepCopy(ng)
         --log:warn(newGroup)
 		--mist.debug.writeData(mist.utils.serialize,{'msg', newGroup}, 'newGroupOrig.lua')
 		local cntry = newGroup.country
@@ -1589,7 +1600,23 @@ do -- the main scope
 		end
 		newGroup.country = newCountry
 
-
+        -- update and verify any self tasks
+        if newGroup.route and newGroup.routes.points then 
+            for i, pData in pairs(newGroup.route.points) do
+                if pData.task and pData.task.params and pData.task.params.tasks and #pData.task.params.tasks > 0 then
+                    for tIndex, tData in pairs(pData.task.params.tasks) do
+                        if tData.params and tData.params.action then  
+                            if tData.params.action.id == "EPLRS" then
+                                tData.params.action.params.groupId = newGroup.groupId
+                            elseif tData.params.action.id == "ActivateBeacon" or tData.params.action.id == "ActivateICLS" then 
+                                tData.params.action.params.unitId = newGroup.units[1].unitId
+                            end 
+                        end
+                    end
+                end
+            
+            end
+        end
 		--mist.debug.writeData(mist.utils.serialize,{'msg', newGroup}, 'newGroup.lua')
         --log:warn(newGroup)
 		-- sanitize table
@@ -1860,10 +1887,10 @@ do
 			if  type(coa_data) == 'table' then
 				if coa_data.country then --there is a country table
 					for cntry_id, cntry_data in pairs(coa_data.country) do
-						for obj_type_name, obj_type_data in pairs(cntry_data) do
-							if obj_type_name == "helicopter" or obj_type_name == "ship" or obj_type_name == "plane" or obj_type_name == "vehicle" then	-- only these types have points
-								if ((type(obj_type_data) == 'table') and obj_type_data.group and (type(obj_type_data.group) == 'table') and (#obj_type_data.group > 0)) then	--there's a group!
-									for group_num, group_data in pairs(obj_type_data.group) do
+						for obj_cat_name, obj_cat_data in pairs(cntry_data) do
+							if obj_cat_name == "helicopter" or obj_cat_name == "ship" or obj_cat_name == "plane" or obj_cat_name == "vehicle" then	-- only these types have points
+								if ((type(obj_cat_data) == 'table') and obj_cat_data.group and (type(obj_cat_data.group) == 'table') and (#obj_cat_data.group > 0)) then	--there's a group!
+									for group_num, group_data in pairs(obj_cat_data.group) do
 										if group_data and group_data.groupId == gpId then -- this is the group we are looking for
 											if group_data.route and group_data.route.points and #group_data.route.points > 0 then
 												local points = {}
@@ -1878,10 +1905,10 @@ do
 											end
 											return
 										end	--if group_data and group_data.name and group_data.name == 'groupname'
-									end --for group_num, group_data in pairs(obj_type_data.group) do
-								end --if ((type(obj_type_data) == 'table') and obj_type_data.group and (type(obj_type_data.group) == 'table') and (#obj_type_data.group > 0)) then
-							end --if obj_type_name == "helicopter" or obj_type_name == "ship" or obj_type_name == "plane" or obj_type_name == "vehicle" or obj_type_name == "static" then
-						end --for obj_type_name, obj_type_data in pairs(cntry_data) do
+									end --for group_num, group_data in pairs(obj_cat_data.group) do
+								end --if ((type(obj_cat_data) == 'table') and obj_cat_data.group and (type(obj_cat_data.group) == 'table') and (#obj_cat_data.group > 0)) then
+							end --if obj_cat_name == "helicopter" or obj_cat_name == "ship" or obj_cat_name == "plane" or obj_cat_name == "vehicle" or obj_cat_name == "static" then
+						end --for obj_cat_name, obj_cat_data in pairs(cntry_data) do
 					end --for cntry_id, cntry_data in pairs(coa_data.country) do
 				end --if coa_data.country then --there is a country table
 			end --if coa_name == 'red' or coa_name == 'blue' and type(coa_data) == 'table' then
@@ -3314,7 +3341,7 @@ do -- group functions scope
 
 	end
 
-	function mist.getGroupData(gpName)
+	function mist.getGroupData(gpName, route)
 		local found = false
 		local newData = {}
 		if mist.DBs.groupsByName[gpName] then
@@ -3355,14 +3382,17 @@ do -- group functions scope
 				newData.units[unitNum].unitName = unitData.unitName
 				newData.units[unitNum].heading = unitData.heading -- added to DBs
 				newData.units[unitNum].playerCanDrive = unitData.playerCanDrive -- added to DBs
-
+                newData.units[unitNum].livery_id = unitData.livery_id
+                newData.units[unitNum].AddPropAircraft = unitData.AddPropAircraft
+                newData.units[unitNum].AddPropVehicle = unitData.AddPropVehicle
+                
 
 				if newData.category == 'plane' or newData.category == 'helicopter' then
 					newData.units[unitNum].payload = payloads[unitNum]
-					newData.units[unitNum].livery_id = unitData.livery_id
+					
 					newData.units[unitNum].onboard_num = unitData.onboard_num
 					newData.units[unitNum].callsign = unitData.callsign
-					newData.units[unitNum].AddPropAircraft = unitData.AddPropAircraft
+					
 				end
 				if newData.category == 'static' then
 					newData.units[unitNum].categoryStatic = unitData.categoryStatic
@@ -3372,6 +3402,10 @@ do -- group functions scope
 				end
 			end
 			--log:info(newData)
+            if route then
+                newData.route = mist.getGroupRoute(gpName, true)
+            end
+            
 			return newData
 		else
 			log:error('$1 not found in MIST database', gpName)
@@ -3396,10 +3430,10 @@ do -- group functions scope
 				if (coa_name == 'red' or coa_name == 'blue') and type(coa_data) == 'table' then
 					if coa_data.country then --there is a country table
 						for cntry_id, cntry_data in pairs(coa_data.country) do
-							for obj_type_name, obj_type_data in pairs(cntry_data) do
-								if obj_type_name == "helicopter" or obj_type_name == "ship" or obj_type_name == "plane" or obj_type_name == "vehicle" then	-- only these types have points
-									if ((type(obj_type_data) == 'table') and obj_type_data.group and (type(obj_type_data.group) == 'table') and (#obj_type_data.group > 0)) then	--there's a group!
-										for group_num, group_data in pairs(obj_type_data.group) do
+							for obj_cat_name, obj_cat_data in pairs(cntry_data) do
+								if obj_cat_name == "helicopter" or obj_cat_name == "ship" or obj_cat_name == "plane" or obj_cat_name == "vehicle" then	-- only these types have points
+									if ((type(obj_cat_data) == 'table') and obj_cat_data.group and (type(obj_cat_data.group) == 'table') and (#obj_cat_data.group > 0)) then	--there's a group!
+										for group_num, group_data in pairs(obj_cat_data.group) do
 											if group_data and group_data.groupId == gpId then
 												for unitIndex, unitData in pairs(group_data.units) do --group index
 													if unitData.unitId == unitId then
@@ -3438,10 +3472,10 @@ do -- group functions scope
 				if type(coa_data) == 'table' then
 					if coa_data.country then --there is a country table
 						for cntry_id, cntry_data in pairs(coa_data.country) do
-							for obj_type_name, obj_type_data in pairs(cntry_data) do
-								if obj_type_name == "helicopter" or obj_type_name == "ship" or obj_type_name == "plane" or obj_type_name == "vehicle" then	-- only these types have points
-									if ((type(obj_type_data) == 'table') and obj_type_data.group and (type(obj_type_data.group) == 'table') and (#obj_type_data.group > 0)) then	--there's a group!
-										for group_num, group_data in pairs(obj_type_data.group) do
+							for obj_cat_name, obj_cat_data in pairs(cntry_data) do
+								if obj_cat_name == "helicopter" or obj_cat_name == "ship" or obj_cat_name == "plane" or obj_cat_name == "vehicle" then	-- only these types have points
+									if ((type(obj_cat_data) == 'table') and obj_cat_data.group and (type(obj_cat_data.group) == 'table') and (#obj_cat_data.group > 0)) then	--there's a group!
+										for group_num, group_data in pairs(obj_cat_data.group) do
 											if group_data and group_data.groupId == gpId then
 												local payloads = {}
 												for unitIndex, unitData in pairs(group_data.units) do --group index
@@ -3463,8 +3497,45 @@ do -- group functions scope
 		end
 		log:warn("Couldn't find payload for group: $1", groupIdent)
 		return
-
 	end
+    
+    function mist.getGroupTable(groupIdent)
+    		local gpId = groupIdent
+		if type(groupIdent) == 'string' and not tonumber(groupIdent) then
+			if mist.DBs.MEgroupsByName[groupIdent] then
+				gpId = mist.DBs.MEgroupsByName[groupIdent].groupId
+			else
+				log:error('$1 not found in mist.DBs.MEgroupsByName', groupIdent)
+			end
+		end
+
+		if gpId then
+			for coa_name, coa_data in pairs(env.mission.coalition) do
+				if type(coa_data) == 'table' then
+					if coa_data.country then --there is a country table
+						for cntry_id, cntry_data in pairs(coa_data.country) do
+							for obj_cat_name, obj_cat_data in pairs(cntry_data) do
+								if obj_cat_name == "helicopter" or obj_cat_name == "ship" or obj_cat_name == "plane" or obj_cat_name == "vehicle" then	-- only these types have points
+									if ((type(obj_cat_data) == 'table') and obj_cat_data.group and (type(obj_cat_data.group) == 'table') and (#obj_cat_data.group > 0)) then	--there's a group!
+										for group_num, group_data in pairs(obj_cat_data.group) do
+											if group_data and group_data.groupId == gpId then
+												return group_data
+											end
+										end
+									end
+								end
+							end
+						end
+					end
+				end
+			end
+		else
+			log:error('Need string or number. Got: $1', type(groupIdent))
+			return false
+		end
+		log:warn("Couldn't find table for group: $1", groupIdent)
+    
+    end
     
     function mist.getValidRandomPoint(vars)
     
@@ -3483,6 +3554,14 @@ do -- group functions scope
 			log:error('Missing field groupName or gpName in variable table')
 		end
 
+        --[[New vars to add, mostly for when called via inZone functions
+        anyTerrain
+        offsetWP1
+        offsetRoute
+        initTasks
+        
+        ]]
+        
 		local action = vars.action
 
 		local disperse = vars.disperse or false
@@ -3490,8 +3569,9 @@ do -- group functions scope
 		local radius = vars.radius or 0
 		local innerRadius = vars.innerRadius
 
-		local route = vars.route
 		local dbData = false
+        
+
 
 		local newGroupData
 		if gpName and not vars.groupData then
@@ -3527,7 +3607,9 @@ do -- group functions scope
 		local newCoord, origCoord 
         
         local validTerrain = {'LAND', 'ROAD', 'SHALLOW_WATER', 'WATER', 'RUNWAY'}
-        if vars.validTerrain then
+        if vars.anyTarrain then
+            -- do nothing
+        elseif vars.validTerrain then
             validTerrain = vars.validTerrain
         else
             if string.lower(newGroupData.category) == 'ship' then
@@ -3536,7 +3618,7 @@ do -- group functions scope
                 validTerrain = {'LAND', 'ROAD'}
             end
         end
-        local offsets = {}
+
 		if point and radius >= 0 then
 			local valid = false
             -- new thoughts
@@ -3634,10 +3716,34 @@ do -- group functions scope
 
 		end
 
-		if route then
-			newGroupData.route = route
-		end
-		--log:info(newGroupData)
+
+        local tempRoute
+        
+        if mist.DBs.MEgroupsByName[gpName] and not vars.route then
+           -- log:warn('getRoute')
+            tempRoute = mist.getGroupRoute(gpName, true)
+        elseif vars.route then
+          --  log:warn('routeExist')
+            tempRoute = mist.utils.deepCopy(route)
+        end
+       -- log:warn(tempRoute)
+        if tempRoute and (vars.offsetRoute or vars.offsetWP1 or vars.initTasks) then
+            for i = 1, #tempRoute do
+               -- log:warn(i)
+                if (vars.offsetRoute) or (i == 1 and vars.offsetWP1) or (i == 1 and vars.initTasks) then 
+                   -- log:warn('update offset')
+                    tempRoute[i].x = tempRoute[i].x + diff.x
+                    tempRoute[i].y = tempRoute[i].y + diff.y
+                elseif vars.initTasks and i > 1 then
+                    --log:warn('deleteWP')
+                    tempRoute[i] = nil
+                end
+            end
+            newGroupData.route = tempRoute
+        end
+        
+        
+		--log:warn(newGroupData)
 		--mist.debug.writeData(mist.utils.serialize,{'teleportToPoint', newGroupData}, 'newGroupData.lua')
 		if string.lower(newGroupData.category) == 'static' then
 			--log:info(newGroupData)
@@ -3647,7 +3753,7 @@ do -- group functions scope
 
 	end
 
-	function mist.respawnInZone(gpName, zone, disperse, maxDisp)
+	function mist.respawnInZone(gpName, zone, disperse, maxDisp, v)
 
 		if type(gpName) == 'table' and gpName:getName() then
 			gpName = gpName:getName()
@@ -3669,10 +3775,17 @@ do -- group functions scope
 		vars.radius = zone.radius
 		vars.disperse = disperse
 		vars.maxDisp = maxDisp
+        
+        if v and type(v) == 'table' then
+            for index, val in pairs(v) do
+                vars[index] = val
+            end 
+        end
+        
 		return mist.teleportToPoint(vars)
 	end
 
-	function mist.cloneInZone(gpName, zone, disperse, maxDisp)
+	function mist.cloneInZone(gpName, zone, disperse, maxDisp, v)
 		--log:info('cloneInZone')
 		if type(gpName) == 'table' then
 			gpName = gpName:getName()
@@ -3693,10 +3806,15 @@ do -- group functions scope
 		vars.disperse = disperse
 		vars.maxDisp = maxDisp
 		--log:info('do teleport')
+        if v and type(v) == 'table' then
+            for index, val in pairs(v) do
+                vars[index] = val
+            end 
+        end
 		return mist.teleportToPoint(vars)
 	end
 
-	function mist.teleportInZone(gpName, zone, disperse, maxDisp) -- groupName, zoneName or table of Zone Names, keepForm is a boolean
+	function mist.teleportInZone(gpName, zone, disperse, maxDisp, v) -- groupName, zoneName or table of Zone Names, keepForm is a boolean
 		if type(gpName) == 'table' and gpName:getName() then
 			gpName = gpName:getName()
 		else
@@ -3716,6 +3834,11 @@ do -- group functions scope
 		vars.radius = zone.radius
 		vars.disperse = disperse
 		vars.maxDisp = maxDisp
+        if v and type(v) == 'table' then
+            for index, val in pairs(v) do
+                vars[index] = val
+            end 
+        end
 		return mist.teleportToPoint(vars)
 	end
 
@@ -4777,11 +4900,24 @@ do -- mist.debug scope
 	-- in $DCS_ROOT\Scripts\MissionScripting.lua to access lfs and io
 	-- libraries.
 	-- @param fname
-	function mist.debug.dump_G(fname)
+	function mist.debug.dump_G(fname, simp)
 		if lfs and io then
 			local fdir = lfs.writedir() .. [[Logs\]] .. fname
 			local f = io.open(fdir, 'w')
-			f:write(mist.utils.tableShow(_G))
+            if simp then
+                local g = mist.utils.deepCopy(_G)
+                g.mist = nil
+                g.slmod = nil
+                g.env.mission = nil
+                g.env.warehouses = nil
+                g.country.by_idx = nil
+                g.country.by_country = nil
+                
+                f:write(mist.utils.tableShow(g))
+            else
+            
+                f:write(mist.utils.tableShow(_G))
+            end
 			f:close()
 			log:info('Wrote debug data to $1', fdir)
 			--trigger.action.outText(errmsg, 10)
@@ -4825,6 +4961,130 @@ do -- mist.debug scope
 			end
 		end
 	end
+    
+    -- write group table
+    function mist.debug.writeGroup(gName, data)
+        if gName and mist.DBs.groupsByName[gName] then 
+            local dat 
+            if data then
+                dat = mist.getGroupData(gName)
+            else
+                dat = mist.getGroupTable(gName)
+            end
+            if dat then
+                dat.route = {points = mist.getGroupRoute(gName, true)}
+            end
+            
+            if io and lfs and dat then
+                mist.debug.writeData(mist.utils.serialize, {gName, dat}, gName .. '_table.lua')
+            else
+                if dat then 
+                    trigger.action.outText('Error: insufficient libraries to run mist.debug.writeGroup, you must disable the sanitization of the io and lfs libraries in ./Scripts/MissionScripting.lua \nGroup table written to DCS.log file instead.', 10)
+                    log:warn('$1 dataTable: $2', gName, dat)
+                else
+                    trigger.action.outText('Unable to write group table for: ' .. gName .. '\n Error: insufficient libraries to run mist.debug.writeGroup, you must disable the sanitization of the io and lfs libraries in ./Scripts/MissionScripting.lua', 10)
+                end
+            end
+         end
+    end
+    -- write all object types in mission.
+    function mist.debug.writeTypes(fName)
+        local wt = 'mistDebugWriteTypes.lua'
+        if fName and type(fName) == 'string' and string.find(fName, '.lua') then
+            wt = fName
+        end
+        local output = {units = {}, countries = {}}
+        for coa_name_miz, coa_data in pairs(env.mission.coalition) do
+            if type(coa_data) == 'table' then
+                if coa_data.country then --there is a country table
+                    for cntry_id, cntry_data in pairs(coa_data.country) do
+                        local countryName = string.lower(cntry_data.name)
+                        if cntry_data.id and country.names[cntry_data.id] then
+                            countryName = string.lower(country.names[cntry_data.id])
+                        end
+                        output.countries[countryName] = {}
+                        if type(cntry_data) == 'table' then	--just making sure
+                            for obj_cat_name, obj_cat_data in pairs(cntry_data) do
+                                if obj_cat_name == "helicopter" or obj_cat_name == "ship" or obj_cat_name == "plane" or obj_cat_name == "vehicle" or obj_cat_name == "static" then --should be an unncessary check
+                                    local category = obj_cat_name
+                                    if not output.countries[countryName][category] then
+                                        -- log:warn('Create: $1', category)
+                                        output.countries[countryName][category] = {}
+                                    end
+                                    if ((type(obj_cat_data) == 'table') and obj_cat_data.group and (type(obj_cat_data.group) == 'table') and (#obj_cat_data.group > 0)) then	--there's a group!
+                                        for group_num, group_data in pairs(obj_cat_data.group) do
+                                            if group_data and group_data.units and type(group_data.units) == 'table' then	--making sure again- this is a valid group
+                                                for i = 1, #group_data.units do
+                                                    if group_data.units[i] then
+                                                        local u = group_data.units[i]
+                                                        local liv = u.livery_id or 'default'
+                                                        if not output.units[u.type] then -- create unit table
+                                                           -- log:warn('Create: $1', u.type)
+                                                            output.units[u.type] = {count = 0, livery_id = {}}
+                                                        end
+                                                        
+                                                        if not output.countries[countryName][category][u.type] then
+                                                           -- log:warn('Create country, category, unit: $1', u.type)
+                                                            output.countries[countryName][category][u.type] = 0
+                                                        end
+                                                        -- add to count
+                                                        output.countries[countryName][category][u.type] = output.countries[countryName][category][u.type] + 1
+                                                        output.units[u.type].count =  output.units[u.type].count + 1
+                                                        
+                                                        if liv and not output.units[u.type].livery_id[countryName] then
+                                                           -- log:warn('Create livery country: $1', countryName)
+                                                            output.units[u.type].livery_id[countryName] = {}
+                                                        end
+                                                        if liv and not output.units[u.type].livery_id[countryName][liv] then 
+                                                            --log:warn('Create Livery: $1', liv)
+                                                            output.units[u.type].livery_id[countryName][liv] = 0
+                                                        end
+                                                        if liv then 
+                                                            output.units[u.type].livery_id[countryName][liv] = output.units[u.type].livery_id[countryName][liv] + 1
+                                                        end
+                                                        if u.payload and u.payload.pylons then
+                                                            if not output.units[u.type].CLSID then
+                                                                output.units[u.type].CLSID = {}
+                                                                output.units[u.type].pylons = {}
+                                                            end
+                                                            
+                                                            for pyIndex, pData in pairs(u.payload.pylons) do
+                                                                if not output.units[u.type].CLSID[pData.CLSID] then
+                                                                   output.units[u.type].CLSID[pData.CLSID] = 0
+                                                                end
+                                                               output.units[u.type].CLSID[pData.CLSID] = output.units[u.type].CLSID[pData.CLSID] + 1
+                                                                
+                                                                if not output.units[u.type].pylons[pyIndex] then
+                                                                    output.units[u.type].pylons[pyIndex] = {}
+                                                                end
+                                                                if not output.units[u.type].pylons[pyIndex][pData.CLSID] then
+                                                                    output.units[u.type].pylons[pyIndex][pData.CLSID] = 0
+                                                                end
+                                                                output.units[u.type].pylons[pyIndex][pData.CLSID] = output.units[u.type].pylons[pyIndex][pData.CLSID] + 1
+                                                            end
+                                                        
+                                                        end
+                                                    end
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+        if io and lfs then
+             mist.debug.writeData(mist.utils.serialize, {'mistDebugWriteTypes', output}, wt)
+        else
+            trigger.action.outText('Error: insufficient libraries to run mist.debug.writeTypes, you must disable the sanitization of the io and lfs libraries in ./Scripts/MissionScripting.lua \n writeTypes table written to DCS.log file instead.', 10)
+            log:warn('mist.debug.writeTypes: $1', output)
+        end       
+    end
+    -- write CLSIDs
+    -- write livery names
 end
 
 --- 3D Vector functions
@@ -6313,7 +6573,15 @@ do
 		['FW-190D9'] = {'FW-190'},
 		['Bf-109K-4'] = {'Bf-109'},
 	}
+    
+    local mDefs = {
+        coa = {
+            ['red'] = {fillColor = {.8, 0 , 0, .5}, color = {.8, 0 , 0, .5}, lineType = 2},
+            ['blue'] = {fillColor = {0, 0 , 0.8, .5}, color = {0, 0 , 0.8, .5}, lineType = 2},
+        },
+    }
 	
+    local userDefs = {}
 	
 	local mId = 1337
 	
@@ -6334,18 +6602,49 @@ do
 	
 	local function iterate()
 		mId = mId + 1
-		return mId
+		return mist.utils.deepCopy(mId)
 	end
+    
+    function mist.marker.setDefault(vars)
+        if vars and type(vars) == 'table' then
+            for l1, l1Data in pairs(vars) do
+                if type(l1Data) == 'table' then
+                    if not userDefs[l1] then
+                        userDefs[l1] = {}
+                    end
+                    
+                    for l2, l2Data in pairs(l1Data) do
+                        userDefs[l1][l2] = l2Data
+                    end
+                else
+                    userDefs[l1] = l1Data
+                end
+            end
+        
+        end
+    end
 	
-	function mist.marker.add(pos, text, markFor, id)
+	function mist.marker.add(vars)
 		log:warn('markerFunc')
-		log:info('Pos: $1, Text: $2, markFor: $3, id: $4', pos, text, markFor, id)
-		if not id then
+		log:info(vars)
+		local pos           = vars.point or vars.points or vars.pos
+        local text          = vars.text 
+        local markFor       = vars.markFor 
+        local id            = vars.id 
+        local mType         = vars.mType 
+        local color         = vars.color 
+        local fillColor     = vars.fillColor 
+        local lineType      = vars.lineType 
+        local readOnly      = vars.readOnly 
+        local displayMessage= vars.displayMessage 
+        
+        
+        if not id then
 
 		else
 
 		end
-		local markType = 'all'
+		local markScope = 'all'
 		local markForTable = {}
 		if pos then
 			pos = mist.utils.makeVec3(pos)
@@ -6359,15 +6658,15 @@ do
 		if markFor then
 			if type(markFor) == 'number' then -- groupId
 				if mist.DBs.groupsById[markFor] then	
-					markType = 'group'
+					markScope = 'group'
 				end
 			elseif type(markFor) == 'string' then -- groupName
 				if mist.DBs.groupsByName[markFor] then	
-					markType = 'group'
+					markScope = 'group'
 					markFor = mist.DBs.groupsByName[markFor].groupId
 				end
 			elseif type(markFor) == 'table' then -- multiple groupName, country, coalition, all
-				markType = 'table'
+				markScope = 'table'
 				log:info(markFor)
 				for forIndex, forData in pairs(markFor) do -- need to rethink this part and organization. Gotta be a more logical way to send messages to coa, groups, or all. 
 					log:info(forIndex)
@@ -6379,12 +6678,12 @@ do
 							listData = string.lower(listData)
 						end
 						if listData == 'all' then
-							markType = 'all'
+							markScope = 'all'
 							break
 						elseif (forIndex == 'coa' or forIndex == 'ca') then -- mark for coa or CA. 
 							for name, index in pairs (coalition.side) do
 								if listData == string.lower(name) then
-									markType = 'coalition'
+									markScope = 'coalition'
 								end
 							end
 						elseif (forIndex == 'countries' and string.lower(clientData.country) == listData) or (forIndex == 'units' and string.lower(clientData.unitName) == listData) then
@@ -6436,7 +6735,7 @@ do
 				end
 			end
 		else
-			markType = 'all'
+			markScope = 'all'
 		end
 		
 
@@ -6444,14 +6743,14 @@ do
 
 		
 		
-		if markType ~= 'table' then
+		if markScope ~= 'table' then
 			local newId = iterate()
-			local data = {markId = newId, text = text, pos = pos, markType = markType, markFor = markFor}
+			local data = {markId = newId, text = text, pos = pos, markScope = markScope, markFor = markFor}
 
 			-- create marks
-			if markType == 'coa' then
+			if markScope == 'coa' then
 				trigger.action.markToCoalition(newId, text, pos, markFor)
-			elseif markType == 'group' then
+			elseif markScope == 'group' then
 				trigger.action.markToGroup(newId, text, pos, markFor)
 			else
 				trigger.action.markToAll(iterate(), text, pos)
@@ -6752,10 +7051,10 @@ do -- group tasks scope
 			if type(coa_data) == 'table' then
 				if coa_data.country then --there is a country table
 					for cntry_id, cntry_data in pairs(coa_data.country) do
-						for obj_type_name, obj_type_data in pairs(cntry_data) do
-							if obj_type_name == "helicopter" or obj_type_name == "ship" or obj_type_name == "plane" or obj_type_name == "vehicle" then	-- only these types have points
-								if ((type(obj_type_data) == 'table') and obj_type_data.group and (type(obj_type_data.group) == 'table') and (#obj_type_data.group > 0)) then	--there's a group!
-									for group_num, group_data in pairs(obj_type_data.group) do
+						for obj_cat_name, obj_cat_data in pairs(cntry_data) do
+							if obj_cat_name == "helicopter" or obj_cat_name == "ship" or obj_cat_name == "plane" or obj_cat_name == "vehicle" then	-- only these types have points
+								if ((type(obj_cat_data) == 'table') and obj_cat_data.group and (type(obj_cat_data.group) == 'table') and (#obj_cat_data.group > 0)) then	--there's a group!
+									for group_num, group_data in pairs(obj_cat_data.group) do
 										if group_data and group_data.groupId == gpId	then -- this is the group we are looking for
 											if group_data.route and group_data.route.points and #group_data.route.points > 0 then
 												local points = {}
@@ -6792,10 +7091,10 @@ do -- group tasks scope
 											log:error('Group route not defined in mission editor for groupId: $1', gpId)
 											return
 										end	--if group_data and group_data.name and group_data.name == 'groupname'
-									end --for group_num, group_data in pairs(obj_type_data.group) do
-								end --if ((type(obj_type_data) == 'table') and obj_type_data.group and (type(obj_type_data.group) == 'table') and (#obj_type_data.group > 0)) then
-							end --if obj_type_name == "helicopter" or obj_type_name == "ship" or obj_type_name == "plane" or obj_type_name == "vehicle" or obj_type_name == "static" then
-						end --for obj_type_name, obj_type_data in pairs(cntry_data) do
+									end --for group_num, group_data in pairs(obj_cat_data.group) do
+								end --if ((type(obj_cat_data) == 'table') and obj_cat_data.group and (type(obj_cat_data.group) == 'table') and (#obj_cat_data.group > 0)) then
+							end --if obj_cat_name == "helicopter" or obj_cat_name == "ship" or obj_cat_name == "plane" or obj_cat_name == "vehicle" or obj_cat_name == "static" then
+						end --for obj_cat_name, obj_cat_data in pairs(cntry_data) do
 					end --for cntry_id, cntry_data in pairs(coa_data.country) do
 				end --if coa_data.country then --there is a country table
 			end --if coa_name == 'red' or coa_name == 'blue' and type(coa_data) == 'table' then
@@ -7106,8 +7405,12 @@ do -- group tasks scope
 		local minR = innerRadius or 0
 		if maxA and not minA then
 			theta = math.rad(math.random(0, maxA - math.random()))
-		elseif maxA and minA and minA < maxA then
-			theta = math.rad(math.random(minA, maxA) - math.random())
+		elseif maxA and minA then
+            if minA < maxA then
+                theta = math.rad(math.random(minA, maxA) - math.random())
+            else
+                theta = math.rad(math.random(maxA, minA) - math.random())
+            end
 		end
 		local rad = math.random() + math.random()
 		if rad > 1 then
