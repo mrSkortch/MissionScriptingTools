@@ -35,7 +35,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 5
-mist.build = 98
+mist.build = 100
 
 -- forward declaration of log shorthand
 local log
@@ -5027,8 +5027,6 @@ do -- mist.debug scope
     function mist.debug.changeSetting(s)
         if type(s) == 'table' then
             for sName, sVal in pairs(s) do
-                env.info(sName)
-                env.info(sVal)
                 if type(sVal) == 'string' or type(sVal) == 'number' then
                     if sName == 'log' then
                         mistSettings[sName] = sVal
