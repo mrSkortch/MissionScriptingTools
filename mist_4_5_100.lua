@@ -39,12 +39,14 @@ mist.build = 98
 
 -- forward declaration of log shorthand
 local log
-
+local dbLog
+    
 local mistSettings = {
 	errorPopup = false, -- errors printed by mist logger will create popup warning you
 	warnPopup = false,
 	infoPopup = false,
 	logLevel = 'warn',
+    dbLog = 'warn',
 }
 
 do -- the main scope
@@ -73,7 +75,7 @@ do -- the main scope
 	mist.nextGroupId = 1
 	mist.nextUnitId = 1
 
-	local dbLog
+
 	
 	local function initDBs() -- mist.DBs scope
 		mist.DBs = {}
@@ -1232,6 +1234,7 @@ do -- the main scope
         end
     
     end
+    
 
 	--- init function.
 	-- creates logger, adds default event handler
@@ -1601,7 +1604,7 @@ do -- the main scope
 		newGroup.country = newCountry
 
         -- update and verify any self tasks
-        if newGroup.route and newGroup.routes.points then 
+        if newGroup.route and newGroup.route.points then 
             for i, pData in pairs(newGroup.route.points) do
                 if pData.task and pData.task.params and pData.task.params.tasks and #pData.task.params.tasks > 0 then
                     for tIndex, tData in pairs(pData.task.params.tasks) do
@@ -2622,6 +2625,126 @@ do
 	return units_tbl
 end
 
+function mist.getUnitsByAttribute(att, rnum, id)
+    local cEntry = {}
+    cEntry.typeName = att.type or att.typeName or att.typename
+    cEntry.country = att.country
+    cEntry.coalition = att.coalition
+    cEntry.skill = att.skill
+    cEntry.categry = att.category
+    
+    local num = rnum or 1
+    
+    if cEntry.skill == 'human' then
+        cEntry.skill = {'Client', 'Player'}
+    end
+    
+
+    local checkedVal = {}
+    local units = {}
+    for uName, uData in pairs(mist.DBs.unitsByName) do
+        local matched = 0
+        for cName, cVal in pairs(cEntry) do
+            if type(cVal) == 'table' then
+                for sName, sVal in pairs(cVal) do
+                    if (uData[cName] and uData[cName] == sVal) or (uData[cName] and uData[cName] == sName) then
+                         matched = matched + 1
+                    end
+                end
+            else
+                if uData[cName] and uData[cName] == cVal then
+                    matched = matched + 1
+                end
+            end
+        end
+        if matched >= num then
+            if id then 
+                units[uData.unitId] = true
+            else
+            
+                units[uName] = true
+            end
+        end
+    end
+    
+    local rtn = {}
+    for name, _ in pairs(units) do
+        table.insert(rtn, name)
+    end
+    return rtn
+    
+end
+
+function mist.getGroupsByAttribute(att, rnum, id)
+    local cEntry = {}
+    cEntry.typeName = att.type or att.typeName or att.typename
+    cEntry.country = att.country
+    cEntry.coalition = att.coalition
+    cEntry.skill = att.skill
+    cEntry.categry = att.category
+    
+    local num = rnum or 1
+    
+    if cEntry.skill == 'human' then
+        cEntry.skill = {'Client', 'Player'}
+    end
+    local groups = {}
+    for gName, gData in pairs(mist.DBs.groupsByName) do
+        local matched = 0
+        for cName, cVal in pairs(cEntry) do
+            if type(cVal) == 'table' then
+                for sName, sVal in pairs(cVal) do
+                    if cName == 'skill' or cName == 'typeName' then 
+                        local lMatch = 0
+                        for uId, uData in pairs(gData.units) do
+                            if (uData[cName] and uData[cName] == sVal) or (gData[cName] and gData[cName] == sName) then
+                                lMatch = lMatch + 1
+                                break
+                            end
+                        end
+                        if lMatch > 0 then  
+                            matched = matched + 1                    
+                        end
+                    end
+                    if (gData[cName] and gData[cName] == sVal) or (gData[cName] and gData[cName] == sName) then
+                         matched = matched + 1
+                        break
+                    end
+                end
+            else
+                if cName == 'skill' or cName == 'typeName' then
+                    local lMatch = 0
+                    for uId, uData in pairs(gData.units) do
+                        if (uData[cName] and uData[cName] == sVal) then
+                            lMatch = lMatch + 1
+                            break
+                        end
+                    end
+                    if lMatch > 0 then  
+                        matched = matched + 1                    
+                    end
+                end
+                if gData[cName] and gData[cName] == cVal then
+                    matched = matched + 1
+                end
+            end
+        end
+        if matched >= num then
+            if id then 
+                groups[gData.groupid] = true
+            else
+                groups[gName] = true
+            end
+        end
+    end
+    local rtn = {}
+    for name, _ in pairs(groups) do
+        table.insert(rtn, name)
+    end
+    return rtn
+    
+end
+
 function mist.getDeadMapObjsInZones(zone_names)
 	-- zone_names: table of zone names
 	-- returns: table of dead map objects (indexed numerically)
@@ -3543,7 +3666,7 @@ do -- group functions scope
     end
 
 	function mist.teleportToPoint(vars) -- main teleport function that all of teleport/respawn functions call
-		--log:info(vars)
+		--log:warn(vars)
         local point = vars.point
 		local gpName
 		if vars.gpName then
@@ -3607,7 +3730,7 @@ do -- group functions scope
 		local newCoord, origCoord 
         
         local validTerrain = {'LAND', 'ROAD', 'SHALLOW_WATER', 'WATER', 'RUNWAY'}
-        if vars.anyTarrain then
+        if vars.anyTerrain then
             -- do nothing
         elseif vars.validTerrain then
             validTerrain = vars.validTerrain
@@ -3638,7 +3761,7 @@ do -- group functions scope
              ---- old
 			for i = 1, 100	do
 				newCoord = mist.getRandPointInCircle(point, radius, innerRadius)
-				if mist.isTerrainValid(newCoord, validTerrain) then
+				if vars.anyTerrain or mist.isTerrainValid(newCoord, validTerrain)  then
 					origCoord = mist.utils.deepCopy(newCoord)
 					diff = {x = (newCoord.x - newGroupData.units[1].x), y = (newCoord.y - newGroupData.units[1].y)}
 					valid = true
@@ -3724,19 +3847,21 @@ do -- group functions scope
             tempRoute = mist.getGroupRoute(gpName, true)
         elseif vars.route then
           --  log:warn('routeExist')
-            tempRoute = mist.utils.deepCopy(route)
+            tempRoute = mist.utils.deepCopy(vars.route)
         end
        -- log:warn(tempRoute)
-        if tempRoute and (vars.offsetRoute or vars.offsetWP1 or vars.initTasks) then
-            for i = 1, #tempRoute do
-               -- log:warn(i)
-                if (vars.offsetRoute) or (i == 1 and vars.offsetWP1) or (i == 1 and vars.initTasks) then 
-                   -- log:warn('update offset')
-                    tempRoute[i].x = tempRoute[i].x + diff.x
-                    tempRoute[i].y = tempRoute[i].y + diff.y
-                elseif vars.initTasks and i > 1 then
-                    --log:warn('deleteWP')
-                    tempRoute[i] = nil
+        if tempRoute then
+            if (vars.offsetRoute or vars.offsetWP1 or vars.initTasks) then
+                for i = 1, #tempRoute do
+                   -- log:warn(i)
+                    if (vars.offsetRoute) or (i == 1 and vars.offsetWP1) or (i == 1 and vars.initTasks) then 
+                       -- log:warn('update offset')
+                        tempRoute[i].x = tempRoute[i].x + diff.x
+                        tempRoute[i].y = tempRoute[i].y + diff.y
+                    elseif vars.initTasks and i > 1 then
+                        --log:warn('deleteWP')
+                        tempRoute[i] = nil
+                    end
                 end
             end
             newGroupData.route = tempRoute
@@ -4064,14 +4189,20 @@ do -- group functions scope
 		end
 		return choices[rtnVal]
 	end
+    
+    function mist.stringCondense(s)
+        local exclude = {'%-', '%(', '%)', '%_', '%[', '%]', '%.', '%#', '% ', '%{', '%}', '%$', '%%', '%?', '%+', '%^'}
+        for i , str in pairs(exclude) do
+            s = string.gsub(s, str, '')
+        end
+        return s
+    end
 
 	function mist.stringMatch(s1, s2, bool)
-		local exclude = {'%-', '%(', '%)', '%_', '%[', '%]', '%.', '%#', '% ', '%{', '%}', '%$', '%%', '%?', '%+', '%^'}
+		
 		if type(s1) == 'string' and type(s2) == 'string' then
-			for i , str in pairs(exclude) do
-				s1 = string.gsub(s1, str, '')
-				s2 = string.gsub(s2, str, '')
-			end
+            s1 = mist.stringCondense(s1)
+            s2 = mist.stringCondense(s2)
 			if not bool then
 				s1 = string.lower(s1)
 				s2 = string.lower(s2)
@@ -4893,6 +5024,25 @@ end
 do -- mist.debug scope
 	mist.debug = {}
 
+    function mist.debug.changeSetting(s)
+        if type(s) == 'table' then
+            for sName, sVal in pairs(s) do
+                env.info(sName)
+                env.info(sVal)
+                if type(sVal) == 'string' or type(sVal) == 'number' then
+                    if sName == 'log' then
+                        mistSettings[sName] = sVal
+                        log:setLevel(sVal)
+                    elseif sName == 'dbLog' then
+                        mistSettings[sName] = sVal
+                        dblog:setLevel(sVal)
+                    end
+                else
+                    mistSettings[sName] = sVal
+                end
+            end
+        end
+    end
 	--- Dumps the global table _G.
 	-- This dumps the global table _G to a file in
 	-- the DCS\Logs directory.
@@ -6543,6 +6693,7 @@ do -- mist.demos scope
 	end
 
 end
+
 do
 	--[[ stuff for marker panels
 		marker.add() add marker. Point of these functions is to simplify process and to store all mark panels added. 
@@ -6562,10 +6713,20 @@ do
 		If mark added to a group before a client joins slot is synced.
 		Mark made for cliet A in Slot A. Client A leaves, Client B joins in slot A. What do they see?
 		
+        
 		May need to automate process...
+        
+        
+        Could release this. But things I might need to add/change before doing so.
+            - removing marks and re-adding in same sequence doesn't appear to work. May need to schedule adding mark if updating an entry. 
+            - I really dont like the old message style code for which groups get the message. Perhaps change to unitsTable and create function for getting humanUnitsTable. 
+            = Event Handler, and check it, for marks added via script or user to deconflict Ids.
+            - Full validation of passed values for a specific shape type. 
 
 	]]
-	--[[
+    
+    local usedMarks = {}
+
 	local typeBase = {
 		['Mi-8MT'] = {'Mi-8MTV2', 'Mi-8MTV', 'Mi-8'},
 		['MiG-21Bis'] = {'Mig-21'},
@@ -6576,35 +6737,157 @@ do
     
     local mDefs = {
         coa = {
-            ['red'] = {fillColor = {.8, 0 , 0, .5}, color = {.8, 0 , 0, .5}, lineType = 2},
-            ['blue'] = {fillColor = {0, 0 , 0.8, .5}, color = {0, 0 , 0.8, .5}, lineType = 2},
+            ['red'] = {fillColor = {.8, 0 , 0, .5}, color = {.8, 0 , 0, .5}, lineType = 2, fontSize = 16},
+            ['blue'] = {fillColor = {0, 0 , 0.8, .5}, color = {0, 0 , 0.8, .5}, lineType = 2, fontSize = 16},
+            ['all'] = {fillColor = {.1, .1 , .1, .5}, color = {.9, .9 , .9, .5}, lineType = 2, fontSize = 16},
+            ['neutral'] = {fillColor = {.1, .1 , .1, .5}, color = {.2, .2 , .2, .5}, lineType = 2, fontSize = 16},
         },
     }
+
+    local userDefs = {['red'] = {},['blue'] = {},['all'] = {},['neutral'] = {}}
 	
-    local userDefs = {}
-	
-	local mId = 1337
-	
+	local mId = 1000
+    
+    local tNames = {'line', 'circle','rect', 'arrow', 'text', 'quad', 'freeform'}
+    local tLines = {[0] = 'no line', [1] = 'solid', [2] = 'dashed',[3] = 'dotted', [4] = 'dot dash' ,[5] = 'long dash', [6] = 'two dash'}
+    local coas = {[-1] = 'all', [0] = 'neutral', [1] = 'red', [2] = 'blue'}
+    
+    local altNames = {['poly'] = 7, ['lines'] = 1, ['polygon'] = 7 }
+    
+    local function draw(s)
+        --log:warn(s)
+        if type(s) == 'table' then 
+            local mType = s.markType
+            if mType == 'panel' then 
+                if markScope == 'coa' then
+                    trigger.action.markToCoalition(s.markId, s.text, s.pos, s.markFor, s.readOnly)
+                elseif markScope == 'group' then
+                    trigger.action.markToGroup(s.markId, s.text, s.pos, s.markFor, s.readOnly)
+                else
+                    trigger.action.markToAll(s.markId, s.text, s.pos, s.readOnly)
+                end
+            elseif mType == 'line' then 
+                trigger.action.lineToAll(s.coa, s.markId, s.pos[1], s.pos[2], s.color, s.fillColor, s.lineType, s.readOnly, s.message)
+            elseif mType == 'circle' then 
+                trigger.action.circleToAll(s.coa, s.markId, s.pos[1], s.radius, s.color, s.fillColor, s.lineType, s.readOnly, s.message)
+            elseif mType == 'rect' then 
+                trigger.action.rectToAll(s.coa, s.markId, s.pos[1], s.pos[2], s.color, s.fillColor, s.lineType, s.readOnly, s.message)
+            elseif mType == 'arrow' then 
+                trigger.action.arrowToAll(s.coa, s.markId, s.pos[1], s.pos[2], s.color, s.fillColor, s.lineType, s.readOnly, s.message)
+            elseif mType == 'text' then
+                trigger.action.textToAll(s.coa, s.markId, s.pos[1], s.color, s.fillColor, fontSize, s.readOnly, s.text)
+            elseif mType == 'quad' then 
+                trigger.action.quadToAll(s.coa, s.markId, s.pos[1], s.pos[2], s.pos[3], s.pos[4], s.color, s.fillColor, s.lineType, s.readOnly, s.message)
+            end
+            if s.name and not usedMarks[s.name] then 
+                usedMarks[s.name] = s.markId
+            end
+        elseif type(s) == 'string' then
+            --log:warn(s)
+            mist.utils.dostring(s)
+        end
+    end
+    
 	mist.marker = {}
 	mist.marker.list = {}
 	local function markSpamFilter(recList, spamBlockOn)
 		
 		for id, name in pairs(recList) do
 			if name == spamBlockOn then
-				log:info('already on recList')
+				--log:info('already on recList')
 				return recList
 			end
 		end
-		log:info('add to recList')
+		--log:info('add to recList')
 		table.insert(recList, spamBlockOn)
 		return recList
 	end
 	
 	local function iterate()
-		mId = mId + 1
-		return mist.utils.deepCopy(mId)
+		while mId < 10000000 do
+            if usedMarks[mId] then
+                mId = mId + 1
+            else
+                return mist.utils.deepCopy(mId)
+            end
+        end
+		return  mist.utils.deepCopy(mId)
 	end
     
+    local function validateColor(val)
+        if type(val) == 'table' then 
+            for i = 1, #val do
+                if type(val[i]) == 'number' and val[i] > 1 then
+                    val[i] = val[i]/255 -- convert RGB values from 0-255 to 0-1 equivilent. 
+                end
+            end
+        end
+        return val
+    end
+    
+    local function checkDefs(vName, coa)
+        --log:warn('CheckDefs: $1 $2', vName, coa)
+        local coaName 
+        if type(coa) == 'number' then
+            if coas[coa] then
+                coaName = coas[coa]
+            end
+        elseif type(coa) == 'string' then 
+            coaName = coa
+        end
+        
+       -- log:warn(coaName)
+        if userDefs[coaName] and userDefs[coaName][vName] then
+            return userDefs[coaName][vName]
+        elseif mDefs.coa[coaName] and mDefs.coa[coaName][vName] then
+            return mDefs.coa[coaName][vName]
+        end
+
+    end
+    
+    function mist.marker.getNextId()
+        return iterate()
+    end
+    
+    local handle = {}
+    function handle:onEvent(e)
+        if world.event.S_EVENT_MARK_ADDED == e.id and e.idx then
+           usedMarks[e.idx] = e.idx
+           if not  mist.marker.list[e.idx] then
+                --log:info('create maker DB: $1', e.idx)
+                mist.marker.list[e.idx] = {time = e.time, pos = e.pos, groupId = e.groupId, mType = 'panel', text = e.text, markId = e.idx, coalition = e.coalition}
+                if e.unit then
+                    mist.marker.list[e.idx].unit = e.initiaor:getName()
+                end
+                --log:info(mist.marker.list[e.idx])
+           end
+
+        elseif  world.event.S_EVENT_MARK_CHANGE == e.id and e.idx then
+            if mist.marker.list[e.idx] then
+                mist.marker.list[e.idx].text = e.text
+            end
+        elseif  world.event.S_EVENT_MARK_REMOVE == e.id and e.idx then
+            if mist.marker.list[e.idx] then
+                mist.marker.list[e.idx] = nil
+            end
+        end
+        
+    end
+    
+    local function removeMark(id)
+        --log:info("Removing Mark: $1", id)
+        if type(id) == 'table' then 
+            for ind, val in pairs(id) do
+                 trigger.action.removeMark(val)
+                 mist.marker.list[val] = nil
+            end
+        else
+            trigger.action.removeMark(id)
+            mist.marker.list[id] = nil
+        end
+    end
+    
+    world.addEventHandler(handle)
     function mist.marker.setDefault(vars)
         if vars and type(vars) == 'table' then
             for l1, l1Data in pairs(vars) do
@@ -6625,37 +6908,116 @@ do
     end
 	
 	function mist.marker.add(vars)
-		log:warn('markerFunc')
-		log:info(vars)
+		--log:warn('markerFunc')
+		--log:warn(vars)
 		local pos           = vars.point or vars.points or vars.pos
-        local text          = vars.text 
-        local markFor       = vars.markFor 
-        local id            = vars.id 
-        local mType         = vars.mType 
+        local text          = vars.text or ''
+        local markFor       = vars.markFor
+        local markForCoa    = vars.markForCoa           -- optional, can be used if you just want to mark to a specific coa/all
+        local id            = vars.id or vars.markId or vars.markid
+        local mType         = vars.mType or 0
         local color         = vars.color 
         local fillColor     = vars.fillColor 
-        local lineType      = vars.lineType 
-        local readOnly      = vars.readOnly 
-        local displayMessage= vars.displayMessage 
+        local lineType      = vars.lineType or 2
+        local readOnly      = vars.readOnly or true
+        local message       = vars.message 
+        local fontSize      = vars.fontSize 
+        local name          = vars.name
+        local radius        = vars.radius or 500
+        
+        local coa = -1
+        local usedId = 0
         
         
-        if not id then
 
-		else
-
+        if id then 
+            if type(id) ~= 'number' then
+                name = id
+                usedId = iterate()
+            end
+           --log:info('checkIfIdExist: $1', id)
+           --[[
+           Maybe it should treat id or name as the same thing/single value. 
+           
+           If passed number it will use that as the first Id used and will delete/update any marks associated with that same value. 
+           
+           
+           ]]
+           
+            local lId = id or name
+            if mist.marker.list[id] then ----------  NEED A BETTER WAY TO ASSOCIATE THE ID VALUE. CUrrnetly deleting from table and checking if that deleted entry exists which it wont. 
+                --log:warn('active mark to be removed: $1', id)
+                name = mist.marker.list[id].name or id
+               removeMark(id)
+            elseif usedMarks[id] then
+                --log:info('exists in usedMarks: $1', id)
+               removeMark(usedMarks[id])
+            elseif name and usedMarks[name] then
+                --log:info('exists in usedMarks: $1', name)
+                removeMark(usedMarks[name])
+            end
+            usedId = iterate()
+            usedMarks[id] = usedId -- redefine the value used
 		end
+        if name then
+            if usedId == 0 then
+                usedId = iterate()
+            end
+            usedMarks[name] = usedId
+        end
+        
+        
+        if mType then
+            if type(mType) == 'string' then
+                for i = 1, #tNames do
+                    --log:warn(tNames[i])
+                    if mist.stringMatch(mType, tNames[i]) then
+                        mType = i
+                        break
+                    end
+                end
+            elseif type(mType) == 'number' and mType > #tNames then
+                mType = 0
+            end
+        end
+        --log:warn(mType)
 		local markScope = 'all'
 		local markForTable = {}
-		if pos then
-			pos = mist.utils.makeVec3(pos)
+		
+        if pos then
+			if pos[1] then
+                for i = 1, #pos do
+                    pos[i] = mist.utils.makeVec3(pos[i])
+                end
+            
+            else
+                pos[1] = mist.utils.makeVec3(pos)
+            end
+            
 		end
 		if text and type(text) ~= string then
 			text = tostring(text)
-		else
-			text = ''
 		end
-
-		if markFor then
+        
+        if markForCoa then
+            if type(markForCoa) == 'string' then
+                if tonumber(markForCoa) then 
+                    coa = coas[tonumber(markForCoa)]
+                    markScope = 'coa'
+                else
+                    for ind, cName in pairs(coas) do
+                        if mist.stringMatch(cName, markForCoa) then
+                            coa = ind
+                            markScope = 'coa'
+                            break
+                        end
+                    end
+                end
+            end
+            
+            
+        
+        elseif markFor then
 			if type(markFor) == 'number' then -- groupId
 				if mist.DBs.groupsById[markFor] then	
 					markScope = 'group'
@@ -6667,12 +7029,10 @@ do
 				end
 			elseif type(markFor) == 'table' then -- multiple groupName, country, coalition, all
 				markScope = 'table'
-				log:info(markFor)
+				--log:warn(markFor)
 				for forIndex, forData in pairs(markFor) do -- need to rethink this part and organization. Gotta be a more logical way to send messages to coa, groups, or all. 
-					log:info(forIndex)
-					log:info(forData)
 					for list, listData in pairs(forData) do
-						log:info(listData)
+						--log:warn(listData)
 						forIndex = string.lower(forIndex)
 						if type(listData) == 'string' then
 							listData = string.lower(listData)
@@ -6681,18 +7041,29 @@ do
 							markScope = 'all'
 							break
 						elseif (forIndex == 'coa' or forIndex == 'ca') then -- mark for coa or CA. 
-							for name, index in pairs (coalition.side) do
+							local matches = 0
+                            for name, index in pairs (coalition.side) do
 								if listData == string.lower(name) then
-									markScope = 'coalition'
+									markScope = 'coa'
+                                    markFor = index
+                                    coa = index
+                                    matches = matches + 1
 								end
 							end
-						elseif (forIndex == 'countries' and string.lower(clientData.country) == listData) or (forIndex == 'units' and string.lower(clientData.unitName) == listData) then
-							markForTable = markSpamFilter(markForTable, clientData.groupId)
+                            if matches > 1 then
+                                markScope = 'all'
+                            end
+						elseif forIndex == 'countries' then
+                            for clienId, clientData in pairs(mist.DBs.humansById) do
+                                if (string.lower(clientData.country) == listData) or (forIndex == 'units' and string.lower(clientData.unitName) == listData) then
+                                    markForTable = markSpamFilter(markForTable, clientData.groupId)
+                                end
+                            end
 						elseif forIndex == 'unittypes' then -- mark to group
 						-- iterate play units
 							for clientId, clientData in pairs(mist.DBs.humansById) do
 								for typeId, typeData in pairs(listData) do
-									log:info(typeData)
+									--log:warn(typeData)
 									local found = false
 									if list == 'all' or clientData.coalition and type(clientData.coalition) == 'string' and mist.stringMatch(clientData.coalition, list) then
 										if mist.matchString(typeData, clientData.type) then
@@ -6738,58 +7109,141 @@ do
 			markScope = 'all'
 		end
 		
+		if mType == 0  then 
+            local data = {markId = usedId, text = text, pos = pos[1], markScope = markScope, markFor = markFor, markType = 'panel', name = name, time = timer.getTime()}
+            if markScope ~= 'table' then
+                -- create marks
+                
+                mist.marker.list[usedId] = data-- add to the DB
+                 
+            else
+                if #markForTable > 0 then
+                    --log:info('iterate')
+                    local list = {}
+                    if id and not name then
+                        name = id
+                    end
+                    for i = 1, #markForTable do
+                        local newId = iterate()
+                        local data = {markId = newId, text = text, pos = pos[i], markFor = markForTable[i], markType = 'panel', name = name, readOnly = readOnly, time = timer.getTime()}
+                        mist.marker.list[newId] = data
+                        table.insert(list, data)
 
-		
+                        draw(data)
+                        
+                    end
+                    return list
+                end
+            end
 
-		
-		
-		if markScope ~= 'table' then
-			local newId = iterate()
-			local data = {markId = newId, text = text, pos = pos, markScope = markScope, markFor = markFor}
+            draw(data)
+            
+            return data
+		elseif mType > 0 then
+            local newId = iterate()
+            local fCal = {}
+            fCal[#fCal+1] = mType
+            fCal[#fCal+1] = coa
+            fCal[#fCal+1] = usedId
+            for i = 1, #pos do
+                fCal[#fCal+1] = pos[i]
+            end
+            
+            if radius and mType == 2 then
+                fCal[#fCal+1] = radius
+            end
+            
+            if not color then
+                color = checkDefs('color', coa)
+            else
+                color = validateColor(color)
+            end
+            fCal[#fCal+1] = color
+            
+            
+            if not fillColor then
+                fillColor = checkDefs('fillColor', coa)
+            else
+                fillColor = validateColor(fillColor)
+            end
+            fCal[#fCal+1] = fillColor
+            
+            if mType == 5 then -- text to all
+                if not fontSize then
+                     fontSize = checkDefs('fondSize', coa) or 16
+                end
+                fCal[#fCal+1] = fontSize
+            else
+                if not lineType then
+                    lineType = checkDefs('lineType', coa) or 2
+                end
+            end
+            fCal[#fCal+1] = lineType
+            if not readOnly then
+                readOnly = true
+            end
+            fCal[#fCal+1] = readOnly
+            fCal[#fCal+1] = message
+            
+            local data = {coa = coa, markId = usedId, pos = pos, markFor = markFor, color = color, readOnly = readOnly, message = message, fillColor = fillColor, lineType = lineType, markType = tNames[mType], name = name, radius = radius, text = text, fontSize = fontSize, time = timer.getTime()}
+            mist.marker.list[usedId] = data
+            
+            if mType == 7 or  mType == 1 then 
+                local s = "trigger.action.markupToAll("
+                
+                for i = 1, #fCal do
+                    --log:warn(fCal[i])
+                    if type(fCal[i]) == 'table' or type(fCal[i]) == 'boolean' then
+                        s = s .. mist.utils.oneLineSerialize(fCal[i])
+                    else
+                        s = s .. fCal[i]
+                    end
+                    if i < #fCal then 
+                        s = s .. ','
+                    end
+                end
+                
+                s = s .. ')'
+                if name then 
+                    usedMarks[name] = usedId
+                end
+                draw(s)
+                
+            else
 
-			-- create marks
-			if markScope == 'coa' then
-				trigger.action.markToCoalition(newId, text, pos, markFor)
-			elseif markScope == 'group' then
-				trigger.action.markToGroup(newId, text, pos, markFor)
-			else
-				trigger.action.markToAll(iterate(), text, pos)
-			end
-			table.insert(mist.marker.list, data) -- add to the DB
-		else
-			if #markForTable > 0 then
-				log:info('iterate')
-				for i = 1, #markForTable do
-					local newId = iterate()
-					local data = {markId = newId, text = text, pos = pos, markFor = markFor}
-					log:info(data)
-					table.insert(mist.marker.list, data)
-					trigger.action.markToGroup(newId, text, pos, markForTable[i])
-				end
-			end
-		end
-		
+                draw(data)
+                
+            end
+            return data
+        end
 		
 		
 	end
 	
 	function mist.marker.remove(id)
-		for i, data in pairs(mist.marker.list) do
-			if id == data.markId then
-				trigger.action.removeMark(id)
-			end
-		end
+        removeMark(id)
 	end
 	
 	function mist.marker.get(id)
-	
+        if mist.marker.lis[id] then
+            return mist.marker.lis[id] 
+        end
+        local names = {}
+        for markId, data in pairs(mist.marker.list) do
+			if data.name and data.name == id then
+                table.insert(names, data)
+			end
+		end
+        if #names > 0 then
+            return names
+        end
 	end
 	
-	function mist.marker.coords(pos, cType, markFor, id) -- wrapper function to just display coordinates of a specific format at location
+	--function mist.marker.coords(pos, cType, markFor, id) -- wrapper function to just display coordinates of a specific format at location
 		
 	
-	end
-    ]]
+	--end
+
 end
 --- Time conversion functions.
 -- @section mist.time
@@ -7790,7 +8244,8 @@ do -- mist.Logger scope
 	-- @usage -- log everything
 	--myLogger:setLevel(3)
 	function mist.Logger:setLevel(level)
-		if not level then
+		env.info('set Level ' .. level)
+        if not level then
 			self.level = 2
 		else
 			if type(level) == 'string' then
