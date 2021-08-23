@@ -35,7 +35,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 5
-mist.build = 100
+mist.build = 101
 
 -- forward declaration of log shorthand
 local log
@@ -79,7 +79,7 @@ do -- the main scope
 	
 	local function initDBs() -- mist.DBs scope
 		mist.DBs = {}
-
+        mist.DBs.markList = {}
 		mist.DBs.missionData = {}
 		if env.mission then
 
@@ -5030,7 +5030,7 @@ do -- mist.debug scope
                 if type(sVal) == 'string' or type(sVal) == 'number' then
                     if sName == 'log' then
                         mistSettings[sName] = sVal
-                        log:setLevel(sVal)
+                        mist.log:setLevel(sVal)
                     elseif sName == 'dbLog' then
                         mistSettings[sName] = sVal
                         dblog:setLevel(sVal)
@@ -5229,7 +5229,8 @@ do -- mist.debug scope
         else
             trigger.action.outText('Error: insufficient libraries to run mist.debug.writeTypes, you must disable the sanitization of the io and lfs libraries in ./Scripts/MissionScripting.lua \n writeTypes table written to DCS.log file instead.', 10)
             log:warn('mist.debug.writeTypes: $1', output)
-        end       
+        end
+        return output
     end
     -- write CLSIDs
     -- write livery names
@@ -6692,6 +6693,8 @@ do -- mist.demos scope
 
 end
 
+
+
 do
 	--[[ stuff for marker panels
 		marker.add() add marker. Point of these functions is to simplify process and to store all mark panels added. 
@@ -6787,7 +6790,7 @@ do
     end
     
 	mist.marker = {}
-	mist.marker.list = {}
+
 	local function markSpamFilter(recList, spamBlockOn)
 		
 		for id, name in pairs(recList) do
@@ -6851,42 +6854,47 @@ do
     function handle:onEvent(e)
         if world.event.S_EVENT_MARK_ADDED == e.id and e.idx then
            usedMarks[e.idx] = e.idx
-           if not  mist.marker.list[e.idx] then
+           if not mist.DBs.markList[e.idx] then
                 --log:info('create maker DB: $1', e.idx)
-                mist.marker.list[e.idx] = {time = e.time, pos = e.pos, groupId = e.groupId, mType = 'panel', text = e.text, markId = e.idx, coalition = e.coalition}
+               mist.DBs.markList[e.idx] = {time = e.time, pos = e.pos, groupId = e.groupId, mType = 'panel', text = e.text, markId = e.idx, coalition = e.coalition}
                 if e.unit then
-                    mist.marker.list[e.idx].unit = e.initiaor:getName()
+                   mist.DBs.markList[e.idx].unit = e.initiaor:getName()
                 end
                 --log:info(mist.marker.list[e.idx])
            end
 
         elseif  world.event.S_EVENT_MARK_CHANGE == e.id and e.idx then
-            if mist.marker.list[e.idx] then
-                mist.marker.list[e.idx].text = e.text
+            if mist.DBs.markList[e.idx] then
+               mist.DBs.markList[e.idx].text = e.text
             end
         elseif  world.event.S_EVENT_MARK_REMOVE == e.id and e.idx then
-            if mist.marker.list[e.idx] then
-                mist.marker.list[e.idx] = nil
+            if mist.DBs.markList[e.idx] then
+               mist.DBs.markList[e.idx] = nil
             end
         end
         
     end
     
     local function removeMark(id)
-        --log:info("Removing Mark: $1", id)
+        --log:info("Removing Mark: $1", id
+        local removed = false
         if type(id) == 'table' then 
             for ind, val in pairs(id) do
                  trigger.action.removeMark(val)
-                 mist.marker.list[val] = nil
+                mist.DBs.markList[val] = nil
+                 removed = true
             end
         else
             trigger.action.removeMark(id)
-            mist.marker.list[id] = nil
+           mist.DBs.markList[id] = nil
+            removed = true
         end
+        return removed
     end
     
     world.addEventHandler(handle)
     function mist.marker.setDefault(vars)
+        local anyChange = false
         if vars and type(vars) == 'table' then
             for l1, l1Data in pairs(vars) do
                 if type(l1Data) == 'table' then
@@ -6896,13 +6904,16 @@ do
                     
                     for l2, l2Data in pairs(l1Data) do
                         userDefs[l1][l2] = l2Data
+                        anyChange = true
                     end
                 else
                     userDefs[l1] = l1Data
+                    anyChange = true
                 end
             end
         
         end
+        return anyChange
     end
 	
 	function mist.marker.add(vars)
@@ -6913,7 +6924,7 @@ do
         local markFor       = vars.markFor
         local markForCoa    = vars.markForCoa           -- optional, can be used if you just want to mark to a specific coa/all
         local id            = vars.id or vars.markId or vars.markid
-        local mType         = vars.mType or 0
+        local mType         = vars.mType or vars.markType or vars.type or 0
         local color         = vars.color 
         local fillColor     = vars.fillColor 
         local lineType      = vars.lineType or 2
@@ -6943,9 +6954,9 @@ do
            ]]
            
             local lId = id or name
-            if mist.marker.list[id] then ----------  NEED A BETTER WAY TO ASSOCIATE THE ID VALUE. CUrrnetly deleting from table and checking if that deleted entry exists which it wont. 
+            if mist.DBs.markList[id] then ----------  NEED A BETTER WAY TO ASSOCIATE THE ID VALUE. CUrrnetly deleting from table and checking if that deleted entry exists which it wont. 
                 --log:warn('active mark to be removed: $1', id)
-                name = mist.marker.list[id].name or id
+                name = mist.DBs.markList[id].name or id
                removeMark(id)
             elseif usedMarks[id] then
                 --log:info('exists in usedMarks: $1', id)
@@ -6958,13 +6969,12 @@ do
             usedMarks[id] = usedId -- redefine the value used
 		end
         if name then
-            if usedId == 0 then
-                usedId = iterate()
-            end
             usedMarks[name] = usedId
         end
         
-        
+        if usedId == 0 then
+            usedId = iterate()
+        end       
         if mType then
             if type(mType) == 'string' then
                 for i = 1, #tNames do
@@ -7112,7 +7122,7 @@ do
             if markScope ~= 'table' then
                 -- create marks
                 
-                mist.marker.list[usedId] = data-- add to the DB
+               mist.DBs.markList[usedId] = data-- add to the DB
                  
             else
                 if #markForTable > 0 then
@@ -7124,7 +7134,7 @@ do
                     for i = 1, #markForTable do
                         local newId = iterate()
                         local data = {markId = newId, text = text, pos = pos[i], markFor = markForTable[i], markType = 'panel', name = name, readOnly = readOnly, time = timer.getTime()}
-                        mist.marker.list[newId] = data
+                        mist.DBs.markList[newId] = data
                         table.insert(list, data)
 
                         draw(data)
@@ -7184,7 +7194,7 @@ do
             fCal[#fCal+1] = message
             
             local data = {coa = coa, markId = usedId, pos = pos, markFor = markFor, color = color, readOnly = readOnly, message = message, fillColor = fillColor, lineType = lineType, markType = tNames[mType], name = name, radius = radius, text = text, fontSize = fontSize, time = timer.getTime()}
-            mist.marker.list[usedId] = data
+            mist.DBs.markList[usedId] = data
             
             if mType == 7 or  mType == 1 then 
                 local s = "trigger.action.markupToAll("
@@ -7219,29 +7229,30 @@ do
 	end
 	
 	function mist.marker.remove(id)
-        removeMark(id)
+        return removeMark(id)
 	end
 	
 	function mist.marker.get(id)
-        if mist.marker.lis[id] then
-            return mist.marker.lis[id] 
+        if  mist.DBs.markList[id] then
+            return  mist.DBs.markList[id] 
         end
         local names = {}
-        for markId, data in pairs(mist.marker.list) do
+        for markId, data in pairs(mist.DBs.markList) do
 			if data.name and data.name == id then
                 table.insert(names, data)
 			end
 		end
-        if #names > 0 then
+        if #names > 1 then
             return names
         end
 	end
 	
-	--function mist.marker.coords(pos, cType, markFor, id) -- wrapper function to just display coordinates of a specific format at location
-		
-	
-	--end
-
+   --[[
+    function mist.marker.circle(v)
+    
+    
+    end
+]]
 end
 --- Time conversion functions.
 -- @section mist.time
@@ -8123,6 +8134,16 @@ do -- group tasks scope
 			return leader:getPosition().p
 		end
 	end
+    
+    function mist.groupIsDead(groupName) -- copy more or less from on station
+		if Group.getByName(groupName) then 
+            local gp = Group.getByName(groupName)
+            if  #gp:getUnits() > 0 or gp:isExist() == true  then
+                return false
+            end
+		end
+		return true
+	end
 
 end
 
@@ -8242,7 +8263,6 @@ do -- mist.Logger scope
 	-- @usage -- log everything
 	--myLogger:setLevel(3)
 	function mist.Logger:setLevel(level)
-		env.info('set Level ' .. level)
         if not level then
 			self.level = 2
 		else

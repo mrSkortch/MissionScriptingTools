@@ -2,15 +2,34 @@ zonesByName =
 {
 	["LZ zone"] = 
 	{
-		["y"] = 614105.71428571,
 		["radius"] = 3000,
 		["zoneId"] = 2,
+		["color"] = 
+		{
+			[1] = 1,
+			[2] = 1,
+			[3] = 1,
+			[4] = 0.14901960784314,
+		}, -- end of ["color"]
+		["properties"] = 
+		{
+		}, -- end of ["properties"]
+		["hidden"] = false,
+		["y"] = 614105.71428571,
+		["x"] = -245328.57142857,
+		["name"] = "LZ zone",
 		["point"] = 
 		{
 			["y"] = 0,
 			["x"] = -245328.57142857,
 			["z"] = 614105.71428571,
 		}, -- end of ["point"]
+		["type"] = 0,
+	}, -- end of ["LZ zone"]
+	["explosion zone"] = 
+	{
+		["radius"] = 3000,
+		["zoneId"] = 1,
 		["color"] = 
 		{
 			[1] = 1,
@@ -18,21 +37,25 @@ zonesByName =
 			[3] = 1,
 			[4] = 0.14901960784314,
 		}, -- end of ["color"]
-		["x"] = -245328.57142857,
+		["properties"] = 
+		{
+		}, -- end of ["properties"]
 		["hidden"] = false,
-		["name"] = "LZ zone",
-	}, -- end of ["LZ zone"]
-	["explosion zone"] = 
-	{
 		["y"] = 673819.99999999,
-		["radius"] = 3000,
-		["zoneId"] = 1,
+		["x"] = -271900,
+		["name"] = "explosion zone",
 		["point"] = 
 		{
 			["y"] = 0,
 			["x"] = -271900,
 			["z"] = 673819.99999999,
 		}, -- end of ["point"]
+		["type"] = 0,
+	}, -- end of ["explosion zone"]
+	["cloneZone"] = 
+	{
+		["radius"] = 3000,
+		["zoneId"] = 3,
 		["color"] = 
 		{
 			[1] = 1,
@@ -40,31 +63,20 @@ zonesByName =
 			[3] = 1,
 			[4] = 0.14901960784314,
 		}, -- end of ["color"]
-		["x"] = -271900,
+		["properties"] = 
+		{
+		}, -- end of ["properties"]
 		["hidden"] = false,
-		["name"] = "explosion zone",
-	}, -- end of ["explosion zone"]
-	["cloneZone"] = 
-	{
 		["y"] = 692534.28571428,
-		["radius"] = 3000,
-		["zoneId"] = 3,
+		["x"] = -285971.42857143,
+		["name"] = "cloneZone",
 		["point"] = 
 		{
 			["y"] = 0,
 			["x"] = -285971.42857143,
 			["z"] = 692534.28571428,
 		}, -- end of ["point"]
-		["color"] = 
-		{
-			[1] = 1,
-			[2] = 1,
-			[3] = 1,
-			[4] = 0.14901960784314,
-		}, -- end of ["color"]
-		["x"] = -285971.42857143,
-		["hidden"] = false,
-		["name"] = "cloneZone",
+		["type"] = 0,
 	}, -- end of ["cloneZone"]
 	["shipZone"] = 
 	{
@@ -90,5 +102,6 @@ zonesByName =
 			["x"] = -163182.90396786,
 			["z"] = 267139.69375223,
 		}, -- end of ["point"]
+		["type"] = 0,
 	}, -- end of ["shipZone"]
 } -- end of zonesByName

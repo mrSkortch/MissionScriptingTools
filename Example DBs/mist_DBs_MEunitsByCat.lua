@@ -7,8 +7,8 @@ MEunitsByCat =
 			["alt"] = 500,
 			["point"] = 
 			{
-				["y"] = 405888.85058741,
-				["x"] = -155967.80633993,
+				["y"] = 404406.46136648,
+				["x"] = -158700.87914814,
 			}, -- end of ["point"]
 			["alt_type"] = "BARO",
 			["livery_id"] = "Australia RAAF",
@@ -17,7 +17,7 @@ MEunitsByCat =
 			["unitName"] = "Rotary-1-1",
 			["type"] = "CH-47D",
 			["country"] = "australia",
-			["psi"] = -2.6461357622286,
+			["psi"] = -2.6021711998766,
 			["groupId"] = 45,
 			["groupName"] = "nH",
 			["callsign"] = 
@@ -28,11 +28,11 @@ MEunitsByCat =
 				["name"] = "Springfield11",
 			}, -- end of ["callsign"]
 			["countryId"] = 21,
-			["x"] = -155967.80633993,
+			["x"] = -158700.87914814,
 			["skill"] = "High",
-			["heading"] = 2.6461357622286,
+			["heading"] = 2.6021711998766,
 			["unitId"] = 68,
-			["y"] = 405888.85058741,
+			["y"] = 404406.46136648,
 			["coalition"] = "neutral",
 			["speed"] = 44.444444444444,
 		}, -- end of [1]
@@ -814,11 +814,17 @@ MEunitsByCat =
 			["onboard_num"] = "52",
 			["category"] = "plane",
 			["unitName"] = "A-10C Client #1_unit",
+			["AddPropAircraft"] = 
+			{
+			}, -- end of ["AddPropAircraft"]
 			["type"] = "A-10C",
 			["country"] = "usa",
 			["psi"] = 0.67060113146646,
 			["groupId"] = 6,
 			["groupName"] = "A-10C Client #1",
+			["skill"] = "Client",
+			["coalition"] = "blue",
+			["x"] = -318142.85714286,
 			["callsign"] = 
 			{
 				[1] = 3,
@@ -826,13 +832,10 @@ MEunitsByCat =
 				[3] = 1,
 				["name"] = "Uzi11",
 			}, -- end of ["callsign"]
-			["countryId"] = 2,
-			["x"] = -318142.85714286,
-			["skill"] = "Client",
 			["heading"] = -0.67060113146646,
 			["unitId"] = 11,
 			["y"] = 636428.57142857,
-			["coalition"] = "blue",
+			["countryId"] = 2,
 			["speed"] = 138.88888888889,
 		}, -- end of [4]
 		[5] = 
@@ -848,11 +851,17 @@ MEunitsByCat =
 			["onboard_num"] = "52",
 			["category"] = "plane",
 			["unitName"] = "A-10C Client #2_unit",
+			["AddPropAircraft"] = 
+			{
+			}, -- end of ["AddPropAircraft"]
 			["type"] = "A-10C",
 			["country"] = "usa",
 			["psi"] = 0.66079849060746,
 			["groupId"] = 7,
 			["groupName"] = "A-10C Client #2",
+			["skill"] = "Client",
+			["coalition"] = "blue",
+			["x"] = -315857.14285714,
 			["callsign"] = 
 			{
 				[1] = 3,
@@ -860,13 +869,10 @@ MEunitsByCat =
 				[3] = 1,
 				["name"] = "Uzi11",
 			}, -- end of ["callsign"]
-			["countryId"] = 2,
-			["x"] = -315857.14285714,
-			["skill"] = "Client",
 			["heading"] = -0.66079849060746,
 			["unitId"] = 12,
 			["y"] = 644428.57142857,
-			["coalition"] = "blue",
+			["countryId"] = 2,
 			["speed"] = 138.88888888889,
 		}, -- end of [5]
 		[6] = 
@@ -1423,6 +1429,28 @@ MEunitsByCat =
 		}, -- end of [18]
 		[19] = 
 		{
+			["type"] = "AAV7",
+			["point"] = 
+			{
+				["y"] = 185783.38833846,
+				["x"] = -244729.2581753,
+			}, -- end of ["point"]
+			["groupId"] = 47,
+			["skill"] = "Average",
+			["country"] = "usa",
+			["groupName"] = "poly",
+			["y"] = 185783.38833846,
+			["coalition"] = "blue",
+			["x"] = -244729.2581753,
+			["unitId"] = 70,
+			["category"] = "vehicle",
+			["unitName"] = "Ground-2-1",
+			["playerCanDrive"] = true,
+			["heading"] = 2.3261877017598,
+			["countryId"] = 2,
+		}, -- end of [19]
+		[20] = 
+		{
 			["type"] = "BTR-80",
 			["point"] = 
 			{
@@ -1442,8 +1470,8 @@ MEunitsByCat =
 			["playerCanDrive"] = true,
 			["heading"] = -1.7994767003775,
 			["countryId"] = 0,
-		}, -- end of [19]
-		[20] = 
+		}, -- end of [20]
+		[21] = 
 		{
 			["type"] = "BTR-80",
 			["point"] = 
@@ -1464,8 +1492,8 @@ MEunitsByCat =
 			["playerCanDrive"] = true,
 			["heading"] = -1.7994767003775,
 			["countryId"] = 0,
-		}, -- end of [20]
-		[21] = 
+		}, -- end of [21]
+		[22] = 
 		{
 			["type"] = "BTR-80",
 			["point"] = 
@@ -1486,8 +1514,8 @@ MEunitsByCat =
 			["playerCanDrive"] = true,
 			["heading"] = -1.7994767003775,
 			["countryId"] = 0,
-		}, -- end of [21]
-		[22] = 
+		}, -- end of [22]
+		[23] = 
 		{
 			["type"] = "BTR-80",
 			["point"] = 
@@ -1508,8 +1536,8 @@ MEunitsByCat =
 			["playerCanDrive"] = true,
 			["heading"] = -1.7994767003775,
 			["countryId"] = 0,
-		}, -- end of [22]
-		[23] = 
+		}, -- end of [23]
+		[24] = 
 		{
 			["type"] = "BTR-80",
 			["point"] = 
@@ -1530,8 +1558,8 @@ MEunitsByCat =
 			["playerCanDrive"] = true,
 			["heading"] = -1.7994767003775,
 			["countryId"] = 0,
-		}, -- end of [23]
-		[24] = 
+		}, -- end of [24]
+		[25] = 
 		{
 			["type"] = "BTR-80",
 			["point"] = 
@@ -1552,8 +1580,8 @@ MEunitsByCat =
 			["playerCanDrive"] = true,
 			["heading"] = -1.7994767003775,
 			["countryId"] = 0,
-		}, -- end of [24]
-		[25] = 
+		}, -- end of [25]
+		[26] = 
 		{
 			["type"] = "T-55",
 			["point"] = 
@@ -1574,8 +1602,8 @@ MEunitsByCat =
 			["playerCanDrive"] = true,
 			["heading"] = 0,
 			["countryId"] = 0,
-		}, -- end of [25]
-		[26] = 
+		}, -- end of [26]
+		[27] = 
 		{
 			["type"] = "T-55",
 			["point"] = 
@@ -1596,8 +1624,8 @@ MEunitsByCat =
 			["playerCanDrive"] = true,
 			["heading"] = 0,
 			["countryId"] = 0,
-		}, -- end of [26]
-		[27] = 
+		}, -- end of [27]
+		[28] = 
 		{
 			["type"] = "T-55",
 			["point"] = 
@@ -1618,8 +1646,8 @@ MEunitsByCat =
 			["playerCanDrive"] = true,
 			["heading"] = 0,
 			["countryId"] = 0,
-		}, -- end of [27]
-		[28] = 
+		}, -- end of [28]
+		[29] = 
 		{
 			["type"] = "T-55",
 			["point"] = 
@@ -1640,6 +1668,6 @@ MEunitsByCat =
 			["playerCanDrive"] = true,
 			["heading"] = 0,
 			["countryId"] = 0,
-		}, -- end of [28]
+		}, -- end of [29]
 	}, -- end of ["vehicle"]
 } -- end of MEunitsByCat

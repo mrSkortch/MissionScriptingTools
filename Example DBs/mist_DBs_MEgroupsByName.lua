@@ -259,40 +259,62 @@ MEgroupsByName =
 		["task"] = "Ground Nothing",
 		["groupId"] = 35,
 	}, -- end of ["teleGroup"]
-	["Static Cafe-1"] = 
+	["A-10C Client #1"] = 
 	{
-		["coalition"] = "neutral",
-		["country"] = "australia",
-		["groupId"] = 46,
-		["countryId"] = 21,
-		["category"] = "static",
-		["groupName"] = "Static Cafe-1",
+		["modulation"] = 0,
+		["groupId"] = 6,
+		["frequency"] = 251,
+		["country"] = "usa",
+		["groupName"] = "A-10C Client #1",
 		["units"] = 
 		{
 			[1] = 
 			{
-				["shape_name"] = "stolovaya",
-				["type"] = "Cafe",
+				["alt"] = 2000,
 				["point"] = 
 				{
-					["y"] = 464123.689023,
-					["x"] = -115514.59796101,
+					["y"] = 636428.57142857,
+					["x"] = -318142.85714286,
 				}, -- end of ["point"]
-				["categoryStatic"] = "Fortifications",
-				["country"] = "australia",
-				["groupName"] = "Static Cafe-1",
-				["heading"] = 0,
-				["y"] = 464123.689023,
-				["x"] = -115514.59796101,
-				["unitId"] = 69,
-				["category"] = "static",
-				["unitName"] = "Static Cafe-1",
-				["groupId"] = 46,
-				["countryId"] = 21,
-				["coalition"] = "neutral",
+				["alt_type"] = "BARO",
+				["livery_id"] = "104th FS Maryland ANG, Baltimore (MD)",
+				["onboard_num"] = "52",
+				["category"] = "plane",
+				["unitName"] = "A-10C Client #1_unit",
+				["AddPropAircraft"] = 
+				{
+				}, -- end of ["AddPropAircraft"]
+				["type"] = "A-10C",
+				["country"] = "usa",
+				["psi"] = 0.67060113146646,
+				["groupId"] = 6,
+				["groupName"] = "A-10C Client #1",
+				["skill"] = "Client",
+				["coalition"] = "blue",
+				["x"] = -318142.85714286,
+				["callsign"] = 
+				{
+					[1] = 3,
+					[2] = 1,
+					[3] = 1,
+					["name"] = "Uzi11",
+				}, -- end of ["callsign"]
+				["heading"] = -0.67060113146646,
+				["unitId"] = 11,
+				["y"] = 636428.57142857,
+				["countryId"] = 2,
+				["speed"] = 138.88888888889,
 			}, -- end of [1]
 		}, -- end of ["units"]
-	}, -- end of ["Static Cafe-1"]
+		["countryId"] = 2,
+		["radioSet"] = false,
+		["hidden"] = false,
+		["category"] = "plane",
+		["coalition"] = "blue",
+		["startTime"] = 0,
+		["task"] = "CAS",
+		["uncontrolled"] = false,
+	}, -- end of ["A-10C Client #1"]
 	["cloneNeut"] = 
 	{
 		["modulation"] = 0,
@@ -524,6 +546,43 @@ MEgroupsByName =
 		["countryId"] = 21,
 		["hidden"] = false,
 	}, -- end of ["perry"]
+	["poly"] = 
+	{
+		["country"] = "usa",
+		["groupName"] = "poly",
+		["units"] = 
+		{
+			[1] = 
+			{
+				["type"] = "AAV7",
+				["point"] = 
+				{
+					["y"] = 185783.38833846,
+					["x"] = -244729.2581753,
+				}, -- end of ["point"]
+				["groupId"] = 47,
+				["skill"] = "Average",
+				["country"] = "usa",
+				["groupName"] = "poly",
+				["y"] = 185783.38833846,
+				["coalition"] = "blue",
+				["x"] = -244729.2581753,
+				["unitId"] = 70,
+				["category"] = "vehicle",
+				["unitName"] = "Ground-2-1",
+				["playerCanDrive"] = true,
+				["heading"] = 2.3261877017598,
+				["countryId"] = 2,
+			}, -- end of [1]
+		}, -- end of ["units"]
+		["countryId"] = 2,
+		["hidden"] = false,
+		["category"] = "vehicle",
+		["coalition"] = "blue",
+		["startTime"] = 0,
+		["task"] = "Ground Nothing",
+		["groupId"] = 47,
+	}, -- end of ["poly"]
 	["nH"] = 
 	{
 		["modulation"] = 0,
@@ -538,8 +597,8 @@ MEgroupsByName =
 				["alt"] = 500,
 				["point"] = 
 				{
-					["y"] = 405888.85058741,
-					["x"] = -155967.80633993,
+					["y"] = 404406.46136648,
+					["x"] = -158700.87914814,
 				}, -- end of ["point"]
 				["alt_type"] = "BARO",
 				["livery_id"] = "Australia RAAF",
@@ -548,7 +607,7 @@ MEgroupsByName =
 				["unitName"] = "Rotary-1-1",
 				["type"] = "CH-47D",
 				["country"] = "australia",
-				["psi"] = -2.6461357622286,
+				["psi"] = -2.6021711998766,
 				["groupId"] = 45,
 				["groupName"] = "nH",
 				["callsign"] = 
@@ -559,11 +618,11 @@ MEgroupsByName =
 					["name"] = "Springfield11",
 				}, -- end of ["callsign"]
 				["countryId"] = 21,
-				["x"] = -155967.80633993,
+				["x"] = -158700.87914814,
 				["skill"] = "High",
-				["heading"] = 2.6461357622286,
+				["heading"] = 2.6021711998766,
 				["unitId"] = 68,
-				["y"] = 405888.85058741,
+				["y"] = 404406.46136648,
 				["coalition"] = "neutral",
 				["speed"] = 44.444444444444,
 			}, -- end of [1]
@@ -1525,59 +1584,6 @@ MEgroupsByName =
 			}, -- end of [1]
 		}, -- end of ["units"]
 	}, -- end of ["tent #001"]
-	["A-10C Client #2"] = 
-	{
-		["modulation"] = 0,
-		["groupId"] = 7,
-		["frequency"] = 251,
-		["country"] = "usa",
-		["groupName"] = "A-10C Client #2",
-		["units"] = 
-		{
-			[1] = 
-			{
-				["alt"] = 2000,
-				["point"] = 
-				{
-					["y"] = 644428.57142857,
-					["x"] = -315857.14285714,
-				}, -- end of ["point"]
-				["alt_type"] = "BARO",
-				["livery_id"] = "104th FS Maryland ANG, Baltimore (MD)",
-				["onboard_num"] = "52",
-				["category"] = "plane",
-				["unitName"] = "A-10C Client #2_unit",
-				["type"] = "A-10C",
-				["country"] = "usa",
-				["psi"] = 0.66079849060746,
-				["groupId"] = 7,
-				["groupName"] = "A-10C Client #2",
-				["callsign"] = 
-				{
-					[1] = 3,
-					[2] = 1,
-					[3] = 1,
-					["name"] = "Uzi11",
-				}, -- end of ["callsign"]
-				["countryId"] = 2,
-				["x"] = -315857.14285714,
-				["skill"] = "Client",
-				["heading"] = -0.66079849060746,
-				["unitId"] = 12,
-				["y"] = 644428.57142857,
-				["coalition"] = "blue",
-				["speed"] = 138.88888888889,
-			}, -- end of [1]
-		}, -- end of ["units"]
-		["countryId"] = 2,
-		["radioSet"] = false,
-		["hidden"] = false,
-		["category"] = "plane",
-		["coalition"] = "blue",
-		["startTime"] = 0,
-		["task"] = "CAS",
-		["uncontrolled"] = false,
-	}, -- end of ["A-10C Client #2"]
 	["RuTent2"] = 
 	{
 		["coalition"] = "red",
@@ -1612,6 +1618,62 @@ MEgroupsByName =
 			}, -- end of [1]
 		}, -- end of ["units"]
 	}, -- end of ["RuTent2"]
+	["A-10C Client #2"] = 
+	{
+		["modulation"] = 0,
+		["groupId"] = 7,
+		["frequency"] = 251,
+		["country"] = "usa",
+		["groupName"] = "A-10C Client #2",
+		["units"] = 
+		{
+			[1] = 
+			{
+				["alt"] = 2000,
+				["point"] = 
+				{
+					["y"] = 644428.57142857,
+					["x"] = -315857.14285714,
+				}, -- end of ["point"]
+				["alt_type"] = "BARO",
+				["livery_id"] = "104th FS Maryland ANG, Baltimore (MD)",
+				["onboard_num"] = "52",
+				["category"] = "plane",
+				["unitName"] = "A-10C Client #2_unit",
+				["AddPropAircraft"] = 
+				{
+				}, -- end of ["AddPropAircraft"]
+				["type"] = "A-10C",
+				["country"] = "usa",
+				["psi"] = 0.66079849060746,
+				["groupId"] = 7,
+				["groupName"] = "A-10C Client #2",
+				["skill"] = "Client",
+				["coalition"] = "blue",
+				["x"] = -315857.14285714,
+				["callsign"] = 
+				{
+					[1] = 3,
+					[2] = 1,
+					[3] = 1,
+					["name"] = "Uzi11",
+				}, -- end of ["callsign"]
+				["heading"] = -0.66079849060746,
+				["unitId"] = 12,
+				["y"] = 644428.57142857,
+				["countryId"] = 2,
+				["speed"] = 138.88888888889,
+			}, -- end of [1]
+		}, -- end of ["units"]
+		["countryId"] = 2,
+		["radioSet"] = false,
+		["hidden"] = false,
+		["category"] = "plane",
+		["coalition"] = "blue",
+		["startTime"] = 0,
+		["task"] = "CAS",
+		["uncontrolled"] = false,
+	}, -- end of ["A-10C Client #2"]
 	["Rus Ships #1"] = 
 	{
 		["groupId"] = 9,
@@ -1668,6 +1730,40 @@ MEgroupsByName =
 		["countryId"] = 0,
 		["hidden"] = false,
 	}, -- end of ["Rus Ships #1"]
+	["Static Cafe-1"] = 
+	{
+		["coalition"] = "neutral",
+		["country"] = "australia",
+		["groupId"] = 46,
+		["countryId"] = 21,
+		["category"] = "static",
+		["groupName"] = "Static Cafe-1",
+		["units"] = 
+		{
+			[1] = 
+			{
+				["shape_name"] = "stolovaya",
+				["type"] = "Cafe",
+				["point"] = 
+				{
+					["y"] = 464123.689023,
+					["x"] = -115514.59796101,
+				}, -- end of ["point"]
+				["categoryStatic"] = "Fortifications",
+				["country"] = "australia",
+				["groupName"] = "Static Cafe-1",
+				["heading"] = 0,
+				["y"] = 464123.689023,
+				["x"] = -115514.59796101,
+				["unitId"] = 69,
+				["category"] = "static",
+				["unitName"] = "Static Cafe-1",
+				["groupId"] = 46,
+				["countryId"] = 21,
+				["coalition"] = "neutral",
+			}, -- end of [1]
+		}, -- end of ["units"]
+	}, -- end of ["Static Cafe-1"]
 	["F-15C Client #2"] = 
 	{
 		["modulation"] = 0,
@@ -1755,59 +1851,6 @@ MEgroupsByName =
 			}, -- end of [1]
 		}, -- end of ["units"]
 	}, -- end of ["tent"]
-	["A-10C Client #1"] = 
-	{
-		["modulation"] = 0,
-		["groupId"] = 6,
-		["frequency"] = 251,
-		["country"] = "usa",
-		["groupName"] = "A-10C Client #1",
-		["units"] = 
-		{
-			[1] = 
-			{
-				["alt"] = 2000,
-				["point"] = 
-				{
-					["y"] = 636428.57142857,
-					["x"] = -318142.85714286,
-				}, -- end of ["point"]
-				["alt_type"] = "BARO",
-				["livery_id"] = "104th FS Maryland ANG, Baltimore (MD)",
-				["onboard_num"] = "52",
-				["category"] = "plane",
-				["unitName"] = "A-10C Client #1_unit",
-				["type"] = "A-10C",
-				["country"] = "usa",
-				["psi"] = 0.67060113146646,
-				["groupId"] = 6,
-				["groupName"] = "A-10C Client #1",
-				["callsign"] = 
-				{
-					[1] = 3,
-					[2] = 1,
-					[3] = 1,
-					["name"] = "Uzi11",
-				}, -- end of ["callsign"]
-				["countryId"] = 2,
-				["x"] = -318142.85714286,
-				["skill"] = "Client",
-				["heading"] = -0.67060113146646,
-				["unitId"] = 11,
-				["y"] = 636428.57142857,
-				["coalition"] = "blue",
-				["speed"] = 138.88888888889,
-			}, -- end of [1]
-		}, -- end of ["units"]
-		["countryId"] = 2,
-		["radioSet"] = false,
-		["hidden"] = false,
-		["category"] = "plane",
-		["coalition"] = "blue",
-		["startTime"] = 0,
-		["task"] = "CAS",
-		["uncontrolled"] = false,
-	}, -- end of ["A-10C Client #1"]
 	["USTanks1"] = 
 	{
 		["country"] = "usa",
@@ -1911,39 +1954,6 @@ MEgroupsByName =
 		["task"] = "Ground Nothing",
 		["groupId"] = 11,
 	}, -- end of ["USTanks1"]
-	["tent #002"] = 
-	{
-		["coalition"] = "red",
-		["country"] = "russia",
-		["groupId"] = 39,
-		["countryId"] = 0,
-		["category"] = "static",
-		["groupName"] = "tent #002",
-		["units"] = 
-		{
-			[1] = 
-			{
-				["shape_name"] = "elektrowoz",
-				["type"] = "Electric locomotive",
-				["point"] = 
-				{
-					["y"] = 652535.98623348,
-					["x"] = -296017.9062429,
-				}, -- end of ["point"]
-				["groupId"] = 39,
-				["groupName"] = "tent #002",
-				["unitId"] = 62,
-				["countryId"] = 0,
-				["x"] = -296017.9062429,
-				["heading"] = 0,
-				["category"] = "static",
-				["unitName"] = "tent #002",
-				["country"] = "russia",
-				["y"] = 652535.98623348,
-				["coalition"] = "red",
-			}, -- end of [1]
-		}, -- end of ["units"]
-	}, -- end of ["tent #002"]
 	["tent2"] = 
 	{
 		["coalition"] = "blue",
@@ -1978,6 +1988,39 @@ MEgroupsByName =
 			}, -- end of [1]
 		}, -- end of ["units"]
 	}, -- end of ["tent2"]
+	["tent #002"] = 
+	{
+		["coalition"] = "red",
+		["country"] = "russia",
+		["groupId"] = 39,
+		["countryId"] = 0,
+		["category"] = "static",
+		["groupName"] = "tent #002",
+		["units"] = 
+		{
+			[1] = 
+			{
+				["shape_name"] = "elektrowoz",
+				["type"] = "Electric locomotive",
+				["point"] = 
+				{
+					["y"] = 652535.98623348,
+					["x"] = -296017.9062429,
+				}, -- end of ["point"]
+				["groupId"] = 39,
+				["groupName"] = "tent #002",
+				["unitId"] = 62,
+				["countryId"] = 0,
+				["x"] = -296017.9062429,
+				["heading"] = 0,
+				["category"] = "static",
+				["unitName"] = "tent #002",
+				["country"] = "russia",
+				["y"] = 652535.98623348,
+				["coalition"] = "red",
+			}, -- end of [1]
+		}, -- end of ["units"]
+	}, -- end of ["tent #002"]
 	["RuTanks"] = 
 	{
 		["country"] = "russia",

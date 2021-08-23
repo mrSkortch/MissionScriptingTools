@@ -382,6 +382,9 @@ groupsById =
 				["onboard_num"] = "52",
 				["category"] = "plane",
 				["speed"] = 138.88888888889,
+				["AddPropAircraft"] = 
+				{
+				}, -- end of ["AddPropAircraft"]
 				["type"] = "A-10C",
 				["country"] = "usa",
 				["psi"] = 0.67060113146646,
@@ -393,7 +396,6 @@ groupsById =
 				["y"] = 636428.57142857,
 				["unitId"] = 11,
 				["heading"] = -0.67060113146646,
-				["skill"] = "Client",
 				["callsign"] = 
 				{
 					[1] = 3,
@@ -401,6 +403,7 @@ groupsById =
 					[3] = 1,
 					["name"] = "Uzi11",
 				}, -- end of ["callsign"]
+				["skill"] = "Client",
 				["groupId"] = 6,
 			}, -- end of [1]
 		}, -- end of ["units"]
@@ -435,6 +438,9 @@ groupsById =
 				["onboard_num"] = "52",
 				["category"] = "plane",
 				["speed"] = 138.88888888889,
+				["AddPropAircraft"] = 
+				{
+				}, -- end of ["AddPropAircraft"]
 				["type"] = "A-10C",
 				["country"] = "usa",
 				["psi"] = 0.66079849060746,
@@ -446,7 +452,6 @@ groupsById =
 				["y"] = 644428.57142857,
 				["unitId"] = 12,
 				["heading"] = -0.66079849060746,
-				["skill"] = "Client",
 				["callsign"] = 
 				{
 					[1] = 3,
@@ -454,6 +459,7 @@ groupsById =
 					[3] = 1,
 					["name"] = "Uzi11",
 				}, -- end of ["callsign"]
+				["skill"] = "Client",
 				["groupId"] = 7,
 			}, -- end of [1]
 		}, -- end of ["units"]
@@ -1589,8 +1595,8 @@ groupsById =
 				["alt"] = 60,
 				["point"] = 
 				{
-					["y"] = 692389,
-					["x"] = -287110,
+					["y"] = 689785,
+					["x"] = -285145,
 				}, -- end of ["point"]
 				["coalitionId"] = 2,
 				["skill"] = "Average",
@@ -1600,8 +1606,8 @@ groupsById =
 				["groupId"] = 35,
 				["groupName"] = "teleGroup",
 				["countryId"] = 2,
-				["x"] = -287110,
-				["y"] = 692389,
+				["x"] = -285145,
+				["y"] = 689785,
 				["heading"] = 0,
 				["country"] = "usa",
 				["unitName"] = "Unit #002",
@@ -1610,11 +1616,11 @@ groupsById =
 			}, -- end of [1]
 			[2] = 
 			{
-				["alt"] = 60,
+				["alt"] = 61,
 				["point"] = 
 				{
-					["y"] = 692345,
-					["x"] = -286935,
+					["y"] = 689948,
+					["x"] = -285166,
 				}, -- end of ["point"]
 				["coalitionId"] = 2,
 				["skill"] = "Average",
@@ -1624,8 +1630,8 @@ groupsById =
 				["groupId"] = 35,
 				["groupName"] = "teleGroup",
 				["countryId"] = 2,
-				["x"] = -286935,
-				["y"] = 692345,
+				["x"] = -285166,
+				["y"] = 689948,
 				["heading"] = 0,
 				["country"] = "usa",
 				["unitName"] = "Unit #003",
@@ -1634,11 +1640,11 @@ groupsById =
 			}, -- end of [2]
 			[3] = 
 			{
-				["alt"] = 59,
+				["alt"] = 60,
 				["point"] = 
 				{
-					["y"] = 692308,
-					["x"] = -287213,
+					["y"] = 689856,
+					["x"] = -285298,
 				}, -- end of ["point"]
 				["coalitionId"] = 2,
 				["skill"] = "Average",
@@ -1648,8 +1654,8 @@ groupsById =
 				["groupId"] = 35,
 				["groupName"] = "teleGroup",
 				["countryId"] = 2,
-				["x"] = -287213,
-				["y"] = 692308,
+				["x"] = -285298,
+				["y"] = 689856,
 				["heading"] = 0,
 				["country"] = "usa",
 				["unitName"] = "Unit #004",
@@ -1658,11 +1664,11 @@ groupsById =
 			}, -- end of [3]
 			[4] = 
 			{
-				["alt"] = 60,
+				["alt"] = 61,
 				["point"] = 
 				{
-					["y"] = 692321,
-					["x"] = -286989,
+					["y"] = 689796,
+					["x"] = -285058,
 				}, -- end of ["point"]
 				["coalitionId"] = 2,
 				["skill"] = "Average",
@@ -1672,8 +1678,8 @@ groupsById =
 				["groupId"] = 35,
 				["groupName"] = "teleGroup",
 				["countryId"] = 2,
-				["x"] = -286989,
-				["y"] = 692321,
+				["x"] = -285058,
+				["y"] = 689796,
 				["heading"] = 0,
 				["country"] = "usa",
 				["unitName"] = "Unit #005",
@@ -1682,11 +1688,11 @@ groupsById =
 			}, -- end of [4]
 			[5] = 
 			{
-				["alt"] = 59,
+				["alt"] = 61,
 				["point"] = 
 				{
-					["y"] = 692297,
-					["x"] = -287225,
+					["y"] = 689973,
+					["x"] = -285191,
 				}, -- end of ["point"]
 				["coalitionId"] = 2,
 				["skill"] = "Average",
@@ -1696,8 +1702,8 @@ groupsById =
 				["groupId"] = 35,
 				["groupName"] = "teleGroup",
 				["countryId"] = 2,
-				["x"] = -287225,
-				["y"] = 692297,
+				["x"] = -285191,
+				["y"] = 689973,
 				["heading"] = 0,
 				["country"] = "usa",
 				["unitName"] = "Unit #006",
@@ -1706,11 +1712,11 @@ groupsById =
 			}, -- end of [5]
 			[6] = 
 			{
-				["alt"] = 61,
+				["alt"] = 60,
 				["point"] = 
 				{
-					["y"] = 692445,
-					["x"] = -287012,
+					["y"] = 689860,
+					["x"] = -285149,
 				}, -- end of ["point"]
 				["coalitionId"] = 2,
 				["skill"] = "Average",
@@ -1720,8 +1726,8 @@ groupsById =
 				["groupId"] = 35,
 				["groupName"] = "teleGroup",
 				["countryId"] = 2,
-				["x"] = -287012,
-				["y"] = 692445,
+				["x"] = -285149,
+				["y"] = 689860,
 				["heading"] = 0,
 				["country"] = "usa",
 				["unitName"] = "Unit #007",
@@ -1730,11 +1736,11 @@ groupsById =
 			}, -- end of [6]
 			[7] = 
 			{
-				["alt"] = 59,
+				["alt"] = 60,
 				["point"] = 
 				{
-					["y"] = 692311,
-					["x"] = -287237,
+					["y"] = 689799,
+					["x"] = -285216,
 				}, -- end of ["point"]
 				["coalitionId"] = 2,
 				["skill"] = "Average",
@@ -1744,8 +1750,8 @@ groupsById =
 				["groupId"] = 35,
 				["groupName"] = "teleGroup",
 				["countryId"] = 2,
-				["x"] = -287237,
-				["y"] = 692311,
+				["x"] = -285216,
+				["y"] = 689799,
 				["heading"] = 0,
 				["country"] = "usa",
 				["unitName"] = "Unit #008",
@@ -2127,8 +2133,8 @@ groupsById =
 				["alt"] = 500,
 				["point"] = 
 				{
-					["y"] = 405888.85058741,
-					["x"] = -155967.80633993,
+					["y"] = 404406.46136648,
+					["x"] = -158700.87914814,
 				}, -- end of ["point"]
 				["alt_type"] = "BARO",
 				["livery_id"] = "Australia RAAF",
@@ -2137,15 +2143,15 @@ groupsById =
 				["speed"] = 44.444444444444,
 				["type"] = "CH-47D",
 				["country"] = "australia",
-				["psi"] = -2.6461357622286,
+				["psi"] = -2.6021711998766,
 				["unitName"] = "Rotary-1-1",
 				["groupName"] = "nH",
 				["coalition"] = "neutral",
 				["countryId"] = 21,
-				["x"] = -155967.80633993,
-				["y"] = 405888.85058741,
+				["x"] = -158700.87914814,
+				["y"] = 404406.46136648,
 				["unitId"] = 68,
-				["heading"] = 2.6461357622286,
+				["heading"] = 2.6021711998766,
 				["skill"] = "High",
 				["callsign"] = 
 				{
@@ -2200,11 +2206,397 @@ groupsById =
 			}, -- end of [1]
 		}, -- end of ["units"]
 	}, -- end of [46]
-	[1000082] = 
+	[47] = 
+	{
+		["country"] = "usa",
+		["groupName"] = "poly",
+		["units"] = 
+		{
+			[1] = 
+			{
+				["heading"] = 2.3261877017598,
+				["point"] = 
+				{
+					["y"] = 185783.38833846,
+					["x"] = -244729.2581753,
+				}, -- end of ["point"]
+				["groupId"] = 47,
+				["y"] = 185783.38833846,
+				["coalition"] = "blue",
+				["groupName"] = "poly",
+				["type"] = "AAV7",
+				["countryId"] = 2,
+				["x"] = -244729.2581753,
+				["unitId"] = 70,
+				["category"] = "vehicle",
+				["unitName"] = "Ground-2-1",
+				["playerCanDrive"] = true,
+				["country"] = "usa",
+				["skill"] = "Average",
+			}, -- end of [1]
+		}, -- end of ["units"]
+		["coalition"] = "blue",
+		["groupId"] = 47,
+		["category"] = "vehicle",
+		["countryId"] = 2,
+		["startTime"] = 0,
+		["task"] = "Ground Nothing",
+		["hidden"] = false,
+	}, -- end of [47]
+	[7028] = 
+	{
+		["country"] = "australia",
+		["coalitionId"] = 0,
+		["hidden"] = false,
+		["units"] = 
+		{
+			[1] = 
+			{
+				["alt"] = 0,
+				["point"] = 
+				{
+					["y"] = 266075,
+					["x"] = -162226,
+				}, -- end of ["point"]
+				["coalitionId"] = 0,
+				["livery_id"] = "ReubenJames",
+				["skill"] = "Average",
+				["category"] = "ship",
+				["unitName"] = "AUSTRALIA shp 4 unit1",
+				["heading"] = 0,
+				["unitId"] = 7044,
+				["groupName"] = "AUSTRALIA shp 4",
+				["countryId"] = 21,
+				["x"] = -162226,
+				["speed"] = 0,
+				["coalition"] = "neutral",
+				["type"] = "PERRY",
+				["groupId"] = 7028,
+				["y"] = 266075,
+				["country"] = "australia",
+			}, -- end of [1]
+		}, -- end of ["units"]
+		["countryId"] = 21,
+		["name"] = "AUSTRALIA shp 4",
+		["timeAdded"] = 43223.79,
+		["category"] = "ship",
+		["coalition"] = "neutral",
+		["startTime"] = 0,
+		["groupId"] = 7028,
+		["groupName"] = "AUSTRALIA shp 4",
+	}, -- end of [7028]
+	[7001] = 
 	{
 		["country"] = "usa",
 		["coalitionId"] = 2,
-		["groupId"] = 1000082,
+		["groupId"] = 7001,
+		["hidden"] = false,
+		["units"] = 
+		{
+			[1] = 
+			{
+				["alt"] = 72,
+				["point"] = 
+				{
+					["y"] = 693761,
+					["x"] = -284648,
+				}, -- end of ["point"]
+				["coalitionId"] = 2,
+				["skill"] = "Average",
+				["category"] = "vehicle",
+				["speed"] = 0,
+				["type"] = "M-1 Abrams",
+				["groupId"] = 7001,
+				["groupName"] = "USA gnd 1",
+				["countryId"] = 2,
+				["x"] = -284648,
+				["y"] = 693761,
+				["heading"] = 1.4977557542423,
+				["country"] = "usa",
+				["unitName"] = "USA gnd 1 unit1",
+				["unitId"] = 7001,
+				["coalition"] = "blue",
+			}, -- end of [1]
+			[2] = 
+			{
+				["alt"] = 73,
+				["point"] = 
+				{
+					["y"] = 693771,
+					["x"] = -284456,
+				}, -- end of ["point"]
+				["coalitionId"] = 2,
+				["skill"] = "Average",
+				["category"] = "vehicle",
+				["speed"] = 0,
+				["type"] = "M-1 Abrams",
+				["groupId"] = 7001,
+				["groupName"] = "USA gnd 1",
+				["countryId"] = 2,
+				["x"] = -284456,
+				["y"] = 693771,
+				["heading"] = 1.4977557542423,
+				["country"] = "usa",
+				["unitName"] = "USA gnd 1 unit2",
+				["unitId"] = 7002,
+				["coalition"] = "blue",
+			}, -- end of [2]
+			[3] = 
+			{
+				["alt"] = 72,
+				["point"] = 
+				{
+					["y"] = 693781,
+					["x"] = -284639,
+				}, -- end of ["point"]
+				["coalitionId"] = 2,
+				["skill"] = "Average",
+				["category"] = "vehicle",
+				["speed"] = 0,
+				["type"] = "M-1 Abrams",
+				["groupId"] = 7001,
+				["groupName"] = "USA gnd 1",
+				["countryId"] = 2,
+				["x"] = -284639,
+				["y"] = 693781,
+				["heading"] = 1.4977557542423,
+				["country"] = "usa",
+				["unitName"] = "USA gnd 1 unit3",
+				["unitId"] = 7003,
+				["coalition"] = "blue",
+			}, -- end of [3]
+			[4] = 
+			{
+				["alt"] = 72,
+				["point"] = 
+				{
+					["y"] = 693653,
+					["x"] = -284699,
+				}, -- end of ["point"]
+				["coalitionId"] = 2,
+				["skill"] = "Average",
+				["category"] = "vehicle",
+				["speed"] = 0,
+				["type"] = "M-1 Abrams",
+				["groupId"] = 7001,
+				["groupName"] = "USA gnd 1",
+				["countryId"] = 2,
+				["x"] = -284699,
+				["y"] = 693653,
+				["heading"] = 1.4977557629417,
+				["country"] = "usa",
+				["unitName"] = "USA gnd 1 unit4",
+				["unitId"] = 7004,
+				["coalition"] = "blue",
+			}, -- end of [4]
+		}, -- end of ["units"]
+		["countryId"] = 2,
+		["name"] = "USA gnd 1",
+		["timeAdded"] = 43220.79,
+		["category"] = "vehicle",
+		["coalition"] = "blue",
+		["startTime"] = 0,
+		["task"] = "Ground Nothing",
+		["groupName"] = "USA gnd 1",
+	}, -- end of [7001]
+	[7005] = 
+	{
+		["country"] = "usa",
+		["groupName"] = "USA air 1",
+		["modulation"] = 0,
+		["groupId"] = 7005,
+		["coalitionId"] = 2,
+		["name"] = "USA air 1",
+		["hidden"] = false,
+		["units"] = 
+		{
+			[1] = 
+			{
+				["alt"] = 1997,
+				["point"] = 
+				{
+					["y"] = 682727,
+					["x"] = -288608,
+				}, -- end of ["point"]
+				["alt_type"] = "BARO",
+				["coalitionId"] = 2,
+				["livery_id"] = "usaf standard",
+				["skill"] = "High",
+				["category"] = "plane",
+				["unitName"] = "USA air 1 unit1",
+				["heading"] = 1.6162179734619,
+				["groupId"] = 7005,
+				["groupName"] = "USA air 1",
+				["speed"] = 138.85196364465,
+				["countryId"] = 2,
+				["x"] = -288608,
+				["coalition"] = "blue",
+				["y"] = 682727,
+				["country"] = "usa",
+				["type"] = "B-52H",
+				["unitId"] = 7009,
+				["callsign"] = 
+				{
+					[1] = 4,
+					[2] = 1,
+					[3] = 1,
+					["name"] = "Colt11",
+				}, -- end of ["callsign"]
+			}, -- end of [1]
+		}, -- end of ["units"]
+		["countryId"] = 2,
+		["radioSet"] = false,
+		["timeAdded"] = 43220.79,
+		["category"] = "plane",
+		["coalition"] = "blue",
+		["startTime"] = 0,
+		["task"] = "Ground Attack",
+		["uncontrolled"] = false,
+	}, -- end of [7005]
+	[7013] = 
+	{
+		["country"] = "australia",
+		["groupName"] = "AUSTRALIA air 4",
+		["modulation"] = 0,
+		["groupId"] = 7013,
+		["coalitionId"] = 0,
+		["name"] = "AUSTRALIA air 4",
+		["hidden"] = false,
+		["units"] = 
+		{
+			[1] = 
+			{
+				["alt"] = 1998,
+				["point"] = 
+				{
+					["y"] = 319595,
+					["x"] = -198560,
+				}, -- end of ["point"]
+				["alt_type"] = "BARO",
+				["coalitionId"] = 0,
+				["livery_id"] = "Australian 75th Squadron",
+				["skill"] = "High",
+				["category"] = "plane",
+				["unitName"] = "AUSTRALIA air 4 unit1",
+				["heading"] = 2.1995924992708,
+				["groupId"] = 7013,
+				["groupName"] = "AUSTRALIA air 4",
+				["speed"] = 180.49294253728,
+				["countryId"] = 21,
+				["x"] = -198560,
+				["coalition"] = "neutral",
+				["y"] = 319595,
+				["country"] = "australia",
+				["type"] = "FA-18C_hornet",
+				["unitId"] = 7021,
+				["callsign"] = 
+				{
+					[1] = 1,
+					[2] = 1,
+					[3] = 1,
+					["name"] = "Enfield11",
+				}, -- end of ["callsign"]
+			}, -- end of [1]
+		}, -- end of ["units"]
+		["countryId"] = 21,
+		["radioSet"] = false,
+		["timeAdded"] = 43221.79,
+		["category"] = "plane",
+		["coalition"] = "neutral",
+		["startTime"] = 0,
+		["task"] = "CAP",
+		["uncontrolled"] = false,
+	}, -- end of [7013]
+	[7017] = 
+	{
+		["groupId"] = 7017,
+		["coalitionId"] = 2,
+		["hidden"] = false,
+		["groupName"] = "USA static 4",
+		["units"] = 
+		{
+			[1] = 
+			{
+				["alt"] = 65,
+				["point"] = 
+				{
+					["y"] = 693655,
+					["x"] = -286667,
+				}, -- end of ["point"]
+				["categoryStatic"] = "Cargos",
+				["coalitionId"] = 2,
+				["mass"] = 1337,
+				["category"] = "static",
+				["unitName"] = "USA static 4",
+				["shape_name"] = "ab-212_cargo",
+				["type"] = "uh1h_cargo",
+				["country"] = "usa",
+				["groupName"] = "USA static 4",
+				["y"] = 693655,
+				["x"] = -286667,
+				["coalition"] = "blue",
+				["unitId"] = 7017,
+				["heading"] = 0,
+				["countryId"] = 2,
+				["groupId"] = 7017,
+			}, -- end of [1]
+		}, -- end of ["units"]
+		["countryId"] = 2,
+		["coalition"] = "blue",
+		["timeAdded"] = 43221.79,
+		["category"] = "static",
+		["country"] = "usa",
+		["startTime"] = 0,
+		["name"] = "USA static 4",
+		["uncontrolled"] = false,
+	}, -- end of [7017]
+	[7021] = 
+	{
+		["country"] = "australia",
+		["coalitionId"] = 0,
+		["hidden"] = false,
+		["units"] = 
+		{
+			[1] = 
+			{
+				["alt"] = 0,
+				["point"] = 
+				{
+					["y"] = 268869,
+					["x"] = -163156,
+				}, -- end of ["point"]
+				["coalitionId"] = 0,
+				["livery_id"] = "ReubenJames",
+				["skill"] = "Average",
+				["category"] = "ship",
+				["unitName"] = "AUSTRALIA shp 3 unit1",
+				["heading"] = 0,
+				["unitId"] = 7033,
+				["groupName"] = "AUSTRALIA shp 3",
+				["countryId"] = 21,
+				["x"] = -163156,
+				["speed"] = 0,
+				["coalition"] = "neutral",
+				["type"] = "PERRY",
+				["groupId"] = 7021,
+				["y"] = 268869,
+				["country"] = "australia",
+			}, -- end of [1]
+		}, -- end of ["units"]
+		["countryId"] = 21,
+		["name"] = "AUSTRALIA shp 3",
+		["timeAdded"] = 43222.79,
+		["category"] = "ship",
+		["coalition"] = "neutral",
+		["startTime"] = 0,
+		["groupId"] = 7021,
+		["groupName"] = "AUSTRALIA shp 3",
+	}, -- end of [7021]
+	[7025] = 
+	{
+		["country"] = "usa",
+		["coalitionId"] = 2,
+		["groupId"] = 7025,
 		["hidden"] = false,
 		["units"] = 
 		{
@@ -2227,7 +2619,7 @@ groupsById =
 				["x"] = -286407,
 				["speed"] = 0,
 				["type"] = "M-113",
-				["groupId"] = 1000082,
+				["groupId"] = 7025,
 				["coalition"] = "blue",
 				["y"] = 686871,
 				["country"] = "usa",
@@ -2251,7 +2643,7 @@ groupsById =
 				["x"] = -286447,
 				["speed"] = 0,
 				["type"] = "M-113",
-				["groupId"] = 1000082,
+				["groupId"] = 7025,
 				["coalition"] = "blue",
 				["y"] = 686871,
 				["country"] = "usa",
@@ -2259,357 +2651,57 @@ groupsById =
 		}, -- end of ["units"]
 		["countryId"] = 2,
 		["name"] = "USA gnd 8",
-		["timeAdded"] = 43223.99,
+		["timeAdded"] = 43223.79,
 		["category"] = "vehicle",
 		["coalition"] = "blue",
 		["startTime"] = 0,
 		["task"] = "Ground Nothing",
 		["groupName"] = "USA gnd 8",
-	}, -- end of [1000082]
-	[7028] = 
+	}, -- end of [7025]
+	[7006] = 
 	{
-		["groupId"] = 7028,
+		["groupId"] = 7006,
 		["coalitionId"] = 2,
 		["hidden"] = false,
-		["groupName"] = "USA static 6",
+		["groupName"] = "USA static 2",
 		["units"] = 
 		{
 			[1] = 
 			{
-				["alt"] = 73,
+				["alt"] = 70,
 				["point"] = 
 				{
-					["y"] = 694850,
-					["x"] = -285204,
+					["y"] = 691224,
+					["x"] = -283405,
 				}, -- end of ["point"]
 				["categoryStatic"] = "Cargos",
 				["coalitionId"] = 2,
 				["mass"] = 1337,
 				["category"] = "static",
-				["unitName"] = "USA static 6",
+				["unitName"] = "USA static 2",
 				["shape_name"] = "ab-212_cargo",
 				["type"] = "uh1h_cargo",
 				["country"] = "usa",
-				["groupName"] = "USA static 6",
-				["y"] = 694850,
-				["x"] = -285204,
+				["groupName"] = "USA static 2",
+				["y"] = 691224,
+				["x"] = -283405,
 				["coalition"] = "blue",
-				["unitId"] = 7028,
+				["unitId"] = 7006,
 				["heading"] = 0,
 				["countryId"] = 2,
-				["groupId"] = 7028,
+				["groupId"] = 7006,
 			}, -- end of [1]
 		}, -- end of ["units"]
 		["countryId"] = 2,
 		["coalition"] = "blue",
-		["timeAdded"] = 43222.99,
+		["timeAdded"] = 43220.79,
 		["category"] = "static",
 		["country"] = "usa",
 		["startTime"] = 0,
-		["name"] = "USA static 6",
+		["name"] = "USA static 2",
 		["uncontrolled"] = false,
-	}, -- end of [7028]
-	[1000083] = 
-	{
-		["country"] = "usa",
-		["groupName"] = "USA air 7",
-		["modulation"] = 0,
-		["groupId"] = 1000083,
-		["coalitionId"] = 2,
-		["name"] = "USA air 7",
-		["hidden"] = false,
-		["units"] = 
-		{
-			[1] = 
-			{
-				["alt"] = 1996,
-				["point"] = 
-				{
-					["y"] = 682741,
-					["x"] = -288608,
-				}, -- end of ["point"]
-				["alt_type"] = "BARO",
-				["coalitionId"] = 2,
-				["livery_id"] = "usaf standard",
-				["skill"] = "High",
-				["category"] = "plane",
-				["unitName"] = "USA air 7 unit1",
-				["heading"] = 1.6162179835615,
-				["groupId"] = 1000083,
-				["groupName"] = "USA air 7",
-				["speed"] = 138.82033106075,
-				["countryId"] = 2,
-				["x"] = -288608,
-				["coalition"] = "blue",
-				["y"] = 682741,
-				["country"] = "usa",
-				["type"] = "B-52H",
-				["unitId"] = 7042,
-				["callsign"] = 
-				{
-					[1] = 4,
-					[2] = 1,
-					[3] = 1,
-					["name"] = "Colt11",
-				}, -- end of ["callsign"]
-			}, -- end of [1]
-		}, -- end of ["units"]
-		["countryId"] = 2,
-		["radioSet"] = false,
-		["timeAdded"] = 43223.99,
-		["category"] = "plane",
-		["coalition"] = "blue",
-		["startTime"] = 0,
-		["task"] = "Ground Attack",
-		["uncontrolled"] = false,
-	}, -- end of [1000083]
-	[7005] = 
-	{
-		["groupId"] = 7005,
-		["coalitionId"] = 2,
-		["hidden"] = false,
-		["groupName"] = "USA static 1",
-		["units"] = 
-		{
-			[1] = 
-			{
-				["alt"] = 61,
-				["type"] = "Sandbox",
-				["point"] = 
-				{
-					["y"] = 690788,
-					["x"] = -285547,
-				}, -- end of ["point"]
-				["categoryStatic"] = "Fortifications",
-				["coalitionId"] = 2,
-				["y"] = 690788,
-				["groupName"] = "USA static 1",
-				["country"] = "usa",
-				["countryId"] = 2,
-				["x"] = -285547,
-				["coalition"] = "blue",
-				["category"] = "static",
-				["unitName"] = "USA static 1",
-				["unitId"] = 7005,
-				["heading"] = 0,
-				["groupId"] = 7005,
-			}, -- end of [1]
-		}, -- end of ["units"]
-		["countryId"] = 2,
-		["coalition"] = "blue",
-		["timeAdded"] = 43220.99,
-		["category"] = "static",
-		["country"] = "usa",
-		["startTime"] = 0,
-		["name"] = "USA static 1",
-		["uncontrolled"] = false,
-	}, -- end of [7005]
-	[1000084] = 
-	{
-		["country"] = "australia",
-		["groupName"] = "AUSTRALIA air 8",
-		["modulation"] = 0,
-		["groupId"] = 1000084,
-		["coalitionId"] = 0,
-		["name"] = "AUSTRALIA air 8",
-		["hidden"] = false,
-		["units"] = 
-		{
-			[1] = 
-			{
-				["alt"] = 1997,
-				["point"] = 
-				{
-					["y"] = 319610,
-					["x"] = -198571,
-				}, -- end of ["point"]
-				["alt_type"] = "BARO",
-				["coalitionId"] = 0,
-				["livery_id"] = "Australian 75th Squadron",
-				["skill"] = "High",
-				["category"] = "plane",
-				["unitName"] = "AUSTRALIA air 8 unit1",
-				["heading"] = 2.1995924685911,
-				["groupId"] = 1000084,
-				["groupName"] = "AUSTRALIA air 8",
-				["speed"] = 180.44764340673,
-				["countryId"] = 21,
-				["x"] = -198571,
-				["coalition"] = "neutral",
-				["y"] = 319610,
-				["country"] = "australia",
-				["type"] = "FA-18C_hornet",
-				["unitId"] = 7043,
-				["callsign"] = 
-				{
-					[1] = 1,
-					[2] = 1,
-					[3] = 1,
-					["name"] = "Enfield11",
-				}, -- end of ["callsign"]
-			}, -- end of [1]
-		}, -- end of ["units"]
-		["countryId"] = 21,
-		["radioSet"] = false,
-		["timeAdded"] = 43223.99,
-		["category"] = "plane",
-		["coalition"] = "neutral",
-		["startTime"] = 0,
-		["task"] = "CAP",
-		["uncontrolled"] = false,
-	}, -- end of [1000084]
-	[1000069] = 
-	{
-		["country"] = "usa",
-		["groupName"] = "USA air 3",
-		["modulation"] = 0,
-		["groupId"] = 1000069,
-		["coalitionId"] = 2,
-		["name"] = "USA air 3",
-		["hidden"] = false,
-		["units"] = 
-		{
-			[1] = 
-			{
-				["alt"] = 1996,
-				["point"] = 
-				{
-					["y"] = 682741,
-					["x"] = -288608,
-				}, -- end of ["point"]
-				["alt_type"] = "BARO",
-				["coalitionId"] = 2,
-				["livery_id"] = "usaf standard",
-				["skill"] = "High",
-				["category"] = "plane",
-				["unitName"] = "USA air 3 unit1",
-				["heading"] = 1.6162179835615,
-				["groupId"] = 1000069,
-				["groupName"] = "USA air 3",
-				["speed"] = 138.82033106075,
-				["countryId"] = 2,
-				["x"] = -288608,
-				["coalition"] = "blue",
-				["y"] = 682741,
-				["country"] = "usa",
-				["type"] = "B-52H",
-				["unitId"] = 7020,
-				["callsign"] = 
-				{
-					[1] = 4,
-					[2] = 1,
-					[3] = 1,
-					["name"] = "Colt11",
-				}, -- end of ["callsign"]
-			}, -- end of [1]
-		}, -- end of ["units"]
-		["countryId"] = 2,
-		["radioSet"] = false,
-		["timeAdded"] = 43221.99,
-		["category"] = "plane",
-		["coalition"] = "blue",
-		["startTime"] = 0,
-		["task"] = "Ground Attack",
-		["uncontrolled"] = false,
-	}, -- end of [1000069]
-	[7017] = 
-	{
-		["groupId"] = 7017,
-		["coalitionId"] = 2,
-		["hidden"] = false,
-		["groupName"] = "USA static 4",
-		["units"] = 
-		{
-			[1] = 
-			{
-				["alt"] = 61,
-				["point"] = 
-				{
-					["y"] = 693989,
-					["x"] = -288108,
-				}, -- end of ["point"]
-				["categoryStatic"] = "Cargos",
-				["coalitionId"] = 2,
-				["mass"] = 1337,
-				["category"] = "static",
-				["unitName"] = "USA static 4",
-				["shape_name"] = "ab-212_cargo",
-				["type"] = "uh1h_cargo",
-				["country"] = "usa",
-				["groupName"] = "USA static 4",
-				["y"] = 693989,
-				["x"] = -288108,
-				["coalition"] = "blue",
-				["unitId"] = 7017,
-				["heading"] = 0,
-				["countryId"] = 2,
-				["groupId"] = 7017,
-			}, -- end of [1]
-		}, -- end of ["units"]
-		["countryId"] = 2,
-		["coalition"] = "blue",
-		["timeAdded"] = 43221.99,
-		["category"] = "static",
-		["country"] = "usa",
-		["startTime"] = 0,
-		["name"] = "USA static 4",
-		["uncontrolled"] = false,
-	}, -- end of [7017]
-	[1000070] = 
-	{
-		["country"] = "australia",
-		["groupName"] = "AUSTRALIA air 4",
-		["modulation"] = 0,
-		["groupId"] = 1000070,
-		["coalitionId"] = 0,
-		["name"] = "AUSTRALIA air 4",
-		["hidden"] = false,
-		["units"] = 
-		{
-			[1] = 
-			{
-				["alt"] = 1997,
-				["point"] = 
-				{
-					["y"] = 319610,
-					["x"] = -198571,
-				}, -- end of ["point"]
-				["alt_type"] = "BARO",
-				["coalitionId"] = 0,
-				["livery_id"] = "Australian 75th Squadron",
-				["skill"] = "High",
-				["category"] = "plane",
-				["unitName"] = "AUSTRALIA air 4 unit1",
-				["heading"] = 2.1995924685911,
-				["groupId"] = 1000070,
-				["groupName"] = "AUSTRALIA air 4",
-				["speed"] = 180.44764340673,
-				["countryId"] = 21,
-				["x"] = -198571,
-				["coalition"] = "neutral",
-				["y"] = 319610,
-				["country"] = "australia",
-				["type"] = "FA-18C_hornet",
-				["unitId"] = 7021,
-				["callsign"] = 
-				{
-					[1] = 1,
-					[2] = 1,
-					[3] = 1,
-					["name"] = "Enfield11",
-				}, -- end of ["callsign"]
-			}, -- end of [1]
-		}, -- end of ["units"]
-		["countryId"] = 21,
-		["radioSet"] = false,
-		["timeAdded"] = 43221.99,
-		["category"] = "plane",
-		["coalition"] = "neutral",
-		["startTime"] = 0,
-		["task"] = "CAP",
-		["uncontrolled"] = false,
-	}, -- end of [1000070]
-	[1000071] = 
+	}, -- end of [7006]
+	[7014] = 
 	{
 		["country"] = "australia",
 		["coalitionId"] = 0,
@@ -2621,10 +2713,11 @@ groupsById =
 				["alt"] = 0,
 				["point"] = 
 				{
-					["y"] = 266588,
-					["x"] = -163302,
+					["y"] = 267048,
+					["x"] = -161099,
 				}, -- end of ["point"]
 				["coalitionId"] = 0,
+				["livery_id"] = "ReubenJames",
 				["skill"] = "Average",
 				["category"] = "ship",
 				["unitName"] = "AUSTRALIA shp 2 unit1",
@@ -2632,268 +2725,29 @@ groupsById =
 				["unitId"] = 7022,
 				["groupName"] = "AUSTRALIA shp 2",
 				["countryId"] = 21,
-				["x"] = -163302,
+				["x"] = -161099,
 				["speed"] = 0,
-				["type"] = "PERRY",
-				["groupId"] = 1000071,
 				["coalition"] = "neutral",
-				["y"] = 266588,
+				["type"] = "PERRY",
+				["groupId"] = 7014,
+				["y"] = 267048,
 				["country"] = "australia",
 			}, -- end of [1]
 		}, -- end of ["units"]
 		["countryId"] = 21,
 		["name"] = "AUSTRALIA shp 2",
-		["timeAdded"] = 43221.99,
+		["timeAdded"] = 43221.79,
 		["category"] = "ship",
 		["coalition"] = "neutral",
 		["startTime"] = 0,
-		["groupId"] = 1000071,
+		["groupId"] = 7014,
 		["groupName"] = "AUSTRALIA shp 2",
-	}, -- end of [1000071]
-	[7006] = 
-	{
-		["groupId"] = 7006,
-		["coalitionId"] = 2,
-		["hidden"] = false,
-		["groupName"] = "USA static 2",
-		["units"] = 
-		{
-			[1] = 
-			{
-				["alt"] = 72,
-				["point"] = 
-				{
-					["y"] = 694712,
-					["x"] = -286007,
-				}, -- end of ["point"]
-				["categoryStatic"] = "Cargos",
-				["coalitionId"] = 2,
-				["mass"] = 1337,
-				["category"] = "static",
-				["unitName"] = "USA static 2",
-				["shape_name"] = "ab-212_cargo",
-				["type"] = "uh1h_cargo",
-				["country"] = "usa",
-				["groupName"] = "USA static 2",
-				["y"] = 694712,
-				["x"] = -286007,
-				["coalition"] = "blue",
-				["unitId"] = 7006,
-				["heading"] = 0,
-				["countryId"] = 2,
-				["groupId"] = 7006,
-			}, -- end of [1]
-		}, -- end of ["units"]
-		["countryId"] = 2,
-		["coalition"] = "blue",
-		["timeAdded"] = 43220.99,
-		["category"] = "static",
-		["country"] = "usa",
-		["startTime"] = 0,
-		["name"] = "USA static 2",
-		["uncontrolled"] = false,
-	}, -- end of [7006]
-	[1000058] = 
+	}, -- end of [7014]
+	[7018] = 
 	{
 		["country"] = "usa",
 		["coalitionId"] = 2,
-		["groupId"] = 1000058,
-		["hidden"] = false,
-		["units"] = 
-		{
-			[1] = 
-			{
-				["alt"] = 62,
-				["point"] = 
-				{
-					["y"] = 692663,
-					["x"] = -286548,
-				}, -- end of ["point"]
-				["coalitionId"] = 2,
-				["skill"] = "Average",
-				["category"] = "vehicle",
-				["speed"] = 0,
-				["type"] = "M-1 Abrams",
-				["groupId"] = 1000058,
-				["groupName"] = "USA gnd 1",
-				["countryId"] = 2,
-				["x"] = -286548,
-				["y"] = 692663,
-				["heading"] = 1.4977557600419,
-				["country"] = "usa",
-				["unitName"] = "USA gnd 1 unit1",
-				["unitId"] = 7001,
-				["coalition"] = "blue",
-			}, -- end of [1]
-			[2] = 
-			{
-				["alt"] = 62,
-				["point"] = 
-				{
-					["y"] = 692678,
-					["x"] = -286576,
-				}, -- end of ["point"]
-				["coalitionId"] = 2,
-				["skill"] = "Average",
-				["category"] = "vehicle",
-				["speed"] = 0,
-				["type"] = "M-1 Abrams",
-				["groupId"] = 1000058,
-				["groupName"] = "USA gnd 1",
-				["countryId"] = 2,
-				["x"] = -286576,
-				["y"] = 692678,
-				["heading"] = 1.4977557629417,
-				["country"] = "usa",
-				["unitName"] = "USA gnd 1 unit2",
-				["unitId"] = 7002,
-				["coalition"] = "blue",
-			}, -- end of [2]
-			[3] = 
-			{
-				["alt"] = 63,
-				["point"] = 
-				{
-					["y"] = 692774,
-					["x"] = -286539,
-				}, -- end of ["point"]
-				["coalitionId"] = 2,
-				["skill"] = "Average",
-				["category"] = "vehicle",
-				["speed"] = 0,
-				["type"] = "M-1 Abrams",
-				["groupId"] = 1000058,
-				["groupName"] = "USA gnd 1",
-				["countryId"] = 2,
-				["x"] = -286539,
-				["y"] = 692774,
-				["heading"] = 1.497755762398,
-				["country"] = "usa",
-				["unitName"] = "USA gnd 1 unit3",
-				["unitId"] = 7003,
-				["coalition"] = "blue",
-			}, -- end of [3]
-			[4] = 
-			{
-				["alt"] = 62,
-				["point"] = 
-				{
-					["y"] = 692553,
-					["x"] = -286525,
-				}, -- end of ["point"]
-				["coalitionId"] = 2,
-				["skill"] = "Average",
-				["category"] = "vehicle",
-				["speed"] = 0,
-				["type"] = "M-1 Abrams",
-				["groupId"] = 1000058,
-				["groupName"] = "USA gnd 1",
-				["countryId"] = 2,
-				["x"] = -286525,
-				["y"] = 692553,
-				["heading"] = 1.4977557625792,
-				["country"] = "usa",
-				["unitName"] = "USA gnd 1 unit4",
-				["unitId"] = 7004,
-				["coalition"] = "blue",
-			}, -- end of [4]
-		}, -- end of ["units"]
-		["countryId"] = 2,
-		["name"] = "USA gnd 1",
-		["timeAdded"] = 43220.99,
-		["category"] = "vehicle",
-		["coalition"] = "blue",
-		["startTime"] = 0,
-		["task"] = "Ground Nothing",
-		["groupName"] = "USA gnd 1",
-	}, -- end of [1000058]
-	[7038] = 
-	{
-		["groupId"] = 7038,
-		["coalitionId"] = 2,
-		["hidden"] = false,
-		["groupName"] = "USA static 7",
-		["units"] = 
-		{
-			[1] = 
-			{
-				["alt"] = 61,
-				["type"] = "Sandbox",
-				["point"] = 
-				{
-					["y"] = 693155,
-					["x"] = -287187,
-				}, -- end of ["point"]
-				["categoryStatic"] = "Fortifications",
-				["coalitionId"] = 2,
-				["y"] = 693155,
-				["groupName"] = "USA static 7",
-				["country"] = "usa",
-				["countryId"] = 2,
-				["x"] = -287187,
-				["coalition"] = "blue",
-				["category"] = "static",
-				["unitName"] = "USA static 7",
-				["unitId"] = 7038,
-				["heading"] = 0,
-				["groupId"] = 7038,
-			}, -- end of [1]
-		}, -- end of ["units"]
-		["countryId"] = 2,
-		["coalition"] = "blue",
-		["timeAdded"] = 43223.99,
-		["category"] = "static",
-		["country"] = "usa",
-		["startTime"] = 0,
-		["name"] = "USA static 7",
-		["uncontrolled"] = false,
-	}, -- end of [7038]
-	[7027] = 
-	{
-		["groupId"] = 7027,
-		["coalitionId"] = 2,
-		["hidden"] = false,
-		["groupName"] = "USA static 5",
-		["units"] = 
-		{
-			[1] = 
-			{
-				["alt"] = 69,
-				["type"] = "Sandbox",
-				["point"] = 
-				{
-					["y"] = 693432,
-					["x"] = -285294,
-				}, -- end of ["point"]
-				["categoryStatic"] = "Fortifications",
-				["coalitionId"] = 2,
-				["y"] = 693432,
-				["groupName"] = "USA static 5",
-				["country"] = "usa",
-				["countryId"] = 2,
-				["x"] = -285294,
-				["coalition"] = "blue",
-				["category"] = "static",
-				["unitName"] = "USA static 5",
-				["unitId"] = 7027,
-				["heading"] = 0,
-				["groupId"] = 7027,
-			}, -- end of [1]
-		}, -- end of ["units"]
-		["countryId"] = 2,
-		["coalition"] = "blue",
-		["timeAdded"] = 43222.99,
-		["category"] = "static",
-		["country"] = "usa",
-		["startTime"] = 0,
-		["name"] = "USA static 5",
-		["uncontrolled"] = false,
-	}, -- end of [7027]
-	[1000075] = 
-	{
-		["country"] = "usa",
-		["coalitionId"] = 2,
-		["groupId"] = 1000075,
+		["groupId"] = 7018,
 		["hidden"] = false,
 		["units"] = 
 		{
@@ -2916,7 +2770,7 @@ groupsById =
 				["x"] = -286407,
 				["speed"] = 0,
 				["type"] = "M-113",
-				["groupId"] = 1000075,
+				["groupId"] = 7018,
 				["coalition"] = "blue",
 				["y"] = 686871,
 				["country"] = "usa",
@@ -2940,7 +2794,7 @@ groupsById =
 				["x"] = -286447,
 				["speed"] = 0,
 				["type"] = "M-113",
-				["groupId"] = 1000075,
+				["groupId"] = 7018,
 				["coalition"] = "blue",
 				["y"] = 686871,
 				["country"] = "usa",
@@ -2948,404 +2802,40 @@ groupsById =
 		}, -- end of ["units"]
 		["countryId"] = 2,
 		["name"] = "USA gnd 6",
-		["timeAdded"] = 43222.99,
+		["timeAdded"] = 43222.79,
 		["category"] = "vehicle",
 		["coalition"] = "blue",
 		["startTime"] = 0,
 		["task"] = "Ground Nothing",
 		["groupName"] = "USA gnd 6",
-	}, -- end of [1000075]
-	[1000085] = 
-	{
-		["country"] = "australia",
-		["coalitionId"] = 0,
-		["hidden"] = false,
-		["units"] = 
-		{
-			[1] = 
-			{
-				["alt"] = 0,
-				["point"] = 
-				{
-					["y"] = 268804,
-					["x"] = -165342,
-				}, -- end of ["point"]
-				["coalitionId"] = 0,
-				["skill"] = "Average",
-				["category"] = "ship",
-				["unitName"] = "AUSTRALIA shp 4 unit1",
-				["heading"] = 0,
-				["unitId"] = 7044,
-				["groupName"] = "AUSTRALIA shp 4",
-				["countryId"] = 21,
-				["x"] = -165342,
-				["speed"] = 0,
-				["type"] = "PERRY",
-				["groupId"] = 1000085,
-				["coalition"] = "neutral",
-				["y"] = 268804,
-				["country"] = "australia",
-			}, -- end of [1]
-		}, -- end of ["units"]
-		["countryId"] = 21,
-		["name"] = "AUSTRALIA shp 4",
-		["timeAdded"] = 43223.99,
-		["category"] = "ship",
-		["coalition"] = "neutral",
-		["startTime"] = 0,
-		["groupId"] = 1000085,
-		["groupName"] = "AUSTRALIA shp 4",
-	}, -- end of [1000085]
-	[1000076] = 
-	{
-		["country"] = "usa",
-		["groupName"] = "USA air 5",
-		["modulation"] = 0,
-		["groupId"] = 1000076,
-		["coalitionId"] = 2,
-		["name"] = "USA air 5",
-		["hidden"] = false,
-		["units"] = 
-		{
-			[1] = 
-			{
-				["alt"] = 1996,
-				["point"] = 
-				{
-					["y"] = 682741,
-					["x"] = -288608,
-				}, -- end of ["point"]
-				["alt_type"] = "BARO",
-				["coalitionId"] = 2,
-				["livery_id"] = "usaf standard",
-				["skill"] = "High",
-				["category"] = "plane",
-				["unitName"] = "USA air 5 unit1",
-				["heading"] = 1.6162179835615,
-				["groupId"] = 1000076,
-				["groupName"] = "USA air 5",
-				["speed"] = 138.82033106075,
-				["countryId"] = 2,
-				["x"] = -288608,
-				["coalition"] = "blue",
-				["y"] = 682741,
-				["country"] = "usa",
-				["type"] = "B-52H",
-				["unitId"] = 7031,
-				["callsign"] = 
-				{
-					[1] = 4,
-					[2] = 1,
-					[3] = 1,
-					["name"] = "Colt11",
-				}, -- end of ["callsign"]
-			}, -- end of [1]
-		}, -- end of ["units"]
-		["countryId"] = 2,
-		["radioSet"] = false,
-		["timeAdded"] = 43222.99,
-		["category"] = "plane",
-		["coalition"] = "blue",
-		["startTime"] = 0,
-		["task"] = "Ground Attack",
-		["uncontrolled"] = false,
-	}, -- end of [1000076]
-	[1000061] = 
+	}, -- end of [7018]
+	[7022] = 
 	{
 		["country"] = "usa",
 		["coalitionId"] = 2,
-		["groupId"] = 1000061,
+		["groupId"] = 7022,
 		["hidden"] = false,
 		["units"] = 
 		{
 			[1] = 
 			{
-				["alt"] = 48,
+				["alt"] = 73,
 				["point"] = 
 				{
-					["y"] = 686871,
-					["x"] = -286407,
-				}, -- end of ["point"]
-				["coalitionId"] = 2,
-				["skill"] = "Average",
-				["category"] = "vehicle",
-				["unitName"] = "USA gnd 2 unit1",
-				["heading"] = 0,
-				["unitId"] = 7007,
-				["groupName"] = "USA gnd 2",
-				["countryId"] = 2,
-				["x"] = -286407,
-				["speed"] = 0,
-				["type"] = "M-113",
-				["groupId"] = 1000061,
-				["coalition"] = "blue",
-				["y"] = 686871,
-				["country"] = "usa",
-			}, -- end of [1]
-			[2] = 
-			{
-				["alt"] = 48,
-				["point"] = 
-				{
-					["y"] = 686871,
-					["x"] = -286447,
-				}, -- end of ["point"]
-				["coalitionId"] = 2,
-				["skill"] = "Average",
-				["category"] = "vehicle",
-				["unitName"] = "USA gnd 2 unit2",
-				["heading"] = 0,
-				["unitId"] = 7008,
-				["groupName"] = "USA gnd 2",
-				["countryId"] = 2,
-				["x"] = -286447,
-				["speed"] = 0,
-				["type"] = "M-113",
-				["groupId"] = 1000061,
-				["coalition"] = "blue",
-				["y"] = 686871,
-				["country"] = "usa",
-			}, -- end of [2]
-		}, -- end of ["units"]
-		["countryId"] = 2,
-		["name"] = "USA gnd 2",
-		["timeAdded"] = 43220.99,
-		["category"] = "vehicle",
-		["coalition"] = "blue",
-		["startTime"] = 0,
-		["task"] = "Ground Nothing",
-		["groupName"] = "USA gnd 2",
-	}, -- end of [1000061]
-	[1000077] = 
-	{
-		["country"] = "australia",
-		["groupName"] = "AUSTRALIA air 6",
-		["modulation"] = 0,
-		["groupId"] = 1000077,
-		["coalitionId"] = 0,
-		["name"] = "AUSTRALIA air 6",
-		["hidden"] = false,
-		["units"] = 
-		{
-			[1] = 
-			{
-				["alt"] = 1997,
-				["point"] = 
-				{
-					["y"] = 319610,
-					["x"] = -198571,
-				}, -- end of ["point"]
-				["alt_type"] = "BARO",
-				["coalitionId"] = 0,
-				["livery_id"] = "Australian 75th Squadron",
-				["skill"] = "High",
-				["category"] = "plane",
-				["unitName"] = "AUSTRALIA air 6 unit1",
-				["heading"] = 2.1995924685911,
-				["groupId"] = 1000077,
-				["groupName"] = "AUSTRALIA air 6",
-				["speed"] = 180.44764340673,
-				["countryId"] = 21,
-				["x"] = -198571,
-				["coalition"] = "neutral",
-				["y"] = 319610,
-				["country"] = "australia",
-				["type"] = "FA-18C_hornet",
-				["unitId"] = 7032,
-				["callsign"] = 
-				{
-					[1] = 1,
-					[2] = 1,
-					[3] = 1,
-					["name"] = "Enfield11",
-				}, -- end of ["callsign"]
-			}, -- end of [1]
-		}, -- end of ["units"]
-		["countryId"] = 21,
-		["radioSet"] = false,
-		["timeAdded"] = 43222.99,
-		["category"] = "plane",
-		["coalition"] = "neutral",
-		["startTime"] = 0,
-		["task"] = "CAP",
-		["uncontrolled"] = false,
-	}, -- end of [1000077]
-	[1000062] = 
-	{
-		["country"] = "usa",
-		["groupName"] = "USA air 1",
-		["modulation"] = 0,
-		["groupId"] = 1000062,
-		["coalitionId"] = 2,
-		["name"] = "USA air 1",
-		["hidden"] = false,
-		["units"] = 
-		{
-			[1] = 
-			{
-				["alt"] = 1996,
-				["point"] = 
-				{
-					["y"] = 682741,
-					["x"] = -288608,
-				}, -- end of ["point"]
-				["alt_type"] = "BARO",
-				["coalitionId"] = 2,
-				["livery_id"] = "usaf standard",
-				["skill"] = "High",
-				["category"] = "plane",
-				["unitName"] = "USA air 1 unit1",
-				["heading"] = 1.6162179835615,
-				["groupId"] = 1000062,
-				["groupName"] = "USA air 1",
-				["speed"] = 138.82033106075,
-				["countryId"] = 2,
-				["x"] = -288608,
-				["coalition"] = "blue",
-				["y"] = 682741,
-				["country"] = "usa",
-				["type"] = "B-52H",
-				["unitId"] = 7009,
-				["callsign"] = 
-				{
-					[1] = 4,
-					[2] = 1,
-					[3] = 1,
-					["name"] = "Colt11",
-				}, -- end of ["callsign"]
-			}, -- end of [1]
-		}, -- end of ["units"]
-		["countryId"] = 2,
-		["radioSet"] = false,
-		["timeAdded"] = 43220.99,
-		["category"] = "plane",
-		["coalition"] = "blue",
-		["startTime"] = 0,
-		["task"] = "Ground Attack",
-		["uncontrolled"] = false,
-	}, -- end of [1000062]
-	[1000078] = 
-	{
-		["country"] = "australia",
-		["coalitionId"] = 0,
-		["hidden"] = false,
-		["units"] = 
-		{
-			[1] = 
-			{
-				["alt"] = 0,
-				["point"] = 
-				{
-					["y"] = 267963,
-					["x"] = -165895,
-				}, -- end of ["point"]
-				["coalitionId"] = 0,
-				["skill"] = "Average",
-				["category"] = "ship",
-				["speed"] = 0,
-				["type"] = "PERRY",
-				["groupId"] = 1000078,
-				["groupName"] = "AUSTRALIA shp 3",
-				["countryId"] = 21,
-				["x"] = -165895,
-				["y"] = 267963,
-				["heading"] = 0,
-				["country"] = "australia",
-				["unitName"] = "AUSTRALIA shp 3 unit1",
-				["unitId"] = 7033,
-				["coalition"] = "neutral",
-			}, -- end of [1]
-		}, -- end of ["units"]
-		["countryId"] = 21,
-		["name"] = "AUSTRALIA shp 3",
-		["timeAdded"] = 43222.99,
-		["category"] = "ship",
-		["coalition"] = "neutral",
-		["startTime"] = 0,
-		["groupId"] = 1000078,
-		["groupName"] = "AUSTRALIA shp 3",
-	}, -- end of [1000078]
-	[1000063] = 
-	{
-		["country"] = "australia",
-		["groupName"] = "AUSTRALIA air 2",
-		["modulation"] = 0,
-		["groupId"] = 1000063,
-		["coalitionId"] = 0,
-		["name"] = "AUSTRALIA air 2",
-		["hidden"] = false,
-		["units"] = 
-		{
-			[1] = 
-			{
-				["alt"] = 1997,
-				["point"] = 
-				{
-					["y"] = 319610,
-					["x"] = -198571,
-				}, -- end of ["point"]
-				["alt_type"] = "BARO",
-				["coalitionId"] = 0,
-				["livery_id"] = "Australian 75th Squadron",
-				["skill"] = "High",
-				["category"] = "plane",
-				["unitName"] = "AUSTRALIA air 2 unit1",
-				["heading"] = 2.1995924685911,
-				["groupId"] = 1000063,
-				["groupName"] = "AUSTRALIA air 2",
-				["speed"] = 180.44764340673,
-				["countryId"] = 21,
-				["x"] = -198571,
-				["coalition"] = "neutral",
-				["y"] = 319610,
-				["country"] = "australia",
-				["type"] = "FA-18C_hornet",
-				["unitId"] = 7010,
-				["callsign"] = 
-				{
-					[1] = 1,
-					[2] = 1,
-					[3] = 1,
-					["name"] = "Enfield11",
-				}, -- end of ["callsign"]
-			}, -- end of [1]
-		}, -- end of ["units"]
-		["countryId"] = 21,
-		["radioSet"] = false,
-		["timeAdded"] = 43220.99,
-		["category"] = "plane",
-		["coalition"] = "neutral",
-		["startTime"] = 0,
-		["task"] = "CAP",
-		["uncontrolled"] = false,
-	}, -- end of [1000063]
-	[1000079] = 
-	{
-		["country"] = "usa",
-		["coalitionId"] = 2,
-		["groupId"] = 1000079,
-		["hidden"] = false,
-		["units"] = 
-		{
-			[1] = 
-			{
-				["alt"] = 61,
-				["point"] = 
-				{
-					["y"] = 692747,
-					["x"] = -287036,
+					["y"] = 693098,
+					["x"] = -284021,
 				}, -- end of ["point"]
 				["coalitionId"] = 2,
 				["skill"] = "Average",
 				["category"] = "vehicle",
 				["speed"] = 0,
 				["type"] = "M-1 Abrams",
-				["groupId"] = 1000079,
+				["groupId"] = 7022,
 				["groupName"] = "USA gnd 7",
 				["countryId"] = 2,
-				["x"] = -287036,
-				["y"] = 692747,
-				["heading"] = 1.4977557703724,
+				["x"] = -284021,
+				["y"] = 693098,
+				["heading"] = 1.4977557645728,
 				["country"] = "usa",
 				["unitName"] = "USA gnd 7 unit1",
 				["unitId"] = 7034,
@@ -3353,23 +2843,23 @@ groupsById =
 			}, -- end of [1]
 			[2] = 
 			{
-				["alt"] = 61,
+				["alt"] = 73,
 				["point"] = 
 				{
-					["y"] = 692716,
-					["x"] = -286920,
+					["y"] = 693012,
+					["x"] = -284053,
 				}, -- end of ["point"]
 				["coalitionId"] = 2,
 				["skill"] = "Average",
 				["category"] = "vehicle",
-				["speed"] = 0,
+				["speed"] = 5.0056692998623e-05,
 				["type"] = "M-1 Abrams",
-				["groupId"] = 1000079,
+				["groupId"] = 7022,
 				["groupName"] = "USA gnd 7",
 				["countryId"] = 2,
-				["x"] = -286920,
-				["y"] = 692716,
-				["heading"] = 1.4977557703724,
+				["x"] = -284053,
+				["y"] = 693012,
+				["heading"] = 1.4877557641795,
 				["country"] = "usa",
 				["unitName"] = "USA gnd 7 unit2",
 				["unitId"] = 7035,
@@ -3377,23 +2867,23 @@ groupsById =
 			}, -- end of [2]
 			[3] = 
 			{
-				["alt"] = 61,
+				["alt"] = 74,
 				["point"] = 
 				{
-					["y"] = 692580,
-					["x"] = -287056,
+					["y"] = 693026,
+					["x"] = -283898,
 				}, -- end of ["point"]
 				["coalitionId"] = 2,
 				["skill"] = "Average",
 				["category"] = "vehicle",
-				["speed"] = 0,
+				["speed"] = 0.00018869274936151,
 				["type"] = "M-1 Abrams",
-				["groupId"] = 1000079,
+				["groupId"] = 7022,
 				["groupName"] = "USA gnd 7",
 				["countryId"] = 2,
-				["x"] = -287056,
-				["y"] = 692580,
-				["heading"] = 1.4977557642103,
+				["x"] = -283898,
+				["y"] = 693026,
+				["heading"] = 1.5077557625432,
 				["country"] = "usa",
 				["unitName"] = "USA gnd 7 unit3",
 				["unitId"] = 7036,
@@ -3401,23 +2891,23 @@ groupsById =
 			}, -- end of [3]
 			[4] = 
 			{
-				["alt"] = 60,
+				["alt"] = 73,
 				["point"] = 
 				{
-					["y"] = 692752,
-					["x"] = -287189,
+					["y"] = 693093,
+					["x"] = -284127,
 				}, -- end of ["point"]
 				["coalitionId"] = 2,
 				["skill"] = "Average",
 				["category"] = "vehicle",
-				["speed"] = 0,
+				["speed"] = 0.0040063578450385,
 				["type"] = "M-1 Abrams",
-				["groupId"] = 1000079,
+				["groupId"] = 7022,
 				["groupName"] = "USA gnd 7",
 				["countryId"] = 2,
-				["x"] = -287189,
-				["y"] = 692752,
-				["heading"] = 1.4977557678351,
+				["x"] = -284127,
+				["y"] = 693093,
+				["heading"] = 1.4877557641795,
 				["country"] = "usa",
 				["unitName"] = "USA gnd 7 unit4",
 				["unitId"] = 7037,
@@ -3426,14 +2916,68 @@ groupsById =
 		}, -- end of ["units"]
 		["countryId"] = 2,
 		["name"] = "USA gnd 7",
-		["timeAdded"] = 43223.99,
+		["timeAdded"] = 43223.79,
 		["category"] = "vehicle",
 		["coalition"] = "blue",
 		["startTime"] = 0,
 		["task"] = "Ground Nothing",
 		["groupName"] = "USA gnd 7",
-	}, -- end of [1000079]
-	[1000064] = 
+	}, -- end of [7022]
+	[7026] = 
+	{
+		["country"] = "usa",
+		["groupName"] = "USA air 7",
+		["modulation"] = 0,
+		["groupId"] = 7026,
+		["coalitionId"] = 2,
+		["name"] = "USA air 7",
+		["hidden"] = false,
+		["units"] = 
+		{
+			[1] = 
+			{
+				["alt"] = 1997,
+				["point"] = 
+				{
+					["y"] = 682727,
+					["x"] = -288608,
+				}, -- end of ["point"]
+				["alt_type"] = "BARO",
+				["coalitionId"] = 2,
+				["livery_id"] = "usaf standard",
+				["skill"] = "High",
+				["category"] = "plane",
+				["unitName"] = "USA air 7 unit1",
+				["heading"] = 1.6162179734619,
+				["groupId"] = 7026,
+				["groupName"] = "USA air 7",
+				["speed"] = 138.85196364465,
+				["countryId"] = 2,
+				["x"] = -288608,
+				["coalition"] = "blue",
+				["y"] = 682727,
+				["country"] = "usa",
+				["type"] = "B-52H",
+				["unitId"] = 7042,
+				["callsign"] = 
+				{
+					[1] = 4,
+					[2] = 1,
+					[3] = 1,
+					["name"] = "Colt11",
+				}, -- end of ["callsign"]
+			}, -- end of [1]
+		}, -- end of ["units"]
+		["countryId"] = 2,
+		["radioSet"] = false,
+		["timeAdded"] = 43223.79,
+		["category"] = "plane",
+		["coalition"] = "blue",
+		["startTime"] = 0,
+		["task"] = "Ground Attack",
+		["uncontrolled"] = false,
+	}, -- end of [7026]
+	[7007] = 
 	{
 		["country"] = "australia",
 		["coalitionId"] = 0,
@@ -3445,10 +2989,11 @@ groupsById =
 				["alt"] = 0,
 				["point"] = 
 				{
-					["y"] = 266228,
-					["x"] = -161996,
+					["y"] = 265153,
+					["x"] = -163065,
 				}, -- end of ["point"]
 				["coalitionId"] = 0,
+				["livery_id"] = "ReubenJames",
 				["skill"] = "Average",
 				["category"] = "ship",
 				["unitName"] = "AUSTRALIA shp 1 unit1",
@@ -3456,341 +3001,29 @@ groupsById =
 				["unitId"] = 7011,
 				["groupName"] = "AUSTRALIA shp 1",
 				["countryId"] = 21,
-				["x"] = -161996,
+				["x"] = -163065,
 				["speed"] = 0,
-				["type"] = "PERRY",
-				["groupId"] = 1000064,
 				["coalition"] = "neutral",
-				["y"] = 266228,
+				["type"] = "PERRY",
+				["groupId"] = 7007,
+				["y"] = 265153,
 				["country"] = "australia",
 			}, -- end of [1]
 		}, -- end of ["units"]
 		["countryId"] = 21,
 		["name"] = "AUSTRALIA shp 1",
-		["timeAdded"] = 43220.99,
+		["timeAdded"] = 43220.79,
 		["category"] = "ship",
 		["coalition"] = "neutral",
 		["startTime"] = 0,
-		["groupId"] = 1000064,
+		["groupId"] = 7007,
 		["groupName"] = "AUSTRALIA shp 1",
-	}, -- end of [1000064]
-	[7039] = 
-	{
-		["groupId"] = 7039,
-		["coalitionId"] = 2,
-		["hidden"] = false,
-		["groupName"] = "USA static 8",
-		["units"] = 
-		{
-			[1] = 
-			{
-				["alt"] = 67,
-				["point"] = 
-				{
-					["y"] = 691664,
-					["x"] = -284503,
-				}, -- end of ["point"]
-				["categoryStatic"] = "Cargos",
-				["coalitionId"] = 2,
-				["mass"] = 1337,
-				["category"] = "static",
-				["unitName"] = "USA static 8",
-				["shape_name"] = "ab-212_cargo",
-				["type"] = "uh1h_cargo",
-				["country"] = "usa",
-				["groupName"] = "USA static 8",
-				["y"] = 691664,
-				["x"] = -284503,
-				["coalition"] = "blue",
-				["unitId"] = 7039,
-				["heading"] = 0,
-				["countryId"] = 2,
-				["groupId"] = 7039,
-			}, -- end of [1]
-		}, -- end of ["units"]
-		["countryId"] = 2,
-		["coalition"] = "blue",
-		["timeAdded"] = 43223.99,
-		["category"] = "static",
-		["country"] = "usa",
-		["startTime"] = 0,
-		["name"] = "USA static 8",
-		["uncontrolled"] = false,
-	}, -- end of [7039]
-	[1000065] = 
+	}, -- end of [7007]
+	[7011] = 
 	{
 		["country"] = "usa",
 		["coalitionId"] = 2,
-		["groupId"] = 1000065,
-		["hidden"] = false,
-		["units"] = 
-		{
-			[1] = 
-			{
-				["alt"] = 60,
-				["point"] = 
-				{
-					["y"] = 692171,
-					["x"] = -286749,
-				}, -- end of ["point"]
-				["coalitionId"] = 2,
-				["skill"] = "Average",
-				["category"] = "vehicle",
-				["speed"] = 0,
-				["type"] = "M-1 Abrams",
-				["groupId"] = 1000065,
-				["groupName"] = "USA gnd 3",
-				["countryId"] = 2,
-				["x"] = -286749,
-				["y"] = 692171,
-				["heading"] = 1.4977557591357,
-				["country"] = "usa",
-				["unitName"] = "USA gnd 3 unit1",
-				["unitId"] = 7012,
-				["coalition"] = "blue",
-			}, -- end of [1]
-			[2] = 
-			{
-				["alt"] = 61,
-				["point"] = 
-				{
-					["y"] = 692204,
-					["x"] = -286580,
-				}, -- end of ["point"]
-				["coalitionId"] = 2,
-				["skill"] = "Average",
-				["category"] = "vehicle",
-				["speed"] = 0,
-				["type"] = "M-1 Abrams",
-				["groupId"] = 1000065,
-				["groupName"] = "USA gnd 3",
-				["countryId"] = 2,
-				["x"] = -286580,
-				["y"] = 692204,
-				["heading"] = 1.4977557614918,
-				["country"] = "usa",
-				["unitName"] = "USA gnd 3 unit2",
-				["unitId"] = 7013,
-				["coalition"] = "blue",
-			}, -- end of [2]
-			[3] = 
-			{
-				["alt"] = 61,
-				["point"] = 
-				{
-					["y"] = 692150,
-					["x"] = -286560,
-				}, -- end of ["point"]
-				["coalitionId"] = 2,
-				["skill"] = "Average",
-				["category"] = "vehicle",
-				["speed"] = 0,
-				["type"] = "M-1 Abrams",
-				["groupId"] = 1000065,
-				["groupName"] = "USA gnd 3",
-				["countryId"] = 2,
-				["x"] = -286560,
-				["y"] = 692150,
-				["heading"] = 1.4977557614918,
-				["country"] = "usa",
-				["unitName"] = "USA gnd 3 unit3",
-				["unitId"] = 7014,
-				["coalition"] = "blue",
-			}, -- end of [3]
-			[4] = 
-			{
-				["alt"] = 60,
-				["point"] = 
-				{
-					["y"] = 691995,
-					["x"] = -286713,
-				}, -- end of ["point"]
-				["coalitionId"] = 2,
-				["skill"] = "Average",
-				["category"] = "vehicle",
-				["speed"] = 0,
-				["type"] = "M-1 Abrams",
-				["groupId"] = 1000065,
-				["groupName"] = "USA gnd 3",
-				["countryId"] = 2,
-				["x"] = -286713,
-				["y"] = 691995,
-				["heading"] = 1.4977557627604,
-				["country"] = "usa",
-				["unitName"] = "USA gnd 3 unit4",
-				["unitId"] = 7015,
-				["coalition"] = "blue",
-			}, -- end of [4]
-		}, -- end of ["units"]
-		["countryId"] = 2,
-		["name"] = "USA gnd 3",
-		["timeAdded"] = 43221.99,
-		["category"] = "vehicle",
-		["coalition"] = "blue",
-		["startTime"] = 0,
-		["task"] = "Ground Nothing",
-		["groupName"] = "USA gnd 3",
-	}, -- end of [1000065]
-	[7016] = 
-	{
-		["groupId"] = 7016,
-		["coalitionId"] = 2,
-		["hidden"] = false,
-		["groupName"] = "USA static 3",
-		["units"] = 
-		{
-			[1] = 
-			{
-				["alt"] = 60,
-				["type"] = "Sandbox",
-				["point"] = 
-				{
-					["y"] = 691139,
-					["x"] = -286038,
-				}, -- end of ["point"]
-				["categoryStatic"] = "Fortifications",
-				["coalitionId"] = 2,
-				["y"] = 691139,
-				["groupName"] = "USA static 3",
-				["country"] = "usa",
-				["countryId"] = 2,
-				["x"] = -286038,
-				["coalition"] = "blue",
-				["category"] = "static",
-				["unitName"] = "USA static 3",
-				["unitId"] = 7016,
-				["heading"] = 0,
-				["groupId"] = 7016,
-			}, -- end of [1]
-		}, -- end of ["units"]
-		["countryId"] = 2,
-		["coalition"] = "blue",
-		["timeAdded"] = 43221.99,
-		["category"] = "static",
-		["country"] = "usa",
-		["startTime"] = 0,
-		["name"] = "USA static 3",
-		["uncontrolled"] = false,
-	}, -- end of [7016]
-	[1000072] = 
-	{
-		["country"] = "usa",
-		["coalitionId"] = 2,
-		["groupId"] = 1000072,
-		["hidden"] = false,
-		["units"] = 
-		{
-			[1] = 
-			{
-				["alt"] = 55,
-				["point"] = 
-				{
-					["y"] = 692563,
-					["x"] = -288904,
-				}, -- end of ["point"]
-				["coalitionId"] = 2,
-				["skill"] = "Average",
-				["category"] = "vehicle",
-				["speed"] = 0,
-				["type"] = "M-1 Abrams",
-				["groupId"] = 1000072,
-				["groupName"] = "USA gnd 5",
-				["countryId"] = 2,
-				["x"] = -288904,
-				["y"] = 692563,
-				["heading"] = 1.4977557725472,
-				["country"] = "usa",
-				["unitName"] = "USA gnd 5 unit1",
-				["unitId"] = 7023,
-				["coalition"] = "blue",
-			}, -- end of [1]
-			[2] = 
-			{
-				["alt"] = 56,
-				["point"] = 
-				{
-					["y"] = 692623,
-					["x"] = -288844,
-				}, -- end of ["point"]
-				["coalitionId"] = 2,
-				["skill"] = "Average",
-				["category"] = "vehicle",
-				["speed"] = 0,
-				["type"] = "M-1 Abrams",
-				["groupId"] = 1000072,
-				["groupName"] = "USA gnd 5",
-				["countryId"] = 2,
-				["x"] = -288844,
-				["y"] = 692623,
-				["heading"] = 1.4977557660227,
-				["country"] = "usa",
-				["unitName"] = "USA gnd 5 unit2",
-				["unitId"] = 7024,
-				["coalition"] = "blue",
-			}, -- end of [2]
-			[3] = 
-			{
-				["alt"] = 55,
-				["point"] = 
-				{
-					["y"] = 692459,
-					["x"] = -288865,
-				}, -- end of ["point"]
-				["coalitionId"] = 2,
-				["skill"] = "Average",
-				["category"] = "vehicle",
-				["speed"] = 0,
-				["type"] = "M-1 Abrams",
-				["groupId"] = 1000072,
-				["groupName"] = "USA gnd 5",
-				["countryId"] = 2,
-				["x"] = -288865,
-				["y"] = 692459,
-				["heading"] = 1.4977557638479,
-				["country"] = "usa",
-				["unitName"] = "USA gnd 5 unit3",
-				["unitId"] = 7025,
-				["coalition"] = "blue",
-			}, -- end of [3]
-			[4] = 
-			{
-				["alt"] = 55,
-				["point"] = 
-				{
-					["y"] = 692675,
-					["x"] = -289069,
-				}, -- end of ["point"]
-				["coalitionId"] = 2,
-				["skill"] = "Average",
-				["category"] = "vehicle",
-				["speed"] = 0,
-				["type"] = "M-1 Abrams",
-				["groupId"] = 1000072,
-				["groupName"] = "USA gnd 5",
-				["countryId"] = 2,
-				["x"] = -289069,
-				["y"] = 692675,
-				["heading"] = 1.4977557685601,
-				["country"] = "usa",
-				["unitName"] = "USA gnd 5 unit4",
-				["unitId"] = 7026,
-				["coalition"] = "blue",
-			}, -- end of [4]
-		}, -- end of ["units"]
-		["countryId"] = 2,
-		["name"] = "USA gnd 5",
-		["timeAdded"] = 43222.99,
-		["category"] = "vehicle",
-		["coalition"] = "blue",
-		["startTime"] = 0,
-		["task"] = "Ground Nothing",
-		["groupName"] = "USA gnd 5",
-	}, -- end of [1000072]
-	[1000068] = 
-	{
-		["country"] = "usa",
-		["coalitionId"] = 2,
-		["groupId"] = 1000068,
+		["groupId"] = 7011,
 		["hidden"] = false,
 		["units"] = 
 		{
@@ -3807,7 +3040,7 @@ groupsById =
 				["category"] = "vehicle",
 				["speed"] = 0,
 				["type"] = "M-113",
-				["groupId"] = 1000068,
+				["groupId"] = 7011,
 				["groupName"] = "USA gnd 4",
 				["countryId"] = 2,
 				["x"] = -286407,
@@ -3831,7 +3064,7 @@ groupsById =
 				["category"] = "vehicle",
 				["speed"] = 0,
 				["type"] = "M-113",
-				["groupId"] = 1000068,
+				["groupId"] = 7011,
 				["groupName"] = "USA gnd 4",
 				["countryId"] = 2,
 				["x"] = -286447,
@@ -3845,11 +3078,646 @@ groupsById =
 		}, -- end of ["units"]
 		["countryId"] = 2,
 		["name"] = "USA gnd 4",
-		["timeAdded"] = 43221.99,
+		["timeAdded"] = 43221.79,
 		["category"] = "vehicle",
 		["coalition"] = "blue",
 		["startTime"] = 0,
 		["task"] = "Ground Nothing",
 		["groupName"] = "USA gnd 4",
-	}, -- end of [1000068]
+	}, -- end of [7011]
+	[7015] = 
+	{
+		["country"] = "usa",
+		["coalitionId"] = 2,
+		["groupId"] = 7015,
+		["hidden"] = false,
+		["units"] = 
+		{
+			[1] = 
+			{
+				["alt"] = 69,
+				["point"] = 
+				{
+					["y"] = 695073,
+					["x"] = -287442,
+				}, -- end of ["point"]
+				["coalitionId"] = 2,
+				["skill"] = "Average",
+				["category"] = "vehicle",
+				["speed"] = 0,
+				["type"] = "M-1 Abrams",
+				["groupId"] = 7015,
+				["groupName"] = "USA gnd 5",
+				["countryId"] = 2,
+				["x"] = -287442,
+				["y"] = 695073,
+				["heading"] = 1.4977557701918,
+				["country"] = "usa",
+				["unitName"] = "USA gnd 5 unit1",
+				["unitId"] = 7023,
+				["coalition"] = "blue",
+			}, -- end of [1]
+			[2] = 
+			{
+				["alt"] = 68,
+				["point"] = 
+				{
+					["y"] = 695090,
+					["x"] = -287590,
+				}, -- end of ["point"]
+				["coalitionId"] = 2,
+				["skill"] = "Average",
+				["category"] = "vehicle",
+				["speed"] = 0,
+				["type"] = "M-1 Abrams",
+				["groupId"] = 7015,
+				["groupName"] = "USA gnd 5",
+				["countryId"] = 2,
+				["x"] = -287590,
+				["y"] = 695090,
+				["heading"] = 1.4977557591357,
+				["country"] = "usa",
+				["unitName"] = "USA gnd 5 unit2",
+				["unitId"] = 7024,
+				["coalition"] = "blue",
+			}, -- end of [2]
+			[3] = 
+			{
+				["alt"] = 69,
+				["point"] = 
+				{
+					["y"] = 695151,
+					["x"] = -287518,
+				}, -- end of ["point"]
+				["coalitionId"] = 2,
+				["skill"] = "Average",
+				["category"] = "vehicle",
+				["speed"] = 0,
+				["type"] = "M-1 Abrams",
+				["groupId"] = 7015,
+				["groupName"] = "USA gnd 5",
+				["countryId"] = 2,
+				["x"] = -287518,
+				["y"] = 695151,
+				["heading"] = 1.4977557660229,
+				["country"] = "usa",
+				["unitName"] = "USA gnd 5 unit3",
+				["unitId"] = 7025,
+				["coalition"] = "blue",
+			}, -- end of [3]
+			[4] = 
+			{
+				["alt"] = 68,
+				["point"] = 
+				{
+					["y"] = 694882,
+					["x"] = -287479,
+				}, -- end of ["point"]
+				["coalitionId"] = 2,
+				["skill"] = "Average",
+				["category"] = "vehicle",
+				["speed"] = 0,
+				["type"] = "M-1 Abrams",
+				["groupId"] = 7015,
+				["groupName"] = "USA gnd 5",
+				["countryId"] = 2,
+				["x"] = -287479,
+				["y"] = 694882,
+				["heading"] = 1.4977557575044,
+				["country"] = "usa",
+				["unitName"] = "USA gnd 5 unit4",
+				["unitId"] = 7026,
+				["coalition"] = "blue",
+			}, -- end of [4]
+		}, -- end of ["units"]
+		["countryId"] = 2,
+		["name"] = "USA gnd 5",
+		["timeAdded"] = 43222.79,
+		["category"] = "vehicle",
+		["coalition"] = "blue",
+		["startTime"] = 0,
+		["task"] = "Ground Nothing",
+		["groupName"] = "USA gnd 5",
+	}, -- end of [7015]
+	[7019] = 
+	{
+		["country"] = "usa",
+		["groupName"] = "USA air 5",
+		["modulation"] = 0,
+		["groupId"] = 7019,
+		["coalitionId"] = 2,
+		["name"] = "USA air 5",
+		["hidden"] = false,
+		["units"] = 
+		{
+			[1] = 
+			{
+				["alt"] = 1997,
+				["point"] = 
+				{
+					["y"] = 682727,
+					["x"] = -288608,
+				}, -- end of ["point"]
+				["alt_type"] = "BARO",
+				["coalitionId"] = 2,
+				["livery_id"] = "usaf standard",
+				["skill"] = "High",
+				["category"] = "plane",
+				["unitName"] = "USA air 5 unit1",
+				["heading"] = 1.6162179734619,
+				["groupId"] = 7019,
+				["groupName"] = "USA air 5",
+				["speed"] = 138.85196364465,
+				["countryId"] = 2,
+				["x"] = -288608,
+				["coalition"] = "blue",
+				["y"] = 682727,
+				["country"] = "usa",
+				["type"] = "B-52H",
+				["unitId"] = 7031,
+				["callsign"] = 
+				{
+					[1] = 4,
+					[2] = 1,
+					[3] = 1,
+					["name"] = "Colt11",
+				}, -- end of ["callsign"]
+			}, -- end of [1]
+		}, -- end of ["units"]
+		["countryId"] = 2,
+		["radioSet"] = false,
+		["timeAdded"] = 43222.79,
+		["category"] = "plane",
+		["coalition"] = "blue",
+		["startTime"] = 0,
+		["task"] = "Ground Attack",
+		["uncontrolled"] = false,
+	}, -- end of [7019]
+	[7027] = 
+	{
+		["country"] = "australia",
+		["groupName"] = "AUSTRALIA air 8",
+		["modulation"] = 0,
+		["groupId"] = 7027,
+		["coalitionId"] = 0,
+		["name"] = "AUSTRALIA air 8",
+		["hidden"] = false,
+		["units"] = 
+		{
+			[1] = 
+			{
+				["alt"] = 1998,
+				["point"] = 
+				{
+					["y"] = 319595,
+					["x"] = -198560,
+				}, -- end of ["point"]
+				["alt_type"] = "BARO",
+				["coalitionId"] = 0,
+				["livery_id"] = "Australian 75th Squadron",
+				["skill"] = "High",
+				["category"] = "plane",
+				["unitName"] = "AUSTRALIA air 8 unit1",
+				["heading"] = 2.1995924992708,
+				["groupId"] = 7027,
+				["groupName"] = "AUSTRALIA air 8",
+				["speed"] = 180.49294253728,
+				["countryId"] = 21,
+				["x"] = -198560,
+				["coalition"] = "neutral",
+				["y"] = 319595,
+				["country"] = "australia",
+				["type"] = "FA-18C_hornet",
+				["unitId"] = 7043,
+				["callsign"] = 
+				{
+					[1] = 1,
+					[2] = 1,
+					[3] = 1,
+					["name"] = "Enfield11",
+				}, -- end of ["callsign"]
+			}, -- end of [1]
+		}, -- end of ["units"]
+		["countryId"] = 21,
+		["radioSet"] = false,
+		["timeAdded"] = 43223.79,
+		["category"] = "plane",
+		["coalition"] = "neutral",
+		["startTime"] = 0,
+		["task"] = "CAP",
+		["uncontrolled"] = false,
+	}, -- end of [7027]
+	[7038] = 
+	{
+		["groupId"] = 7038,
+		["coalitionId"] = 2,
+		["hidden"] = false,
+		["groupName"] = "USA static 7",
+		["units"] = 
+		{
+			[1] = 
+			{
+				["alt"] = 70,
+				["type"] = "Sandbox",
+				["point"] = 
+				{
+					["y"] = 694696,
+					["x"] = -287053,
+				}, -- end of ["point"]
+				["categoryStatic"] = "Fortifications",
+				["coalitionId"] = 2,
+				["y"] = 694696,
+				["groupName"] = "USA static 7",
+				["country"] = "usa",
+				["countryId"] = 2,
+				["x"] = -287053,
+				["coalition"] = "blue",
+				["category"] = "static",
+				["unitName"] = "USA static 7",
+				["unitId"] = 7038,
+				["heading"] = 0,
+				["groupId"] = 7038,
+			}, -- end of [1]
+		}, -- end of ["units"]
+		["countryId"] = 2,
+		["coalition"] = "blue",
+		["timeAdded"] = 43223.79,
+		["category"] = "static",
+		["country"] = "usa",
+		["startTime"] = 0,
+		["name"] = "USA static 7",
+		["uncontrolled"] = false,
+	}, -- end of [7038]
+	[7004] = 
+	{
+		["country"] = "usa",
+		["coalitionId"] = 2,
+		["groupId"] = 7004,
+		["hidden"] = false,
+		["units"] = 
+		{
+			[1] = 
+			{
+				["alt"] = 48,
+				["point"] = 
+				{
+					["y"] = 686871,
+					["x"] = -286407,
+				}, -- end of ["point"]
+				["coalitionId"] = 2,
+				["skill"] = "Average",
+				["category"] = "vehicle",
+				["unitName"] = "USA gnd 2 unit1",
+				["heading"] = 0,
+				["unitId"] = 7007,
+				["groupName"] = "USA gnd 2",
+				["countryId"] = 2,
+				["x"] = -286407,
+				["speed"] = 0,
+				["type"] = "M-113",
+				["groupId"] = 7004,
+				["coalition"] = "blue",
+				["y"] = 686871,
+				["country"] = "usa",
+			}, -- end of [1]
+			[2] = 
+			{
+				["alt"] = 48,
+				["point"] = 
+				{
+					["y"] = 686871,
+					["x"] = -286447,
+				}, -- end of ["point"]
+				["coalitionId"] = 2,
+				["skill"] = "Average",
+				["category"] = "vehicle",
+				["unitName"] = "USA gnd 2 unit2",
+				["heading"] = 0,
+				["unitId"] = 7008,
+				["groupName"] = "USA gnd 2",
+				["countryId"] = 2,
+				["x"] = -286447,
+				["speed"] = 0,
+				["type"] = "M-113",
+				["groupId"] = 7004,
+				["coalition"] = "blue",
+				["y"] = 686871,
+				["country"] = "usa",
+			}, -- end of [2]
+		}, -- end of ["units"]
+		["countryId"] = 2,
+		["name"] = "USA gnd 2",
+		["timeAdded"] = 43220.79,
+		["category"] = "vehicle",
+		["coalition"] = "blue",
+		["startTime"] = 0,
+		["task"] = "Ground Nothing",
+		["groupName"] = "USA gnd 2",
+	}, -- end of [7004]
+	[7008] = 
+	{
+		["country"] = "usa",
+		["coalitionId"] = 2,
+		["groupId"] = 7008,
+		["hidden"] = false,
+		["units"] = 
+		{
+			[1] = 
+			{
+				["alt"] = 66,
+				["point"] = 
+				{
+					["y"] = 691761,
+					["x"] = -284967,
+				}, -- end of ["point"]
+				["coalitionId"] = 2,
+				["skill"] = "Average",
+				["category"] = "vehicle",
+				["speed"] = 0,
+				["type"] = "M-1 Abrams",
+				["groupId"] = 7008,
+				["groupName"] = "USA gnd 3",
+				["countryId"] = 2,
+				["x"] = -284967,
+				["y"] = 691761,
+				["heading"] = 1.4977557594982,
+				["country"] = "usa",
+				["unitName"] = "USA gnd 3 unit1",
+				["unitId"] = 7012,
+				["coalition"] = "blue",
+			}, -- end of [1]
+			[2] = 
+			{
+				["alt"] = 66,
+				["point"] = 
+				{
+					["y"] = 691809,
+					["x"] = -284861,
+				}, -- end of ["point"]
+				["coalitionId"] = 2,
+				["skill"] = "Average",
+				["category"] = "vehicle",
+				["speed"] = 0,
+				["type"] = "M-1 Abrams",
+				["groupId"] = 7008,
+				["groupName"] = "USA gnd 3",
+				["countryId"] = 2,
+				["x"] = -284861,
+				["y"] = 691809,
+				["heading"] = 1.4977557625792,
+				["country"] = "usa",
+				["unitName"] = "USA gnd 3 unit2",
+				["unitId"] = 7013,
+				["coalition"] = "blue",
+			}, -- end of [2]
+			[3] = 
+			{
+				["alt"] = 66,
+				["point"] = 
+				{
+					["y"] = 691744,
+					["x"] = -284982,
+				}, -- end of ["point"]
+				["coalitionId"] = 2,
+				["skill"] = "Average",
+				["category"] = "vehicle",
+				["speed"] = 0,
+				["type"] = "M-1 Abrams",
+				["groupId"] = 7008,
+				["groupName"] = "USA gnd 3",
+				["countryId"] = 2,
+				["x"] = -284982,
+				["y"] = 691744,
+				["heading"] = 1.4977557573233,
+				["country"] = "usa",
+				["unitName"] = "USA gnd 3 unit3",
+				["unitId"] = 7014,
+				["coalition"] = "blue",
+			}, -- end of [3]
+			[4] = 
+			{
+				["alt"] = 65,
+				["point"] = 
+				{
+					["y"] = 691757,
+					["x"] = -285098,
+				}, -- end of ["point"]
+				["coalitionId"] = 2,
+				["skill"] = "Average",
+				["category"] = "vehicle",
+				["speed"] = 0,
+				["type"] = "M-1 Abrams",
+				["groupId"] = 7008,
+				["groupName"] = "USA gnd 3",
+				["countryId"] = 2,
+				["x"] = -285098,
+				["y"] = 691757,
+				["heading"] = 1.4977557640291,
+				["country"] = "usa",
+				["unitName"] = "USA gnd 3 unit4",
+				["unitId"] = 7015,
+				["coalition"] = "blue",
+			}, -- end of [4]
+		}, -- end of ["units"]
+		["countryId"] = 2,
+		["name"] = "USA gnd 3",
+		["timeAdded"] = 43221.79,
+		["category"] = "vehicle",
+		["coalition"] = "blue",
+		["startTime"] = 0,
+		["task"] = "Ground Nothing",
+		["groupName"] = "USA gnd 3",
+	}, -- end of [7008]
+	[7012] = 
+	{
+		["country"] = "usa",
+		["groupName"] = "USA air 3",
+		["modulation"] = 0,
+		["groupId"] = 7012,
+		["coalitionId"] = 2,
+		["name"] = "USA air 3",
+		["hidden"] = false,
+		["units"] = 
+		{
+			[1] = 
+			{
+				["alt"] = 1997,
+				["point"] = 
+				{
+					["y"] = 682727,
+					["x"] = -288608,
+				}, -- end of ["point"]
+				["alt_type"] = "BARO",
+				["coalitionId"] = 2,
+				["livery_id"] = "usaf standard",
+				["skill"] = "High",
+				["category"] = "plane",
+				["unitName"] = "USA air 3 unit1",
+				["heading"] = 1.6162179734619,
+				["groupId"] = 7012,
+				["groupName"] = "USA air 3",
+				["speed"] = 138.85196364465,
+				["countryId"] = 2,
+				["x"] = -288608,
+				["coalition"] = "blue",
+				["y"] = 682727,
+				["country"] = "usa",
+				["type"] = "B-52H",
+				["unitId"] = 7020,
+				["callsign"] = 
+				{
+					[1] = 4,
+					[2] = 1,
+					[3] = 1,
+					["name"] = "Colt11",
+				}, -- end of ["callsign"]
+			}, -- end of [1]
+		}, -- end of ["units"]
+		["countryId"] = 2,
+		["radioSet"] = false,
+		["timeAdded"] = 43221.79,
+		["category"] = "plane",
+		["coalition"] = "blue",
+		["startTime"] = 0,
+		["task"] = "Ground Attack",
+		["uncontrolled"] = false,
+	}, -- end of [7012]
+	[7016] = 
+	{
+		["groupId"] = 7016,
+		["coalitionId"] = 2,
+		["hidden"] = false,
+		["groupName"] = "USA static 3",
+		["units"] = 
+		{
+			[1] = 
+			{
+				["alt"] = 63,
+				["type"] = "Sandbox",
+				["point"] = 
+				{
+					["y"] = 693960,
+					["x"] = -287585,
+				}, -- end of ["point"]
+				["categoryStatic"] = "Fortifications",
+				["coalitionId"] = 2,
+				["y"] = 693960,
+				["groupName"] = "USA static 3",
+				["country"] = "usa",
+				["countryId"] = 2,
+				["x"] = -287585,
+				["coalition"] = "blue",
+				["category"] = "static",
+				["unitName"] = "USA static 3",
+				["unitId"] = 7016,
+				["heading"] = 0,
+				["groupId"] = 7016,
+			}, -- end of [1]
+		}, -- end of ["units"]
+		["countryId"] = 2,
+		["coalition"] = "blue",
+		["timeAdded"] = 43221.79,
+		["category"] = "static",
+		["country"] = "usa",
+		["startTime"] = 0,
+		["name"] = "USA static 3",
+		["uncontrolled"] = false,
+	}, -- end of [7016]
+	[7020] = 
+	{
+		["country"] = "australia",
+		["groupName"] = "AUSTRALIA air 6",
+		["modulation"] = 0,
+		["groupId"] = 7020,
+		["coalitionId"] = 0,
+		["name"] = "AUSTRALIA air 6",
+		["hidden"] = false,
+		["units"] = 
+		{
+			[1] = 
+			{
+				["alt"] = 1998,
+				["point"] = 
+				{
+					["y"] = 319595,
+					["x"] = -198560,
+				}, -- end of ["point"]
+				["alt_type"] = "BARO",
+				["coalitionId"] = 0,
+				["livery_id"] = "Australian 75th Squadron",
+				["skill"] = "High",
+				["category"] = "plane",
+				["unitName"] = "AUSTRALIA air 6 unit1",
+				["heading"] = 2.1995924992708,
+				["groupId"] = 7020,
+				["groupName"] = "AUSTRALIA air 6",
+				["speed"] = 180.49294253728,
+				["countryId"] = 21,
+				["x"] = -198560,
+				["coalition"] = "neutral",
+				["y"] = 319595,
+				["country"] = "australia",
+				["type"] = "FA-18C_hornet",
+				["unitId"] = 7032,
+				["callsign"] = 
+				{
+					[1] = 1,
+					[2] = 1,
+					[3] = 1,
+					["name"] = "Enfield11",
+				}, -- end of ["callsign"]
+			}, -- end of [1]
+		}, -- end of ["units"]
+		["countryId"] = 21,
+		["radioSet"] = false,
+		["timeAdded"] = 43222.79,
+		["category"] = "plane",
+		["coalition"] = "neutral",
+		["startTime"] = 0,
+		["task"] = "CAP",
+		["uncontrolled"] = false,
+	}, -- end of [7020]
+	[7039] = 
+	{
+		["groupId"] = 7039,
+		["coalitionId"] = 2,
+		["hidden"] = false,
+		["groupName"] = "USA static 8",
+		["units"] = 
+		{
+			[1] = 
+			{
+				["alt"] = 55,
+				["point"] = 
+				{
+					["y"] = 689703,
+					["x"] = -286460,
+				}, -- end of ["point"]
+				["categoryStatic"] = "Cargos",
+				["coalitionId"] = 2,
+				["mass"] = 1337,
+				["category"] = "static",
+				["unitName"] = "USA static 8",
+				["shape_name"] = "ab-212_cargo",
+				["type"] = "uh1h_cargo",
+				["country"] = "usa",
+				["groupName"] = "USA static 8",
+				["y"] = 689703,
+				["x"] = -286460,
+				["coalition"] = "blue",
+				["unitId"] = 7039,
+				["heading"] = 0,
+				["countryId"] = 2,
+				["groupId"] = 7039,
+			}, -- end of [1]
+		}, -- end of ["units"]
+		["countryId"] = 2,
+		["coalition"] = "blue",
+		["timeAdded"] = 43223.79,
+		["category"] = "static",
+		["country"] = "usa",
+		["startTime"] = 0,
+		["name"] = "USA static 8",
+		["uncontrolled"] = false,
+	}, -- end of [7039]
 } -- end of groupsById

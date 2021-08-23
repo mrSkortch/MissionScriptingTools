@@ -1,6 +1,6 @@
 missionData = 
 {
-	["version"] = 18,
+	["version"] = 19,
 	["files"] = 
 	{
 	}, -- end of ["files"]
