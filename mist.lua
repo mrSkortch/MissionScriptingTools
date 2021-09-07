@@ -35,7 +35,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 5
-mist.build = 101
+mist.build = 102
 
 -- forward declaration of log shorthand
 local log
@@ -3139,10 +3139,11 @@ function mist.getLeadingPos(vars)
 			unitPosTbl[#unitPosTbl + 1] = unit:getPosition().p
 		end
 	end
+    
 	if #unitPosTbl > 0 then	-- one more more units found.
 		-- first, find the unit most in the heading direction
 		local maxPos = -math.huge
-
+        heading = heading * -1 -- rotated value appears to be opposite of what was expected
 		local maxPosInd	-- maxPos - the furthest in direction defined by heading; maxPosInd =
 		for i = 1, #unitPosTbl do
 			local rotatedVec2 = mist.vec.rotateVec2(mist.utils.makeVec2(unitPosTbl[i]), heading)
@@ -5135,6 +5136,9 @@ do -- mist.debug scope
             end
          end
     end
+    
+
+    
     -- write all object types in mission.
     function mist.debug.writeTypes(fName)
         local wt = 'mistDebugWriteTypes.lua'
@@ -5986,15 +5990,130 @@ do -- mist.msg scope
 			end
 		end
 	end
-
+--[[
 	local function mistdisplayV5()
-		--[[thoughts to improve upon
-		event handler based activeClients table.
-		display messages only when there is an update
-		possibly co-routine it.
-		]]
-	end
+		--thoughts to improve upon
+		--event handler based activeClients table.
+		--display messages only when there is an update
+		--possibly co-routine it.
+		
+        
+        
+        local activeClients = {}
 
+		for clientId, clientData in pairs(mist.DBs.humansById) do
+			if Unit.getByName(clientData.unitName) and Unit.getByName(clientData.unitName):isExist() == true then
+				activeClients[clientData.groupId] = clientData.groupName
+			end
+		end
+
+		--[f caSlots == true and caMSGtoGroup == true then
+
+		--end
+
+
+		if #messageList > 0 then
+			if displayActive == false then
+				displayActive = true
+			end
+			--mist.debug.writeData(mist.utils.serialize,{'msg', messageList}, 'messageList.lua')
+			local msgTableText = {}
+			local msgTableSound = {}
+
+			for messageId, messageData in pairs(messageList) do
+				if messageData.displayedFor > messageData.displayTime then
+					messageData:remove()	-- now using the remove/destroy function.
+				else
+					if messageData.displayedFor then
+						messageData.displayedFor = messageData.displayedFor + messageDisplayRate
+					end
+					local nextSound = 1000
+					local soundIndex = 0
+
+					if messageData.multSound and #messageData.multSound > 0 then
+						for index, sData in pairs(messageData.multSound) do
+							if sData.time <= messageData.displayedFor and sData.played == false and sData.time < nextSound then -- find index of the next sound to be played
+								nextSound = sData.time
+								soundIndex = index
+							end
+						end
+						if soundIndex ~= 0 then
+							messageData.multSound[soundIndex].played = true
+						end
+					end
+
+					for recIndex, recData in pairs(messageData.msgFor) do -- iterate recipiants
+						if recData == 'RED' or recData == 'BLUE' or activeClients[recData] then -- rec exists
+							if messageData.text and messageData.update then -- text
+								if not msgTableText[recData] then -- create table entry for text
+									msgTableText[recData] = {}
+									msgTableText[recData].text = {}
+									if recData == 'RED' or recData == 'BLUE' then
+										msgTableText[recData].text[1] = '-------Combined Arms Message-------- \n'
+									end
+									msgTableText[recData].text[#msgTableText[recData].text + 1] = messageData.text
+									msgTableText[recData].displayTime = messageData.displayTime - messageData.displayedFor
+								else -- add to table entry and adjust display time if needed
+									if recData == 'RED' or recData == 'BLUE' then
+										msgTableText[recData].text[#msgTableText[recData].text + 1] = '\n ---------------- Combined Arms Message: \n'
+									else
+										msgTableText[recData].text[#msgTableText[recData].text + 1] = '\n ---------------- \n'
+									end
+									msgTableText[recData].text[#msgTableText[recData].text + 1] = messageData.text
+									if msgTableText[recData].displayTime < messageData.displayTime - messageData.displayedFor then
+										msgTableText[recData].displayTime = messageData.displayTime - messageData.displayedFor
+									else
+										msgTableText[recData].displayTime = 1
+									end
+								end
+							end
+							if soundIndex ~= 0 then
+								msgTableSound[recData] = messageData.multSound[soundIndex].file
+							end
+						end
+                        
+					end
+                    messageData.update = nil
+
+				end
+			end
+			------- new display
+
+			if caSlots == true and caMSGtoGroup == false then
+				if msgTableText.RED then
+					trigger.action.outTextForCoalition(coalition.side.RED, table.concat(msgTableText.RED.text), msgTableText.RED.displayTime, true)
+
+				end
+				if msgTableText.BLUE then
+					trigger.action.outTextForCoalition(coalition.side.BLUE, table.concat(msgTableText.BLUE.text), msgTableText.BLUE.displayTime, true)
+				end
+			end
+
+			for index, msgData in pairs(msgTableText) do
+				if type(index) == 'number' then -- its a groupNumber
+					trigger.action.outTextForGroup(index, table.concat(msgData.text), msgData.displayTime, true)
+				end
+			end
+			--- new audio
+			if msgTableSound.RED then
+				trigger.action.outSoundForCoalition(coalition.side.RED, msgTableSound.RED)
+			end
+			if msgTableSound.BLUE then
+				trigger.action.outSoundForCoalition(coalition.side.BLUE, msgTableSound.BLUE)
+			end
+
+
+			for index, file in pairs(msgTableSound) do
+				if type(index) == 'number' then -- its a groupNumber
+					trigger.action.outSoundForGroup(index, file)
+				end
+			end
+		else
+			mist.removeFunction(displayFuncId)
+			displayActive = false
+		end
+	end
+]]
 	local function mistdisplayV4()
 		local activeClients = {}
 
@@ -6922,7 +7041,7 @@ do
 		local pos           = vars.point or vars.points or vars.pos
         local text          = vars.text or ''
         local markFor       = vars.markFor
-        local markForCoa    = vars.markForCoa           -- optional, can be used if you just want to mark to a specific coa/all
+        local markForCoa    = vars.markForCoa   or vars.coa  -- optional, can be used if you just want to mark to a specific coa/all
         local id            = vars.id or vars.markId or vars.markid
         local mType         = vars.mType or vars.markType or vars.type or 0
         local color         = vars.color 
@@ -7021,6 +7140,9 @@ do
                         end
                     end
                 end
+            elseif type(markForCoa) == 'number' and markForCoa >=-1 and markForCoa <= #coas then
+                coa = markForCoa
+                markScore = 'coa'
             end
             
             
@@ -7247,6 +7369,31 @@ do
         end
 	end
 	
+   function  mist.marker.drawZone(name, v)
+        if mist.DBs.zonesByName[name] then
+            --log:warn(mist.DBs.zonesByName[name])
+            local vars = v or {}
+            local ref = mist.utils.deepCopy(mist.DBs.zonesByName[name])
+            
+            if ref.type == 2 then -- it is a quad, but use freeform cause it isnt as bugged
+                vars.mType = 6
+                vars.point = ref.verticies
+            else
+                vars.mType = 2
+                vars.radius = ref.radius
+                vars.point = ref.point
+            end
+            
+            
+            if not (vars.ignoreColor and vars.ignoreColor == true) and not vars.fillColor then
+                vars.fillColor = ref.color
+            end
+            
+            --log:warn(vars)
+            return mist.marker.add(vars)
+        end
+    
+    end
    --[[
     function mist.marker.circle(v)
     
