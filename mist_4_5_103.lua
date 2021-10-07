@@ -35,7 +35,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 5
-mist.build = 102
+mist.build = 103
 
 -- forward declaration of log shorthand
 local log
@@ -253,6 +253,7 @@ do -- the main scope
 													if category == 'static' then
 														units_tbl[unit_num].categoryStatic = unit_data.category
 														units_tbl[unit_num].shape_name = unit_data.shape_name
+                                                        units_tbl[unit_num].linkUnit = unit_data.linkUnit
 														if unit_data.mass then
 															units_tbl[unit_num].mass = unit_data.mass
 														end
@@ -836,6 +837,8 @@ do -- the main scope
 						newTable.units[1].canCargo = data.canCargo
 						newTable.units[1].categoryStatic = data.categoryStatic
 						newTable.units[1].type = data.type
+                        newTable.units[1].linkUnit = data.linkUnit
+                        
 						mistAddedObjects[index] = nil
                         break
 					end
@@ -2780,6 +2783,114 @@ function mist.getDeadMapObjsInPolygonZone(zone)
 	end
 	return map_objs
 end
+mist.shape = {}
+function mist.shape.insideShape(shape1, shape2, full)
+    if shape1.radius then -- probably a circle
+        if shape2.radius then
+             return mist.shape.circleInCircle(shape1, shape2, full)
+        elseif shape2[1] then
+             return mist.shape.circleInPoly(shape1, shape2, full)
+        end
+    
+    elseif shape1[1] then -- shape1 is probably a polygon
+        if shape2.radius then
+            return  mist.shape.polyInCircle(shape1, shape2, full)
+        elseif shape2[1] then
+            return  mist.shape.polyInPoly(shape1, shape2, full)
+        end
+    end
+    return false
+end
+
+function mist.shape.circleInCircle(c1, c2, full)
+    if not full then -- quick partial check
+        if mist.utils.get2DDist(c1.point, c2.point) <= c2.radius then
+            return true
+        end
+    end
+    local theta = mist.utils.getHeadingPoints(c2.point, c1.point) -- heading from 
+    if full then
+        return  mist.utils.get2DDist(mist.projectPoint(c1.point, c1.radius, theta), c2.point) <= c2.radius
+    else
+        return mist.utils.get2DDist(mist.projectPoint(c1.point, c1.radius, theta + math.pi), c2.point) <= c2.radius
+    end
+    return false
+end
+
+
+function mist.shape.circleInPoly(circle, poly, full) 
+
+    if poly and type(poly) == 'table' and circle and type(circle) == 'table' and circle.radius and circle.point then
+        if not full then 
+            for i = 1, #poly do
+                if mist.utils.get2DDist(circle.point, poly[i]) <= circle.radius then
+                    return true
+                end
+            end
+        end
+        -- no point is inside of the zone, now check if any part is
+        local count = 0
+        for i = 1, #poly do
+            local theta -- heading of each set of points
+            if i == #poly then
+                theta = mist.utils.getHeadingPoints(poly[i],poly[1])
+            else
+                theta = mist.utils.getHeadingPoints(poly[i],poly[i+1])
+            end
+            -- offset 
+            local pPoint = mist.projectPoint(circle.point, circle.radius, theta - (math.pi/180))
+            local oPoint = mist.projectPoint(circle.point, circle.radius, theta + (math.pi/180))
+
+           
+            if mist.pointInPolygon(pPoint, poly) == true then
+                 if (full and mist.pointInPolygon(oPoint, poly) == true) or not full then
+                    return true
+                
+                end
+               
+            end
+        end      
+        
+    end
+    return false
+end
+
+
+function mist.shape.polyInPoly(p1, p2, full)
+    local count = 0
+    for i = 1, #p1 do
+        
+        if mist.pointInPolygon(p1[i], p2) then
+            count = count + 1
+        end
+        if (not full) and count > 0 then
+            return true
+        end
+    end
+    if count == #p1 then
+        return true
+    end
+    
+    return false
+end
+
+function mist.shape.polyInCircle(poly, circle, full)
+        local count = 0
+        for i = 1, #poly do
+            if mist.utils.get2DDist(circle.point, poly[i]) <= circle.radius then
+                if full then
+                    count = count + 1
+                else
+                   return true
+                end
+            end
+        end
+        if count == #poly then
+            return true
+        end
+
+    return false
+end
 
 function mist.pointInPolygon(point, poly, maxalt) --raycasting point in polygon. Code from http://softsurfer.com/Archive/algorithm_0103/algorithm_0103.htm
 	--[[local type_tbl = {
@@ -2867,7 +2978,7 @@ function mist.getUnitsInZones(unit_names, zone_names, zone_type)
 	for k = 1, #zone_names do
 		local zone = mist.DBs.zonesByName[zone_names[k]]
 		if zone then
-			zones[#zones + 1] = {radius = zone.radius, x = zone.point.x, y = zone.point.y, z = zone.point.z, verts = zone.vertices}
+			zones[#zones + 1] = {radius = zone.radius, x = zone.point.x, y = zone.point.y, z = zone.point.z, verts = zone.verticies}
 		end
 	end
 
@@ -3014,7 +3125,8 @@ end
 function mist.getAvgPoint(points)
 	local avgX, avgY, avgZ, totNum = 0, 0, 0, 0
 	for i = 1, #points do
-		local nPoint = mist.utils.makeVec3(points[i])
+        --log:warn(points[i])
+        local nPoint = mist.utils.makeVec3(points[i])
 		if nPoint.z then
 			avgX = avgX + nPoint.x
 			avgY = avgY + nPoint.y
@@ -4585,6 +4697,12 @@ do -- mist.util scope
 	-- @tparam Vec2|Vec3 point2 second point
 	-- @treturn number distance between given points.
 	function mist.utils.get2DDist(point1, point2)
+        if not point1 then
+            log:warn("mist.utils.get2DDist  1st input value is nil") 
+        end
+        if not point2 then
+            log:warn("mist.utils.get2DDist  2nd input value is nil") 
+        end
 		point1 = mist.utils.makeVec3(point1)
 		point2 = mist.utils.makeVec3(point2)
 		return mist.vec.mag({x = point1.x - point2.x, y = 0, z = point1.z - point2.z})
@@ -4595,6 +4713,12 @@ do -- mist.util scope
 	-- @tparam Vec3 point2 second point
 	-- @treturn number distancen between given points in 3D space.
 	function mist.utils.get3DDist(point1, point2)
+        if not point1 then
+            log:warn("mist.utils.get2DDist  1st input value is nil") 
+        end
+        if not point2 then
+            log:warn("mist.utils.get2DDist  2nd input value is nil") 
+        end
 		return mist.vec.mag({x = point1.x - point2.x, y = point1.y - point2.y, z = point1.z - point2.z})
 	end
 
@@ -5236,8 +5360,15 @@ do -- mist.debug scope
         end
         return output
     end
-    -- write CLSIDs
-    -- write livery names
+    function mist.debug.writeWeapons(unit)
+    
+    end
+    
+    function mist.debug.mark(msg, coord)
+        
+        mist.marker.add({point = coord, text = msg})
+        log:warn('debug.mark: $1    $2', msg, coord)
+    end
 end
 
 --- 3D Vector functions
@@ -7392,8 +7523,9 @@ do
             --log:warn(vars)
             return mist.marker.add(vars)
         end
-    
     end
+    
+    
    --[[
     function mist.marker.circle(v)
     
@@ -8048,7 +8180,7 @@ do -- group tasks scope
 		if type(zoneName) == 'string'  then 
             local zone = mist.DBs.zonesByName[zoneName]
             if zone.type and zone.type == 2 then
-                return mist.getRandomPointInPoly(zone.vertices)
+                return mist.getRandomPointInPoly(zone.verticies)
             else
                 return mist.getRandPointInCircle(zone.point, zone.radius, innerRadius, maxA, minA)
             end
