@@ -35,7 +35,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 5
-mist.build = 103
+mist.build = 104
 
 -- forward declaration of log shorthand
 local log
@@ -927,7 +927,10 @@ do -- the main scope
 
                     if stillExists == true and (updated == true or not mist.DBs.groupsByName[name]) then
                         --dbLog:info('Get Table')
-                        writeGroups[#writeGroups+1] = {data = dbUpdate(name, gData.type), isUpdated = updated}
+                        local dbData =  dbUpdate(name, gData.type)
+                        if dbData and type(dbData) == 'table' then 
+                            writeGroups[#writeGroups+1] = {data = dbData, isUpdated = updated}
+                        end
                     
                     end
                     -- Work done, so remove
@@ -935,7 +938,7 @@ do -- the main scope
                 tempSpawnedGroups[name] = nil
                 tempSpawnGroupsCounter = tempSpawnGroupsCounter - 1
 			end			
-		end	
+		end
 	end
 	
 	local function updateDBTables()
@@ -1226,12 +1229,15 @@ do -- the main scope
             for i = 1, #st do
                 local s = st[i]
                 if StaticObject.isExist(s) then
-                    if not mist.DBs.unitsByName[s:getName()] then
-                        --env.info(StaticObject.getID(s) .. ' Not found in DB yet')
-                        tempSpawnedGroups[s:getName()] = {type = 'static'}
-                        tempSpawnGroupsCounter = tempSpawnGroupsCounter + 1
-                    end
-                end
+                    local name = s:getName()
+                    if not mist.DBs.unitsByName[name] then
+                       dbLog:warn('$1 Not found in DB yet. ID: $2', name, StaticObject.getID(s))
+                       if string.len(name) > 0 then  -- because in this mission someone sent the name was returning as an empty string. Gotta be careful. 
+                            tempSpawnedGroups[s:getName()] = {type = 'static'}
+                            tempSpawnGroupsCounter = tempSpawnGroupsCounter + 1
+                       end
+                   end
+               end
             end
         
         end
@@ -2941,7 +2947,7 @@ function mist.getUnitsInPolygon(unit_names, polyZone, max_alt)
 	for i =1, #units do
 		local lUnit = units[i]
         local lCat = lUnit:getCategory()
-        if ((lCat == 14 and lUnit:isActive()) or lCat ~= 1) and mist.pointInPolygon(lUnit:getPosition().p, polyZone, max_alt) then
+        if ((lCat == 1 and lUnit:isActive()) or lCat ~= 1) and mist.pointInPolygon(lUnit:getPosition().p, polyZone, max_alt) then
 			inZoneUnits[#inZoneUnits + 1] = lUnit
 		end
 	end
@@ -2964,7 +2970,7 @@ function mist.getUnitsInZones(unit_names, zone_names, zone_type)
 	local zones = {}
     
     if zone_names and type(zone_names) == 'string' then
-        zone_names = {zoneNames}
+        zone_names = {zone_names}
     end
 	for k = 1, #unit_names do
 		
