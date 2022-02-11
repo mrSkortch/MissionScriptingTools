@@ -9,11 +9,11 @@ dynGroupsAdded =
 		{
 			[1] = 
 			{
-				["alt"] = 60,
+				["alt"] = 74,
 				["point"] = 
 				{
-					["y"] = 689785,
-					["x"] = -285145,
+					["y"] = 694968,
+					["x"] = -285046,
 				}, -- end of ["point"]
 				["coalitionId"] = 2,
 				["skill"] = "Average",
@@ -23,8 +23,8 @@ dynGroupsAdded =
 				["groupId"] = 35,
 				["groupName"] = "teleGroup",
 				["countryId"] = 2,
-				["x"] = -285145,
-				["y"] = 689785,
+				["x"] = -285046,
+				["y"] = 694968,
 				["heading"] = 0,
 				["country"] = "usa",
 				["unitName"] = "Unit #002",
@@ -33,11 +33,11 @@ dynGroupsAdded =
 			}, -- end of [1]
 			[2] = 
 			{
-				["alt"] = 61,
+				["alt"] = 74,
 				["point"] = 
 				{
-					["y"] = 689948,
-					["x"] = -285166,
+					["y"] = 695126,
+					["x"] = -285098,
 				}, -- end of ["point"]
 				["coalitionId"] = 2,
 				["skill"] = "Average",
@@ -47,8 +47,8 @@ dynGroupsAdded =
 				["groupId"] = 35,
 				["groupName"] = "teleGroup",
 				["countryId"] = 2,
-				["x"] = -285166,
-				["y"] = 689948,
+				["x"] = -285098,
+				["y"] = 695126,
 				["heading"] = 0,
 				["country"] = "usa",
 				["unitName"] = "Unit #003",
@@ -57,11 +57,11 @@ dynGroupsAdded =
 			}, -- end of [2]
 			[3] = 
 			{
-				["alt"] = 60,
+				["alt"] = 74,
 				["point"] = 
 				{
-					["y"] = 689856,
-					["x"] = -285298,
+					["y"] = 694892,
+					["x"] = -285039,
 				}, -- end of ["point"]
 				["coalitionId"] = 2,
 				["skill"] = "Average",
@@ -71,8 +71,8 @@ dynGroupsAdded =
 				["groupId"] = 35,
 				["groupName"] = "teleGroup",
 				["countryId"] = 2,
-				["x"] = -285298,
-				["y"] = 689856,
+				["x"] = -285039,
+				["y"] = 694892,
 				["heading"] = 0,
 				["country"] = "usa",
 				["unitName"] = "Unit #004",
@@ -81,11 +81,11 @@ dynGroupsAdded =
 			}, -- end of [3]
 			[4] = 
 			{
-				["alt"] = 61,
+				["alt"] = 75,
 				["point"] = 
 				{
-					["y"] = 689796,
-					["x"] = -285058,
+					["y"] = 695084,
+					["x"] = -284914,
 				}, -- end of ["point"]
 				["coalitionId"] = 2,
 				["skill"] = "Average",
@@ -95,8 +95,8 @@ dynGroupsAdded =
 				["groupId"] = 35,
 				["groupName"] = "teleGroup",
 				["countryId"] = 2,
-				["x"] = -285058,
-				["y"] = 689796,
+				["x"] = -284914,
+				["y"] = 695084,
 				["heading"] = 0,
 				["country"] = "usa",
 				["unitName"] = "Unit #005",
@@ -105,11 +105,11 @@ dynGroupsAdded =
 			}, -- end of [4]
 			[5] = 
 			{
-				["alt"] = 61,
+				["alt"] = 73,
 				["point"] = 
 				{
-					["y"] = 689973,
-					["x"] = -285191,
+					["y"] = 694985,
+					["x"] = -285104,
 				}, -- end of ["point"]
 				["coalitionId"] = 2,
 				["skill"] = "Average",
@@ -119,8 +119,8 @@ dynGroupsAdded =
 				["groupId"] = 35,
 				["groupName"] = "teleGroup",
 				["countryId"] = 2,
-				["x"] = -285191,
-				["y"] = 689973,
+				["x"] = -285104,
+				["y"] = 694985,
 				["heading"] = 0,
 				["country"] = "usa",
 				["unitName"] = "Unit #006",
@@ -129,11 +129,11 @@ dynGroupsAdded =
 			}, -- end of [5]
 			[6] = 
 			{
-				["alt"] = 60,
+				["alt"] = 74,
 				["point"] = 
 				{
-					["y"] = 689860,
-					["x"] = -285149,
+					["y"] = 694877,
+					["x"] = -285009,
 				}, -- end of ["point"]
 				["coalitionId"] = 2,
 				["skill"] = "Average",
@@ -143,8 +143,8 @@ dynGroupsAdded =
 				["groupId"] = 35,
 				["groupName"] = "teleGroup",
 				["countryId"] = 2,
-				["x"] = -285149,
-				["y"] = 689860,
+				["x"] = -285009,
+				["y"] = 694877,
 				["heading"] = 0,
 				["country"] = "usa",
 				["unitName"] = "Unit #007",
@@ -153,11 +153,11 @@ dynGroupsAdded =
 			}, -- end of [6]
 			[7] = 
 			{
-				["alt"] = 60,
+				["alt"] = 74,
 				["point"] = 
 				{
-					["y"] = 689799,
-					["x"] = -285216,
+					["y"] = 694952,
+					["x"] = -284964,
 				}, -- end of ["point"]
 				["coalitionId"] = 2,
 				["skill"] = "Average",
@@ -167,8 +167,8 @@ dynGroupsAdded =
 				["groupId"] = 35,
 				["groupName"] = "teleGroup",
 				["countryId"] = 2,
-				["x"] = -285216,
-				["y"] = 689799,
+				["x"] = -284964,
+				["y"] = 694952,
 				["heading"] = 0,
 				["country"] = "usa",
 				["unitName"] = "Unit #008",
@@ -197,8 +197,8 @@ dynGroupsAdded =
 				["alt"] = 0,
 				["point"] = 
 				{
-					["y"] = 265153,
-					["x"] = -163065,
+					["y"] = 267081,
+					["x"] = -164471,
 				}, -- end of ["point"]
 				["coalitionId"] = 0,
 				["livery_id"] = "ReubenJames",
@@ -209,12 +209,12 @@ dynGroupsAdded =
 				["unitId"] = 7011,
 				["groupName"] = "AUSTRALIA shp 1",
 				["countryId"] = 21,
-				["x"] = -163065,
+				["x"] = -164471,
 				["speed"] = 0,
 				["coalition"] = "neutral",
 				["type"] = "PERRY",
 				["groupId"] = 7007,
-				["y"] = 265153,
+				["y"] = 267081,
 				["country"] = "australia",
 			}, -- end of [1]
 		}, -- end of ["units"]
@@ -237,26 +237,26 @@ dynGroupsAdded =
 		{
 			[1] = 
 			{
-				["alt"] = 65,
+				["alt"] = 62,
 				["type"] = "Sandbox",
 				["point"] = 
 				{
-					["y"] = 693778,
-					["x"] = -286660,
+					["y"] = 693698,
+					["x"] = -287512,
 				}, -- end of ["point"]
-				["categoryStatic"] = "Fortifications",
-				["coalitionId"] = 2,
-				["y"] = 693778,
-				["groupName"] = "USA static 1",
 				["country"] = "usa",
-				["countryId"] = 2,
-				["x"] = -286660,
+				["coalitionId"] = 2,
 				["coalition"] = "blue",
+				["groupName"] = "USA static 1",
+				["unitId"] = 7005,
+				["y"] = 693698,
+				["x"] = -287512,
+				["countryId"] = 2,
 				["category"] = "static",
 				["unitName"] = "USA static 1",
-				["unitId"] = 7005,
-				["heading"] = 0,
 				["groupId"] = 7005,
+				["heading"] = 0,
+				["categoryStatic"] = "Fortifications",
 			}, -- end of [1]
 		}, -- end of ["units"]
 		["countryId"] = 2,
@@ -278,11 +278,11 @@ dynGroupsAdded =
 		{
 			[1] = 
 			{
-				["alt"] = 72,
+				["alt"] = 67,
 				["point"] = 
 				{
-					["y"] = 693761,
-					["x"] = -284648,
+					["y"] = 692292,
+					["x"] = -284982,
 				}, -- end of ["point"]
 				["coalitionId"] = 2,
 				["skill"] = "Average",
@@ -292,9 +292,9 @@ dynGroupsAdded =
 				["groupId"] = 7001,
 				["groupName"] = "USA gnd 1",
 				["countryId"] = 2,
-				["x"] = -284648,
-				["y"] = 693761,
-				["heading"] = 1.4977557542423,
+				["x"] = -284982,
+				["y"] = 692292,
+				["heading"] = 1.4977557593169,
 				["country"] = "usa",
 				["unitName"] = "USA gnd 1 unit1",
 				["unitId"] = 7001,
@@ -302,11 +302,11 @@ dynGroupsAdded =
 			}, -- end of [1]
 			[2] = 
 			{
-				["alt"] = 73,
+				["alt"] = 67,
 				["point"] = 
 				{
-					["y"] = 693771,
-					["x"] = -284456,
+					["y"] = 692208,
+					["x"] = -284870,
 				}, -- end of ["point"]
 				["coalitionId"] = 2,
 				["skill"] = "Average",
@@ -316,9 +316,9 @@ dynGroupsAdded =
 				["groupId"] = 7001,
 				["groupName"] = "USA gnd 1",
 				["countryId"] = 2,
-				["x"] = -284456,
-				["y"] = 693771,
-				["heading"] = 1.4977557542423,
+				["x"] = -284870,
+				["y"] = 692208,
+				["heading"] = 1.4977557696476,
 				["country"] = "usa",
 				["unitName"] = "USA gnd 1 unit2",
 				["unitId"] = 7002,
@@ -326,11 +326,11 @@ dynGroupsAdded =
 			}, -- end of [2]
 			[3] = 
 			{
-				["alt"] = 72,
+				["alt"] = 68,
 				["point"] = 
 				{
-					["y"] = 693781,
-					["x"] = -284639,
+					["y"] = 692374,
+					["x"] = -284971,
 				}, -- end of ["point"]
 				["coalitionId"] = 2,
 				["skill"] = "Average",
@@ -340,9 +340,9 @@ dynGroupsAdded =
 				["groupId"] = 7001,
 				["groupName"] = "USA gnd 1",
 				["countryId"] = 2,
-				["x"] = -284639,
-				["y"] = 693781,
-				["heading"] = 1.4977557542423,
+				["x"] = -284971,
+				["y"] = 692374,
+				["heading"] = 1.4977557676538,
 				["country"] = "usa",
 				["unitName"] = "USA gnd 1 unit3",
 				["unitId"] = 7003,
@@ -350,11 +350,11 @@ dynGroupsAdded =
 			}, -- end of [3]
 			[4] = 
 			{
-				["alt"] = 72,
+				["alt"] = 68,
 				["point"] = 
 				{
-					["y"] = 693653,
-					["x"] = -284699,
+					["y"] = 692388,
+					["x"] = -284932,
 				}, -- end of ["point"]
 				["coalitionId"] = 2,
 				["skill"] = "Average",
@@ -364,9 +364,9 @@ dynGroupsAdded =
 				["groupId"] = 7001,
 				["groupName"] = "USA gnd 1",
 				["countryId"] = 2,
-				["x"] = -284699,
-				["y"] = 693653,
-				["heading"] = 1.4977557629417,
+				["x"] = -284932,
+				["y"] = 692388,
+				["heading"] = 1.4977557602231,
 				["country"] = "usa",
 				["unitName"] = "USA gnd 1 unit4",
 				["unitId"] = 7004,
@@ -566,11 +566,11 @@ dynGroupsAdded =
 		{
 			[1] = 
 			{
-				["alt"] = 70,
+				["alt"] = 57,
 				["point"] = 
 				{
-					["y"] = 691224,
-					["x"] = -283405,
+					["y"] = 691173,
+					["x"] = -286924,
 				}, -- end of ["point"]
 				["categoryStatic"] = "Cargos",
 				["coalitionId"] = 2,
@@ -581,8 +581,8 @@ dynGroupsAdded =
 				["type"] = "uh1h_cargo",
 				["country"] = "usa",
 				["groupName"] = "USA static 2",
-				["y"] = 691224,
-				["x"] = -283405,
+				["y"] = 691173,
+				["x"] = -286924,
 				["coalition"] = "blue",
 				["unitId"] = 7006,
 				["heading"] = 0,
@@ -609,11 +609,11 @@ dynGroupsAdded =
 		{
 			[1] = 
 			{
-				["alt"] = 65,
+				["alt"] = 63,
 				["point"] = 
 				{
-					["y"] = 693655,
-					["x"] = -286667,
+					["y"] = 694197,
+					["x"] = -287544,
 				}, -- end of ["point"]
 				["categoryStatic"] = "Cargos",
 				["coalitionId"] = 2,
@@ -624,8 +624,8 @@ dynGroupsAdded =
 				["type"] = "uh1h_cargo",
 				["country"] = "usa",
 				["groupName"] = "USA static 4",
-				["y"] = 693655,
-				["x"] = -286667,
+				["y"] = 694197,
+				["x"] = -287544,
 				["coalition"] = "blue",
 				["unitId"] = 7017,
 				["heading"] = 0,
@@ -710,22 +710,22 @@ dynGroupsAdded =
 				["type"] = "Sandbox",
 				["point"] = 
 				{
-					["y"] = 693960,
-					["x"] = -287585,
+					["y"] = 692858,
+					["x"] = -286636,
 				}, -- end of ["point"]
-				["categoryStatic"] = "Fortifications",
-				["coalitionId"] = 2,
-				["y"] = 693960,
-				["groupName"] = "USA static 3",
 				["country"] = "usa",
-				["countryId"] = 2,
-				["x"] = -287585,
+				["coalitionId"] = 2,
 				["coalition"] = "blue",
+				["groupName"] = "USA static 3",
+				["unitId"] = 7016,
+				["y"] = 692858,
+				["x"] = -286636,
+				["countryId"] = 2,
 				["category"] = "static",
 				["unitName"] = "USA static 3",
-				["unitId"] = 7016,
-				["heading"] = 0,
 				["groupId"] = 7016,
+				["heading"] = 0,
+				["categoryStatic"] = "Fortifications",
 			}, -- end of [1]
 		}, -- end of ["units"]
 		["countryId"] = 2,
@@ -803,8 +803,8 @@ dynGroupsAdded =
 				["alt"] = 0,
 				["point"] = 
 				{
-					["y"] = 267048,
-					["x"] = -161099,
+					["y"] = 267810,
+					["x"] = -162283,
 				}, -- end of ["point"]
 				["coalitionId"] = 0,
 				["livery_id"] = "ReubenJames",
@@ -815,12 +815,12 @@ dynGroupsAdded =
 				["unitId"] = 7022,
 				["groupName"] = "AUSTRALIA shp 2",
 				["countryId"] = 21,
-				["x"] = -161099,
+				["x"] = -162283,
 				["speed"] = 0,
 				["coalition"] = "neutral",
 				["type"] = "PERRY",
 				["groupId"] = 7014,
-				["y"] = 267048,
+				["y"] = 267810,
 				["country"] = "australia",
 			}, -- end of [1]
 		}, -- end of ["units"]
@@ -843,11 +843,11 @@ dynGroupsAdded =
 		{
 			[1] = 
 			{
-				["alt"] = 66,
+				["alt"] = 62,
 				["point"] = 
 				{
-					["y"] = 691761,
-					["x"] = -284967,
+					["y"] = 690419,
+					["x"] = -284972,
 				}, -- end of ["point"]
 				["coalitionId"] = 2,
 				["skill"] = "Average",
@@ -857,9 +857,9 @@ dynGroupsAdded =
 				["groupId"] = 7008,
 				["groupName"] = "USA gnd 3",
 				["countryId"] = 2,
-				["x"] = -284967,
-				["y"] = 691761,
-				["heading"] = 1.4977557594982,
+				["x"] = -284972,
+				["y"] = 690419,
+				["heading"] = 1.4977557640291,
 				["country"] = "usa",
 				["unitName"] = "USA gnd 3 unit1",
 				["unitId"] = 7012,
@@ -867,11 +867,11 @@ dynGroupsAdded =
 			}, -- end of [1]
 			[2] = 
 			{
-				["alt"] = 66,
+				["alt"] = 63,
 				["point"] = 
 				{
-					["y"] = 691809,
-					["x"] = -284861,
+					["y"] = 690558,
+					["x"] = -284846,
 				}, -- end of ["point"]
 				["coalitionId"] = 2,
 				["skill"] = "Average",
@@ -881,9 +881,9 @@ dynGroupsAdded =
 				["groupId"] = 7008,
 				["groupName"] = "USA gnd 3",
 				["countryId"] = 2,
-				["x"] = -284861,
-				["y"] = 691809,
-				["heading"] = 1.4977557625792,
+				["x"] = -284846,
+				["y"] = 690558,
+				["heading"] = 1.4977557580482,
 				["country"] = "usa",
 				["unitName"] = "USA gnd 3 unit2",
 				["unitId"] = 7013,
@@ -891,11 +891,11 @@ dynGroupsAdded =
 			}, -- end of [2]
 			[3] = 
 			{
-				["alt"] = 66,
+				["alt"] = 62,
 				["point"] = 
 				{
-					["y"] = 691744,
-					["x"] = -284982,
+					["y"] = 690360,
+					["x"] = -285032,
 				}, -- end of ["point"]
 				["coalitionId"] = 2,
 				["skill"] = "Average",
@@ -905,9 +905,9 @@ dynGroupsAdded =
 				["groupId"] = 7008,
 				["groupName"] = "USA gnd 3",
 				["countryId"] = 2,
-				["x"] = -284982,
-				["y"] = 691744,
-				["heading"] = 1.4977557573233,
+				["x"] = -285032,
+				["y"] = 690360,
+				["heading"] = 1.4977557565984,
 				["country"] = "usa",
 				["unitName"] = "USA gnd 3 unit3",
 				["unitId"] = 7014,
@@ -915,11 +915,11 @@ dynGroupsAdded =
 			}, -- end of [3]
 			[4] = 
 			{
-				["alt"] = 65,
+				["alt"] = 62,
 				["point"] = 
 				{
-					["y"] = 691757,
-					["x"] = -285098,
+					["y"] = 690314,
+					["x"] = -284956,
 				}, -- end of ["point"]
 				["coalitionId"] = 2,
 				["skill"] = "Average",
@@ -929,9 +929,9 @@ dynGroupsAdded =
 				["groupId"] = 7008,
 				["groupName"] = "USA gnd 3",
 				["countryId"] = 2,
-				["x"] = -285098,
-				["y"] = 691757,
-				["heading"] = 1.4977557640291,
+				["x"] = -284956,
+				["y"] = 690314,
+				["heading"] = 1.497755755511,
 				["country"] = "usa",
 				["unitName"] = "USA gnd 3 unit4",
 				["unitId"] = 7015,
@@ -1023,11 +1023,11 @@ dynGroupsAdded =
 		{
 			[1] = 
 			{
-				["alt"] = 69,
+				["alt"] = 73,
 				["point"] = 
 				{
-					["y"] = 695073,
-					["x"] = -287442,
+					["y"] = 691751,
+					["x"] = -283221,
 				}, -- end of ["point"]
 				["coalitionId"] = 2,
 				["skill"] = "Average",
@@ -1037,9 +1037,9 @@ dynGroupsAdded =
 				["groupId"] = 7015,
 				["groupName"] = "USA gnd 5",
 				["countryId"] = 2,
-				["x"] = -287442,
-				["y"] = 695073,
-				["heading"] = 1.4977557701918,
+				["x"] = -283221,
+				["y"] = 691751,
+				["heading"] = 1.4977557703725,
 				["country"] = "usa",
 				["unitName"] = "USA gnd 5 unit1",
 				["unitId"] = 7023,
@@ -1047,11 +1047,11 @@ dynGroupsAdded =
 			}, -- end of [1]
 			[2] = 
 			{
-				["alt"] = 68,
+				["alt"] = 74,
 				["point"] = 
 				{
-					["y"] = 695090,
-					["x"] = -287590,
+					["y"] = 691898,
+					["x"] = -283194,
 				}, -- end of ["point"]
 				["coalitionId"] = 2,
 				["skill"] = "Average",
@@ -1061,9 +1061,9 @@ dynGroupsAdded =
 				["groupId"] = 7015,
 				["groupName"] = "USA gnd 5",
 				["countryId"] = 2,
-				["x"] = -287590,
-				["y"] = 695090,
-				["heading"] = 1.4977557591357,
+				["x"] = -283194,
+				["y"] = 691898,
+				["heading"] = 1.4977557634854,
 				["country"] = "usa",
 				["unitName"] = "USA gnd 5 unit2",
 				["unitId"] = 7024,
@@ -1071,11 +1071,11 @@ dynGroupsAdded =
 			}, -- end of [2]
 			[3] = 
 			{
-				["alt"] = 69,
+				["alt"] = 72,
 				["point"] = 
 				{
-					["y"] = 695151,
-					["x"] = -287518,
+					["y"] = 691826,
+					["x"] = -283357,
 				}, -- end of ["point"]
 				["coalitionId"] = 2,
 				["skill"] = "Average",
@@ -1085,9 +1085,9 @@ dynGroupsAdded =
 				["groupId"] = 7015,
 				["groupName"] = "USA gnd 5",
 				["countryId"] = 2,
-				["x"] = -287518,
-				["y"] = 695151,
-				["heading"] = 1.4977557660229,
+				["x"] = -283357,
+				["y"] = 691826,
+				["heading"] = 1.4977557538798,
 				["country"] = "usa",
 				["unitName"] = "USA gnd 5 unit3",
 				["unitId"] = 7025,
@@ -1095,11 +1095,11 @@ dynGroupsAdded =
 			}, -- end of [3]
 			[4] = 
 			{
-				["alt"] = 68,
+				["alt"] = 72,
 				["point"] = 
 				{
-					["y"] = 694882,
-					["x"] = -287479,
+					["y"] = 691852,
+					["x"] = -283362,
 				}, -- end of ["point"]
 				["coalitionId"] = 2,
 				["skill"] = "Average",
@@ -1109,9 +1109,9 @@ dynGroupsAdded =
 				["groupId"] = 7015,
 				["groupName"] = "USA gnd 5",
 				["countryId"] = 2,
-				["x"] = -287479,
-				["y"] = 694882,
-				["heading"] = 1.4977557575044,
+				["x"] = -283362,
+				["y"] = 691852,
+				["heading"] = 1.4977557720036,
 				["country"] = "usa",
 				["unitName"] = "USA gnd 5 unit4",
 				["unitId"] = 7026,
@@ -1257,11 +1257,11 @@ dynGroupsAdded =
 		{
 			[1] = 
 			{
-				["alt"] = 73,
+				["alt"] = 62,
 				["point"] = 
 				{
-					["y"] = 695241,
-					["x"] = -285338,
+					["y"] = 691602,
+					["x"] = -285948,
 				}, -- end of ["point"]
 				["categoryStatic"] = "Cargos",
 				["coalitionId"] = 2,
@@ -1272,8 +1272,8 @@ dynGroupsAdded =
 				["type"] = "uh1h_cargo",
 				["country"] = "usa",
 				["groupName"] = "USA static 6",
-				["y"] = 695241,
-				["x"] = -285338,
+				["y"] = 691602,
+				["x"] = -285948,
 				["coalition"] = "blue",
 				["unitId"] = 7028,
 				["heading"] = 0,
@@ -1354,26 +1354,26 @@ dynGroupsAdded =
 		{
 			[1] = 
 			{
-				["alt"] = 68,
+				["alt"] = 63,
 				["type"] = "Sandbox",
 				["point"] = 
 				{
-					["y"] = 693480,
-					["x"] = -285622,
+					["y"] = 692897,
+					["x"] = -286503,
 				}, -- end of ["point"]
-				["categoryStatic"] = "Fortifications",
-				["coalitionId"] = 2,
-				["y"] = 693480,
-				["groupName"] = "USA static 5",
 				["country"] = "usa",
-				["countryId"] = 2,
-				["x"] = -285622,
+				["coalitionId"] = 2,
 				["coalition"] = "blue",
+				["groupName"] = "USA static 5",
+				["unitId"] = 7027,
+				["y"] = 692897,
+				["x"] = -286503,
+				["countryId"] = 2,
 				["category"] = "static",
 				["unitName"] = "USA static 5",
-				["unitId"] = 7027,
-				["heading"] = 0,
 				["groupId"] = 7027,
+				["heading"] = 0,
+				["categoryStatic"] = "Fortifications",
 			}, -- end of [1]
 		}, -- end of ["units"]
 		["countryId"] = 2,
@@ -1397,8 +1397,8 @@ dynGroupsAdded =
 				["alt"] = 0,
 				["point"] = 
 				{
-					["y"] = 268869,
-					["x"] = -163156,
+					["y"] = 268107,
+					["x"] = -163693,
 				}, -- end of ["point"]
 				["coalitionId"] = 0,
 				["livery_id"] = "ReubenJames",
@@ -1409,12 +1409,12 @@ dynGroupsAdded =
 				["unitId"] = 7033,
 				["groupName"] = "AUSTRALIA shp 3",
 				["countryId"] = 21,
-				["x"] = -163156,
+				["x"] = -163693,
 				["speed"] = 0,
 				["coalition"] = "neutral",
 				["type"] = "PERRY",
 				["groupId"] = 7021,
-				["y"] = 268869,
+				["y"] = 268107,
 				["country"] = "australia",
 			}, -- end of [1]
 		}, -- end of ["units"]
@@ -1557,11 +1557,11 @@ dynGroupsAdded =
 		{
 			[1] = 
 			{
-				["alt"] = 73,
+				["alt"] = 59,
 				["point"] = 
 				{
-					["y"] = 693098,
-					["x"] = -284021,
+					["y"] = 692769,
+					["x"] = -287355,
 				}, -- end of ["point"]
 				["coalitionId"] = 2,
 				["skill"] = "Average",
@@ -1571,9 +1571,9 @@ dynGroupsAdded =
 				["groupId"] = 7022,
 				["groupName"] = "USA gnd 7",
 				["countryId"] = 2,
-				["x"] = -284021,
-				["y"] = 693098,
-				["heading"] = 1.4977557645728,
+				["x"] = -287355,
+				["y"] = 692769,
+				["heading"] = 1.4977557591357,
 				["country"] = "usa",
 				["unitName"] = "USA gnd 7 unit1",
 				["unitId"] = 7034,
@@ -1581,23 +1581,23 @@ dynGroupsAdded =
 			}, -- end of [1]
 			[2] = 
 			{
-				["alt"] = 73,
+				["alt"] = 59,
 				["point"] = 
 				{
-					["y"] = 693012,
-					["x"] = -284053,
+					["y"] = 692754,
+					["x"] = -287476,
 				}, -- end of ["point"]
 				["coalitionId"] = 2,
 				["skill"] = "Average",
 				["category"] = "vehicle",
-				["speed"] = 5.0056692998623e-05,
+				["speed"] = 0,
 				["type"] = "M-1 Abrams",
 				["groupId"] = 7022,
 				["groupName"] = "USA gnd 7",
 				["countryId"] = 2,
-				["x"] = -284053,
-				["y"] = 693012,
-				["heading"] = 1.4877557641795,
+				["x"] = -287476,
+				["y"] = 692754,
+				["heading"] = 1.4977557605856,
 				["country"] = "usa",
 				["unitName"] = "USA gnd 7 unit2",
 				["unitId"] = 7035,
@@ -1605,23 +1605,23 @@ dynGroupsAdded =
 			}, -- end of [2]
 			[3] = 
 			{
-				["alt"] = 74,
+				["alt"] = 59,
 				["point"] = 
 				{
-					["y"] = 693026,
-					["x"] = -283898,
+					["y"] = 692726,
+					["x"] = -287538,
 				}, -- end of ["point"]
 				["coalitionId"] = 2,
 				["skill"] = "Average",
 				["category"] = "vehicle",
-				["speed"] = 0.00018869274936151,
+				["speed"] = 0,
 				["type"] = "M-1 Abrams",
 				["groupId"] = 7022,
 				["groupName"] = "USA gnd 7",
 				["countryId"] = 2,
-				["x"] = -283898,
-				["y"] = 693026,
-				["heading"] = 1.5077557625432,
+				["x"] = -287538,
+				["y"] = 692726,
+				["heading"] = 1.4977557605856,
 				["country"] = "usa",
 				["unitName"] = "USA gnd 7 unit3",
 				["unitId"] = 7036,
@@ -1629,23 +1629,23 @@ dynGroupsAdded =
 			}, -- end of [3]
 			[4] = 
 			{
-				["alt"] = 73,
+				["alt"] = 59,
 				["point"] = 
 				{
-					["y"] = 693093,
-					["x"] = -284127,
+					["y"] = 692766,
+					["x"] = -287511,
 				}, -- end of ["point"]
 				["coalitionId"] = 2,
 				["skill"] = "Average",
 				["category"] = "vehicle",
-				["speed"] = 0.0040063578450385,
+				["speed"] = 0,
 				["type"] = "M-1 Abrams",
 				["groupId"] = 7022,
 				["groupName"] = "USA gnd 7",
 				["countryId"] = 2,
-				["x"] = -284127,
-				["y"] = 693093,
-				["heading"] = 1.4877557641795,
+				["x"] = -287511,
+				["y"] = 692766,
+				["heading"] = 1.4977557605856,
 				["country"] = "usa",
 				["unitName"] = "USA gnd 7 unit4",
 				["unitId"] = 7037,
@@ -1727,8 +1727,8 @@ dynGroupsAdded =
 				["alt"] = 0,
 				["point"] = 
 				{
-					["y"] = 266075,
-					["x"] = -162226,
+					["y"] = 265427,
+					["x"] = -164284,
 				}, -- end of ["point"]
 				["coalitionId"] = 0,
 				["livery_id"] = "ReubenJames",
@@ -1739,12 +1739,12 @@ dynGroupsAdded =
 				["unitId"] = 7044,
 				["groupName"] = "AUSTRALIA shp 4",
 				["countryId"] = 21,
-				["x"] = -162226,
+				["x"] = -164284,
 				["speed"] = 0,
 				["coalition"] = "neutral",
 				["type"] = "PERRY",
 				["groupId"] = 7028,
-				["y"] = 266075,
+				["y"] = 265427,
 				["country"] = "australia",
 			}, -- end of [1]
 		}, -- end of ["units"]
@@ -1767,11 +1767,11 @@ dynGroupsAdded =
 		{
 			[1] = 
 			{
-				["alt"] = 55,
+				["alt"] = 63,
 				["point"] = 
 				{
-					["y"] = 689703,
-					["x"] = -286460,
+					["y"] = 693814,
+					["x"] = -287262,
 				}, -- end of ["point"]
 				["categoryStatic"] = "Cargos",
 				["coalitionId"] = 2,
@@ -1782,8 +1782,8 @@ dynGroupsAdded =
 				["type"] = "uh1h_cargo",
 				["country"] = "usa",
 				["groupName"] = "USA static 8",
-				["y"] = 689703,
-				["x"] = -286460,
+				["y"] = 693814,
+				["x"] = -287262,
 				["coalition"] = "blue",
 				["unitId"] = 7039,
 				["heading"] = 0,
@@ -1810,26 +1810,26 @@ dynGroupsAdded =
 		{
 			[1] = 
 			{
-				["alt"] = 70,
+				["alt"] = 56,
 				["type"] = "Sandbox",
 				["point"] = 
 				{
-					["y"] = 694696,
-					["x"] = -287053,
+					["y"] = 691971,
+					["x"] = -288088,
 				}, -- end of ["point"]
-				["categoryStatic"] = "Fortifications",
-				["coalitionId"] = 2,
-				["y"] = 694696,
-				["groupName"] = "USA static 7",
 				["country"] = "usa",
-				["countryId"] = 2,
-				["x"] = -287053,
+				["coalitionId"] = 2,
 				["coalition"] = "blue",
+				["groupName"] = "USA static 7",
+				["unitId"] = 7038,
+				["y"] = 691971,
+				["x"] = -288088,
+				["countryId"] = 2,
 				["category"] = "static",
 				["unitName"] = "USA static 7",
-				["unitId"] = 7038,
-				["heading"] = 0,
 				["groupId"] = 7038,
+				["heading"] = 0,
+				["categoryStatic"] = "Fortifications",
 			}, -- end of [1]
 		}, -- end of ["units"]
 		["countryId"] = 2,

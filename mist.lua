@@ -35,7 +35,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 5
-mist.build = 104
+mist.build = 106
 
 -- forward declaration of log shorthand
 local log
@@ -116,6 +116,17 @@ do -- the main scope
                             end
                         end
                     end
+                    if zone.verticies then -- trust but verify
+                        local r = 0
+                        for i = 1, #zone.verticies do
+                            local dist = mist.utils.get2DDist(zone.point, zone.verticies[i])
+                            if dist > r then
+                                r = mist.utils.deepCopy(dist)
+                            end
+                        end
+                        zone.radius = r
+                    
+                    end
 
 					mist.DBs.zonesByName[zone_data.name] = zone
 					mist.DBs.zonesByNum[#mist.DBs.zonesByNum + 1] = mist.utils.deepCopy(zone)	--[[deepcopy so that the zone in zones_by_name and the zone in
@@ -123,6 +134,85 @@ do -- the main scope
 				end
 			end
 		end
+        
+        mist.DBs.drawingByName = {}
+        mist.DBs.drawingIndexed = {}
+        
+        if env.mission.drawings and env.mission.drawings.layers then
+            for i = 1, #env.mission.drawings.layers do
+                local l = env.mission.drawings.layers[i]
+                
+                for j = 1, #l.objects do
+                    local copy = mist.utils.deepCopy(l.objects[j])
+                    --log:warn(copy)
+                    local doOffset = false
+                    copy.layer = l.name
+
+                    local theta = copy.angle or 0
+                    theta = math.rad(theta)
+                    if copy.primitiveType == "Polygon" then
+                        
+                        if copy.polygonMode == 'rect' then
+                            local h, w = copy.height, copy.width
+                            copy.points = {}
+                            copy.points[1] = {x = h/2, y = w/2}
+                            copy.points[2] = {x = -h/2, y = w/2}
+                            copy.points[3] = {x = -h/2, y = -w/2}
+                            copy.points[4] = {x = h/2, y = -w/2}
+                            doOffset = true
+                        elseif copy.polygonMode == "circle" then
+                            copy.points = {x = copy.mapX, y = copy.mapY}
+                        elseif copy.polygonMode == 'oval' then
+                            -- oval bugs. Scale  and rotation are off. 
+                            copy.points = {}
+                            local numPoints = 24
+                            local angleStep = (math.pi*2)/numPoints
+                            doOffset = true
+                            for v = 1, numPoints do
+                                local pointAngle = v * angleStep
+                                local x = copy.r1 * math.cos(pointAngle) 
+                                local y = copy.r2 * math.sin(pointAngle) 
+                                
+                                table.insert(copy.points,{x=x,y=y})
+                                
+                            end
+                        elseif copy.polygonMode == "arrow" then
+                            doOffset = true
+                         end
+                        
+                    -- NOTE TO SELF. FIGURE OUT WHICH SHAPES NEED TO BE OFFSET. OVAL YES.
+                        --log:warn('check offset')
+                        if theta ~= 0 and copy.points and doOffset == true then
+                            
+                            --log:warn('offsetting Values')
+                            for p = 1, #copy.points do
+                                local offset = mist.vec.rotateVec2(copy.points[p], theta)
+                                copy.points[p] = offset 
+                            end
+                           --log:warn(copy.points[1])
+                        end
+                    
+                    end
+                    if copy.points and #copy.points > 1 then
+                        for u = 1, #copy.points do
+                            copy.points[u].x = copy.points[u].x + copy.mapX
+                            copy.points[u].y = copy.points[u].y + copy.mapY
+                        end
+                    
+                    end
+                    if mist.DBs.drawingByName[copy.name] then
+                        log:warn("Drawing by the name of [ $1 ] already exists in DB. Failed to add to mist.DBs.drawingByName.", copy.name)
+                    else
+                    
+                        mist.DBs.drawingByName[copy.name] = copy
+                    end
+                    table.insert(mist.DBs.drawingIndexed, copy)
+                end
+            
+            end
+        
+        end
+        
 
 		mist.DBs.navPoints = {}
 		mist.DBs.units = {}
@@ -319,6 +409,11 @@ do -- the main scope
 					['Arco'] = 2,
 					['Shell'] = 3,
 				},
+                ['TRANSPORT'] = {
+                    ['Heavy'] = 9,
+                    ['Trash'] = 10,
+                    ['Cargo'] = 11,
+                    ['Ascot'] = 12,
 				['JTAC'] = {
 					['Axeman'] = 1,
 					['Darknight'] = 2,
@@ -360,14 +455,105 @@ do -- the main scope
 						['rules'] = {
 							['canUseAircraft'] = true,
 							['appliesTo'] = {
-								'A-10C',
+								'A-10C_2',
+                                'A-10C',
 								'A-10A',
 							},
 						},
-					},
-				},
-			},
-		}
+                    },
+					['f16'] = {
+                         Viper = 9,
+                         Venom = 10,
+                         Lobo = 11,
+                         Cowboy = 12,
+                         Python = 13,
+                         Rattler =14,
+                         Panther = 15,
+                         Wolf = 16,
+                         Weasel = 17,
+                         Wild = 18,
+                         Ninja = 19,
+                         Jedi = 20,
+                         rules = {
+                            ['canUseAircraft'] = true,
+                            ['appliesTo'] = {
+                                'F-16C_50',
+                                'F-16C bl.52d',
+                                'F-16C bl.50',
+                                'F-16A MLU',
+                                'F-16A',
+                            },
+                         },
+
+                    },
+					['f18'] = {
+						['Hornet'] = 9,
+						['Squid'] = 10,
+						['Ragin'] = 11,
+						['Roman'] = 12,
+                         Sting = 13,
+                         Jury =14,
+                         Jokey = 15,
+                         Ram = 16,
+                         Hawk = 17,
+                         Devil = 18,
+                         Check = 19,
+                         Snake = 20,
+						['rules'] = {
+							['canUseAircraft'] = true,
+							['appliesTo'] = {
+								
+                                "FA-18C_hornet",
+								'F/A-18C',
+							},
+						},
+                    },
+                    ['b1'] = {
+						['Bone'] = 9,
+						['Dark'] = 10,
+						['Vader'] = 11,
+						['rules'] = {
+							['canUseAircraft'] = true,
+							['appliesTo'] = {
+								'B-1B',
+							},
+						},
+                    },
+                    ['b52'] = {
+						['Buff'] = 9,
+						['Dump'] = 10,
+						['Kenworth'] = 11,
+						['rules'] = {
+							['canUseAircraft'] = true,
+							['appliesTo'] = {
+								'B-52H',
+							},
+						},
+                    },
+                    ['f15e'] = {
+						['Dude'] = 9,
+						['Thud'] = 10,
+						['Gunny'] = 11,
+						['Trek'] = 12,
+                         Sniper = 13,
+                         Sled =14,
+                         Best = 15,
+                         Jazz = 16,
+                         Rage = 17,
+                         Tahoe = 18,
+						['rules'] = {
+							['canUseAircraft'] = true,
+							['appliesTo'] = {
+								'F-15E',
+                                --'F-15ERAZBAM',
+							},
+						},
+                    },
+
+                },
+            },
+        },
+    }
 		mist.DBs.const.shapeNames = {
 			["Landmine"] = "landmine",
 			["FARP CP Blindage"] = "kp_ug",
@@ -554,8 +740,8 @@ do -- the main scope
 		mist.DBs.MEgroupsById = mist.utils.deepCopy(mist.DBs.groupsById)
 
 		mist.DBs.deadObjects = {}
-
-		do
+               
+        do
 			local mt = {}
 
 			function mt.__newindex(t, key, val)
@@ -875,6 +1061,7 @@ do -- the main scope
 			--dbLog:info('iterate')
 			for name, gData in pairs(tempSpawnedGroups) do
 				--env.info(name)
+                --dbLog:info(gData)
 				local updated = false
                 local stillExists = false
                 if not gData.checked then 
@@ -882,9 +1069,9 @@ do -- the main scope
                     local _g = gData.gp or Group.getByName(name)
                     if mist.DBs.groupsByName[name] then
                         -- first check group level properties, groupId, countryId, coalition
-                       -- dbLog:info('Found in DBs, check if updated')
+                        --dbLog:info('Found in DBs, check if updated')
                         local dbTable = mist.DBs.groupsByName[name]
-                       -- dbLog:info(dbTable)
+                        --dbLog:info(dbTable)
                         if gData.type ~= 'static' then
                            -- dbLog:info('Not static')
                           
@@ -905,11 +1092,11 @@ do -- the main scope
                     end			
                     --dbLog:info('Updated: $1', updated)
                     if updated == false and gData.type ~= 'static' then -- time to check units
-                        --dbLog:info('No Group Mismatch, Check Units')
+                       --dbLog:info('No Group Mismatch, Check Units')
                         if _g and _g:isExist() == true then 
                             stillExists = true
                             for index, uObject in pairs(_g:getUnits()) do
-                                --dbLog:info(index)
+                             --dbLog:info(index)
                                 if mist.DBs.unitsByName[uObject:getName()] then
                                     --dbLog:info('UnitByName table exists')
                                     local uTable = mist.DBs.unitsByName[uObject:getName()]
@@ -931,14 +1118,13 @@ do -- the main scope
                         if dbData and type(dbData) == 'table' then 
                             writeGroups[#writeGroups+1] = {data = dbData, isUpdated = updated}
                         end
-                    
                     end
                     -- Work done, so remove
                 end
                 tempSpawnedGroups[name] = nil
                 tempSpawnGroupsCounter = tempSpawnGroupsCounter - 1
 			end			
-		end
+		end	
 	end
 	
 	local function updateDBTables()
@@ -1058,19 +1244,20 @@ do -- the main scope
 	local function groupSpawned(event)
 		-- dont need to add units spawned in at the start of the mission if mist is loaded in init line
 		if event.id == world.event.S_EVENT_BIRTH and timer.getTime0() < timer.getAbsTime() then
-			--dbLog:info('unitSpawnEvent')
-			
+			--log:info('unitSpawnEvent')
+			--log:info(event)
+            --log:info(event.initiator:getTypeName())
 				--table.insert(tempSpawnedUnits,(event.initiator))
 				-------
 				-- New functionality below. 
 				-------
 			if Object.getCategory(event.initiator) == 1 and not Unit.getPlayerName(event.initiator) then -- simple player check, will need to later check to see if unit was spawned with a player in a flight
-				--dbLog:info('Object is a Unit')
+				--log:info('Object is a Unit')
 				if Unit.getGroup(event.initiator) then
-					--dbLog:info(Unit.getGroup(event.initiator):getName())
+				--	log:info(Unit.getGroup(event.initiator):getName())
                     local g = Unit.getGroup(event.initiator)
 					if not tempSpawnedGroups[g:getName()] then
-						--dbLog:info('added')
+						--log:info('added')
 						tempSpawnedGroups[g:getName()] = {type = 'group', gp = g}
 						tempSpawnGroupsCounter = tempSpawnGroupsCounter + 1
 					end
@@ -1078,7 +1265,7 @@ do -- the main scope
 					log:error('Group not accessible by unit in event handler. This is a DCS bug')
 				end
 			elseif Object.getCategory(event.initiator) == 3 or Object.getCategory(event.initiator) == 6 then
-				--dbLog:info('Object is Static')
+				--log:info('Object is Static')
 				tempSpawnedGroups[StaticObject.getName(event.initiator)] = {type = 'static'}
 				tempSpawnGroupsCounter = tempSpawnGroupsCounter + 1
 			end
@@ -1236,8 +1423,8 @@ do -- the main scope
                             tempSpawnedGroups[s:getName()] = {type = 'static'}
                             tempSpawnGroupsCounter = tempSpawnGroupsCounter + 1
                        end
-                   end
-               end
+                    end
+                end
             end
         
         end
@@ -1519,7 +1706,11 @@ do -- the main scope
 		end
 
 		if newGroup.clone and mist.DBs.groupsByName[newGroup.name] or not newGroup.name then
-			newGroup.name = tostring(newCountry .. tostring(typeName) .. mistDynAddIndex[typeName])
+            --if newGroup.baseName then
+                -- idea of later. So custmozed naming can be created
+           -- else
+                newGroup.name = tostring(newCountry .. tostring(typeName) .. mistDynAddIndex[typeName])
+            --end
 		end
 
 		if not newGroup.hidden then
@@ -1604,11 +1795,11 @@ do -- the main scope
                 end
             end
 		else -- if aircraft and no route assigned. make a quick and stupid route so AI doesnt RTB immediately
-			if newCat == 'AIRPLANE' or newCat == 'HELICOPTER' then
+			--if newCat == 'AIRPLANE' or newCat == 'HELICOPTER' then
 				newGroup.route = {}
 				newGroup.route.points = {}
 				newGroup.route.points[1] = {}
-			end
+			--end
 		end
 		newGroup.country = newCountry
 
@@ -1629,7 +1820,7 @@ do -- the main scope
             
             end
         end
-		--mist.debug.writeData(mist.utils.serialize,{'msg', newGroup}, 'newGroup.lua')
+		--mist.debug.writeData(mist.utils.serialize,{'msg', newGroup}, 'newGroupPushedToAddGroup.lua')
         --log:warn(newGroup)
 		-- sanitize table
 		newGroup.groupName = nil
@@ -2898,6 +3089,52 @@ function mist.shape.polyInCircle(poly, circle, full)
     return false
 end
 
+function mist.shape.getPointOnSegment(point, seg, isSeg)
+    local p = mist.utils.makeVec2(point)
+    local s1 = mist.utils.makeVec2(seg[1])
+    local s2 = mist.utils.makeVec2(seg[2])
+    
+    
+    local cx, cy = p.x - s1.x, p.y - s1.y
+    local dx, dy = s2.x - s1.x, s2.x - s1.y
+    local d = (dx*dx + dy*dy)
+      
+    if d == 0 then
+       return {x = s1.x, y = s1.y}
+    end
+    local u = (cx*dx + cy*dy)/d
+    if isSeg then 
+       if u < 0 then
+            u = 0
+        elseif u > 1 then
+            u = 1
+        end
+    end
+    return {x = s1.x + u*dx, y = s1.y + u*dy}
+end
+
+
+function mist.shape.segmentIntersect(segA, segB)
+    local dx1, dy1 = segA[2].x - segA[1].x, segA[2] - segA[1].y
+    local dx2, dy2 = segB[2].x - segB[1].x, segB[2] - segB[1].y
+    local dx3, dy3 = segA[1].x - segB[1].x, segA[1].y - segB[1].y
+    local d = dx1*dy2 - dy1*dx2
+    if d == 0 then
+       return false
+    end
+    local t1 = (dx2*dy3 - dy2*dx3)/d
+    if t1 < 0 or t1 > 1 then
+      return false
+    end
+    local t2 = (dx1*dy3 - dy1*dx3)/d
+    if t2 < 0 or t2 > 1 then
+      return false
+    end
+      -- point of intersection
+      return true, segA[1].x + t1*dx1, segA[1].y + t1*dy1
+end
+
+
 function mist.pointInPolygon(point, poly, maxalt) --raycasting point in polygon. Code from http://softsurfer.com/Archive/algorithm_0103/algorithm_0103.htm
 	--[[local type_tbl = {
 		point = {'table'},
@@ -2934,6 +3171,10 @@ function mist.pointInPolygon(point, poly, maxalt) --raycasting point in polygon.
 	else
 		return false
 	end
+end
+
+function mist.mapValue(val, inMin, inMax, outMin, outMax)
+     return (val - inMin) * (outMax - outMin) / (inMax - inMin) + outMin
 end
 
 function mist.getUnitsInPolygon(unit_names, polyZone, max_alt)
@@ -2989,7 +3230,6 @@ function mist.getUnitsInZones(unit_names, zone_names, zone_type)
 	end
 
 	local in_zone_units = {}
-
 	for units_ind = 1, #units do
         local lUnit = units[units_ind]
         local unit_pos = lUnit:getPosition().p
@@ -4449,6 +4689,25 @@ do -- mist.util scope
 	function mist.utils.celsiusToFahrenheit(c)
 		return c*(9/5)+32
 	end
+    
+    function mist.utils.hexToRGB(hex, l) -- because for some reason the draw tools use hex when everything is rgba 0 - 1
+        local int = 255
+        if l then
+         int = 1
+        end
+        if hex and type(hex) == 'string' then
+            local val = {}
+            hex = string.gsub(hex, '0x', '')
+            if string.len(hex) == 8 then 
+                val[1] = tonumber("0x"..hex:sub(1,2)) / int
+                val[2] = tonumber("0x"..hex:sub(3,4)) / int
+                val[3] = tonumber("0x"..hex:sub(5,6)) / int
+                val[4] = tonumber("0x"..hex:sub(7,8)) / int
+                
+                return val
+            end
+        end
+   end
 	
 	function mist.utils.converter(t1, t2, val)
 		if type(t1) == 'string' then
@@ -6108,6 +6367,8 @@ do -- mist.msg scope
 
 	local caSlots = false
 	local caMSGtoGroup = false
+    local anyUpdate = false
+    local lastMessageTime = nil
 
 	if env.mission.groundControl then -- just to be sure?
 		for index, value in pairs(env.mission.groundControl) do
@@ -6127,130 +6388,127 @@ do -- mist.msg scope
 			end
 		end
 	end
---[[
+
 	local function mistdisplayV5()
-		--thoughts to improve upon
-		--event handler based activeClients table.
-		--display messages only when there is an update
-		--possibly co-routine it.
-		
-        
-        
-        local activeClients = {}
+        --log:warn("mistdisplayV5: $1", timer.getTime())
 
-		for clientId, clientData in pairs(mist.DBs.humansById) do
-			if Unit.getByName(clientData.unitName) and Unit.getByName(clientData.unitName):isExist() == true then
-				activeClients[clientData.groupId] = clientData.groupName
-			end
-		end
-
-		--[f caSlots == true and caMSGtoGroup == true then
-
-		--end
-
-
+        local clearView = true
 		if #messageList > 0 then
-			if displayActive == false then
-				displayActive = true
-			end
-			--mist.debug.writeData(mist.utils.serialize,{'msg', messageList}, 'messageList.lua')
-			local msgTableText = {}
-			local msgTableSound = {}
+            --log:warn('Updates: $1', anyUpdate)
+            if anyUpdate == true then
+                local activeClients = {}
 
-			for messageId, messageData in pairs(messageList) do
-				if messageData.displayedFor > messageData.displayTime then
-					messageData:remove()	-- now using the remove/destroy function.
-				else
-					if messageData.displayedFor then
-						messageData.displayedFor = messageData.displayedFor + messageDisplayRate
-					end
-					local nextSound = 1000
-					local soundIndex = 0
+                for clientId, clientData in pairs(mist.DBs.humansById) do
+                    if Unit.getByName(clientData.unitName) and Unit.getByName(clientData.unitName):isExist() == true then
+                        activeClients[clientData.groupId] = clientData.groupName
+                    end
+                end
+                anyUpdate = false
+                if displayActive == false then
+                    displayActive = true
+                end
+                --mist.debug.writeData(mist.utils.serialize,{'msg', messageList}, 'messageList.lua')
+                local msgTableText = {}
+                local msgTableSound = {}
 
-					if messageData.multSound and #messageData.multSound > 0 then
-						for index, sData in pairs(messageData.multSound) do
-							if sData.time <= messageData.displayedFor and sData.played == false and sData.time < nextSound then -- find index of the next sound to be played
-								nextSound = sData.time
-								soundIndex = index
-							end
-						end
-						if soundIndex ~= 0 then
-							messageData.multSound[soundIndex].played = true
-						end
-					end
+                for mInd, messageData in pairs(messageList) do
+                    if messageData.displayedFor > messageData.displayTime then
+                        messageData:remove()	-- now using the remove/destroy function.
+                    else
+                        if messageData.displayedFor then
+                            messageData.displayedFor = messageData.displayedFor + messageDisplayRate
+                        end
+                        local nextSound = 1000
+                        local soundIndex = 0
 
-					for recIndex, recData in pairs(messageData.msgFor) do -- iterate recipiants
-						if recData == 'RED' or recData == 'BLUE' or activeClients[recData] then -- rec exists
-							if messageData.text and messageData.update then -- text
-								if not msgTableText[recData] then -- create table entry for text
-									msgTableText[recData] = {}
-									msgTableText[recData].text = {}
-									if recData == 'RED' or recData == 'BLUE' then
-										msgTableText[recData].text[1] = '-------Combined Arms Message-------- \n'
-									end
-									msgTableText[recData].text[#msgTableText[recData].text + 1] = messageData.text
-									msgTableText[recData].displayTime = messageData.displayTime - messageData.displayedFor
-								else -- add to table entry and adjust display time if needed
-									if recData == 'RED' or recData == 'BLUE' then
-										msgTableText[recData].text[#msgTableText[recData].text + 1] = '\n ---------------- Combined Arms Message: \n'
-									else
-										msgTableText[recData].text[#msgTableText[recData].text + 1] = '\n ---------------- \n'
-									end
-									msgTableText[recData].text[#msgTableText[recData].text + 1] = messageData.text
-									if msgTableText[recData].displayTime < messageData.displayTime - messageData.displayedFor then
-										msgTableText[recData].displayTime = messageData.displayTime - messageData.displayedFor
-									else
-										msgTableText[recData].displayTime = 1
-									end
-								end
-							end
-							if soundIndex ~= 0 then
-								msgTableSound[recData] = messageData.multSound[soundIndex].file
-							end
-						end
-                        
-					end
-                    messageData.update = nil
+                        if messageData.multSound and #messageData.multSound > 0 then
+                            for index, sData in pairs(messageData.multSound) do
+                                if sData.time <= messageData.displayedFor and sData.played == false and sData.time < nextSound then -- find index of the next sound to be played
+                                    nextSound = sData.time
+                                    soundIndex = index
+                                end
+                            end
+                            if soundIndex ~= 0 then
+                                messageData.multSound[soundIndex].played = true
+                            end
+                        end
 
-				end
-			end
-			------- new display
+                        for recIndex, recData in pairs(messageData.msgFor) do -- iterate recipiants
+                            if recData == 'RED' or recData == 'BLUE' or activeClients[recData] then -- rec exists
+                                if messageData.text then -- text
+                                    if not msgTableText[recData] then -- create table entry for text
+                                        msgTableText[recData] = {}
+                                        msgTableText[recData].text = {}
+                                        if recData == 'RED' or recData == 'BLUE' then
+                                            msgTableText[recData].text[1] = '-------Combined Arms Message-------- \n'
+                                        end
+                                        msgTableText[recData].text[#msgTableText[recData].text + 1] = messageData.text
+                                        msgTableText[recData].displayTime = messageData.displayTime - messageData.displayedFor
+                                    else -- add to table entry and adjust display time if needed
+                                        if recData == 'RED' or recData == 'BLUE' then
+                                            msgTableText[recData].text[#msgTableText[recData].text + 1] = '\n ---------------- Combined Arms Message: \n'
+                                        else
+                                            msgTableText[recData].text[#msgTableText[recData].text + 1] = '\n ---------------- \n'
+                                        end
+                                        table.insert(msgTableText[recData].text, messageData.text)
+                                        if msgTableText[recData].displayTime < messageData.displayTime - messageData.displayedFor then
+                                            msgTableText[recData].displayTime = messageData.displayTime - messageData.displayedFor
+                                        else
+                                            --msgTableText[recData].displayTime = 10
+                                        end
+                                    end
+                                end
+                                if soundIndex ~= 0 then
+                                    msgTableSound[recData] = messageData.multSound[soundIndex].file
+                                end
+                            end
+                            
+                        end
+                        messageData.update = nil
 
-			if caSlots == true and caMSGtoGroup == false then
-				if msgTableText.RED then
-					trigger.action.outTextForCoalition(coalition.side.RED, table.concat(msgTableText.RED.text), msgTableText.RED.displayTime, true)
+                    end
+                
+                end
+                ------- new display
 
-				end
-				if msgTableText.BLUE then
-					trigger.action.outTextForCoalition(coalition.side.BLUE, table.concat(msgTableText.BLUE.text), msgTableText.BLUE.displayTime, true)
-				end
-			end
+                if caSlots == true and caMSGtoGroup == false then
+                    if msgTableText.RED then
+                        trigger.action.outTextForCoalition(coalition.side.RED, table.concat(msgTableText.RED.text), msgTableText.RED.displayTime, clearView)
 
-			for index, msgData in pairs(msgTableText) do
-				if type(index) == 'number' then -- its a groupNumber
-					trigger.action.outTextForGroup(index, table.concat(msgData.text), msgData.displayTime, true)
-				end
-			end
-			--- new audio
-			if msgTableSound.RED then
-				trigger.action.outSoundForCoalition(coalition.side.RED, msgTableSound.RED)
-			end
-			if msgTableSound.BLUE then
-				trigger.action.outSoundForCoalition(coalition.side.BLUE, msgTableSound.BLUE)
-			end
+                    end
+                    if msgTableText.BLUE then
+                        trigger.action.outTextForCoalition(coalition.side.BLUE, table.concat(msgTableText.BLUE.text), msgTableText.BLUE.displayTime, clearView)
+                    end
+                end
+
+                for index, msgData in pairs(msgTableText) do
+                    if type(index) == 'number' then -- its a groupNumber
+                        trigger.action.outTextForGroup(index, table.concat(msgData.text), msgData.displayTime, clearView)
+                    end
+                end
+                --- new audio
+                if msgTableSound.RED then
+                    trigger.action.outSoundForCoalition(coalition.side.RED, msgTableSound.RED)
+                end
+                if msgTableSound.BLUE then
+                    trigger.action.outSoundForCoalition(coalition.side.BLUE, msgTableSound.BLUE)
+                end
 
 
-			for index, file in pairs(msgTableSound) do
-				if type(index) == 'number' then -- its a groupNumber
-					trigger.action.outSoundForGroup(index, file)
-				end
-			end
+                for index, file in pairs(msgTableSound) do
+                    if type(index) == 'number' then -- its a groupNumber
+                        trigger.action.outSoundForGroup(index, file)
+                    end
+                end
+                
+            end
+            
 		else
 			mist.removeFunction(displayFuncId)
 			displayActive = false
 		end
 	end
-]]
+
 	local function mistdisplayV4()
 		local activeClients = {}
 
@@ -6409,14 +6667,14 @@ end]]
 
 			]]
 
-
+        
 			local new = {}
 			new.text = vars.text -- The actual message
 			new.displayTime = vars.displayTime -- How long will the message appear for
 			new.displayedFor = 0 -- how long the message has been displayed so far
 			new.name = vars.name	 -- ID to overwrite the older message (if it exists) Basically it replaces a message that is displayed with new text.
 			new.addedAt = timer.getTime()
-			new.update = true
+            --log:warn('New Message: $1', new.text)
 
 			if vars.multSound and vars.multSound[1] then
 				new.multSound = vars.multSound
@@ -6507,13 +6765,14 @@ end]]
 							messageList[i].text = new.text
 							messageList[i].msgFor = new.msgFor
 							messageList[i].multSound = new.multSound
-							messageList[i].update = true
+                            anyUpdate = true
+                            --log:warn('Message updated: $1', new.messageID)
 							return messageList[i].messageID
 						end
 					end
 				end
 			end
-
+            anyUpdate = true
 			messageID = messageID + 1
 			new.messageID = messageID
 
@@ -6527,7 +6786,7 @@ end]]
 
 			if displayActive == false then
 				displayActive = true
-				displayFuncId = mist.scheduleFunction(mistdisplayV4, {}, timer.getTime() + messageDisplayRate, messageDisplayRate)
+				displayFuncId = mist.scheduleFunction(mistdisplayV5, {}, timer.getTime() + messageDisplayRate, messageDisplayRate)
 			end
 
 			return messageID
@@ -6538,6 +6797,7 @@ end]]
 			for i, msgData in pairs(messageList) do
 				if messageList[i] == self then
 					table.remove(messageList, i)
+                    anyUpdate = true
 					return true --removal successful
 				end
 			end
@@ -6548,6 +6808,7 @@ end]]
 			for i, msgData in pairs(messageList) do
 				if messageList[i].messageID == id then
 					table.remove(messageList, i)
+                    anyUpdate = true
 					return true --removal successful
 				end
 			end
@@ -6984,14 +7245,6 @@ do
     
     local usedMarks = {}
 
-	local typeBase = {
-		['Mi-8MT'] = {'Mi-8MTV2', 'Mi-8MTV', 'Mi-8'},
-		['MiG-21Bis'] = {'Mig-21'},
-		['MiG-15bis'] = {'Mig-15'},
-		['FW-190D9'] = {'FW-190'},
-		['Bf-109K-4'] = {'Bf-109'},
-	}
-    
     local mDefs = {
         coa = {
             ['red'] = {fillColor = {.8, 0 , 0, .5}, color = {.8, 0 , 0, .5}, lineType = 2, fontSize = 16},
@@ -7012,7 +7265,7 @@ do
     local altNames = {['poly'] = 7, ['lines'] = 1, ['polygon'] = 7 }
     
     local function draw(s)
-        --log:warn(s)
+       --log:warn(s)
         if type(s) == 'table' then 
             local mType = s.markType
             if mType == 'panel' then 
@@ -7032,7 +7285,7 @@ do
             elseif mType == 'arrow' then 
                 trigger.action.arrowToAll(s.coa, s.markId, s.pos[1], s.pos[2], s.color, s.fillColor, s.lineType, s.readOnly, s.message)
             elseif mType == 'text' then
-                trigger.action.textToAll(s.coa, s.markId, s.pos[1], s.color, s.fillColor, fontSize, s.readOnly, s.text)
+                trigger.action.textToAll(s.coa, s.markId, s.pos[1], s.color, s.fillColor, s.fontSize, s.readOnly, s.text)
             elseif mType == 'quad' then 
                 trigger.action.quadToAll(s.coa, s.markId, s.pos[1], s.pos[2], s.pos[3], s.pos[4], s.color, s.fillColor, s.lineType, s.readOnly, s.message)
             end
@@ -7078,6 +7331,9 @@ do
                     val[i] = val[i]/255 -- convert RGB values from 0-255 to 0-1 equivilent. 
                 end
             end
+        elseif type(val) == 'string' then
+            val = mist.utils.hexToRGB(val)
+        
         end
         return val
     end
@@ -7136,12 +7392,14 @@ do
         local removed = false
         if type(id) == 'table' then 
             for ind, val in pairs(id) do
-                 trigger.action.removeMark(val)
-                mist.DBs.markList[val] = nil
-                 removed = true
+                if type(val) == 'number' then 
+                    trigger.action.removeMark(val)
+                    mist.DBs.markList[val] = nil
+                    removed = true
+                 end
             end
         else
-            trigger.action.removeMark(id)
+           trigger.action.removeMark(id)
            mist.DBs.markList[id] = nil
             removed = true
         end
@@ -7437,7 +7695,7 @@ do
             
             if mType == 5 then -- text to all
                 if not fontSize then
-                     fontSize = checkDefs('fondSize', coa) or 16
+                     fontSize = checkDefs('fontSize', coa) or 16
                 end
                 fCal[#fCal+1] = fontSize
             else
@@ -7450,8 +7708,12 @@ do
                 readOnly = true
             end
             fCal[#fCal+1] = readOnly
-            fCal[#fCal+1] = message
+            if mType == 5 then 
+                fCal[#fCal+1] = text
+            else
             
+                fCal[#fCal+1] = message
+            end
             local data = {coa = coa, markId = usedId, pos = pos, markFor = markFor, color = color, readOnly = readOnly, message = message, fillColor = fillColor, lineType = lineType, markType = tNames[mType], name = name, radius = radius, text = text, fontSize = fontSize, time = timer.getTime()}
             mist.DBs.markList[usedId] = data
             
@@ -7529,6 +7791,75 @@ do
             --log:warn(vars)
             return mist.marker.add(vars)
         end
+    end
+    
+    function mist.marker.drawShape(name, v)
+        if mist.DBs.drawingByName[name] then
+           
+            local d = v or {}
+            local o = mist.utils.deepCopy(mist.DBs.drawingByName[name])
+             mist.marker.add({point = {x = o.mapX, z = o.mapY}, text = name})
+            --log:warn(o)
+            d.points = o.points or {}
+            if o.primitiveType == "Polygon" then
+                d.mType = 7
+                    
+                if o.polygonMode == "rect" then
+                    d.mType = 6
+                elseif o.polygonMode == "circle" then
+                    d.mType = 2
+                    d.points = {x = o.mapX, y = o.mapY}
+                    d.radius = o.radius
+                end
+            elseif o.primitiveType == "TextBox" then
+                d.mType = 5
+                d.points = {x = o.mapX, y = o.mapY}
+                d.text = o.text or d.text
+                d.fontSize = d.fontSize or o.fontSize
+            end
+            -- NOTE TO SELF. FIGURE OUT WHICH SHAPES NEED TO BE OFFSET. OVAL YES.
+            
+            if o.fillColorString and not d.fillColor then
+                d.fillColor = mist.utils.hexToRGB(o.fillColorString)
+            end
+            if o.colorString then
+                d.color = mist.utils.hexToRGB(o.colorString)
+            end
+
+            
+            if o.thickness == 0 then
+                d.lineType = 0
+            elseif o.style == 'solid' then
+                d.lineType = 1
+            elseif o.style == 'dot' then
+                d.lineType = 2
+            elseif o.style == 'dash' then
+                d.lineType = 3
+            else
+                d.lineType = 1
+            end
+            
+            
+            if o.primitiveType == "Line" and #d.points >= 2 then
+                d.mType = 1
+                local rtn = {}
+                for i = 1, #d.points -1 do
+                    local var = mist.utils.deepCopy(d)
+                    var.points = {}
+                    var.points[1] = d.points[i]
+                    var.points[2] = d.points[i+1]
+                    table.insert(rtn, mist.marker.add(var))
+                end
+                return rtn
+            else
+                if d.mType then
+                    --log:warn(d)
+                    return mist.marker.add(d)
+                end
+            end
+        end
+    
+    
     end
     
     
@@ -8224,6 +8555,19 @@ do -- group tasks scope
 		end
 		return newCoord
 	end
+    
+    function mist.getWindBearingAndVel(p)
+        local point = mist.utils.makeVec3(o)
+        local gLevel = land.getHeight({x = point.x, y = point.z})
+        if point.y <= gLevel then
+            point.y = gLevel + 10
+        end
+        local t = atmosphere.getWind(point)
+        local bearing = math.tan(t.z/t.x)
+        local vel = math.sqrt(t.x^2 + t.z^2)
+        return bearing, vel
+    
+    end
 
 	function mist.groupToRandomPoint(vars)
 		local group = vars.group --Required

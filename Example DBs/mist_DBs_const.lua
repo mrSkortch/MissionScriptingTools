@@ -141,58 +141,166 @@ const =
 			{
 				["groupLimit"] = 9,
 			}, -- end of ["rules"]
-			["aircraft"] = 
+			["TRANSPORT"] = 
 			{
-				["Uzi"] = 3,
-				["Pontiac"] = 8,
-				["Chevy"] = 7,
-				["Dodge"] = 5,
-				["Ford"] = 6,
-				["Enfield"] = 1,
-				["Colt"] = 4,
-				["Springfield"] = 2,
-			}, -- end of ["aircraft"]
-			["unique"] = 
-			{
-				["A10"] = 
+				["unique"] = 
 				{
-					["Boar"] = 10,
-					["Pig"] = 11,
-					["rules"] = 
+					["b52"] = 
 					{
-						["canUseAircraft"] = true,
-						["appliesTo"] = 
+						["rules"] = 
 						{
-							[1] = "A-10C",
-							[2] = "A-10A",
-						}, -- end of ["appliesTo"]
-					}, -- end of ["rules"]
-					["Tusk"] = 12,
-					["Hawg"] = 9,
-				}, -- end of ["A10"]
-			}, -- end of ["unique"]
-			["JTAC"] = 
-			{
-				["Ferret"] = 10,
-				["Finger"] = 8,
-				["Deathstar"] = 15,
-				["Pointer"] = 4,
-				["Anvil"] = 16,
-				["Darknight"] = 2,
-				["Whiplash"] = 7,
-				["Warrior"] = 3,
-				["Eyeball"] = 5,
-				["Mantis"] = 18,
-				["Playboy"] = 12,
-				["Axeman"] = 1,
-				["Moonbeam"] = 6,
-				["Hammer"] = 13,
-				["Shaba"] = 11,
-				["Badger"] = 19,
-				["Jaguar"] = 14,
-				["Firefly"] = 17,
-				["Pinpoint"] = 9,
-			}, -- end of ["JTAC"]
+							["canUseAircraft"] = true,
+							["appliesTo"] = 
+							{
+								[1] = "B-52H",
+							}, -- end of ["appliesTo"]
+						}, -- end of ["rules"]
+						["Dump"] = 10,
+						["Kenworth"] = 11,
+						["Buff"] = 9,
+					}, -- end of ["b52"]
+					["f15e"] = 
+					{
+						["Rage"] = 17,
+						["rules"] = 
+						{
+							["canUseAircraft"] = true,
+							["appliesTo"] = 
+							{
+								[1] = "F-15E",
+							}, -- end of ["appliesTo"]
+						}, -- end of ["rules"]
+						["Trek"] = 12,
+						["Thud"] = 10,
+						["Sled"] = 14,
+						["Gunny"] = 11,
+						["Dude"] = 9,
+						["Tahoe"] = 18,
+						["Jazz"] = 16,
+						["Best"] = 15,
+						["Sniper"] = 13,
+					}, -- end of ["f15e"]
+					["A10"] = 
+					{
+						["Boar"] = 10,
+						["Pig"] = 11,
+						["rules"] = 
+						{
+							["canUseAircraft"] = true,
+							["appliesTo"] = 
+							{
+								[1] = "A-10C_2",
+								[2] = "A-10C",
+								[3] = "A-10A",
+							}, -- end of ["appliesTo"]
+						}, -- end of ["rules"]
+						["Tusk"] = 12,
+						["Hawg"] = 9,
+					}, -- end of ["A10"]
+					["f16"] = 
+					{
+						["rules"] = 
+						{
+							["canUseAircraft"] = true,
+							["appliesTo"] = 
+							{
+								[1] = "F-16C_50",
+								[2] = "F-16C bl.52d",
+								[3] = "F-16C bl.50",
+								[4] = "F-16A MLU",
+								[5] = "F-16A",
+							}, -- end of ["appliesTo"]
+						}, -- end of ["rules"]
+						["Panther"] = 15,
+						["Weasel"] = 17,
+						["Viper"] = 9,
+						["Lobo"] = 11,
+						["Jedi"] = 20,
+						["Ninja"] = 19,
+						["Python"] = 13,
+						["Wild"] = 18,
+						["Rattler"] = 14,
+						["Wolf"] = 16,
+						["Cowboy"] = 12,
+						["Venom"] = 10,
+					}, -- end of ["f16"]
+					["b1"] = 
+					{
+						["Dark"] = 10,
+						["rules"] = 
+						{
+							["canUseAircraft"] = true,
+							["appliesTo"] = 
+							{
+								[1] = "B-1B",
+							}, -- end of ["appliesTo"]
+						}, -- end of ["rules"]
+						["Vader"] = 11,
+						["Bone"] = 9,
+					}, -- end of ["b1"]
+					["f18"] = 
+					{
+						["Jury"] = 14,
+						["rules"] = 
+						{
+							["canUseAircraft"] = true,
+							["appliesTo"] = 
+							{
+								[1] = "FA-18C_hornet",
+								[2] = "F/A-18C",
+							}, -- end of ["appliesTo"]
+						}, -- end of ["rules"]
+						["Ram"] = 16,
+						["Roman"] = 12,
+						["Hornet"] = 9,
+						["Squid"] = 10,
+						["Snake"] = 20,
+						["Hawk"] = 17,
+						["Devil"] = 18,
+						["Check"] = 19,
+						["Ragin"] = 11,
+						["Jokey"] = 15,
+						["Sting"] = 13,
+					}, -- end of ["f18"]
+				}, -- end of ["unique"]
+				["Trash"] = 10,
+				["aircraft"] = 
+				{
+					["Uzi"] = 3,
+					["Pontiac"] = 8,
+					["Chevy"] = 7,
+					["Dodge"] = 5,
+					["Ford"] = 6,
+					["Enfield"] = 1,
+					["Colt"] = 4,
+					["Springfield"] = 2,
+				}, -- end of ["aircraft"]
+				["JTAC"] = 
+				{
+					["Ferret"] = 10,
+					["Finger"] = 8,
+					["Deathstar"] = 15,
+					["Pointer"] = 4,
+					["Anvil"] = 16,
+					["Darknight"] = 2,
+					["Whiplash"] = 7,
+					["Warrior"] = 3,
+					["Eyeball"] = 5,
+					["Mantis"] = 18,
+					["Playboy"] = 12,
+					["Axeman"] = 1,
+					["Moonbeam"] = 6,
+					["Hammer"] = 13,
+					["Shaba"] = 11,
+					["Badger"] = 19,
+					["Jaguar"] = 14,
+					["Firefly"] = 17,
+					["Pinpoint"] = 9,
+				}, -- end of ["JTAC"]
+				["Ascot"] = 12,
+				["Cargo"] = 11,
+				["Heavy"] = 9,
+			}, -- end of ["TRANSPORT"]
 			["TANKER"] = 
 			{
 				["Texaco"] = 1,

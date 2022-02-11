@@ -477,92 +477,92 @@ MEunitsByCat =
 		[5] = 
 		{
 			["shape_name"] = "ab-212_cargo",
-			["type"] = "uh1h_cargo",
+			["heading"] = 0,
 			["point"] = 
 			{
 				["y"] = 675199.99999999,
 				["x"] = -292007.14285714,
 			}, -- end of ["point"]
+			["unitId"] = 45,
 			["groupId"] = 31,
-			["country"] = "usa",
-			["heading"] = 0,
+			["type"] = "uh1h_cargo",
 			["groupName"] = "cargoBob",
 			["x"] = -292007.14285714,
-			["y"] = 675199.99999999,
+			["coalition"] = "blue",
 			["mass"] = 371,
-			["unitId"] = 45,
+			["categoryStatic"] = "Cargos",
 			["category"] = "static",
 			["unitName"] = "cargoBob",
+			["y"] = 675199.99999999,
+			["country"] = "usa",
 			["countryId"] = 2,
-			["categoryStatic"] = "Cargos",
-			["coalition"] = "blue",
 		}, -- end of [5]
 		[6] = 
 		{
 			["shape_name"] = "ab-212_cargo",
-			["type"] = "uh1h_cargo",
+			["heading"] = 0,
 			["point"] = 
 			{
 				["y"] = 674842.85714285,
 				["x"] = -291678.57142856,
 			}, -- end of ["point"]
+			["unitId"] = 46,
 			["groupId"] = 32,
-			["country"] = "usa",
-			["heading"] = 0,
+			["type"] = "uh1h_cargo",
 			["groupName"] = "cloneCargoBase",
 			["x"] = -291678.57142856,
-			["y"] = 674842.85714285,
+			["coalition"] = "blue",
 			["mass"] = 1337,
-			["unitId"] = 46,
+			["categoryStatic"] = "Cargos",
 			["category"] = "static",
 			["unitName"] = "cloneCargoBase",
+			["y"] = 674842.85714285,
+			["country"] = "usa",
 			["countryId"] = 2,
-			["categoryStatic"] = "Cargos",
-			["coalition"] = "blue",
 		}, -- end of [6]
 		[7] = 
 		{
-			["heading"] = 0,
+			["type"] = "AH-1W",
 			["point"] = 
 			{
 				["y"] = 443856.28948724,
 				["x"] = -355322.45423175,
 			}, -- end of ["point"]
-			["categoryStatic"] = "Helicopters",
-			["groupId"] = 40,
+			["country"] = "usa",
+			["unitId"] = 63,
 			["livery_id"] = "USA Marines",
 			["groupName"] = "static_on_ship1",
-			["country"] = "usa",
-			["coalition"] = "blue",
+			["heading"] = 0,
+			["countryId"] = 2,
 			["x"] = -355322.45423175,
-			["type"] = "AH-1W",
+			["categoryStatic"] = "Helicopters",
 			["category"] = "static",
 			["unitName"] = "static_on_ship1",
-			["unitId"] = 63,
+			["groupId"] = 40,
+			["coalition"] = "blue",
 			["y"] = 443856.28948724,
-			["countryId"] = 2,
 		}, -- end of [7]
 		[8] = 
 		{
-			["heading"] = 0,
+			["type"] = "AH-1W",
 			["point"] = 
 			{
 				["y"] = 443849.03844635,
 				["x"] = -355322.27295572,
 			}, -- end of ["point"]
-			["categoryStatic"] = "Helicopters",
-			["groupId"] = 41,
+			["country"] = "usa",
+			["unitId"] = 64,
 			["livery_id"] = "USA Marines",
 			["groupName"] = "static_on_ship1 #001",
-			["country"] = "usa",
-			["coalition"] = "blue",
+			["heading"] = 0,
+			["countryId"] = 2,
 			["x"] = -355322.27295572,
-			["type"] = "AH-1W",
+			["categoryStatic"] = "Helicopters",
 			["category"] = "static",
 			["unitName"] = "static_on_ship1 #001",
-			["unitId"] = 64,
+			["groupId"] = 41,
+			["coalition"] = "blue",
 			["y"] = 443849.03844635,
-			["countryId"] = 2,
 		}, -- end of [8]
 		[9] = 
 		{

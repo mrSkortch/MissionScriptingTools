@@ -1311,25 +1311,25 @@ MEunits =
 						[1] = 
 						{
 							["shape_name"] = "ab-212_cargo",
-							["type"] = "uh1h_cargo",
+							["heading"] = 0,
 							["point"] = 
 							{
 								["y"] = 675199.99999999,
 								["x"] = -292007.14285714,
 							}, -- end of ["point"]
-							["categoryStatic"] = "Cargos",
-							["y"] = 675199.99999999,
+							["country"] = "usa",
 							["coalition"] = "blue",
-							["groupName"] = "cargoBob",
-							["groupId"] = 31,
-							["countryId"] = 2,
-							["mass"] = 371,
 							["unitId"] = 45,
+							["groupName"] = "cargoBob",
+							["countryId"] = 2,
+							["y"] = 675199.99999999,
+							["mass"] = 371,
+							["categoryStatic"] = "Cargos",
 							["category"] = "static",
 							["unitName"] = "cargoBob",
 							["x"] = -292007.14285714,
-							["heading"] = 0,
-							["country"] = "usa",
+							["type"] = "uh1h_cargo",
+							["groupId"] = 31,
 						}, -- end of [1]
 					}, -- end of ["units"]
 				}, -- end of [4]
@@ -1346,25 +1346,25 @@ MEunits =
 						[1] = 
 						{
 							["shape_name"] = "ab-212_cargo",
-							["type"] = "uh1h_cargo",
+							["heading"] = 0,
 							["point"] = 
 							{
 								["y"] = 674842.85714285,
 								["x"] = -291678.57142856,
 							}, -- end of ["point"]
-							["categoryStatic"] = "Cargos",
-							["y"] = 674842.85714285,
+							["country"] = "usa",
 							["coalition"] = "blue",
-							["groupName"] = "cloneCargoBase",
-							["groupId"] = 32,
-							["countryId"] = 2,
-							["mass"] = 1337,
 							["unitId"] = 46,
+							["groupName"] = "cloneCargoBase",
+							["countryId"] = 2,
+							["y"] = 674842.85714285,
+							["mass"] = 1337,
+							["categoryStatic"] = "Cargos",
 							["category"] = "static",
 							["unitName"] = "cloneCargoBase",
 							["x"] = -291678.57142856,
-							["heading"] = 0,
-							["country"] = "usa",
+							["type"] = "uh1h_cargo",
+							["groupId"] = 32,
 						}, -- end of [1]
 					}, -- end of ["units"]
 				}, -- end of [5]
@@ -1380,25 +1380,25 @@ MEunits =
 					{
 						[1] = 
 						{
-							["heading"] = 0,
+							["type"] = "AH-1W",
 							["point"] = 
 							{
 								["y"] = 443856.28948724,
 								["x"] = -355322.45423175,
 							}, -- end of ["point"]
-							["categoryStatic"] = "Helicopters",
-							["y"] = 443856.28948724,
+							["country"] = "usa",
+							["coalition"] = "blue",
 							["livery_id"] = "USA Marines",
 							["groupName"] = "static_on_ship1",
-							["coalition"] = "blue",
 							["countryId"] = 2,
+							["y"] = 443856.28948724,
 							["x"] = -355322.45423175,
-							["unitId"] = 63,
+							["groupId"] = 40,
 							["category"] = "static",
 							["unitName"] = "static_on_ship1",
-							["type"] = "AH-1W",
-							["country"] = "usa",
-							["groupId"] = 40,
+							["categoryStatic"] = "Helicopters",
+							["heading"] = 0,
+							["unitId"] = 63,
 						}, -- end of [1]
 					}, -- end of ["units"]
 				}, -- end of [6]
@@ -1414,25 +1414,25 @@ MEunits =
 					{
 						[1] = 
 						{
-							["heading"] = 0,
+							["type"] = "AH-1W",
 							["point"] = 
 							{
 								["y"] = 443849.03844635,
 								["x"] = -355322.27295572,
 							}, -- end of ["point"]
-							["categoryStatic"] = "Helicopters",
-							["y"] = 443849.03844635,
+							["country"] = "usa",
+							["coalition"] = "blue",
 							["livery_id"] = "USA Marines",
 							["groupName"] = "static_on_ship1 #001",
-							["coalition"] = "blue",
 							["countryId"] = 2,
+							["y"] = 443849.03844635,
 							["x"] = -355322.27295572,
-							["unitId"] = 64,
+							["groupId"] = 41,
 							["category"] = "static",
 							["unitName"] = "static_on_ship1 #001",
-							["type"] = "AH-1W",
-							["country"] = "usa",
-							["groupId"] = 41,
+							["categoryStatic"] = "Helicopters",
+							["heading"] = 0,
+							["unitId"] = 64,
 						}, -- end of [1]
 					}, -- end of ["units"]
 				}, -- end of [7]
