@@ -109,6 +109,9 @@ humansByName =
 		["onboard_num"] = "52",
 		["category"] = "plane",
 		["speed"] = 138.88888888889,
+		["AddPropAircraft"] = 
+		{
+		}, -- end of ["AddPropAircraft"]
 		["type"] = "A-10C",
 		["country"] = "usa",
 		["psi"] = 0.67060113146646,
@@ -120,7 +123,6 @@ humansByName =
 		["y"] = 636428.57142857,
 		["unitId"] = 11,
 		["heading"] = -0.67060113146646,
-		["skill"] = "Client",
 		["callsign"] = 
 		{
 			[1] = 3,
@@ -128,6 +130,7 @@ humansByName =
 			[3] = 1,
 			["name"] = "Uzi11",
 		}, -- end of ["callsign"]
+		["skill"] = "Client",
 		["groupId"] = 6,
 	}, -- end of ["A-10C Client #1_unit"]
 	["Su-33 Client #2Unit"] = 
@@ -171,6 +174,9 @@ humansByName =
 		["onboard_num"] = "52",
 		["category"] = "plane",
 		["speed"] = 138.88888888889,
+		["AddPropAircraft"] = 
+		{
+		}, -- end of ["AddPropAircraft"]
 		["type"] = "A-10C",
 		["country"] = "usa",
 		["psi"] = 0.66079849060746,
@@ -182,7 +188,6 @@ humansByName =
 		["y"] = 644428.57142857,
 		["unitId"] = 12,
 		["heading"] = -0.66079849060746,
-		["skill"] = "Client",
 		["callsign"] = 
 		{
 			[1] = 3,
@@ -190,6 +195,7 @@ humansByName =
 			[3] = 1,
 			["name"] = "Uzi11",
 		}, -- end of ["callsign"]
+		["skill"] = "Client",
 		["groupId"] = 7,
 	}, -- end of ["A-10C Client #2_unit"]
 	["Su-33 Client #1Unit"] = 

@@ -108,8 +108,8 @@ MEunitsByNum =
 		["alt"] = 500,
 		["point"] = 
 		{
-			["y"] = 405888.85058741,
-			["x"] = -155967.80633993,
+			["y"] = 404406.46136648,
+			["x"] = -158700.87914814,
 		}, -- end of ["point"]
 		["alt_type"] = "BARO",
 		["livery_id"] = "Australia RAAF",
@@ -118,7 +118,7 @@ MEunitsByNum =
 		["unitName"] = "Rotary-1-1",
 		["type"] = "CH-47D",
 		["country"] = "australia",
-		["psi"] = -2.6461357622286,
+		["psi"] = -2.6021711998766,
 		["groupId"] = 45,
 		["groupName"] = "nH",
 		["callsign"] = 
@@ -129,11 +129,11 @@ MEunitsByNum =
 			["name"] = "Springfield11",
 		}, -- end of ["callsign"]
 		["countryId"] = 21,
-		["x"] = -155967.80633993,
+		["x"] = -158700.87914814,
 		["skill"] = "High",
-		["heading"] = 2.6461357622286,
+		["heading"] = 2.6021711998766,
 		["unitId"] = 68,
-		["y"] = 405888.85058741,
+		["y"] = 404406.46136648,
 		["coalition"] = "neutral",
 		["speed"] = 44.444444444444,
 	}, -- end of [5]
@@ -247,92 +247,92 @@ MEunitsByNum =
 	[11] = 
 	{
 		["shape_name"] = "ab-212_cargo",
-		["type"] = "uh1h_cargo",
+		["heading"] = 0,
 		["point"] = 
 		{
 			["y"] = 675199.99999999,
 			["x"] = -292007.14285714,
 		}, -- end of ["point"]
+		["unitId"] = 45,
 		["groupId"] = 31,
-		["country"] = "usa",
-		["heading"] = 0,
+		["type"] = "uh1h_cargo",
 		["groupName"] = "cargoBob",
 		["x"] = -292007.14285714,
-		["y"] = 675199.99999999,
+		["coalition"] = "blue",
 		["mass"] = 371,
-		["unitId"] = 45,
+		["categoryStatic"] = "Cargos",
 		["category"] = "static",
 		["unitName"] = "cargoBob",
+		["y"] = 675199.99999999,
+		["country"] = "usa",
 		["countryId"] = 2,
-		["categoryStatic"] = "Cargos",
-		["coalition"] = "blue",
 	}, -- end of [11]
 	[12] = 
 	{
 		["shape_name"] = "ab-212_cargo",
-		["type"] = "uh1h_cargo",
+		["heading"] = 0,
 		["point"] = 
 		{
 			["y"] = 674842.85714285,
 			["x"] = -291678.57142856,
 		}, -- end of ["point"]
+		["unitId"] = 46,
 		["groupId"] = 32,
-		["country"] = "usa",
-		["heading"] = 0,
+		["type"] = "uh1h_cargo",
 		["groupName"] = "cloneCargoBase",
 		["x"] = -291678.57142856,
-		["y"] = 674842.85714285,
+		["coalition"] = "blue",
 		["mass"] = 1337,
-		["unitId"] = 46,
+		["categoryStatic"] = "Cargos",
 		["category"] = "static",
 		["unitName"] = "cloneCargoBase",
+		["y"] = 674842.85714285,
+		["country"] = "usa",
 		["countryId"] = 2,
-		["categoryStatic"] = "Cargos",
-		["coalition"] = "blue",
 	}, -- end of [12]
 	[13] = 
 	{
-		["heading"] = 0,
+		["type"] = "AH-1W",
 		["point"] = 
 		{
 			["y"] = 443856.28948724,
 			["x"] = -355322.45423175,
 		}, -- end of ["point"]
-		["categoryStatic"] = "Helicopters",
-		["groupId"] = 40,
+		["country"] = "usa",
+		["unitId"] = 63,
 		["livery_id"] = "USA Marines",
 		["groupName"] = "static_on_ship1",
-		["country"] = "usa",
-		["coalition"] = "blue",
+		["heading"] = 0,
+		["countryId"] = 2,
 		["x"] = -355322.45423175,
-		["type"] = "AH-1W",
+		["categoryStatic"] = "Helicopters",
 		["category"] = "static",
 		["unitName"] = "static_on_ship1",
-		["unitId"] = 63,
+		["groupId"] = 40,
+		["coalition"] = "blue",
 		["y"] = 443856.28948724,
-		["countryId"] = 2,
 	}, -- end of [13]
 	[14] = 
 	{
-		["heading"] = 0,
+		["type"] = "AH-1W",
 		["point"] = 
 		{
 			["y"] = 443849.03844635,
 			["x"] = -355322.27295572,
 		}, -- end of ["point"]
-		["categoryStatic"] = "Helicopters",
-		["groupId"] = 41,
+		["country"] = "usa",
+		["unitId"] = 64,
 		["livery_id"] = "USA Marines",
 		["groupName"] = "static_on_ship1 #001",
-		["country"] = "usa",
-		["coalition"] = "blue",
+		["heading"] = 0,
+		["countryId"] = 2,
 		["x"] = -355322.27295572,
-		["type"] = "AH-1W",
+		["categoryStatic"] = "Helicopters",
 		["category"] = "static",
 		["unitName"] = "static_on_ship1 #001",
-		["unitId"] = 64,
+		["groupId"] = 41,
+		["coalition"] = "blue",
 		["y"] = 443849.03844635,
-		["countryId"] = 2,
 	}, -- end of [14]
 	[15] = 
 	{
@@ -710,6 +710,28 @@ MEunitsByNum =
 	}, -- end of [31]
 	[32] = 
 	{
+		["type"] = "AAV7",
+		["point"] = 
+		{
+			["y"] = 185783.38833846,
+			["x"] = -244729.2581753,
+		}, -- end of ["point"]
+		["groupId"] = 47,
+		["skill"] = "Average",
+		["country"] = "usa",
+		["groupName"] = "poly",
+		["y"] = 185783.38833846,
+		["coalition"] = "blue",
+		["x"] = -244729.2581753,
+		["unitId"] = 70,
+		["category"] = "vehicle",
+		["unitName"] = "Ground-2-1",
+		["playerCanDrive"] = true,
+		["heading"] = 2.3261877017598,
+		["countryId"] = 2,
+	}, -- end of [32]
+	[33] = 
+	{
 		["alt"] = 2000,
 		["point"] = 
 		{
@@ -741,8 +763,8 @@ MEunitsByNum =
 		["y"] = 662142.85714286,
 		["coalition"] = "blue",
 		["speed"] = 138.88888888889,
-	}, -- end of [32]
-	[33] = 
+	}, -- end of [33]
+	[34] = 
 	{
 		["alt"] = 2000,
 		["point"] = 
@@ -775,8 +797,8 @@ MEunitsByNum =
 		["y"] = 668428.57142857,
 		["coalition"] = "blue",
 		["speed"] = 138.88888888889,
-	}, -- end of [33]
-	[34] = 
+	}, -- end of [34]
+	[35] = 
 	{
 		["alt"] = 2000,
 		["point"] = 
@@ -789,11 +811,17 @@ MEunitsByNum =
 		["onboard_num"] = "52",
 		["category"] = "plane",
 		["unitName"] = "A-10C Client #1_unit",
+		["AddPropAircraft"] = 
+		{
+		}, -- end of ["AddPropAircraft"]
 		["type"] = "A-10C",
 		["country"] = "usa",
 		["psi"] = 0.67060113146646,
 		["groupId"] = 6,
 		["groupName"] = "A-10C Client #1",
+		["skill"] = "Client",
+		["coalition"] = "blue",
+		["x"] = -318142.85714286,
 		["callsign"] = 
 		{
 			[1] = 3,
@@ -801,16 +829,13 @@ MEunitsByNum =
 			[3] = 1,
 			["name"] = "Uzi11",
 		}, -- end of ["callsign"]
-		["countryId"] = 2,
-		["x"] = -318142.85714286,
-		["skill"] = "Client",
 		["heading"] = -0.67060113146646,
 		["unitId"] = 11,
 		["y"] = 636428.57142857,
-		["coalition"] = "blue",
+		["countryId"] = 2,
 		["speed"] = 138.88888888889,
-	}, -- end of [34]
-	[35] = 
+	}, -- end of [35]
+	[36] = 
 	{
 		["alt"] = 2000,
 		["point"] = 
@@ -823,11 +848,17 @@ MEunitsByNum =
 		["onboard_num"] = "52",
 		["category"] = "plane",
 		["unitName"] = "A-10C Client #2_unit",
+		["AddPropAircraft"] = 
+		{
+		}, -- end of ["AddPropAircraft"]
 		["type"] = "A-10C",
 		["country"] = "usa",
 		["psi"] = 0.66079849060746,
 		["groupId"] = 7,
 		["groupName"] = "A-10C Client #2",
+		["skill"] = "Client",
+		["coalition"] = "blue",
+		["x"] = -315857.14285714,
 		["callsign"] = 
 		{
 			[1] = 3,
@@ -835,16 +866,13 @@ MEunitsByNum =
 			[3] = 1,
 			["name"] = "Uzi11",
 		}, -- end of ["callsign"]
-		["countryId"] = 2,
-		["x"] = -315857.14285714,
-		["skill"] = "Client",
 		["heading"] = -0.66079849060746,
 		["unitId"] = 12,
 		["y"] = 644428.57142857,
-		["coalition"] = "blue",
+		["countryId"] = 2,
 		["speed"] = 138.88888888889,
-	}, -- end of [35]
-	[36] = 
+	}, -- end of [36]
+	[37] = 
 	{
 		["alt"] = 2000,
 		["point"] = 
@@ -877,8 +905,8 @@ MEunitsByNum =
 		["y"] = 682714.28571429,
 		["coalition"] = "blue",
 		["speed"] = 138.88888888889,
-	}, -- end of [36]
-	[37] = 
+	}, -- end of [37]
+	[38] = 
 	{
 		["alt"] = 2000,
 		["hardpoint_racks"] = true,
@@ -912,8 +940,8 @@ MEunitsByNum =
 		["countryId"] = 2,
 		["coalition"] = "blue",
 		["speed"] = 138.88888888889,
-	}, -- end of [37]
-	[38] = 
+	}, -- end of [38]
+	[39] = 
 	{
 		["alt"] = 500,
 		["hardpoint_racks"] = true,
@@ -947,8 +975,8 @@ MEunitsByNum =
 		["countryId"] = 2,
 		["coalition"] = "blue",
 		["speed"] = 55.555555555556,
-	}, -- end of [38]
-	[39] = 
+	}, -- end of [39]
+	[40] = 
 	{
 		["alt"] = 500,
 		["point"] = 
@@ -981,8 +1009,8 @@ MEunitsByNum =
 		["y"] = 631695.14285713,
 		["coalition"] = "blue",
 		["speed"] = 55.555555555556,
-	}, -- end of [39]
-	[40] = 
+	}, -- end of [40]
+	[41] = 
 	{
 		["type"] = "MOSCOW",
 		["point"] = 
@@ -1002,8 +1030,8 @@ MEunitsByNum =
 		["unitId"] = 15,
 		["y"] = 200000,
 		["countryId"] = 0,
-	}, -- end of [40]
-	[41] = 
+	}, -- end of [41]
+	[42] = 
 	{
 		["type"] = "MOSCOW",
 		["point"] = 
@@ -1023,8 +1051,8 @@ MEunitsByNum =
 		["unitId"] = 16,
 		["y"] = 200800,
 		["countryId"] = 0,
-	}, -- end of [41]
-	[42] = 
+	}, -- end of [42]
+	[43] = 
 	{
 		["type"] = "MOSCOW",
 		["point"] = 
@@ -1044,8 +1072,8 @@ MEunitsByNum =
 		["unitId"] = 17,
 		["y"] = 73571.428571428,
 		["countryId"] = 0,
-	}, -- end of [42]
-	[43] = 
+	}, -- end of [43]
+	[44] = 
 	{
 		["type"] = "MOSCOW",
 		["point"] = 
@@ -1065,8 +1093,8 @@ MEunitsByNum =
 		["unitId"] = 18,
 		["y"] = 74371.428571428,
 		["countryId"] = 0,
-	}, -- end of [43]
-	[44] = 
+	}, -- end of [44]
+	[45] = 
 	{
 		["type"] = "FARP",
 		["point"] = 
@@ -1086,8 +1114,8 @@ MEunitsByNum =
 		["groupId"] = 17,
 		["y"] = 617591.42857143,
 		["countryId"] = 0,
-	}, -- end of [44]
-	[45] = 
+	}, -- end of [45]
+	[46] = 
 	{
 		["shape_name"] = "PalatkaB",
 		["type"] = "FARP Tent",
@@ -1108,8 +1136,8 @@ MEunitsByNum =
 		["groupId"] = 18,
 		["countryId"] = 0,
 		["coalition"] = "red",
-	}, -- end of [45]
-	[46] = 
+	}, -- end of [46]
+	[47] = 
 	{
 		["shape_name"] = "PalatkaB",
 		["type"] = "FARP Tent",
@@ -1130,8 +1158,8 @@ MEunitsByNum =
 		["groupId"] = 19,
 		["countryId"] = 0,
 		["coalition"] = "red",
-	}, -- end of [46]
-	[47] = 
+	}, -- end of [47]
+	[48] = 
 	{
 		["shape_name"] = "PalatkaB",
 		["type"] = "FARP Tent",
@@ -1152,8 +1180,8 @@ MEunitsByNum =
 		["groupId"] = 36,
 		["countryId"] = 0,
 		["coalition"] = "red",
-	}, -- end of [47]
-	[48] = 
+	}, -- end of [48]
+	[49] = 
 	{
 		["shape_name"] = "teplowoz",
 		["type"] = "Locomotive",
@@ -1173,8 +1201,8 @@ MEunitsByNum =
 		["country"] = "russia",
 		["y"] = 652535.98623348,
 		["coalition"] = "red",
-	}, -- end of [48]
-	[49] = 
+	}, -- end of [49]
+	[50] = 
 	{
 		["shape_name"] = "elektrowoz",
 		["type"] = "Electric locomotive",
@@ -1194,8 +1222,8 @@ MEunitsByNum =
 		["country"] = "russia",
 		["y"] = 652535.98623348,
 		["coalition"] = "red",
-	}, -- end of [49]
-	[50] = 
+	}, -- end of [50]
+	[51] = 
 	{
 		["type"] = "BTR-80",
 		["point"] = 
@@ -1216,8 +1244,8 @@ MEunitsByNum =
 		["playerCanDrive"] = true,
 		["heading"] = -1.7994767003775,
 		["countryId"] = 0,
-	}, -- end of [50]
-	[51] = 
+	}, -- end of [51]
+	[52] = 
 	{
 		["type"] = "BTR-80",
 		["point"] = 
@@ -1238,8 +1266,8 @@ MEunitsByNum =
 		["playerCanDrive"] = true,
 		["heading"] = -1.7994767003775,
 		["countryId"] = 0,
-	}, -- end of [51]
-	[52] = 
+	}, -- end of [52]
+	[53] = 
 	{
 		["type"] = "BTR-80",
 		["point"] = 
@@ -1260,8 +1288,8 @@ MEunitsByNum =
 		["playerCanDrive"] = true,
 		["heading"] = -1.7994767003775,
 		["countryId"] = 0,
-	}, -- end of [52]
-	[53] = 
+	}, -- end of [53]
+	[54] = 
 	{
 		["type"] = "BTR-80",
 		["point"] = 
@@ -1282,8 +1310,8 @@ MEunitsByNum =
 		["playerCanDrive"] = true,
 		["heading"] = -1.7994767003775,
 		["countryId"] = 0,
-	}, -- end of [53]
-	[54] = 
+	}, -- end of [54]
+	[55] = 
 	{
 		["type"] = "BTR-80",
 		["point"] = 
@@ -1304,8 +1332,8 @@ MEunitsByNum =
 		["playerCanDrive"] = true,
 		["heading"] = -1.7994767003775,
 		["countryId"] = 0,
-	}, -- end of [54]
-	[55] = 
+	}, -- end of [55]
+	[56] = 
 	{
 		["type"] = "BTR-80",
 		["point"] = 
@@ -1326,8 +1354,8 @@ MEunitsByNum =
 		["playerCanDrive"] = true,
 		["heading"] = -1.7994767003775,
 		["countryId"] = 0,
-	}, -- end of [55]
-	[56] = 
+	}, -- end of [56]
+	[57] = 
 	{
 		["type"] = "T-55",
 		["point"] = 
@@ -1348,8 +1376,8 @@ MEunitsByNum =
 		["playerCanDrive"] = true,
 		["heading"] = 0,
 		["countryId"] = 0,
-	}, -- end of [56]
-	[57] = 
+	}, -- end of [57]
+	[58] = 
 	{
 		["type"] = "T-55",
 		["point"] = 
@@ -1370,8 +1398,8 @@ MEunitsByNum =
 		["playerCanDrive"] = true,
 		["heading"] = 0,
 		["countryId"] = 0,
-	}, -- end of [57]
-	[58] = 
+	}, -- end of [58]
+	[59] = 
 	{
 		["type"] = "T-55",
 		["point"] = 
@@ -1392,8 +1420,8 @@ MEunitsByNum =
 		["playerCanDrive"] = true,
 		["heading"] = 0,
 		["countryId"] = 0,
-	}, -- end of [58]
-	[59] = 
+	}, -- end of [59]
+	[60] = 
 	{
 		["type"] = "T-55",
 		["point"] = 
@@ -1414,8 +1442,8 @@ MEunitsByNum =
 		["playerCanDrive"] = true,
 		["heading"] = 0,
 		["countryId"] = 0,
-	}, -- end of [59]
-	[60] = 
+	}, -- end of [60]
+	[61] = 
 	{
 		["alt"] = 2000,
 		["point"] = 
@@ -1442,8 +1470,8 @@ MEunitsByNum =
 		["y"] = 590391.42857142,
 		["coalition"] = "red",
 		["speed"] = 138.88888888889,
-	}, -- end of [60]
-	[61] = 
+	}, -- end of [61]
+	[62] = 
 	{
 		["alt"] = 2000,
 		["point"] = 
@@ -1470,8 +1498,8 @@ MEunitsByNum =
 		["y"] = 590431.42857142,
 		["coalition"] = "red",
 		["speed"] = 138.88888888889,
-	}, -- end of [61]
-	[62] = 
+	}, -- end of [62]
+	[63] = 
 	{
 		["alt"] = 2000,
 		["point"] = 
@@ -1498,8 +1526,8 @@ MEunitsByNum =
 		["y"] = 590471.42857142,
 		["coalition"] = "red",
 		["speed"] = 138.88888888889,
-	}, -- end of [62]
-	[63] = 
+	}, -- end of [63]
+	[64] = 
 	{
 		["alt"] = 500,
 		["point"] = 
@@ -1526,8 +1554,8 @@ MEunitsByNum =
 		["y"] = 615000,
 		["coalition"] = "red",
 		["speed"] = 55.555555555556,
-	}, -- end of [63]
-	[64] = 
+	}, -- end of [64]
+	[65] = 
 	{
 		["alt"] = 500,
 		["point"] = 
@@ -1554,8 +1582,8 @@ MEunitsByNum =
 		["y"] = 615040,
 		["coalition"] = "red",
 		["speed"] = 55.555555555556,
-	}, -- end of [64]
-	[65] = 
+	}, -- end of [65]
+	[66] = 
 	{
 		["alt"] = 500,
 		["point"] = 
@@ -1590,8 +1618,8 @@ MEunitsByNum =
 		["y"] = 603285.71428571,
 		["countryId"] = 0,
 		["speed"] = 55.555555555556,
-	}, -- end of [65]
-	[66] = 
+	}, -- end of [66]
+	[67] = 
 	{
 		["alt"] = 500,
 		["point"] = 
@@ -1626,5 +1654,5 @@ MEunitsByNum =
 		["y"] = 603325.71428571,
 		["countryId"] = 0,
 		["speed"] = 55.555555555556,
-	}, -- end of [66]
+	}, -- end of [67]
 } -- end of MEunitsByNum

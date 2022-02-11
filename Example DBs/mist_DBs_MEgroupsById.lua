@@ -382,11 +382,17 @@ MEgroupsById =
 				["onboard_num"] = "52",
 				["category"] = "plane",
 				["unitName"] = "A-10C Client #1_unit",
+				["AddPropAircraft"] = 
+				{
+				}, -- end of ["AddPropAircraft"]
 				["type"] = "A-10C",
 				["country"] = "usa",
 				["psi"] = 0.67060113146646,
 				["groupId"] = 6,
 				["groupName"] = "A-10C Client #1",
+				["skill"] = "Client",
+				["coalition"] = "blue",
+				["x"] = -318142.85714286,
 				["callsign"] = 
 				{
 					[1] = 3,
@@ -394,13 +400,10 @@ MEgroupsById =
 					[3] = 1,
 					["name"] = "Uzi11",
 				}, -- end of ["callsign"]
-				["countryId"] = 2,
-				["x"] = -318142.85714286,
-				["skill"] = "Client",
 				["heading"] = -0.67060113146646,
 				["unitId"] = 11,
 				["y"] = 636428.57142857,
-				["coalition"] = "blue",
+				["countryId"] = 2,
 				["speed"] = 138.88888888889,
 			}, -- end of [1]
 		}, -- end of ["units"]
@@ -435,11 +438,17 @@ MEgroupsById =
 				["onboard_num"] = "52",
 				["category"] = "plane",
 				["unitName"] = "A-10C Client #2_unit",
+				["AddPropAircraft"] = 
+				{
+				}, -- end of ["AddPropAircraft"]
 				["type"] = "A-10C",
 				["country"] = "usa",
 				["psi"] = 0.66079849060746,
 				["groupId"] = 7,
 				["groupName"] = "A-10C Client #2",
+				["skill"] = "Client",
+				["coalition"] = "blue",
+				["x"] = -315857.14285714,
 				["callsign"] = 
 				{
 					[1] = 3,
@@ -447,13 +456,10 @@ MEgroupsById =
 					[3] = 1,
 					["name"] = "Uzi11",
 				}, -- end of ["callsign"]
-				["countryId"] = 2,
-				["x"] = -315857.14285714,
-				["skill"] = "Client",
 				["heading"] = -0.66079849060746,
 				["unitId"] = 12,
 				["y"] = 644428.57142857,
-				["coalition"] = "blue",
+				["countryId"] = 2,
 				["speed"] = 138.88888888889,
 			}, -- end of [1]
 		}, -- end of ["units"]
@@ -1408,25 +1414,25 @@ MEgroupsById =
 			[1] = 
 			{
 				["shape_name"] = "ab-212_cargo",
-				["type"] = "uh1h_cargo",
+				["heading"] = 0,
 				["point"] = 
 				{
 					["y"] = 675199.99999999,
 					["x"] = -292007.14285714,
 				}, -- end of ["point"]
+				["unitId"] = 45,
 				["groupId"] = 31,
-				["country"] = "usa",
-				["heading"] = 0,
+				["type"] = "uh1h_cargo",
 				["groupName"] = "cargoBob",
 				["x"] = -292007.14285714,
-				["y"] = 675199.99999999,
+				["coalition"] = "blue",
 				["mass"] = 371,
-				["unitId"] = 45,
+				["categoryStatic"] = "Cargos",
 				["category"] = "static",
 				["unitName"] = "cargoBob",
+				["y"] = 675199.99999999,
+				["country"] = "usa",
 				["countryId"] = 2,
-				["categoryStatic"] = "Cargos",
-				["coalition"] = "blue",
 			}, -- end of [1]
 		}, -- end of ["units"]
 	}, -- end of [31]
@@ -1443,25 +1449,25 @@ MEgroupsById =
 			[1] = 
 			{
 				["shape_name"] = "ab-212_cargo",
-				["type"] = "uh1h_cargo",
+				["heading"] = 0,
 				["point"] = 
 				{
 					["y"] = 674842.85714285,
 					["x"] = -291678.57142856,
 				}, -- end of ["point"]
+				["unitId"] = 46,
 				["groupId"] = 32,
-				["country"] = "usa",
-				["heading"] = 0,
+				["type"] = "uh1h_cargo",
 				["groupName"] = "cloneCargoBase",
 				["x"] = -291678.57142856,
-				["y"] = 674842.85714285,
+				["coalition"] = "blue",
 				["mass"] = 1337,
-				["unitId"] = 46,
+				["categoryStatic"] = "Cargos",
 				["category"] = "static",
 				["unitName"] = "cloneCargoBase",
+				["y"] = 674842.85714285,
+				["country"] = "usa",
 				["countryId"] = 2,
-				["categoryStatic"] = "Cargos",
-				["coalition"] = "blue",
 			}, -- end of [1]
 		}, -- end of ["units"]
 	}, -- end of [32]
@@ -1826,25 +1832,25 @@ MEgroupsById =
 		{
 			[1] = 
 			{
-				["heading"] = 0,
+				["type"] = "AH-1W",
 				["point"] = 
 				{
 					["y"] = 443849.03844635,
 					["x"] = -355322.27295572,
 				}, -- end of ["point"]
-				["categoryStatic"] = "Helicopters",
-				["groupId"] = 41,
+				["country"] = "usa",
+				["unitId"] = 64,
 				["livery_id"] = "USA Marines",
 				["groupName"] = "static_on_ship1 #001",
-				["country"] = "usa",
-				["coalition"] = "blue",
+				["heading"] = 0,
+				["countryId"] = 2,
 				["x"] = -355322.27295572,
-				["type"] = "AH-1W",
+				["categoryStatic"] = "Helicopters",
 				["category"] = "static",
 				["unitName"] = "static_on_ship1 #001",
-				["unitId"] = 64,
+				["groupId"] = 41,
+				["coalition"] = "blue",
 				["y"] = 443849.03844635,
-				["countryId"] = 2,
 			}, -- end of [1]
 		}, -- end of ["units"]
 	}, -- end of [41]
@@ -1899,8 +1905,8 @@ MEgroupsById =
 				["alt"] = 500,
 				["point"] = 
 				{
-					["y"] = 405888.85058741,
-					["x"] = -155967.80633993,
+					["y"] = 404406.46136648,
+					["x"] = -158700.87914814,
 				}, -- end of ["point"]
 				["alt_type"] = "BARO",
 				["livery_id"] = "Australia RAAF",
@@ -1909,7 +1915,7 @@ MEgroupsById =
 				["unitName"] = "Rotary-1-1",
 				["type"] = "CH-47D",
 				["country"] = "australia",
-				["psi"] = -2.6461357622286,
+				["psi"] = -2.6021711998766,
 				["groupId"] = 45,
 				["groupName"] = "nH",
 				["callsign"] = 
@@ -1920,11 +1926,11 @@ MEgroupsById =
 					["name"] = "Springfield11",
 				}, -- end of ["callsign"]
 				["countryId"] = 21,
-				["x"] = -155967.80633993,
+				["x"] = -158700.87914814,
 				["skill"] = "High",
-				["heading"] = 2.6461357622286,
+				["heading"] = 2.6021711998766,
 				["unitId"] = 68,
-				["y"] = 405888.85058741,
+				["y"] = 404406.46136648,
 				["coalition"] = "neutral",
 				["speed"] = 44.444444444444,
 			}, -- end of [1]
@@ -1938,6 +1944,43 @@ MEgroupsById =
 		["task"] = "Transport",
 		["uncontrolled"] = false,
 	}, -- end of [45]
+	[47] = 
+	{
+		["country"] = "usa",
+		["groupName"] = "poly",
+		["units"] = 
+		{
+			[1] = 
+			{
+				["type"] = "AAV7",
+				["point"] = 
+				{
+					["y"] = 185783.38833846,
+					["x"] = -244729.2581753,
+				}, -- end of ["point"]
+				["groupId"] = 47,
+				["skill"] = "Average",
+				["country"] = "usa",
+				["groupName"] = "poly",
+				["y"] = 185783.38833846,
+				["coalition"] = "blue",
+				["x"] = -244729.2581753,
+				["unitId"] = 70,
+				["category"] = "vehicle",
+				["unitName"] = "Ground-2-1",
+				["playerCanDrive"] = true,
+				["heading"] = 2.3261877017598,
+				["countryId"] = 2,
+			}, -- end of [1]
+		}, -- end of ["units"]
+		["countryId"] = 2,
+		["hidden"] = false,
+		["category"] = "vehicle",
+		["coalition"] = "blue",
+		["startTime"] = 0,
+		["task"] = "Ground Nothing",
+		["groupId"] = 47,
+	}, -- end of [47]
 	[34] = 
 	{
 		["modulation"] = 0,
@@ -2070,25 +2113,25 @@ MEgroupsById =
 		{
 			[1] = 
 			{
-				["heading"] = 0,
+				["type"] = "AH-1W",
 				["point"] = 
 				{
 					["y"] = 443856.28948724,
 					["x"] = -355322.45423175,
 				}, -- end of ["point"]
-				["categoryStatic"] = "Helicopters",
-				["groupId"] = 40,
+				["country"] = "usa",
+				["unitId"] = 63,
 				["livery_id"] = "USA Marines",
 				["groupName"] = "static_on_ship1",
-				["country"] = "usa",
-				["coalition"] = "blue",
+				["heading"] = 0,
+				["countryId"] = 2,
 				["x"] = -355322.45423175,
-				["type"] = "AH-1W",
+				["categoryStatic"] = "Helicopters",
 				["category"] = "static",
 				["unitName"] = "static_on_ship1",
-				["unitId"] = 63,
+				["groupId"] = 40,
+				["coalition"] = "blue",
 				["y"] = 443856.28948724,
-				["countryId"] = 2,
 			}, -- end of [1]
 		}, -- end of ["units"]
 	}, -- end of [40]
