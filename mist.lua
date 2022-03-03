@@ -35,7 +35,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 5
-mist.build = 106
+mist.build = 107
 
 -- forward declaration of log shorthand
 local log
@@ -163,7 +163,6 @@ do -- the main scope
                         elseif copy.polygonMode == "circle" then
                             copy.points = {x = copy.mapX, y = copy.mapY}
                         elseif copy.polygonMode == 'oval' then
-                            -- oval bugs. Scale  and rotation are off. 
                             copy.points = {}
                             local numPoints = 24
                             local angleStep = (math.pi*2)/numPoints
@@ -179,9 +178,8 @@ do -- the main scope
                         elseif copy.polygonMode == "arrow" then
                             doOffset = true
                          end
-                        
-                    -- NOTE TO SELF. FIGURE OUT WHICH SHAPES NEED TO BE OFFSET. OVAL YES.
-                        --log:warn('check offset')
+                       
+
                         if theta ~= 0 and copy.points and doOffset == true then
                             
                             --log:warn('offsetting Values')
@@ -192,11 +190,13 @@ do -- the main scope
                            --log:warn(copy.points[1])
                         end
                     
+                    elseif copy.primitiveType == "Line" and copy.closed == true then
+                       table.insert(copy.points, mist.utils.deepCopy(copy.points[1]))
                     end
                     if copy.points and #copy.points > 1 then
                         for u = 1, #copy.points do
-                            copy.points[u].x = copy.points[u].x + copy.mapX
-                            copy.points[u].y = copy.points[u].y + copy.mapY
+                            copy.points[u].x = mist.utils.round(copy.points[u].x + copy.mapX, 2)
+                            copy.points[u].y = mist.utils.round(copy.points[u].y + copy.mapY, 2)
                         end
                     
                     end
@@ -1618,7 +1618,7 @@ do -- the main scope
 		
 		mistAddedObjects[#mistAddedObjects + 1] = mist.utils.deepCopy(newObj)
 		if newObj.x and newObj.y and newObj.type and type(newObj.x) == 'number' and type(newObj.y) == 'number' and type(newObj.type) == 'string' then
-			log:info(newObj)
+			--log:warn(newObj)
 			coalition.addStaticObject(country.id[newCountry], newObj)
 
 			return newObj
@@ -1833,7 +1833,7 @@ do -- the main scope
 		for unitIndex, unitData in pairs(newGroup.units) do
 			newGroup.units[unitIndex].unitName = nil
 		end
-
+        
 		coalition.addGroup(country.id[newCountry], Unit.Category[newCat], newGroup)
 
 		return newGroup
@@ -4230,7 +4230,7 @@ do -- group functions scope
 		--log:warn(newGroupData)
 		--mist.debug.writeData(mist.utils.serialize,{'teleportToPoint', newGroupData}, 'newGroupData.lua')
 		if string.lower(newGroupData.category) == 'static' then
-			--log:info(newGroupData)
+			--log:warn(newGroupData)
 			return mist.dynAddStatic(newGroupData)
 		end
 		return mist.dynAdd(newGroupData)
@@ -6410,13 +6410,14 @@ do -- mist.msg scope
                 --mist.debug.writeData(mist.utils.serialize,{'msg', messageList}, 'messageList.lua')
                 local msgTableText = {}
                 local msgTableSound = {}
-
+                local curTime = timer.getTime()
                 for mInd, messageData in pairs(messageList) do
-                    if messageData.displayedFor > messageData.displayTime then
+                    --log:warn(messageData)
+                    if messageData.displayTill < curTime then
                         messageData:remove()	-- now using the remove/destroy function.
                     else
                         if messageData.displayedFor then
-                            messageData.displayedFor = messageData.displayedFor + messageDisplayRate
+                            messageData.displayedFor = curTime - messageData.addedAt
                         end
                         local nextSound = 1000
                         local soundIndex = 0
@@ -6672,6 +6673,7 @@ end]]
 			new.text = vars.text -- The actual message
 			new.displayTime = vars.displayTime -- How long will the message appear for
 			new.displayedFor = 0 -- how long the message has been displayed so far
+            new.displayTill = timer.getTime() + vars.displayTime
 			new.name = vars.name	 -- ID to overwrite the older message (if it exists) Basically it replaces a message that is displayed with new text.
 			new.addedAt = timer.getTime()
             --log:warn('New Message: $1', new.text)
@@ -6759,6 +6761,7 @@ end]]
 					if messageList[i].name then
 						if messageList[i].name == vars.name then
 							--log:info('updateMessage')
+                            messageList[i].displayTill = timer.getTime() + messageList[i].displayTime
 							messageList[i].displayedFor = 0
 							messageList[i].addedAt = timer.getTime()
 							messageList[i].sound = new.sound
@@ -7387,20 +7390,38 @@ do
         
     end
     
+    local function getMarkId(id)
+        if mist.DBs.markList[id] then
+            return id
+        else
+            for mEntry, mData in pairs(mist.DBs.markList) do
+                if id == mData.name or id == mData.id then
+                    return mData.id
+                end
+            end
+        end
+    
+    
+    end
+    
+    
     local function removeMark(id)
         --log:info("Removing Mark: $1", id
         local removed = false
         if type(id) == 'table' then 
             for ind, val in pairs(id) do
-                if type(val) == 'number' then 
-                    trigger.action.removeMark(val)
-                    mist.DBs.markList[val] = nil
+                local r = getMarkId(val)
+                if r then 
+                    trigger.action.removeMark(r)
+                    mist.DBs.markList[r] = nil
                     removed = true
-                 end
+                end
             end
+          
         else
-           trigger.action.removeMark(id)
-           mist.DBs.markList[id] = nil
+            local r = getMarkId(id)
+            trigger.action.removeMark(r)
+            mist.DBs.markList[r] = nil
             removed = true
         end
         return removed
@@ -7670,10 +7691,34 @@ do
             fCal[#fCal+1] = mType
             fCal[#fCal+1] = coa
             fCal[#fCal+1] = usedId
-            for i = 1, #pos do
-                fCal[#fCal+1] = pos[i]
-            end
             
+            local likeARainCoat = false
+            if mType == 7 then 
+                local score = 0
+                for i = 1, #pos do
+                    if i < #pos then
+                        local val = ((pos[i+1].x - pos[i].x)*(pos[i+1].z + pos[i].z))
+                        --log:warn("$1 index score is: $2", i, val)
+                        score = score + val
+                    else
+                       score = score + ((pos[1].x - pos[i].x)*(pos[1].z + pos[i].z))
+                    end
+                end
+                --log:warn(score)
+                if score > 0 then -- it is anti-clockwise. Due to DCS bug make it clockwise. 
+                    likeARainCoat = true
+                    --log:warn('flip')
+                    
+                    for i = #pos, 1, -1 do
+                       fCal[#fCal+1] = pos[i]
+                    end
+                end
+            end
+            if likeARainCoat == false then 
+                for i = 1, #pos do
+                    fCal[#fCal+1] = pos[i]
+                end
+            end
             if radius and mType == 2 then
                 fCal[#fCal+1] = radius
             end
@@ -7719,7 +7764,7 @@ do
             
             if mType == 7 or  mType == 1 then 
                 local s = "trigger.action.markupToAll("
-                
+
                 for i = 1, #fCal do
                     --log:warn(fCal[i])
                     if type(fCal[i]) == 'table' or type(fCal[i]) == 'boolean' then
@@ -7731,7 +7776,7 @@ do
                         s = s .. ','
                     end
                 end
-                
+
                 s = s .. ')'
                 if name then 
                     usedMarks[name] = usedId
@@ -7763,7 +7808,7 @@ do
                 table.insert(names, data)
 			end
 		end
-        if #names > 1 then
+        if #names >= 1 then
             return names
         end
 	end
@@ -7798,7 +7843,7 @@ do
            
             local d = v or {}
             local o = mist.utils.deepCopy(mist.DBs.drawingByName[name])
-             mist.marker.add({point = {x = o.mapX, z = o.mapY}, text = name})
+             --mist.marker.add({point = {x = o.mapX, z = o.mapY}, text = name})
             --log:warn(o)
             d.points = o.points or {}
             if o.primitiveType == "Polygon" then
