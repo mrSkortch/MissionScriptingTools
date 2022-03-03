@@ -9,9 +9,9 @@ Forum Thread: http://forums.eagle.ru/showthread.php?t=98616
 
 Documentation
 ====
-The MIST Wiki page can be fore at this address: http://wiki.hoggit.us/view/Mission_Scripting_Tools_Documentation
+The MIST Wiki page can be found at this address: http://wiki.hoggit.us/view/Mission_Scripting_Tools_Documentation
 
-The attached pdf "mist gude.pdf" is attached in the download. 
+The attached pdf "mist gude.pdf" is attached in the download however is no longer being updated. 
 
 Description
 ====
