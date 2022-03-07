@@ -35,7 +35,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 5
-mist.build = 107
+mist.build = 108
 
 -- forward declaration of log shorthand
 local log
@@ -2831,7 +2831,7 @@ function mist.getUnitsByAttribute(att, rnum, id)
     cEntry.country = att.country
     cEntry.coalition = att.coalition
     cEntry.skill = att.skill
-    cEntry.categry = att.category
+    cEntry.category = att.category
     
     local num = rnum or 1
     
@@ -2881,7 +2881,7 @@ function mist.getGroupsByAttribute(att, rnum, id)
     cEntry.country = att.country
     cEntry.coalition = att.coalition
     cEntry.skill = att.skill
-    cEntry.categry = att.category
+    cEntry.category = att.category
     
     local num = rnum or 1
     
@@ -6368,6 +6368,7 @@ do -- mist.msg scope
 	local caSlots = false
 	local caMSGtoGroup = false
     local anyUpdate = false
+    local anySound = false
     local lastMessageTime = nil
 
 	if env.mission.groundControl then -- just to be sure?
@@ -6395,7 +6396,7 @@ do -- mist.msg scope
         local clearView = true
 		if #messageList > 0 then
             --log:warn('Updates: $1', anyUpdate)
-            if anyUpdate == true then
+            if anyUpdate == true or anySound == true then
                 local activeClients = {}
 
                 for clientId, clientData in pairs(mist.DBs.humansById) do
@@ -6403,7 +6404,7 @@ do -- mist.msg scope
                         activeClients[clientData.groupId] = clientData.groupName
                     end
                 end
-                anyUpdate = false
+
                 if displayActive == false then
                     displayActive = true
                 end
@@ -6419,14 +6420,16 @@ do -- mist.msg scope
                         if messageData.displayedFor then
                             messageData.displayedFor = curTime - messageData.addedAt
                         end
-                        local nextSound = 1000
+                       
                         local soundIndex = 0
-
+                        local refSound = 100000
                         if messageData.multSound and #messageData.multSound > 0 then
+                            anySound = true
                             for index, sData in pairs(messageData.multSound) do
-                                if sData.time <= messageData.displayedFor and sData.played == false and sData.time < nextSound then -- find index of the next sound to be played
-                                    nextSound = sData.time
+                                if sData.time <= messageData.displayedFor and sData.played == false and sData.time < refSound then -- find index of the next sound to be played
+                                    refSound = sData.time
                                     soundIndex = index
+                                   
                                 end
                             end
                             if soundIndex ~= 0 then
@@ -6471,20 +6474,21 @@ do -- mist.msg scope
                 
                 end
                 ------- new display
+                if anyUpdate == true then 
+                    if caSlots == true and caMSGtoGroup == false then
+                        if msgTableText.RED then
+                            trigger.action.outTextForCoalition(coalition.side.RED, table.concat(msgTableText.RED.text), msgTableText.RED.displayTime, clearView)
 
-                if caSlots == true and caMSGtoGroup == false then
-                    if msgTableText.RED then
-                        trigger.action.outTextForCoalition(coalition.side.RED, table.concat(msgTableText.RED.text), msgTableText.RED.displayTime, clearView)
-
+                        end
+                        if msgTableText.BLUE then
+                            trigger.action.outTextForCoalition(coalition.side.BLUE, table.concat(msgTableText.BLUE.text), msgTableText.BLUE.displayTime, clearView)
+                        end
                     end
-                    if msgTableText.BLUE then
-                        trigger.action.outTextForCoalition(coalition.side.BLUE, table.concat(msgTableText.BLUE.text), msgTableText.BLUE.displayTime, clearView)
-                    end
-                end
 
-                for index, msgData in pairs(msgTableText) do
-                    if type(index) == 'number' then -- its a groupNumber
-                        trigger.action.outTextForGroup(index, table.concat(msgData.text), msgData.displayTime, clearView)
+                    for index, msgData in pairs(msgTableText) do
+                        if type(index) == 'number' then -- its a groupNumber
+                            trigger.action.outTextForGroup(index, table.concat(msgData.text), msgData.displayTime, clearView)
+                        end
                     end
                 end
                 --- new audio
@@ -6502,7 +6506,10 @@ do -- mist.msg scope
                     end
                 end
                 
-            end
+            end         
+
+            anyUpdate = false
+            anySound = false
             
 		else
 			mist.removeFunction(displayFuncId)
@@ -6764,7 +6771,6 @@ end]]
                             messageList[i].displayTill = timer.getTime() + messageList[i].displayTime
 							messageList[i].displayedFor = 0
 							messageList[i].addedAt = timer.getTime()
-							messageList[i].sound = new.sound
 							messageList[i].text = new.text
 							messageList[i].msgFor = new.msgFor
 							messageList[i].multSound = new.multSound
