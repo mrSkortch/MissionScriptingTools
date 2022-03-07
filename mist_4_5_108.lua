@@ -6369,7 +6369,7 @@ do -- mist.msg scope
 	local caMSGtoGroup = false
     local anyUpdate = false
     local anySound = false
-    local lastMessageTime = nil
+    local lastMessageTime = math.huge
 
 	if env.mission.groundControl then -- just to be sure?
 		for index, value in pairs(env.mission.groundControl) do
@@ -6391,11 +6391,11 @@ do -- mist.msg scope
 	end
 
 	local function mistdisplayV5()
-        --log:warn("mistdisplayV5: $1", timer.getTime())
+        log:warn("mistdisplayV5: $1", timer.getTime())
 
         local clearView = true
 		if #messageList > 0 then
-            --log:warn('Updates: $1', anyUpdate)
+            log:warn('Updates: $1', anyUpdate)
             if anyUpdate == true or anySound == true then
                 local activeClients = {}
 
@@ -6413,8 +6413,9 @@ do -- mist.msg scope
                 local msgTableSound = {}
                 local curTime = timer.getTime()
                 for mInd, messageData in pairs(messageList) do
-                    --log:warn(messageData)
+                    log:warn(messageData)
                     if messageData.displayTill < curTime then
+                        log:warn('remove')
                         messageData:remove()	-- now using the remove/destroy function.
                     else
                         if messageData.displayedFor then
@@ -6683,6 +6684,7 @@ end]]
             new.displayTill = timer.getTime() + vars.displayTime
 			new.name = vars.name	 -- ID to overwrite the older message (if it exists) Basically it replaces a message that is displayed with new text.
 			new.addedAt = timer.getTime()
+            new.clearView = vars.clearView or true
             --log:warn('New Message: $1', new.text)
 
 			if vars.multSound and vars.multSound[1] then
@@ -6795,7 +6797,7 @@ end]]
 
 			if displayActive == false then
 				displayActive = true
-				displayFuncId = mist.scheduleFunction(mistdisplayV5, {}, timer.getTime() + messageDisplayRate, messageDisplayRate)
+				displayFuncId = mist.scheduleFunction(mistdisplayV4, {}, timer.getTime() + messageDisplayRate, messageDisplayRate)
 			end
 
 			return messageID
