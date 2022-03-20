@@ -35,7 +35,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 5
-mist.build = 108
+mist.build = 109
 
 -- forward declaration of log shorthand
 local log
@@ -831,7 +831,7 @@ do -- the main scope
 			for i = 1, #lunits do
 				if lunits[i].category ~= 'static' then -- can't get statics with Unit.getByName :(
 					local unit = lUnit.getByName(lunits[i].unitName)
-					if unit then
+					if unit and unit:isExist() == true then
 						----dbLog:info("unit named $1 alive!", lunits[i].unitName) -- spammy
 						local pos = unit:getPosition()
 						local newtbl = ldeepcopy(lunits[i])
@@ -3188,7 +3188,7 @@ function mist.getUnitsInPolygon(unit_names, polyZone, max_alt)
 	for i =1, #units do
 		local lUnit = units[i]
         local lCat = lUnit:getCategory()
-        if ((lCat == 1 and lUnit:isActive()) or lCat ~= 1) and mist.pointInPolygon(lUnit:getPosition().p, polyZone, max_alt) then
+        if lUnit:isExist() == true and ((lCat == 1 and lUnit:isActive()) or lCat ~= 1) and mist.pointInPolygon(lUnit:getPosition().p, polyZone, max_alt) then
 			inZoneUnits[#inZoneUnits + 1] = lUnit
 		end
 	end
@@ -3216,7 +3216,7 @@ function mist.getUnitsInZones(unit_names, zone_names, zone_type)
 	for k = 1, #unit_names do
 		
         local unit = Unit.getByName(unit_names[k]) or StaticObject.getByName(unit_names[k])
-		if unit then
+		if unit and unit:isExist() == true then
 			units[#units + 1] = unit
 		end
 	end
@@ -3280,14 +3280,14 @@ function mist.getUnitsInMovingZones(unit_names, zone_unit_names, radius, zone_ty
 
 	for k = 1, #unit_names do
 		local unit = Unit.getByName(unit_names[k]) or StaticObject.getByName(unit_names[k])
-		if unit then
+		if unit and unit:isExist() == true then
 			units[#units + 1] = unit
 		end
 	end
 
 	for k = 1, #zone_unit_names do
 		local unit = Unit.getByName(zone_unit_names[k]) or StaticObject.getByName(zone_unit_names[k])
-		if unit then
+		if unit and unit:isExist() == true then
 			zone_units[#zone_units + 1] = unit
 		end
 	end
@@ -3325,7 +3325,7 @@ function mist.getUnitsLOS(unitset1, altoffset1, unitset2, altoffset2, radius)
 	for unitset1_ind = 1, #unitset1 do
 		local unit1 = Unit.getByName(unitset1[unitset1_ind])
         local lCat = unit1:getCategory()
-		if unit1 and ((lCat == 1 and unit1:isActive()) or lCat ~= 1) then
+		if unit1 and ((lCat == 1 and unit1:isActive()) or lCat ~= 1) and unit:isExist() == true then
 			unit_info1[#unit_info1 + 1] = {}
 			unit_info1[#unit_info1].unit = unit1
 			unit_info1[#unit_info1].pos	= unit1:getPosition().p
@@ -3335,7 +3335,7 @@ function mist.getUnitsLOS(unitset1, altoffset1, unitset2, altoffset2, radius)
 	for unitset2_ind = 1, #unitset2 do
 		local unit2 = Unit.getByName(unitset2[unitset2_ind])
         local lCat = unit2:getCategory()
-		if unit2 and ((lCat == 1 and unit2:isActive()) or lCat ~= 1) then
+		if unit2 and ((lCat == 1 and unit2:isActive()) or lCat ~= 1) and unit:isExist() == true then
 			unit_info2[#unit_info2 + 1] = {}
 			unit_info2[#unit_info2].unit = unit2
 			unit_info2[#unit_info2].pos	= unit2:getPosition().p
@@ -3395,7 +3395,7 @@ function mist.getAvgPos(unitNames)
 		elseif StaticObject.getByName(unitNames[i]) then
 			unit = StaticObject.getByName(unitNames[i])
 		end
-		if unit then
+		if unit and unit:isExist() == true then
 			local pos = unit:getPosition().p
 			if pos then -- you never know O.o
 				avgX = avgX + pos.x
@@ -5906,7 +5906,7 @@ unitTableDef = table or nil
 			local num_in_zone = 0
 			for i = 1, #units do
 				local unit = Unit.getByName(units[i]) or StaticObject.getByName(units[i])
-				if unit then
+				if unit and unit:isExist() == true then
 					local pos = unit:getPosition().p
 					if mist.pointInPolygon(pos, zone, maxalt) then
 						num_in_zone = num_in_zone + 1
