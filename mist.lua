@@ -35,7 +35,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 5
-mist.build = 109
+mist.build = 110
 
 -- forward declaration of log shorthand
 local log
@@ -858,7 +858,7 @@ do -- the main scope
 		end
 	end
 
-	local function dbUpdate(event, objType)
+	local function dbUpdate(event, objType, origGroupName)
 		--dbLog:info('dbUpdate')
 		local newTable = {}
 		newTable.startTime =	0
@@ -873,10 +873,10 @@ do -- the main scope
 				log:warn('$1 is not a Group or Static Object. This should not be possible. Sent category is: $2', event, objType)
 				return false
 			end
-
-			newTable.name = newObject:getName()
+            local objName = newObject:getName()
+			newTable.name = origGroupName or objName
 			newTable.groupId = tonumber(newObject:getID())
-			newTable.groupName = newObject:getName()
+			newTable.groupName = origGroupName or objName
 			local unitOneRef
 			if objType == 'static' then
 				unitOneRef = newObject
@@ -1061,9 +1061,10 @@ do -- the main scope
 			--dbLog:info('iterate')
 			for name, gData in pairs(tempSpawnedGroups) do
 				--env.info(name)
-                --dbLog:info(gData)
+                --dbLog:warn(gData)
 				local updated = false
                 local stillExists = false
+                local staticGroupName
                 if not gData.checked then 
                     tempSpawnedGroups[name].checked = true -- so if there was an error it will get cleared.
                     local _g = gData.gp or Group.getByName(name)
@@ -1073,7 +1074,7 @@ do -- the main scope
                         local dbTable = mist.DBs.groupsByName[name]
                         --dbLog:info(dbTable)
                         if gData.type ~= 'static' then
-                           -- dbLog:info('Not static')
+                            --dbLog:info('Not static')
                           
                             if _g and _g:isExist() == true then 
                                 stillExists = true
@@ -1091,22 +1092,30 @@ do -- the main scope
                         end
                     end			
                     --dbLog:info('Updated: $1', updated)
-                    if updated == false and gData.type ~= 'static' then -- time to check units
-                       --dbLog:info('No Group Mismatch, Check Units')
-                        if _g and _g:isExist() == true then 
-                            stillExists = true
-                            for index, uObject in pairs(_g:getUnits()) do
-                             --dbLog:info(index)
-                                if mist.DBs.unitsByName[uObject:getName()] then
-                                    --dbLog:info('UnitByName table exists')
-                                    local uTable = mist.DBs.unitsByName[uObject:getName()]
-                                    if tonumber(uObject:getID()) ~= uTable.unitId or uObject:getTypeName() ~= uTable.type  then
-                                        --dbLog:info('Unit Data mismatch')
-                                        updated = true
-                                        break
+                    if updated == false then 
+                        if gData.type ~= 'static' then -- time to check units
+                          -- dbLog:info('No Group Mismatch, Check Units')
+                            if _g and _g:isExist() == true then 
+                                stillExists = true
+                                for index, uObject in pairs(_g:getUnits()) do
+                                   -- dbLog:info(index)
+                                    if mist.DBs.unitsByName[uObject:getName()] then
+                                        --dbLog:info('UnitByName table exists')
+                                        local uTable = mist.DBs.unitsByName[uObject:getName()]
+                                        if tonumber(uObject:getID()) ~= uTable.unitId or uObject:getTypeName() ~= uTable.type  then
+                                            --dbLog:info('Unit Data mismatch')
+                                            updated = true
+                                            break
+                                        end
                                     end
                                 end
                             end
+                        else -- it is a static object
+                            local ref = mist.DBs.unitsByName[name]
+                            if ref then
+                                staticGroupName = ref.groupName
+                            end
+                        
                         end
                     else
                         stillExists = true
@@ -1114,7 +1123,7 @@ do -- the main scope
 
                     if stillExists == true and (updated == true or not mist.DBs.groupsByName[name]) then
                         --dbLog:info('Get Table')
-                        local dbData =  dbUpdate(name, gData.type)
+                        local dbData =  dbUpdate(name, gData.type, staticGroupName)
                         if dbData and type(dbData) == 'table' then 
                             writeGroups[#writeGroups+1] = {data = dbData, isUpdated = updated}
                         end
@@ -1440,7 +1449,7 @@ do -- the main scope
         
 		-- create logger
 		mist.log = mist.Logger:new("MIST", mistSettings.logLevel)
-		dbLog = mist.Logger:new('MISTDB', 'warn')
+		dbLog = mist.Logger:new('MISTDB', mistSettings.dbLog)
 		
 		log = mist.log -- log shorthand
 		-- set warning log level, showing only
@@ -3114,11 +3123,16 @@ function mist.shape.getPointOnSegment(point, seg, isSeg)
 end
 
 
-function mist.shape.segmentIntersect(segA, segB)
-    local dx1, dy1 = segA[2].x - segA[1].x, segA[2] - segA[1].y
-    local dx2, dy2 = segB[2].x - segB[1].x, segB[2] - segB[1].y
+function mist.shape.segmentIntersect(seg1, seg2)
+    local segA = {mist.utils.makeVec2(seg1[1]), mist.utils.makeVec2(seg1[2])}
+    local segB = {mist.utils.makeVec2(seg2[1]), mist.utils.makeVec2(seg2[2])}
+     
+    local dx1, dy1 = segA[2].x - segA[1].x, segA[2].y - segA[1].y
+    local dx2, dy2 = segB[2].x - segB[1].x, segB[2].y - segB[1].y
     local dx3, dy3 = segA[1].x - segB[1].x, segA[1].y - segB[1].y
+    
     local d = dx1*dy2 - dy1*dx2
+    
     if d == 0 then
        return false
     end
@@ -3131,7 +3145,7 @@ function mist.shape.segmentIntersect(segA, segB)
       return false
     end
       -- point of intersection
-      return true, segA[1].x + t1*dx1, segA[1].y + t1*dy1
+      return true, {x = segA[1].x + t1*dx1, y = segA[1].y + t1*dy1}
 end
 
 
@@ -7480,7 +7494,7 @@ do
         local coa = -1
         local usedId = 0
         
-        
+        pos = mist.utils.deepCopy(pos)
 
         if id then 
             if type(id) ~= 'number' then
@@ -8610,7 +8624,7 @@ do -- group tasks scope
 	end
     
     function mist.getWindBearingAndVel(p)
-        local point = mist.utils.makeVec3(o)
+        local point = mist.utils.makeVec3(p)
         local gLevel = land.getHeight({x = point.x, y = point.z})
         if point.y <= gLevel then
             point.y = gLevel + 10
