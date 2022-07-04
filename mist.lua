@@ -35,7 +35,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 5
-mist.build = 110
+mist.build = 113
 
 -- forward declaration of log shorthand
 local log
@@ -222,6 +222,7 @@ do -- the main scope
             if string.lower(coa_name_miz) == 'neutrals' then
                 coa_name = 'neutral'
             end
+            local coaEnum = coalition.side[string.upper(coa_name)]
 			if type(coa_data) == 'table' then
 				mist.DBs.units[coa_name] = {}
                 
@@ -282,6 +283,7 @@ do -- the main scope
 												mist.DBs.units[coa_name][countryName][category][group_num].groupId = group_data.groupId
 												mist.DBs.units[coa_name][countryName][category][group_num].category = category
 												mist.DBs.units[coa_name][countryName][category][group_num].coalition = coa_name
+                                                mist.DBs.units[coa_name][countryName][category][group_num].coalitionId = coaEnum
 												mist.DBs.units[coa_name][countryName][category][group_num].country = countryName
 												mist.DBs.units[coa_name][countryName][category][group_num].countryId = cntry_data.id
 												mist.DBs.units[coa_name][countryName][category][group_num].startTime = group_data.start_time
@@ -309,6 +311,8 @@ do -- the main scope
 													units_tbl[unit_num].unitId = unit_data.unitId
 													units_tbl[unit_num].category = category
 													units_tbl[unit_num].coalition = coa_name
+                                                    units_tbl[unit_num].coalitionId = coaEnum
+                                                    
 													units_tbl[unit_num].country = countryName
 													units_tbl[unit_num].countryId = cntry_data.id
 													units_tbl[unit_num].heading = unit_data.heading
@@ -789,6 +793,7 @@ do -- the main scope
 						if not static_found then
 							val.objectPos = pos.p
 							val.objectType = 'building'
+                            val.typeName = Object.getTypeName(val.object)
 						end
 					else
 						val.objectType = 'unknown'
@@ -815,6 +820,7 @@ do -- the main scope
 	end
 
 	local function updateAliveUnits()	-- coroutine function
+        --log:warn("updateALiveUnits")
 		local lalive_units = mist.DBs.aliveUnits -- local references for faster execution
 		local lunits = mist.DBs.unitsByNum
 		local ldeepcopy = mist.utils.deepCopy
@@ -845,6 +851,7 @@ do -- the main scope
 					end
 				end
 				if i%units_per_run == 0 then
+                    --log:warn("yield: $1", i)
 					coroutine.yield()
 				end
 			end
@@ -1114,6 +1121,8 @@ do -- the main scope
                             local ref = mist.DBs.unitsByName[name]
                             if ref then
                                 staticGroupName = ref.groupName
+                            else
+                                stillExists = true
                             end
                         
                         end
@@ -1372,6 +1381,7 @@ do -- the main scope
 						if not static_found then
 							val.objectPos = pos.p
 							val.objectType = 'building'
+                            val.typeName = Object.getTypeName(val.object)
 						end
 					else
 						val.objectType = 'unknown'
@@ -2836,7 +2846,7 @@ end
 
 function mist.getUnitsByAttribute(att, rnum, id)
     local cEntry = {}
-    cEntry.typeName = att.type or att.typeName or att.typename
+    cEntry.type = att.type or att.typeName or att.typename
     cEntry.country = att.country
     cEntry.coalition = att.coalition
     cEntry.skill = att.skill
@@ -2861,6 +2871,7 @@ function mist.getUnitsByAttribute(att, rnum, id)
                     end
                 end
             else
+                
                 if uData[cName] and uData[cName] == cVal then
                     matched = matched + 1
                 end
@@ -2886,7 +2897,7 @@ end
 
 function mist.getGroupsByAttribute(att, rnum, id)
     local cEntry = {}
-    cEntry.typeName = att.type or att.typeName or att.typename
+    cEntry.type = att.type or att.typeName or att.typename
     cEntry.country = att.country
     cEntry.coalition = att.coalition
     cEntry.skill = att.skill
@@ -2903,7 +2914,7 @@ function mist.getGroupsByAttribute(att, rnum, id)
         for cName, cVal in pairs(cEntry) do
             if type(cVal) == 'table' then
                 for sName, sVal in pairs(cVal) do
-                    if cName == 'skill' or cName == 'typeName' then 
+                    if cName == 'skill' or cName == 'type' then 
                         local lMatch = 0
                         for uId, uData in pairs(gData.units) do
                             if (uData[cName] and uData[cName] == sVal) or (gData[cName] and gData[cName] == sName) then
@@ -2921,7 +2932,7 @@ function mist.getGroupsByAttribute(att, rnum, id)
                     end
                 end
             else
-                if cName == 'skill' or cName == 'typeName' then
+                if cName == 'skill' or cName == 'type' then
                     local lMatch = 0
                     for uId, uData in pairs(gData.units) do
                         if (uData[cName] and uData[cName] == sVal) then
@@ -2954,7 +2965,33 @@ function mist.getGroupsByAttribute(att, rnum, id)
     
 end
 
-function mist.getDeadMapObjsInZones(zone_names)
+function mist.getDeadMapObjectsFromPoint(p, radius, filters)
+	local map_objs = {}
+    local fCheck = filters or {}
+    local filter = {}
+    local r = radius or p.radius or 100
+    local point = mist.utils.makeVec3(p)
+    local filterSize = 0
+    for fInd, fVal in pairs(fCheck) do
+        filterSize = filterSize + 1
+        filter[string.lower(fInd)] = true
+        filter[string.lower(fVal)] = true
+    
+    end
+    for obj_id, obj in pairs(mist.DBs.deadObjects) do
+        log:warn(obj)
+		if obj.objectType and obj.objectType == 'building' then --dead map object
+            if ((point.x - obj.objectPos.x)^2 + (point.z - obj.objectPos.z)^2)^0.5 <= r then
+               if filterSize == 0 or (obj.typeName and filter[string.lower(obj.typeName)])then
+                    map_objs[#map_objs + 1] = mist.utils.deepCopy(obj)
+               end
+            end
+		end
+	end
+	return map_objs
+end
+
+function mist.getDeadMapObjsInZones(zone_names, filters)
 	-- zone_names: table of zone names
 	-- returns: table of dead map objects (indexed numerically)
 	local map_objs = {}
@@ -2964,25 +3001,32 @@ function mist.getDeadMapObjsInZones(zone_names)
 			zones[#zones + 1] = mist.DBs.zonesByName[zone_names[i]]
 		end
 	end
-	for obj_id, obj in pairs(mist.DBs.deadObjects) do
-		if obj.objectType and obj.objectType == 'building' then --dead map object
-			for i = 1, #zones do
-				if ((zones[i].point.x - obj.objectPos.x)^2 + (zones[i].point.z - obj.objectPos.z)^2)^0.5 <= zones[i].radius then
-					map_objs[#map_objs + 1] = mist.utils.deepCopy(obj)
-				end
-			end
-		end
-	end
+    for i = 1, #zones do
+        local rtn = mist.getDeadMapObjectsFromPoint(zones[i], nil, filters)
+        for j = 1, #rtn do
+            map_objs[#map_objs + 1] = rtn[j]
+        end
+    end
+
 	return map_objs
 end
 
-function mist.getDeadMapObjsInPolygonZone(zone)
+function mist.getDeadMapObjsInPolygonZone(zone, filters)
 	-- zone_names: table of zone names
 	-- returns: table of dead map objects (indexed numerically)
+    local filter = {}
+    local fCheck = filters or {}
+    local filterSize = 0
+    for fInd, fVal in pairs(fCheck) do
+        filterSize = filterSize + 1
+        filter[string.lower(fInd)] = true
+        filter[string.lower(fVal)] = true
+    
+    end
 	local map_objs = {}
 	for obj_id, obj in pairs(mist.DBs.deadObjects) do
 		if obj.objectType and obj.objectType == 'building' then --dead map object
-			if mist.pointInPolygon(obj.objectPos, zone) then
+			if mist.pointInPolygon(obj.objectPos, zone) and  (filterSize == 0 or filter[string.lower(obj.objectData.type)]) then
 				map_objs[#map_objs + 1] = mist.utils.deepCopy(obj)
 			end
 		end
@@ -3105,7 +3149,7 @@ function mist.shape.getPointOnSegment(point, seg, isSeg)
     
     
     local cx, cy = p.x - s1.x, p.y - s1.y
-    local dx, dy = s2.x - s1.x, s2.x - s1.y
+    local dx, dy = s2.x - s1.x, s2.y - s1.y
     local d = (dx*dx + dy*dy)
       
     if d == 0 then
@@ -3121,6 +3165,7 @@ function mist.shape.getPointOnSegment(point, seg, isSeg)
     end
     return {x = s1.x + u*dx, y = s1.y + u*dy}
 end
+
 
 
 function mist.shape.segmentIntersect(seg1, seg2)
@@ -4047,7 +4092,7 @@ do -- group functions scope
 		elseif vars.groupName then
 			gpName = vars.groupName
 		else
-			log:error('Missing field groupName or gpName in variable table')
+			log:error('Missing field groupName or gpName in variable table. Table: $1', vars)
 		end
 
         --[[New vars to add, mostly for when called via inZone functions
@@ -5181,21 +5226,21 @@ do -- mist.util scope
 	-- borrowed from slmod
 	-- @param var variable to serialize
 	-- @treturn string variable serialized to string
-	function mist.utils.basicSerialize(var)
-		if var == nil then
-			return "\"\""
-		else
-			if ((type(var) == 'number') or
-					(type(var) == 'boolean') or
-					(type(var) == 'function') or
-					(type(var) == 'table') or
-					(type(var) == 'userdata') ) then
-			return tostring(var)
-		elseif type(var) == 'string' then
-			var = string.format('%q', var)
-			return var
-		end
-	end
+function mist.utils.basicSerialize(var)
+    if var == nil then
+        return "\"\""
+    else
+        if ((type(var) == 'number') or
+                (type(var) == 'boolean') or
+                (type(var) == 'function') or
+                (type(var) == 'table') or
+                (type(var) == 'userdata') ) then
+                    return tostring(var)
+        elseif type(var) == 'string' then
+            var = string.format('%q', var)
+            return var
+        end
+    end
 end
 
 --- Serialize value
@@ -7290,7 +7335,7 @@ do
     local altNames = {['poly'] = 7, ['lines'] = 1, ['polygon'] = 7 }
     
     local function draw(s)
-       --log:warn(s)
+        --log:warn(s)
         if type(s) == 'table' then 
             local mType = s.markType
             if mType == 'panel' then 
@@ -8630,7 +8675,7 @@ do -- group tasks scope
             point.y = gLevel + 10
         end
         local t = atmosphere.getWind(point)
-        local bearing = math.tan(t.z/t.x)
+        local bearing = math.atan2(t.z, t.x)
         local vel = math.sqrt(t.x^2 + t.z^2)
         return bearing, vel
     
@@ -8840,6 +8885,18 @@ do -- group tasks scope
 		end
 		return true
 	end
+    
+    function mist.pointInZone(point, zone)
+        local ref = mist.utils.deepCopy(zone)
+        if type(zone) == 'string' then
+            ref = mist.DBs.zonesByName[zone]
+        end
+        if ref.verticies then
+            return mist.pointInPolygon(point, ref.verticies)
+        else
+            return mist.utils.get2DDist(point, ref.point) < ref.radius
+        end
+    end
 
 end
 
@@ -9047,6 +9104,30 @@ do -- mist.Logger scope
 			end
 		end
 	end
+    --- Logs a message, disregarding the log level and displays a message out text box.
+	-- @tparam string text the text with keywords to substitute.
+	-- @param ... variables to be used for substitution.
+	-- @usage myLogger:msg("Always logged!")
+    
+    function mist.Logger:echo(text, ...)
+		text = formatText(text, unpack(arg))
+		if text:len() > 4000 then
+			local texts = splitText(text)
+			for i = 1, #texts do
+				if i == 1 then
+					env.info(self.tag .. '|' .. texts[i])
+				else
+					env.info(texts[i])
+				end
+			end
+		else
+			env.info(self.tag .. '|' .. text)
+		end
+        trigger.action.outText(text, 30)
+	end
+    
+    
+    
 
 	--- Logs a warning.
 	-- logs a message prefixed with this loggers tag to dcs.log as
