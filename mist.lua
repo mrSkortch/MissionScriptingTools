@@ -35,7 +35,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 5
-mist.build = 113
+mist.build = 115
 
 -- forward declaration of log shorthand
 local log
@@ -64,8 +64,8 @@ do -- the main scope
 	local updateAliveUnitsCounter = 0
 	local updateTenthSecond = 0
 	
-	local mistGpId = 7000
-	local mistUnitId = 7000
+	local mistGpId = 70000
+	local mistUnitId = 70000
 	local mistDynAddIndex = {[' air '] = 0, [' hel '] = 0, [' gnd '] = 0, [' bld '] = 0, [' static '] = 0, [' shp '] = 0}
 
 	local scheduledTasks = {}
@@ -75,7 +75,7 @@ do -- the main scope
 	mist.nextGroupId = 1
 	mist.nextUnitId = 1
 
-
+    
 	
 	local function initDBs() -- mist.DBs scope
 		mist.DBs = {}
@@ -339,7 +339,7 @@ do -- the main scope
 
 													units_tbl[unit_num].groupName = groupName
 													units_tbl[unit_num].groupId = group_data.groupId
-
+                                                    units_tbl[unit_num].linkUnit = unit_data.linkUnit
 													if unit_data.AddPropAircraft then
 														units_tbl[unit_num].AddPropAircraft = unit_data.AddPropAircraft
 													end
@@ -347,7 +347,13 @@ do -- the main scope
 													if category == 'static' then
 														units_tbl[unit_num].categoryStatic = unit_data.category
 														units_tbl[unit_num].shape_name = unit_data.shape_name
-                                                        units_tbl[unit_num].linkUnit = unit_data.linkUnit
+                                                        if group_data.linkOffset then
+                                                            if group_data.route and group_data.route.points and group_data.route.points[1] and group_data.route.points[1].linkUnit then 
+                                                                units_tbl[unit_num].linkUnit =  group_data.route.points[1].linkUnit
+                                                            end
+                                                             units_tbl[unit_num].offset = unit_data.offsets
+                                                        end
+                                                       
 														if unit_data.mass then
 															units_tbl[unit_num].mass = unit_data.mass
 														end
@@ -394,6 +400,36 @@ do -- the main scope
 		mist.DBs.removedAliveUnits = {} -- will be filled in by the "updateAliveUnits" coroutine in mist.main.
 
 		mist.DBs.const = {}
+        
+        mist.DBs.const.nato = {
+            a = "alpha",
+            b = "bravo",
+            c = "charlie",
+            d = "delta",
+            e = "echo",
+            f = "foxtrot",
+            g = "golf",
+            h = "hotel",
+            i = "india",
+            j = "juliett",
+            k = "kilo",
+            l = "lima",
+            m = "mike",
+            n = "november",
+            o = "oscar",
+            p = "papa",
+            q = "quebec",
+            r = "romeo",
+            s = "sierra",
+            t = "tango",
+            u = "uniform",
+            v = "victor",
+            w = "whiskey",
+            x = "xray",
+            y = "yankee",
+            z = "zulu",
+            
+        }
 
 		-- not accessible by SSE, must use static list :-/
 		mist.DBs.const.callsigns = {
@@ -808,10 +844,10 @@ do -- the main scope
 		do -- mist unitID funcs
 			for id, idData in pairs(mist.DBs.unitsById) do
 				if idData.unitId > mist.nextUnitId then
-					mist.nextUnitId = mist.utils.deepCopy(idData.unitId)
+					mist.nextUnitId = mist.utils.deepCopy(idData.unitId) 
 				end
 				if idData.groupId > mist.nextGroupId then
-					mist.nextGroupId = mist.utils.deepCopy(idData.groupId)
+					mist.nextGroupId = mist.utils.deepCopy(idData.groupId) 
 				end
 			end
 		end
@@ -1153,10 +1189,10 @@ do -- the main scope
 			savesPerRun = 5
 		end
 		if i > 0 then
-			--dbLog:info('updateDBTables')
+		--	dbLog:info('updateDBTables')
 			local ldeepCopy = mist.utils.deepCopy
 			for x = 1, i do
-				--dbLog:info(writeGroups[x])
+			--	dbLog:info(writeGroups[x])
 				local newTable = writeGroups[x].data
 				local updated = writeGroups[x].isUpdated
 				local mistCategory
@@ -1295,8 +1331,9 @@ do -- the main scope
 	local function doScheduledFunctions()
 		local i = 1
 		while i <= #scheduledTasks do
+            local refTime = timer.getTime()
 			if not scheduledTasks[i].rep then -- not a repeated process
-				if scheduledTasks[i].t <= timer.getTime() then
+				if scheduledTasks[i].t <= refTime then
 					local task = scheduledTasks[i] -- local reference
 					table.remove(scheduledTasks, i)
 					local err, errmsg = pcall(task.f, unpack(task.vars, 1, table.maxn(task.vars)))
@@ -1308,9 +1345,9 @@ do -- the main scope
 					i = i + 1
 				end
 			else
-				if scheduledTasks[i].st and scheduledTasks[i].st <= timer.getTime() then	 --if a stoptime was specified, and the stop time exceeded
+				if scheduledTasks[i].st and scheduledTasks[i].st <= refTime then	 --if a stoptime was specified, and the stop time exceeded
 					table.remove(scheduledTasks, i) -- stop time exceeded, do not execute, do not increment i
-				elseif scheduledTasks[i].t <= timer.getTime() then
+				elseif scheduledTasks[i].t <= refTime then
 					local task = scheduledTasks[i] -- local reference
 					task.t = timer.getTime() + task.rep	--schedule next run
 					local err, errmsg = pcall(task.f, unpack(task.vars, 1, table.maxn(task.vars)))
@@ -1521,7 +1558,7 @@ do -- the main scope
 				coroutines.updateAliveUnits = nil
 			end
 		end
-
+        
 		doScheduledFunctions()
 	end -- end of mist.main
 
@@ -3962,40 +3999,48 @@ do -- group functions scope
 				unitId = mist.DBs.MEunitsByName[unitIdent].unitId
 			else
 				log:error("Unit not found in mist.DBs.MEunitsByName: $1", unitIdent)
+                return {}
 			end
-		end
-		local gpId = mist.DBs.MEunitsById[unitId].groupId
+		elseif type(unitIdent) == "number" and not mist.DBs.MEunitsById[unitIdent] then
+            log:error("Unit not found in mist.DBs.MEunitsBId: $1", unitIdent)
+            return {}
+        end
+        local ref =  mist.DBs.MEunitsById[unitId]
+		
+        if ref then 
+            local gpId = mist.DBs.MEunitsById[unitId].groupId
 
-		if gpId and unitId then
-			for coa_name, coa_data in pairs(env.mission.coalition) do
-				if (coa_name == 'red' or coa_name == 'blue') and type(coa_data) == 'table' then
-					if coa_data.country then --there is a country table
-						for cntry_id, cntry_data in pairs(coa_data.country) do
-							for obj_cat_name, obj_cat_data in pairs(cntry_data) do
-								if obj_cat_name == "helicopter" or obj_cat_name == "ship" or obj_cat_name == "plane" or obj_cat_name == "vehicle" then	-- only these types have points
-									if ((type(obj_cat_data) == 'table') and obj_cat_data.group and (type(obj_cat_data.group) == 'table') and (#obj_cat_data.group > 0)) then	--there's a group!
-										for group_num, group_data in pairs(obj_cat_data.group) do
-											if group_data and group_data.groupId == gpId then
-												for unitIndex, unitData in pairs(group_data.units) do --group index
-													if unitData.unitId == unitId then
-														return unitData.payload
-													end
-												end
-											end
-										end
-									end
-								end
-							end
-						end
-					end
-				end
-			end
+            if gpId and unitId then
+                for coa_name, coa_data in pairs(env.mission.coalition) do
+                    if (coa_name == 'red' or coa_name == 'blue') and type(coa_data) == 'table' then
+                        if coa_data.country then --there is a country table
+                            for cntry_id, cntry_data in pairs(coa_data.country) do
+                                for obj_cat_name, obj_cat_data in pairs(cntry_data) do
+                                    if obj_cat_name == "helicopter" or obj_cat_name == "ship" or obj_cat_name == "plane" or obj_cat_name == "vehicle" then	-- only these types have points
+                                        if ((type(obj_cat_data) == 'table') and obj_cat_data.group and (type(obj_cat_data.group) == 'table') and (#obj_cat_data.group > 0)) then	--there's a group!
+                                            for group_num, group_data in pairs(obj_cat_data.group) do
+                                                if group_data and group_data.groupId == gpId then
+                                                    for unitIndex, unitData in pairs(group_data.units) do --group index
+                                                        if unitData.unitId == unitId then
+                                                            return unitData.payload
+                                                        end
+                                                    end
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+                end
 		else
 			log:error('Need string or number. Got: $1', type(unitIdent))
-			return false
+			return {}
 		end
 		log:warn("Couldn't find payload for unit: $1", unitIdent)
-		return
+		return {}
 	end
 
 	function mist.getGroupPayload(groupIdent)
@@ -4005,6 +4050,7 @@ do -- group functions scope
 				gpId = mist.DBs.MEgroupsByName[groupIdent].groupId
 			else
 				log:error('$1 not found in mist.DBs.MEgroupsByName', groupIdent)
+                return {}
 			end
 		end
 
@@ -4034,10 +4080,10 @@ do -- group functions scope
 			end
 		else
 			log:error('Need string or number. Got: $1', type(groupIdent))
-			return false
+			return {}
 		end
 		log:warn("Couldn't find payload for group: $1", groupIdent)
-		return
+		return {}
 	end
     
     function mist.getGroupTable(groupIdent)
@@ -8855,30 +8901,36 @@ do -- group tasks scope
 	end
 
 	function mist.getLeadPos(group)
-		if type(group) == 'string' then -- group name
-			group = Group.getByName(group)
-		end
+		local gObj
+        if type(group) == 'string' then -- group name
+			gObj = Group.getByName(group)
+		elseif type(group) == "table" then
+            gObj = group
+        end
 		
-		local units = group:getUnits()
+        if gObj then 
+            local units = gObj:getUnits()
 
-		local leader = units[1]
-		if Unit.getLife(leader) == 0 or not Unit.isExist(leader) then	-- SHOULD be good, but if there is a bug, this code future-proofs it then.
-			local lowestInd = math.huge
-			for ind, unit in pairs(units) do
-				if Unit.isExist(unit) and ind < lowestInd then
-					lowestInd = ind
-					return unit:getPosition().p
-				end
-			end
-		end
-		if leader and Unit.isExist(leader) then	-- maybe a little too paranoid now...
-			return leader:getPosition().p
-		end
+            local leader = units[1]
+            if leader then
+                if Unit.isExist(leader) then
+                     return leader:getPoint()
+                elseif #units > 1 then
+                    for i = 2, #units do 
+                        if Unit.isExist(units[i]) then
+                            return units[i]:getPoint()
+                        end
+                    end
+                    
+                end
+            end
+        end
+        log:error("Group passed to mist.getLeadPos might be dead: $1", group)
 	end
     
     function mist.groupIsDead(groupName) -- copy more or less from on station
-		if Group.getByName(groupName) then 
-            local gp = Group.getByName(groupName)
+		local gp = Group.getByName(groupName)
+        if gp then 
             if  #gp:getUnits() > 0 or gp:isExist() == true  then
                 return false
             end
@@ -9016,10 +9068,10 @@ do -- mist.Logger scope
 	-- @usage -- log everything
 	--myLogger:setLevel(3)
 	function mist.Logger:setLevel(level)
-        if not level then
-			self.level = 2
-		else
+        self.level = 2
+        if level then 
 			if type(level) == 'string' then
+                level = string.lower(level)
 				if level == 'none' or level == 'off' then
 					self.level = 0
 				elseif level == 'error' then
@@ -9031,8 +9083,6 @@ do -- mist.Logger scope
 				end
 			elseif type(level) == 'number' then
 				self.level = level
-			else
-				self.level = 2
 			end
 		end
 	end
