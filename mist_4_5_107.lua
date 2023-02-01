@@ -92,7 +92,7 @@ do -- the main scope
 					mist.DBs.missionData.files[#mist.DBs.missionData.files + 1] =	mist.utils.deepCopy(fIndex)
 				end
 			end
-			-- if we add more coalition specific data then bullsye should be categorized by coaliton. For now its just the bullseye table
+			-- if we add more coalition specific data then bullseye should be categorized by coaliton. For now its just the bullseye table
             mist.DBs.missionData.bullseye = {}
 		end
 
