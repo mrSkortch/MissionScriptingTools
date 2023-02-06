@@ -289,6 +289,7 @@ do -- the main scope
 												mist.DBs.units[coa_name][countryName][category][group_num].startTime = group_data.start_time
 												mist.DBs.units[coa_name][countryName][category][group_num].task = group_data.task
 												mist.DBs.units[coa_name][countryName][category][group_num].hidden = group_data.hidden
+												mist.DBs.units[coa_name][countryName][category][group_num].hiddenOnMFD = group_data.hiddenOnMFD
 
 												mist.DBs.units[coa_name][countryName][category][group_num].units = {}
 
@@ -312,11 +313,11 @@ do -- the main scope
 													units_tbl[unit_num].category = category
 													units_tbl[unit_num].coalition = coa_name
                                                     units_tbl[unit_num].coalitionId = coaEnum
-                                                    
 													units_tbl[unit_num].country = countryName
 													units_tbl[unit_num].countryId = cntry_data.id
 													units_tbl[unit_num].heading = unit_data.heading
 													units_tbl[unit_num].playerCanDrive = unit_data.playerCanDrive
+													units_tbl[unit_num].coldAtStart = unit_data.coldAtStart
 													units_tbl[unit_num].alt = unit_data.alt
 													units_tbl[unit_num].alt_type = unit_data.alt_type
 													units_tbl[unit_num].speed = unit_data.speed
