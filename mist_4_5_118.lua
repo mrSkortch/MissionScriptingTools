@@ -35,7 +35,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 5
-mist.build = 116
+mist.build = 118
 
 -- forward declaration of log shorthand
 local log
@@ -92,8 +92,9 @@ do -- the main scope
 					mist.DBs.missionData.files[#mist.DBs.missionData.files + 1] =	mist.utils.deepCopy(fIndex)
 				end
 			end
-			-- if we add more coalition specific data then bullsye should be categorized by coaliton. For now its just the bullseye table
+			-- if we add more coalition specific data then bullseye should be categorized by coaliton. For now its just the bullseye table
             mist.DBs.missionData.bullseye = {}
+			mist.DBs.missionData.countries = {}
 		end
 
 		mist.DBs.zonesByName = {}
@@ -104,14 +105,15 @@ do -- the main scope
 			for zone_ind, zone_data in pairs(env.mission.triggers.zones) do
 				if type(zone_data) == 'table' then
 					local zone = mist.utils.deepCopy(zone_data)
+					--log:warn(zone)
 					zone.point = {}	-- point is used by SSE
 					zone.point.x = zone_data.x
-					zone.point.y = 0
+					zone.point.y = land.getHeight({x = zone_data.x, y = zone_data.y})
 					zone.point.z = zone_data.y
                     zone.properties = {}
                     if zone_data.properties then
                         for propInd, prop in pairs(zone_data.properties) do
-                            if prop.value and type(prop.value) == 'string' and prop.value ~= "" then
+                            if prop.value and tostring(prop.value) ~= "" then
                                 zone.properties[prop.key] = prop.value                                
                             end
                         end
@@ -127,6 +129,18 @@ do -- the main scope
                         zone.radius = r
                     
                     end
+					if zone.linkUnit then
+						local uRef = mist.DBs.unitsByName[zone.linkUnit]
+						if zone.verticies then
+							local offset = {}
+							for i = 1, #zone.verticies do
+								table.insert(offset, {dist = mist.utils.get2DDist(uRef.point, zone.verticies[i]), heading = mist.getHeadingPoints(uRef.point, zone.verticies[i]) + uRef.heading})
+							end
+							zone.offset = offset
+						else
+							zone.offset = {dist = mist.utils.get2DDist(uRef.point, zone.point), heading = mist.getHeadingPoints(uRef.point, zone.point) + uRef.heading}
+						end
+					end
 
 					mist.DBs.zonesByName[zone_data.name] = zone
 					mist.DBs.zonesByNum[#mist.DBs.zonesByNum + 1] = mist.utils.deepCopy(zone)	--[[deepcopy so that the zone in zones_by_name and the zone in
@@ -255,6 +269,7 @@ do -- the main scope
                         if cntry_data.id and country.names[cntry_data.id] then
                             countryName = string.lower(country.names[cntry_data.id])
                         end
+						mist.DBs.missionData.countries[countryName] = coa_name
 						mist.DBs.units[coa_name][countryName] = {}
 						mist.DBs.units[coa_name][countryName].countryId = cntry_data.id
 
@@ -1367,13 +1382,7 @@ do -- the main scope
 	local function groupSpawned(event)
 		-- dont need to add units spawned in at the start of the mission if mist is loaded in init line
 		if event.id == world.event.S_EVENT_BIRTH and timer.getTime0() < timer.getAbsTime() then
-			--log:info('unitSpawnEvent')
-			--log:info(event)
-            --log:info(event.initiator:getTypeName())
-				--table.insert(tempSpawnedUnits,(event.initiator))
-				-------
-				-- New functionality below. 
-				-------
+
 			if Object.getCategory(event.initiator) == 1 and not Unit.getPlayerName(event.initiator) then -- simple player check, will need to later check to see if unit was spawned with a player in a flight
 				--log:info('Object is a Unit')
 				if Unit.getGroup(event.initiator) then
@@ -1388,7 +1397,15 @@ do -- the main scope
 					log:error('Group not accessible by unit in event handler. This is a DCS bug')
 				end
 			elseif Object.getCategory(event.initiator) == 3 or Object.getCategory(event.initiator) == 6 then
-				--log:info('Object is Static')
+				--log:info('staticSpawnEvent')
+				--log:info(event)
+				--log:info(event.initiator:getTypeName())
+				--table.insert(tempSpawnedUnits,(event.initiator))
+					-------
+					-- New functionality below. 
+					-------
+				--log:info(event.initiator:getName())
+					--log:info('Object is Static')
 				tempSpawnedGroups[StaticObject.getName(event.initiator)] = {type = 'static'}
 				tempSpawnGroupsCounter = tempSpawnGroupsCounter + 1
 			end
@@ -1661,8 +1678,9 @@ do -- the main scope
 	-- @todo write good docs
 	-- @tparam table staticObj table containing data needed for the object creation
 	function mist.dynAddStatic(n)
-        --log:info(newObj)
+        
         local newObj = mist.utils.deepCopy(n)
+		log:warn(newObj)
 		if newObj.units and newObj.units[1] then -- if its mist format
 			for entry, val in pairs(newObj.units[1]) do
 				if newObj[entry] and newObj[entry] ~= val or not newObj[entry] then
@@ -1720,7 +1738,7 @@ do -- the main scope
 		end
 
 		if not newObj.heading then
-			newObj.heading = math.random(360)
+			newObj.heading = math.rad(math.random(360))
 		end
 		
 		if newObj.categoryStatic then
@@ -1930,8 +1948,9 @@ do -- the main scope
 
         -- update and verify any self tasks
         if newGroup.route and newGroup.route.points then 
+			--log:warn(newGroup.route.points)
             for i, pData in pairs(newGroup.route.points) do
-                if pData.task and pData.task.params and pData.task.params.tasks and #pData.task.params.tasks > 0 then
+				if pData.task and pData.task.params and pData.task.params.tasks and #pData.task.params.tasks > 0 then
                     for tIndex, tData in pairs(pData.task.params.tasks) do
                         if tData.params and tData.params.action then  
                             if tData.params.action.id == "EPLRS" then
@@ -2158,7 +2177,12 @@ do
 			if metric then
 				s = s .. ' at ' .. mist.utils.round(alt, 0)
 			else
-				s = s .. ' at ' .. mist.utils.round(mist.utils.metersToFeet(alt), 0)
+				s = s .. ' at '
+				local rounded = mist.utils.round(mist.utils.metersToFeet(alt/1000), 0)
+				s = s .. rounded
+				if rounded > 0 then
+					s = s .. "000"
+				end
 			end
 		end
 		return s
@@ -5506,6 +5530,123 @@ function mist.utils.oneLineSerialize(tbl)
 	end
 end
 
+function mist.utils.tableShowSorted(tbls, v)
+	local vars = v or {}
+	local loc = vars.loc or ""
+	local indent = vars.indent or ""
+	local tableshow_tbls = vars.tableshow_tbls or {}
+	local tbl = tbls or {}
+	
+	if type(tbl) == 'table' then --function only works for tables!
+		tableshow_tbls[tbl] = loc
+
+		local tbl_str = {}
+
+		tbl_str[#tbl_str + 1] = indent .. '{\n'
+		
+		local sorted = {}
+		local function byteCompare(str1, str2)
+			local shorter = string.len(str1)
+			if shorter > string.len(str2) then
+				 shorter = string.len(str2)
+			end
+			for i = 1, shorter do
+				local b1 = string.byte(str1, i)
+				local b2 = string.byte(str2, i)
+	
+				if b1 < b2 then
+					return true
+				elseif b1 > b2 then
+					return false
+				end
+			
+			end
+			return false
+		end
+		for ind, val in pairs(tbl) do -- serialize its fields
+			local indS = tostring(ind)
+			local ins = {ind = indS, val = val}
+			local index
+			if #sorted > 0 then
+				local found = false
+				for i = 1, #sorted do
+					if byteCompare(indS, tostring(sorted[i].ind)) == true then
+						index = i 
+						break
+					end
+					
+				end
+			end
+			if index then
+				table.insert(sorted, index, ins)
+			else
+				table.insert(sorted, ins)
+			end
+			
+		end
+		--log:warn(sorted)
+		for i = 1, #sorted do
+			local ind = sorted[i].ind
+			local val = sorted[i].val
+			
+			if type(ind) == "number" then
+				tbl_str[#tbl_str + 1] = indent
+				tbl_str[#tbl_str + 1] = loc .. '['
+				tbl_str[#tbl_str + 1] = tostring(ind)
+				tbl_str[#tbl_str + 1] = '] = '
+			else
+				tbl_str[#tbl_str + 1] = indent
+				tbl_str[#tbl_str + 1] = loc .. '['
+				tbl_str[#tbl_str + 1] = mist.utils.basicSerialize(ind)
+				tbl_str[#tbl_str + 1] = '] = '
+			end
+
+			if ((type(val) == 'number') or (type(val) == 'boolean')) then
+				tbl_str[#tbl_str + 1] = tostring(val)
+				tbl_str[#tbl_str + 1] = ',\n'
+			elseif type(val) == 'string' then
+				tbl_str[#tbl_str + 1] = mist.utils.basicSerialize(val)
+				tbl_str[#tbl_str + 1] = ',\n'
+			elseif type(val) == 'nil' then -- won't ever happen, right?
+				tbl_str[#tbl_str + 1] = 'nil,\n'
+			elseif type(val) == 'table' then
+				if tableshow_tbls[val] then
+					tbl_str[#tbl_str + 1] = ' already defined: ' .. tableshow_tbls[val] .. ',\n'
+				else
+					tableshow_tbls[val] = loc .. '["' .. ind .. '"]'
+					--tbl_str[#tbl_str + 1] = tostring(val) .. ' '
+					tbl_str[#tbl_str + 1] = mist.utils.tableShowSorted(val, {loc =  loc .. '["' .. ind .. '"]', indent = indent .. '    ', tableshow_tbls = tableshow_tbls})
+					tbl_str[#tbl_str + 1] = ',\n'
+				end
+			elseif type(val) == 'function' then
+				if debug and debug.getinfo then
+					local fcnname = tostring(val)
+					local info = debug.getinfo(val, "S")
+					if info.what == "C" then
+						tbl_str[#tbl_str + 1] =  ', C function\n'
+					else
+						if (string.sub(info.source, 1, 2) == [[./]]) then
+							tbl_str[#tbl_str + 1] = string.format('%q',  'function, defined in (' ..  '-' .. info.lastlinedefined .. ')' .. info.source) ..',\n'
+						else
+							tbl_str[#tbl_str + 1] = string.format('%q', 'function, defined in (' ..  '-' .. info.lastlinedefined .. ')') ..',\n'
+						end
+					end
+
+				else
+					tbl_str[#tbl_str + 1] = 'a function,\n'
+				end
+			else
+				tbl_str[#tbl_str + 1] = 'unable to serialize value type ' .. mist.utils.basicSerialize(type(val)) .. ' at index ' .. tostring(ind)
+			end
+		end
+
+		tbl_str[#tbl_str + 1] = indent .. '}'
+		return table.concat(tbl_str)
+	end
+	
+	
+end
+
 --- Returns table in a easy readable string representation.
 -- this function is not meant for serialization because it uses
 -- newlines for better readability.
@@ -5525,7 +5666,7 @@ function mist.utils.tableShow(tbl, loc, indent, tableshow_tbls) --based on seria
 
 		tbl_str[#tbl_str + 1] = indent .. '{\n'
 
-		for ind,val in pairs(tbl) do -- serialize its fields
+		for ind, val in pairs(tbl) do
 			if type(ind) == "number" then
 				tbl_str[#tbl_str + 1] = indent
 				tbl_str[#tbl_str + 1] = loc .. '['
@@ -5625,10 +5766,10 @@ do -- mist.debug scope
                 g.country.by_idx = nil
                 g.country.by_country = nil
                 
-                f:write(mist.utils.tableShow(g))
+                f:write(mist.utils.tableShowSorted(g))
             else
             
-                f:write(mist.utils.tableShow(_G))
+                f:write(mist.utils.tableShowSorted(_G))
             end
 			f:close()
 			log:info('Wrote debug data to $1', fdir)
@@ -7555,7 +7696,7 @@ do
                 --log:info('create maker DB: $1', e.idx)
                mist.DBs.markList[e.idx] = {time = e.time, pos = e.pos, groupId = e.groupId, mType = 'panel', text = e.text, markId = e.idx, coalition = e.coalition}
                 if e.unit then
-                   mist.DBs.markList[e.idx].unit = e.initiaor:getName()
+                   mist.DBs.markList[e.idx].unit = e.intiator:getName()
                 end
                 --log:info(mist.marker.list[e.idx])
            end
@@ -8776,7 +8917,7 @@ do -- group tasks scope
 				break
 			end
 			if j == 100 then
-				newCoord = mist.getRandPointInCircle(avg, 50000)
+				newCoord = mist.getRandPointInCircle(avg, radius)
 				log:warn("Failed to find point in poly; Giving random point from center of the poly")
 			end
 		end
