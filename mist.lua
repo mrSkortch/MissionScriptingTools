@@ -7488,9 +7488,11 @@ do
           
         else
             local r = getMarkId(id)
-            trigger.action.removeMark(r)
-            mist.DBs.markList[r] = nil
-            removed = true
+						if r then
+							trigger.action.removeMark(r)
+							mist.DBs.markList[r] = nil
+							removed = true
+						end
         end
         return removed
     end
