@@ -8602,7 +8602,7 @@ do -- group tasks scope
 	end
     
     function mist.getWindBearingAndVel(p)
-        local point = mist.utils.makeVec3(o)
+        local point = mist.utils.makeVec3(p)
         local gLevel = land.getHeight({x = point.x, y = point.z})
         if point.y <= gLevel then
             point.y = gLevel + 10
