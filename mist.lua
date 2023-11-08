@@ -35,7 +35,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 5
-mist.build = 118
+mist.build = 119
 
 -- forward declaration of log shorthand
 local log
@@ -99,7 +99,7 @@ do -- the main scope
 
 		mist.DBs.zonesByName = {}
 		mist.DBs.zonesByNum = {}
-
+		
 
 		if env.mission.triggers and env.mission.triggers.zones then
 			for zone_ind, zone_data in pairs(env.mission.triggers.zones) do
@@ -227,6 +227,16 @@ do -- the main scope
         
         end
         
+		local abRef = {units = {}, airbase = {}}
+		for ind, val in pairs(world.getAirbases()) do
+			local cat = "airbase"
+			if Airbase.getDesc(val).category > 0 then
+				cat = "units"
+			end
+			abRef[cat][tonumber(val:getID())] = {name = val:getName()}
+
+		end
+		
 
 		mist.DBs.navPoints = {}
 		mist.DBs.units = {}
@@ -286,7 +296,18 @@ do -- the main scope
 										mist.DBs.units[coa_name][countryName][category] = {}
 
 										for group_num, group_data in pairs(obj_cat_data.group) do
-
+											local helipadId
+											local airdromeId
+											
+											if group_data.route and group_data.route.points and group_data.route.points[1] then
+												if group_data.route.points[1].airdromeId then
+													airdromeId =  group_data.route.points[1].airdromeId
+													--table.insert(abRef.airbase[group_data.route.points[1].airdromeId], group_data.groupId)
+												elseif group_data.route.points[1].helipadId then
+													helipadId =  group_data.route.points[1].helipadId
+													--table.insert(abRef.units[group_data.route.points[1].helipadId], group_data.groupId)
+												end
+											end
 											if group_data and group_data.units and type(group_data.units) == 'table' then	--making sure again- this is a valid group
 
 												mist.DBs.units[coa_name][countryName][category][group_num] = {}
@@ -350,7 +371,13 @@ do -- the main scope
 													units_tbl[unit_num].onboard_num = unit_data.onboard_num
 													units_tbl[unit_num].hardpoint_racks = unit_data.hardpoint_racks
 													units_tbl[unit_num].psi = unit_data.psi
-
+													
+													if helipadId then 
+														units_tbl[unit_num].helipadId =  mist.utils.deepCopy(helipadId)
+													end
+													if airdromeId then
+														units_tbl[unit_num].airdromeId = mist.utils.deepCopy(airdromeId)
+													end
 
 													units_tbl[unit_num].groupName = groupName
 													units_tbl[unit_num].groupId = group_data.groupId
@@ -752,6 +779,10 @@ do -- the main scope
 		-- end
 
 		--Build DBs
+		
+		--dbLog:echo(abRef)
+		mist.DBs.spawnsByBase = {}
+		
 		for coa_name, coa_data in pairs(mist.DBs.units) do
 			for cntry_name, cntry_data in pairs(coa_data) do
 				for category_name, category_data in pairs(cntry_data) do
@@ -781,6 +812,21 @@ do -- the main scope
 										--	mist.DBs.activeHumans[unit_data.unitName].playerName = Unit.getByName(unit_data.unitName):getPlayerName()
 										--end
 									end
+									if unit_data.airdromeId then
+										--log:echo(unit_data.airdromeId)
+										--log:echo(abRef.airbase[unit_data.airdromeId])
+										if not mist.DBs.spawnsByBase[abRef.airbase[unit_data.airdromeId].name] then
+											mist.DBs.spawnsByBase[abRef.airbase[unit_data.airdromeId].name] = {}
+										end
+										table.insert(mist.DBs.spawnsByBase[abRef.airbase[unit_data.airdromeId].name], unit_data.unitName)
+									end
+									if unit_data.helipadId then
+										if not mist.DBs.spawnsByBase[abRef.units[unit_data.helipadId].name] then
+											mist.DBs.spawnsByBase[abRef.units[unit_data.helipadId].name] = {}
+										end
+										table.insert(mist.DBs.spawnsByBase[abRef.units[unit_data.helipadId].name], unit_data.unitName)
+									end
+									
 								end
 							end
 						end
@@ -788,7 +834,7 @@ do -- the main scope
 				end
 			end
 		end
-
+		
 		--DynDBs
 		mist.DBs.MEunits = mist.utils.deepCopy(mist.DBs.units)
 		mist.DBs.MEunitsByName = mist.utils.deepCopy(mist.DBs.unitsByName)
@@ -3953,7 +3999,7 @@ do -- group functions scope
 
 	--- Returns group data table of give group.
 	function mist.getCurrentGroupData(gpName)
-		local dbData = mist.getGroupData(gpName)
+		local dbData = mist.getGroupData(gpName) or {}
 
 		if Group.getByName(gpName) and Group.getByName(gpName):isExist() == true then
 			local newGroup = Group.getByName(gpName)
@@ -3989,23 +4035,24 @@ do -- group functions scope
                     newData.units[unitNum].callsign = unitData:getCallsign()
                     newData.units[unitNum].unitName = uName
                 end
-
-				newData.units[unitNum].x = unitData:getPosition().p.x
-				newData.units[unitNum].y = unitData:getPosition().p.z
+				local pos =  unitData:getPosition()
+				newData.units[unitNum].x = pos.p.x
+				newData.units[unitNum].y = pos.p.z
                 newData.units[unitNum].point = {x = newData.units[unitNum].x, y = newData.units[unitNum].y}
-                newData.units[unitNum].heading = mist.getHeading(unitData, true) -- added to DBs
-				newData.units[unitNum].alt = unitData:getPosition().p.y
+                newData.units[unitNum].heading = math.atan2(pos.x.z, pos.x.x)
+				newData.units[unitNum].alt = pos.p.y
                 newData.units[unitNum].speed = mist.vec.mag(unitData:getVelocity())
                
 			end
 
 			return newData
-		elseif StaticObject.getByName(gpName) and StaticObject.getByName(gpName):isExist() == true then
+		elseif StaticObject.getByName(gpName) and StaticObject.getByName(gpName):isExist() == true and dbData.units then
 			local staticObj = StaticObject.getByName(gpName)
-			dbData.units[1].x = staticObj:getPosition().p.x
-			dbData.units[1].y = staticObj:getPosition().p.z
-			dbData.units[1].alt = staticObj:getPosition().p.y
-			dbData.units[1].heading = mist.getHeading(staticObj, true)
+			local pos =staticObj:getPosition()
+			dbData.units[1].x = pos.p.x
+			dbData.units[1].y = pos.p.z
+			dbData.units[1].alt = pos.p.y
+			dbData.units[1].heading = math.atan2(pos.x.z, pos.x.x)
 
 			return dbData
 		end
@@ -4199,7 +4246,10 @@ do -- group functions scope
 									if ((type(obj_cat_data) == 'table') and obj_cat_data.group and (type(obj_cat_data.group) == 'table') and (#obj_cat_data.group > 0)) then	--there's a group!
 										for group_num, group_data in pairs(obj_cat_data.group) do
 											if group_data and group_data.groupId == gpId then
-												return group_data
+												local gp = mist.utils.deepCopy(group_data)
+												gp.category = obj_cat_name
+												gp.country = cntry_data.id
+												return gp
 											end
 										end
 									end
