@@ -35,7 +35,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 5
-mist.build = 119
+mist.build = 120
 
 -- forward declaration of log shorthand
 local log
@@ -998,7 +998,7 @@ do -- the main scope
 				if #unitOneRef > 0 and unitOneRef[1] and type(unitOneRef[1]) == 'table' then
                     newTable.countryId = tonumber(unitOneRef[1]:getCountry())
                     newTable.coalitionId = tonumber(unitOneRef[1]:getCoalition())
-                    newTable.category = tonumber(newObject:getCategory())
+                    newTable.category = tonumber(Object.getCategory(newObject))
                 else
                     log:warn('getUnits failed to return on $1 ; Built Data: $2.', event, newTable)
                     return false
@@ -1115,7 +1115,7 @@ do -- the main scope
 				newTable.units[1].country = newTable.country
 				newTable.units[1].coalitionId = newTable.coalitionId
 				newTable.units[1].coalition = newTable.coalition
-				if newObject:getCategory() == 6 and newObject:getCargoDisplayName() then
+				if Object.getCategory(newObject) == 6 and newObject:getCargoDisplayName() then
 					local mass = newObject:getCargoDisplayName()
 					mass = string.gsub(mass, ' ', '')
 					mass = string.gsub(mass, 'kg', '')
@@ -3422,7 +3422,7 @@ function mist.getUnitsInPolygon(unit_names, polyZone, max_alt)
 	local inZoneUnits = {}
 	for i =1, #units do
 		local lUnit = units[i]
-        local lCat = lUnit:getCategory()
+        local lCat = Object.getCategory(lUnit)
         if lUnit:isExist() == true and ((lCat == 1 and lUnit:isActive()) or lCat ~= 1) and mist.pointInPolygon(lUnit:getPosition().p, polyZone, max_alt) then
 			inZoneUnits[#inZoneUnits + 1] = lUnit
 		end
@@ -3468,7 +3468,7 @@ function mist.getUnitsInZones(unit_names, zone_names, zone_type)
 	for units_ind = 1, #units do
         local lUnit = units[units_ind]
         local unit_pos = lUnit:getPosition().p
-        local lCat = lUnit:getCategory()
+        local lCat = Object.getCategory(lUnit)
         for zones_ind = 1, #zones do
 			if zone_type == 'sphere' then	--add land height value for sphere zone type
 				local alt = land.getHeight({x = zones[zones_ind].x, y = zones[zones_ind].z})
@@ -3531,7 +3531,7 @@ function mist.getUnitsInMovingZones(unit_names, zone_unit_names, radius, zone_ty
 
 	for units_ind = 1, #units do
         local lUnit = units[units_ind]
-        local lCat = lUnit:getCategory()
+        local lCat = Object.getCategory(lUnit)
         local unit_pos = lUnit:getPosition().p
 		for zone_units_ind = 1, #zone_units do
 			
@@ -3559,7 +3559,7 @@ function mist.getUnitsLOS(unitset1, altoffset1, unitset2, altoffset2, radius)
 	-- get the positions all in one step, saves execution time.
 	for unitset1_ind = 1, #unitset1 do
 		local unit1 = Unit.getByName(unitset1[unitset1_ind])
-        local lCat = unit1:getCategory()
+        local lCat = Object.getCategory(unit1)
 		if unit1 and ((lCat == 1 and unit1:isActive()) or lCat ~= 1) and unit:isExist() == true then
 			unit_info1[#unit_info1 + 1] = {}
 			unit_info1[#unit_info1].unit = unit1
@@ -3569,7 +3569,7 @@ function mist.getUnitsLOS(unitset1, altoffset1, unitset2, altoffset2, radius)
 
 	for unitset2_ind = 1, #unitset2 do
 		local unit2 = Unit.getByName(unitset2[unitset2_ind])
-        local lCat = unit2:getCategory()
+        local lCat = Object.getCategory(unit2)
 		if unit2 and ((lCat == 1 and unit2:isActive()) or lCat ~= 1) and unit:isExist() == true then
 			unit_info2[#unit_info2 + 1] = {}
 			unit_info2[#unit_info2].unit = unit2
