@@ -35,7 +35,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 5
-mist.build = 120
+mist.build = 121
 
 -- forward declaration of log shorthand
 local log
@@ -402,6 +402,13 @@ do -- the main scope
 
 														if unit_data.canCargo then
 															units_tbl[unit_num].canCargo = unit_data.canCargo
+														end
+														
+														if unit_data.category == "Heliports" then
+															if not abRef.units[unit_data.unitId] then
+																abRef.units[unit_data.unitId] = {name = unit_data.name}
+															end
+														
 														end
 													end
 
@@ -820,13 +827,13 @@ do -- the main scope
 										end
 										table.insert(mist.DBs.spawnsByBase[abRef.airbase[unit_data.airdromeId].name], unit_data.unitName)
 									end
-									if unit_data.helipadId then
+									if unit_data.helipadId and abRef.units[unit_data.helipadId] and abRef.units[unit_data.helipadId].name then
 										if not mist.DBs.spawnsByBase[abRef.units[unit_data.helipadId].name] then
 											mist.DBs.spawnsByBase[abRef.units[unit_data.helipadId].name] = {}
 										end
 										table.insert(mist.DBs.spawnsByBase[abRef.units[unit_data.helipadId].name], unit_data.unitName)
 									end
-									
+							
 								end
 							end
 						end
