@@ -9,22 +9,23 @@ humansByName =
 			["x"] = -288142.85714286,
 		}, -- end of ["point"]
 		["alt_type"] = "BARO",
+		["coalitionId"] = 2,
 		["livery_id"] = "19th Fighter SQN (AK)",
 		["onboard_num"] = "10",
 		["category"] = "plane",
 		["speed"] = 138.88888888889,
+		["AddPropAircraft"] = 
+		{
+		}, -- end of ["AddPropAircraft"]
 		["type"] = "F-15C",
-		["country"] = "usa",
+		["dbNum"] = 36,
+		["unitId"] = 8,
 		["psi"] = 0.57883789069348,
-		["unitName"] = "F-15C Client #1_unit",
+		["groupId"] = 4,
 		["groupName"] = "F-15C Client #1",
-		["coalition"] = "blue",
+		["skill"] = "Client",
 		["countryId"] = 2,
 		["x"] = -288142.85714286,
-		["y"] = 662142.85714286,
-		["unitId"] = 8,
-		["heading"] = -0.57883789069348,
-		["skill"] = "Client",
 		["callsign"] = 
 		{
 			[1] = 2,
@@ -32,7 +33,11 @@ humansByName =
 			[3] = 1,
 			["name"] = "Springfield11",
 		}, -- end of ["callsign"]
-		["groupId"] = 4,
+		["y"] = 662142.85714286,
+		["heading"] = -0.57883789069348,
+		["country"] = "usa",
+		["coalition"] = "blue",
+		["unitName"] = "F-15C Client #1_unit",
 	}, -- end of ["F-15C Client #1_unit"]
 	["F-15C Client #2_unit"] = 
 	{
@@ -43,22 +48,23 @@ humansByName =
 			["x"] = -287000,
 		}, -- end of ["point"]
 		["alt_type"] = "BARO",
+		["coalitionId"] = 2,
 		["livery_id"] = "19th Fighter SQN (AK)",
 		["onboard_num"] = "10",
 		["category"] = "plane",
 		["speed"] = 138.88888888889,
+		["AddPropAircraft"] = 
+		{
+		}, -- end of ["AddPropAircraft"]
 		["type"] = "F-15C",
-		["country"] = "usa",
+		["dbNum"] = 37,
+		["unitId"] = 10,
 		["psi"] = 0.57883789069348,
-		["unitName"] = "F-15C Client #2_unit",
+		["groupId"] = 5,
 		["groupName"] = "F-15C Client #2",
-		["coalition"] = "blue",
+		["skill"] = "Client",
 		["countryId"] = 2,
 		["x"] = -287000,
-		["y"] = 668428.57142857,
-		["unitId"] = 10,
-		["heading"] = -0.57883789069348,
-		["skill"] = "Client",
 		["callsign"] = 
 		{
 			[1] = 2,
@@ -66,7 +72,11 @@ humansByName =
 			[3] = 1,
 			["name"] = "Springfield11",
 		}, -- end of ["callsign"]
-		["groupId"] = 5,
+		["y"] = 668428.57142857,
+		["heading"] = -0.57883789069348,
+		["country"] = "usa",
+		["coalition"] = "blue",
+		["unitName"] = "F-15C Client #2_unit",
 	}, -- end of ["F-15C Client #2_unit"]
 	["Su-33 Client #3Unit"] = 
 	{
@@ -77,24 +87,26 @@ humansByName =
 			["x"] = -250265.71428571,
 		}, -- end of ["point"]
 		["alt_type"] = "BARO",
+		["coalitionId"] = 1,
 		["livery_id"] = "279th kiap 1st squad navy",
 		["onboard_num"] = "054",
 		["category"] = "plane",
 		["speed"] = 138.88888888889,
 		["type"] = "Su-33",
-		["country"] = "russia",
+		["dbNum"] = 74,
+		["unitId"] = 48,
 		["psi"] = 0,
-		["unitName"] = "Su-33 Client #3Unit",
+		["groupId"] = 20,
 		["groupName"] = "Su-33 Client #1",
-		["coalition"] = "red",
+		["skill"] = "Client",
 		["countryId"] = 0,
 		["x"] = -250265.71428571,
-		["y"] = 590471.42857142,
-		["unitId"] = 48,
-		["heading"] = 0,
-		["skill"] = "Client",
 		["callsign"] = 106,
-		["groupId"] = 20,
+		["y"] = 590471.42857142,
+		["heading"] = 0,
+		["country"] = "russia",
+		["coalition"] = "red",
+		["unitName"] = "Su-33 Client #3Unit",
 	}, -- end of ["Su-33 Client #3Unit"]
 	["A-10C Client #1_unit"] = 
 	{
@@ -105,6 +117,7 @@ humansByName =
 			["x"] = -318142.85714286,
 		}, -- end of ["point"]
 		["alt_type"] = "BARO",
+		["coalitionId"] = 2,
 		["livery_id"] = "104th FS Maryland ANG, Baltimore (MD)",
 		["onboard_num"] = "52",
 		["category"] = "plane",
@@ -113,16 +126,14 @@ humansByName =
 		{
 		}, -- end of ["AddPropAircraft"]
 		["type"] = "A-10C",
-		["country"] = "usa",
+		["dbNum"] = 38,
+		["unitId"] = 11,
 		["psi"] = 0.67060113146646,
-		["unitName"] = "A-10C Client #1_unit",
+		["groupId"] = 6,
 		["groupName"] = "A-10C Client #1",
-		["coalition"] = "blue",
+		["skill"] = "Client",
 		["countryId"] = 2,
 		["x"] = -318142.85714286,
-		["y"] = 636428.57142857,
-		["unitId"] = 11,
-		["heading"] = -0.67060113146646,
 		["callsign"] = 
 		{
 			[1] = 3,
@@ -130,8 +141,11 @@ humansByName =
 			[3] = 1,
 			["name"] = "Uzi11",
 		}, -- end of ["callsign"]
-		["skill"] = "Client",
-		["groupId"] = 6,
+		["y"] = 636428.57142857,
+		["heading"] = -0.67060113146646,
+		["country"] = "usa",
+		["coalition"] = "blue",
+		["unitName"] = "A-10C Client #1_unit",
 	}, -- end of ["A-10C Client #1_unit"]
 	["Su-33 Client #2Unit"] = 
 	{
@@ -142,24 +156,26 @@ humansByName =
 			["x"] = -250225.71428571,
 		}, -- end of ["point"]
 		["alt_type"] = "BARO",
+		["coalitionId"] = 1,
 		["livery_id"] = "279th kiap 1st squad navy",
 		["onboard_num"] = "010",
 		["category"] = "plane",
 		["speed"] = 138.88888888889,
 		["type"] = "Su-33",
-		["country"] = "russia",
+		["dbNum"] = 73,
+		["unitId"] = 47,
 		["psi"] = 0,
-		["unitName"] = "Su-33 Client #2Unit",
+		["groupId"] = 20,
 		["groupName"] = "Su-33 Client #1",
-		["coalition"] = "red",
+		["skill"] = "Client",
 		["countryId"] = 0,
 		["x"] = -250225.71428571,
-		["y"] = 590431.42857142,
-		["unitId"] = 47,
-		["heading"] = 0,
-		["skill"] = "Client",
 		["callsign"] = 105,
-		["groupId"] = 20,
+		["y"] = 590431.42857142,
+		["heading"] = 0,
+		["country"] = "russia",
+		["coalition"] = "red",
+		["unitName"] = "Su-33 Client #2Unit",
 	}, -- end of ["Su-33 Client #2Unit"]
 	["A-10C Client #2_unit"] = 
 	{
@@ -170,6 +186,7 @@ humansByName =
 			["x"] = -315857.14285714,
 		}, -- end of ["point"]
 		["alt_type"] = "BARO",
+		["coalitionId"] = 2,
 		["livery_id"] = "104th FS Maryland ANG, Baltimore (MD)",
 		["onboard_num"] = "52",
 		["category"] = "plane",
@@ -178,16 +195,14 @@ humansByName =
 		{
 		}, -- end of ["AddPropAircraft"]
 		["type"] = "A-10C",
-		["country"] = "usa",
+		["dbNum"] = 39,
+		["unitId"] = 12,
 		["psi"] = 0.66079849060746,
-		["unitName"] = "A-10C Client #2_unit",
+		["groupId"] = 7,
 		["groupName"] = "A-10C Client #2",
-		["coalition"] = "blue",
+		["skill"] = "Client",
 		["countryId"] = 2,
 		["x"] = -315857.14285714,
-		["y"] = 644428.57142857,
-		["unitId"] = 12,
-		["heading"] = -0.66079849060746,
 		["callsign"] = 
 		{
 			[1] = 3,
@@ -195,8 +210,11 @@ humansByName =
 			[3] = 1,
 			["name"] = "Uzi11",
 		}, -- end of ["callsign"]
-		["skill"] = "Client",
-		["groupId"] = 7,
+		["y"] = 644428.57142857,
+		["heading"] = -0.66079849060746,
+		["country"] = "usa",
+		["coalition"] = "blue",
+		["unitName"] = "A-10C Client #2_unit",
 	}, -- end of ["A-10C Client #2_unit"]
 	["Su-33 Client #1Unit"] = 
 	{
@@ -207,23 +225,25 @@ humansByName =
 			["x"] = -250185.71428571,
 		}, -- end of ["point"]
 		["alt_type"] = "BARO",
+		["coalitionId"] = 1,
 		["livery_id"] = "279th kiap 1st squad navy",
 		["onboard_num"] = "53",
 		["category"] = "plane",
 		["speed"] = 138.88888888889,
 		["type"] = "Su-33",
-		["country"] = "russia",
+		["dbNum"] = 72,
+		["unitId"] = 42,
 		["psi"] = 0,
-		["unitName"] = "Su-33 Client #1Unit",
+		["groupId"] = 20,
 		["groupName"] = "Su-33 Client #1",
-		["coalition"] = "red",
+		["skill"] = "Client",
 		["countryId"] = 0,
 		["x"] = -250185.71428571,
-		["y"] = 590391.42857142,
-		["unitId"] = 42,
-		["heading"] = 0,
-		["skill"] = "Client",
 		["callsign"] = 104,
-		["groupId"] = 20,
+		["y"] = 590391.42857142,
+		["heading"] = 0,
+		["country"] = "russia",
+		["coalition"] = "red",
+		["unitName"] = "Su-33 Client #1Unit",
 	}, -- end of ["Su-33 Client #1Unit"]
 } -- end of humansByName
