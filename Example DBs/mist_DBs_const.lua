@@ -1,5 +1,34 @@
 const = 
 {
+	["nato"] = 
+	{
+		["a"] = "alpha",
+		["c"] = "charlie",
+		["b"] = "bravo",
+		["e"] = "echo",
+		["d"] = "delta",
+		["g"] = "golf",
+		["f"] = "foxtrot",
+		["i"] = "india",
+		["h"] = "hotel",
+		["k"] = "kilo",
+		["j"] = "juliett",
+		["m"] = "mike",
+		["l"] = "lima",
+		["o"] = "oscar",
+		["n"] = "november",
+		["q"] = "quebec",
+		["p"] = "papa",
+		["s"] = "sierra",
+		["r"] = "romeo",
+		["u"] = "uniform",
+		["t"] = "tango",
+		["w"] = "whiskey",
+		["v"] = "victor",
+		["y"] = "yankee",
+		["x"] = "xray",
+		["z"] = "zulu",
+	}, -- end of ["nato"]
 	["shapeNames"] = 
 	{
 		["Landmine"] = "landmine",

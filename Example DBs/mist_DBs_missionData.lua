@@ -1,6 +1,12 @@
 missionData = 
 {
-	["version"] = 20,
+	["version"] = 22,
+	["countries"] = 
+	{
+		["australia"] = "neutral",
+		["russia"] = "red",
+		["usa"] = "blue",
+	}, -- end of ["countries"]
 	["files"] = 
 	{
 	}, -- end of ["files"]
