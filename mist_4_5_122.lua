@@ -35,7 +35,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 5
-mist.build = 121
+mist.build = 122
 
 -- forward declaration of log shorthand
 local log
@@ -97,57 +97,6 @@ do -- the main scope
 			mist.DBs.missionData.countries = {}
 		end
 
-		mist.DBs.zonesByName = {}
-		mist.DBs.zonesByNum = {}
-		
-
-		if env.mission.triggers and env.mission.triggers.zones then
-			for zone_ind, zone_data in pairs(env.mission.triggers.zones) do
-				if type(zone_data) == 'table' then
-					local zone = mist.utils.deepCopy(zone_data)
-					--log:warn(zone)
-					zone.point = {}	-- point is used by SSE
-					zone.point.x = zone_data.x
-					zone.point.y = land.getHeight({x = zone_data.x, y = zone_data.y})
-					zone.point.z = zone_data.y
-                    zone.properties = {}
-                    if zone_data.properties then
-                        for propInd, prop in pairs(zone_data.properties) do
-                            if prop.value and tostring(prop.value) ~= "" then
-                                zone.properties[prop.key] = prop.value                                
-                            end
-                        end
-                    end
-                    if zone.verticies then -- trust but verify
-                        local r = 0
-                        for i = 1, #zone.verticies do
-                            local dist = mist.utils.get2DDist(zone.point, zone.verticies[i])
-                            if dist > r then
-                                r = mist.utils.deepCopy(dist)
-                            end
-                        end
-                        zone.radius = r
-                    
-                    end
-					if zone.linkUnit then
-						local uRef = mist.DBs.unitsByName[zone.linkUnit]
-						if zone.verticies then
-							local offset = {}
-							for i = 1, #zone.verticies do
-								table.insert(offset, {dist = mist.utils.get2DDist(uRef.point, zone.verticies[i]), heading = mist.getHeadingPoints(uRef.point, zone.verticies[i]) + uRef.heading})
-							end
-							zone.offset = offset
-						else
-							zone.offset = {dist = mist.utils.get2DDist(uRef.point, zone.point), heading = mist.getHeadingPoints(uRef.point, zone.point) + uRef.heading}
-						end
-					end
-
-					mist.DBs.zonesByName[zone_data.name] = zone
-					mist.DBs.zonesByNum[#mist.DBs.zonesByNum + 1] = mist.utils.deepCopy(zone)	--[[deepcopy so that the zone in zones_by_name and the zone in
-																								zones_by_num se are different objects.. don't want them linked.]]
-				end
-			end
-		end
         
         mist.DBs.drawingByName = {}
         mist.DBs.drawingIndexed = {}
@@ -838,6 +787,59 @@ do -- the main scope
 							end
 						end
 					end
+				end
+			end
+		end
+		
+		mist.DBs.zonesByName = {}
+		mist.DBs.zonesByNum = {}
+
+		if env.mission.triggers and env.mission.triggers.zones then
+			for zone_ind, zone_data in pairs(env.mission.triggers.zones) do
+				if type(zone_data) == 'table' then
+					local zone = mist.utils.deepCopy(zone_data)
+					--log:warn(zone)
+					zone.point = {}	-- point is used by SSE
+					zone.point.x = zone_data.x
+					zone.point.y = land.getHeight({x = zone_data.x, y = zone_data.y})
+					zone.point.z = zone_data.y
+                    zone.properties = {}
+                    if zone_data.properties then
+                        for propInd, prop in pairs(zone_data.properties) do
+                            if prop.value and tostring(prop.value) ~= "" then
+                                zone.properties[prop.key] = prop.value                                
+                            end
+                        end
+                    end
+                    if zone.verticies then -- trust but verify
+                        local r = 0
+                        for i = 1, #zone.verticies do
+                            local dist = mist.utils.get2DDist(zone.point, zone.verticies[i])
+                            if dist > r then
+                                r = mist.utils.deepCopy(dist)
+                            end
+                        end
+                        zone.radius = r
+                    
+                    end
+					if zone.linkUnit then
+						local uRef = mist.DBs.unitsByName[zone.linkUnit]
+						if uRef then 
+							if zone.verticies then
+								local offset = {}
+								for i = 1, #zone.verticies do
+									table.insert(offset, {dist = mist.utils.get2DDist(uRef.point, zone.verticies[i]), heading = mist.getHeadingPoints(uRef.point, zone.verticies[i]) + uRef.heading})
+								end
+								zone.offset = offset
+							else
+								zone.offset = {dist = mist.utils.get2DDist(uRef.point, zone.point), heading = mist.getHeadingPoints(uRef.point, zone.point) + uRef.heading}
+							end
+						end
+					end
+
+					mist.DBs.zonesByName[zone_data.name] = zone
+					mist.DBs.zonesByNum[#mist.DBs.zonesByNum + 1] = mist.utils.deepCopy(zone)	--[[deepcopy so that the zone in zones_by_name and the zone in
+																								zones_by_num se are different objects.. don't want them linked.]]
 				end
 			end
 		end
