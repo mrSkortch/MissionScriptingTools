@@ -35,7 +35,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 5
-mist.build = 122
+mist.build = 123
 
 -- forward declaration of log shorthand
 local log
@@ -1152,6 +1152,7 @@ do -- the main scope
 				end
 			end
 		end
+		--dbLog:warn(newTable)
 		--mist.debug.writeData(mist.utils.serialize,{'msg', newTable}, timer.getAbsTime() ..'Group.lua')
 		newTable.timeAdded = timer.getAbsTime() -- only on the dynGroupsAdded table. For other reference, see start time
 		--mist.debug.dumpDBs()
@@ -1493,7 +1494,7 @@ do -- the main scope
 					task.t = timer.getTime() + task.rep	--schedule next run
 					local err, errmsg = pcall(task.f, unpack(task.vars, 1, table.maxn(task.vars)))
 					if not err then
-						log:error('Error in scheduled function: $1' .. errmsg)
+						log:error('Error in scheduled function: $1', errmsg)
 					end
 					--scheduledTasks[i].f(unpack(scheduledTasks[i].vars, 1, table.maxn(scheduledTasks[i].vars)))	-- do the task
 					i = i + 1
@@ -2019,7 +2020,7 @@ do -- the main scope
             
             end
         end
-		--mist.debug.writeData(mist.utils.serialize,{'msg', newGroup}, 'newGroupPushedToAddGroup.lua')
+		--mist.debug.writeData(mist.utils.serialize,{'msg', newGroup}, newGroup.name ..'.lua')
         --log:warn(newGroup)
 		-- sanitize table
 		newGroup.groupName = nil
@@ -3569,7 +3570,7 @@ function mist.getUnitsLOS(unitset1, altoffset1, unitset2, altoffset2, radius)
 	for unitset1_ind = 1, #unitset1 do
 		local unit1 = Unit.getByName(unitset1[unitset1_ind])
         local lCat = Object.getCategory(unit1)
-		if unit1 and ((lCat == 1 and unit1:isActive()) or lCat ~= 1) and unit:isExist() == true then
+		if unit1 and ((lCat == 1 and unit1:isActive()) or lCat ~= 1) and unit1:isExist() == true then
 			unit_info1[#unit_info1 + 1] = {}
 			unit_info1[#unit_info1].unit = unit1
 			unit_info1[#unit_info1].pos	= unit1:getPosition().p
@@ -3579,7 +3580,7 @@ function mist.getUnitsLOS(unitset1, altoffset1, unitset2, altoffset2, radius)
 	for unitset2_ind = 1, #unitset2 do
 		local unit2 = Unit.getByName(unitset2[unitset2_ind])
         local lCat = Object.getCategory(unit2)
-		if unit2 and ((lCat == 1 and unit2:isActive()) or lCat ~= 1) and unit:isExist() == true then
+		if unit2 and ((lCat == 1 and unit2:isActive()) or lCat ~= 1) and unit2:isExist() == true then
 			unit_info2[#unit_info2 + 1] = {}
 			unit_info2[#unit_info2].unit = unit2
 			unit_info2[#unit_info2].pos	= unit2:getPosition().p
