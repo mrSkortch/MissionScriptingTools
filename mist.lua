@@ -7755,7 +7755,7 @@ do
                 --log:info('create maker DB: $1', e.idx)
                mist.DBs.markList[e.idx] = {time = e.time, pos = e.pos, groupId = e.groupId, mType = 'panel', text = e.text, markId = e.idx, coalition = e.coalition}
                 if e.unit then
-                   mist.DBs.markList[e.idx].unit = e.intiator:getName()
+                   mist.DBs.markList[e.idx].unit = e.initiator:getName()
                 end
                 --log:info(mist.marker.list[e.idx])
            end
