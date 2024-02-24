@@ -7798,7 +7798,7 @@ do
         else
             for mEntry, mData in pairs(mist.DBs.markList) do
                 if id == mData.name or id == mData.id then
-                    return mData.id
+                    return mData.markId
                 end
             end
         end
@@ -7953,7 +7953,7 @@ do
         
         if markForCoa then
             if type(markForCoa) == 'string' then
-				log:warn("coa is string")
+				--log:warn("coa is string")
                 if tonumber(markForCoa) then 
                     coa = coas[tonumber(markForCoa)]
                     markScope = 'coa'

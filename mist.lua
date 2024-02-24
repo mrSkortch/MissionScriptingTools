@@ -7798,7 +7798,7 @@ do
         else
             for mEntry, mData in pairs(mist.DBs.markList) do
                 if id == mData.name or id == mData.id then
-                    return mData.id
+                    return mData.markId
                 end
             end
         end
