@@ -35,7 +35,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 5
-mist.build = 123
+mist.build = 124
 
 -- forward declaration of log shorthand
 local log
@@ -1520,7 +1520,7 @@ do -- the main scope
 					id = tostring(original_id) .. ' #' .. tostring(id_ind)
 					id_ind = id_ind + 1
 				end
-
+				local valid
 				if mist.DBs.aliveUnits and mist.DBs.aliveUnits[val.object.id_] then
 					--log:info('object found in alive_units')
 					val.objectData = mist.utils.deepCopy(mist.DBs.aliveUnits[val.object.id_])
@@ -1533,6 +1533,7 @@ do -- the main scope
 					--trigger.action.outText('remove via death: ' .. Unit.getName(val.object),20)
 						mist.DBs.activeHumans[Unit.getName(val.object)] = nil
 					end]]
+					valid = true
 				elseif mist.DBs.removedAliveUnits and mist.DBs.removedAliveUnits[val.object.id_] then	-- it didn't exist in alive_units, check old_alive_units
 					--log:info('object found in old_alive_units')
 					val.objectData = mist.utils.deepCopy(mist.DBs.removedAliveUnits[val.object.id_])
@@ -1541,32 +1542,37 @@ do -- the main scope
 						val.objectPos = pos.p
 					end
 					val.objectType = mist.DBs.removedAliveUnits[val.object.id_].category
-
+					valid = true
 				else	--attempt to determine if static object...
 					--log:info('object not found in alive units or old alive units')
-					local pos = Object.getPosition(val.object)
-					if pos then
-						local static_found = false
-						for ind, static in pairs(mist.DBs.unitsByCat.static) do
-							if ((pos.p.x - static.point.x)^2 + (pos.p.z - static.point.y)^2)^0.5 < 0.1 then --really, it should be zero...
-								--log:info('correlated dead static object to position')
-								val.objectData = static
-								val.objectPos = pos.p
-								val.objectType = 'static'
-								static_found = true
-								break
+					if Object.isExist(val.object) then 
+						local pos = Object.getPosition(val.object)
+						if pos then
+							local static_found = false
+							for ind, static in pairs(mist.DBs.unitsByCat.static) do
+								if ((pos.p.x - static.point.x)^2 + (pos.p.z - static.point.y)^2)^0.5 < 0.1 then --really, it should be zero...
+									--log:info('correlated dead static object to position')
+									val.objectData = static
+									val.objectPos = pos.p
+									val.objectType = 'static'
+									static_found = true
+									break
+								end
 							end
+							if not static_found then
+								val.objectPos = pos.p
+								val.objectType = 'building'
+								val.typeName = Object.getTypeName(val.object)
+							end
+						else
+							val.objectType = 'unknown'
 						end
-						if not static_found then
-							val.objectPos = pos.p
-							val.objectType = 'building'
-                            val.typeName = Object.getTypeName(val.object)
-						end
-					else
-						val.objectType = 'unknown'
+						valid = true
 					end
 				end
-				mist.DBs.deadObjects[id] = val
+				if valid then
+					mist.DBs.deadObjects[id] = val
+				end
 			end
 		end
 	end
@@ -3561,7 +3567,7 @@ function mist.getUnitsInMovingZones(unit_names, zone_unit_names, radius, zone_ty
 end
 
 function mist.getUnitsLOS(unitset1, altoffset1, unitset2, altoffset2, radius)
-	log:info("$1, $2, $3, $4, $5", unitset1, altoffset1, unitset2, altoffset2, radius)
+	--log:info("$1, $2, $3, $4, $5", unitset1, altoffset1, unitset2, altoffset2, radius)
 	radius = radius or math.huge
 	local unit_info1 = {}
 	local unit_info2 = {}
@@ -3569,21 +3575,25 @@ function mist.getUnitsLOS(unitset1, altoffset1, unitset2, altoffset2, radius)
 	-- get the positions all in one step, saves execution time.
 	for unitset1_ind = 1, #unitset1 do
 		local unit1 = Unit.getByName(unitset1[unitset1_ind])
-        local lCat = Object.getCategory(unit1)
-		if unit1 and ((lCat == 1 and unit1:isActive()) or lCat ~= 1) and unit1:isExist() == true then
-			unit_info1[#unit_info1 + 1] = {}
-			unit_info1[#unit_info1].unit = unit1
-			unit_info1[#unit_info1].pos	= unit1:getPosition().p
+        if unit1 then 
+			local lCat = Object.getCategory(unit1)
+			if ((lCat == 1 and unit1:isActive()) or lCat ~= 1) and unit1:isExist() == true then
+				unit_info1[#unit_info1 + 1] = {}
+				unit_info1[#unit_info1].unit = unit1
+				unit_info1[#unit_info1].pos	= unit1:getPosition().p
+			end
 		end
 	end
 
 	for unitset2_ind = 1, #unitset2 do
 		local unit2 = Unit.getByName(unitset2[unitset2_ind])
-        local lCat = Object.getCategory(unit2)
-		if unit2 and ((lCat == 1 and unit2:isActive()) or lCat ~= 1) and unit2:isExist() == true then
-			unit_info2[#unit_info2 + 1] = {}
-			unit_info2[#unit_info2].unit = unit2
-			unit_info2[#unit_info2].pos	= unit2:getPosition().p
+		if unit2 then
+			local lCat = Object.getCategory(unit2)
+			if  ((lCat == 1 and unit2:isActive()) or lCat ~= 1) and unit2:isExist() == true then
+				unit_info2[#unit_info2 + 1] = {}
+				unit_info2[#unit_info2].unit = unit2
+				unit_info2[#unit_info2].pos	= unit2:getPosition().p
+			end
 		end
 	end
 
@@ -5194,7 +5204,8 @@ do -- mist.util scope
 
     function mist.utils.getHeadingPoints(point1, point2, north) -- sick of writing this out. 
         if north then 
-            return mist.utils.getDir(mist.vec.sub(mist.utils.makeVec3(point2), mist.utils.makeVec3(point1)), (mist.utils.makeVec3(point1)))
+			local p1 = mist.utils.get3DDist(point1)
+            return mist.utils.getDir(mist.vec.sub(mist.utils.makeVec3(point2), p1), p1)
         else
             return mist.utils.getDir(mist.vec.sub(mist.utils.makeVec3(point2), mist.utils.makeVec3(point1))) 
         end
@@ -5838,8 +5849,8 @@ do -- mist.debug scope
 			log:alert('insufficient libraries to run mist.debug.dump_G, you must disable the sanitization of the io and lfs libraries in ./Scripts/MissionScripting.lua')
 			--trigger.action.outText(errmsg, 10)
 		end
-	end
 
+	end
 	--- Write debug data to file.
 	-- This function requires you to disable script sanitization
 	-- in $DCS_ROOT\Scripts\MissionScripting.lua to access lfs and io
@@ -7654,7 +7665,10 @@ do
         --log:warn(s)
         if type(s) == 'table' then 
             local mType = s.markType
-            if mType == 'panel' then 
+			--log:echo(s)
+            
+			if mType == 'panel' then
+				local markScope = s.markScope or "all"
                 if markScope == 'coa' then
                     trigger.action.markToCoalition(s.markId, s.text, s.pos, s.markFor, s.readOnly)
                 elseif markScope == 'group' then
@@ -7712,10 +7726,15 @@ do
     
     local function validateColor(val)
         if type(val) == 'table' then 
-            for i = 1, #val do
-                if type(val[i]) == 'number' and val[i] > 1 then
-                    val[i] = val[i]/255 -- convert RGB values from 0-255 to 0-1 equivilent. 
-                end
+            for i = 1, 4 do
+                if val[i] then
+					if	type(val[i]) == 'number' and val[i] > 1 then
+						val[i] = val[i]/255 -- convert RGB values from 0-255 to 0-1 equivilent. 
+					end
+                else
+					val[i] = 0.8
+					log:warn("index $1 of color to mist.marker.add was missing, defaulted to 0.8", i)
+				end
             end
         elseif type(val) == 'string' then
             val = mist.utils.hexToRGB(val)
@@ -7756,7 +7775,7 @@ do
                 --log:info('create maker DB: $1', e.idx)
                mist.DBs.markList[e.idx] = {time = e.time, pos = e.pos, groupId = e.groupId, mType = 'panel', text = e.text, markId = e.idx, coalition = e.coalition}
                 if e.unit then
-                   mist.DBs.markList[e.idx].unit = e.intiator:getName()
+                   mist.DBs.markList[e.idx].unit = e.initiator:getName()
                 end
                 --log:info(mist.marker.list[e.idx])
            end
@@ -7789,11 +7808,16 @@ do
     
     
     local function removeMark(id)
-        --log:info("Removing Mark: $1", id
+		--log:info("Removing Mark: $1", id)
         local removed = false
         if type(id) == 'table' then 
             for ind, val in pairs(id) do
-                local r = getMarkId(val)
+				local r
+				if val.markId then
+					r = val.markId
+				else
+					r = getMarkId(val)
+				end
                 if r then 
                     trigger.action.removeMark(r)
                     mist.DBs.markList[r] = nil
@@ -7803,9 +7827,11 @@ do
           
         else
             local r = getMarkId(id)
-            trigger.action.removeMark(r)
-            mist.DBs.markList[r] = nil
-            removed = true
+			if r then 
+				trigger.action.removeMark(r)
+				mist.DBs.markList[r] = nil
+				removed = true
+			end
         end
         return removed
     end
@@ -7927,6 +7953,7 @@ do
         
         if markForCoa then
             if type(markForCoa) == 'string' then
+				--log:warn("coa is string")
                 if tonumber(markForCoa) then 
                     coa = coas[tonumber(markForCoa)]
                     markScope = 'coa'
@@ -7941,11 +7968,10 @@ do
                 end
             elseif type(markForCoa) == 'number' and markForCoa >=-1 and markForCoa <= #coas then
                 coa = markForCoa
-                markScore = 'coa'
+				--log:warn("coa is number")
+                markScope = 'coa'
             end
-            
-            
-        
+            markFor = coa
         elseif markFor then
 			if type(markFor) == 'number' then -- groupId
 				if mist.DBs.groupsById[markFor] then	
@@ -8054,7 +8080,7 @@ do
                     end
                     for i = 1, #markForTable do
                         local newId = iterate()
-                        local data = {markId = newId, text = text, pos = pos[i], markFor = markForTable[i], markType = 'panel', name = name, readOnly = readOnly, time = timer.getTime()}
+                        local data = {markId = newId, text = text, pos = pos[i], markScope = markScope, markFor = markForTable[i], markType = 'panel', name = name, readOnly = readOnly, time = timer.getTime()}
                         mist.DBs.markList[newId] = data
                         table.insert(list, data)
 
@@ -8178,6 +8204,7 @@ do
 	end
 	
 	function mist.marker.remove(id)
+	
         return removeMark(id)
 	end
 	
