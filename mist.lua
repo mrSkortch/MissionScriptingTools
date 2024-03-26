@@ -35,7 +35,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 5
-mist.build = 124
+mist.build = 125
 
 -- forward declaration of log shorthand
 local log
@@ -695,7 +695,6 @@ do -- the main scope
             ["FARP"] = "farps",
             ["Fueltank"] = "fueltank_cargo",
             ["Gate"] = "gate",
-            ["FARP Fuel Depot"] = "gsm rus",
             ["Armed house"] = "home1_a",
             ["FARP Command Post"] = "kp-ug",
             ["Watch Tower Armed"] = "ohr-vyshka",
@@ -704,7 +703,6 @@ do -- the main scope
             ["Pipes big"] = "pipes_big_cargo",
             ["Oil platform"] = "plavbaza",
             ["Tetrapod"] = "tetrapod_cargo",
-            ["Fuel tank"] = "toplivo",
             ["Trunks long"] = "trunks_long_cargo",
             ["Trunks small"] = "trunks_small_cargo",
             ["Passenger liner"] = "yastrebow",
@@ -4023,13 +4021,14 @@ do -- group functions scope
 
 		if Group.getByName(gpName) and Group.getByName(gpName):isExist() == true then
 			local newGroup = Group.getByName(gpName)
-			local newData = {}
+			local newData = mist.utils.deepCopy(dbData)
 			newData.name = gpName
 			newData.groupId = tonumber(newGroup:getID())
 			newData.category = newGroup:getCategory()
 			newData.groupName = gpName
 			newData.hidden = dbData.hidden
-
+			
+			
 			if newData.category == 2 then
 				newData.category = 'vehicle'
 			elseif newData.category == 3 then
@@ -8995,8 +8994,8 @@ do -- group tasks scope
 				minR = mist.utils.get2DDist(avg, zone[i])
 			end
 		end
-        --log:warn('Radius: $1', radius)
         --log:warn('minR: $1', minR)
+        --log:warn('Radius: $1', radius)
 		local lSpawnPos = {}
 		for j = 1, 100 do
 			newCoord = mist.getRandPointInCircle(avg, radius)
