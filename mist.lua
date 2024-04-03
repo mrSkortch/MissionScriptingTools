@@ -35,7 +35,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 5
-mist.build = 125
+mist.build = 126
 
 -- forward declaration of log shorthand
 local log
@@ -9227,7 +9227,7 @@ do -- group tasks scope
     function mist.groupIsDead(groupName) -- copy more or less from on station
 		local gp = Group.getByName(groupName)
         if gp then 
-            if  #gp:getUnits() > 0 or gp:isExist() == true  then
+            if  #gp:getUnits() > 0 and gp:isExist() == true  then
                 return false
             end
 		end

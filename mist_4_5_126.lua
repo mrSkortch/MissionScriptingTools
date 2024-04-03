@@ -9227,7 +9227,7 @@ do -- group tasks scope
     function mist.groupIsDead(groupName) -- copy more or less from on station
 		local gp = Group.getByName(groupName)
         if gp then 
-            if  #gp:getUnits() > 0 or gp:isExist() == true  then
+            if  #gp:getUnits() > 0 and gp:isExist() == true  then
                 return false
             end
 		end
