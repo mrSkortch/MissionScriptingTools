@@ -35,7 +35,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 5
-mist.build = 126
+mist.build = 127
 
 -- forward declaration of log shorthand
 local log
@@ -1421,9 +1421,9 @@ do -- the main scope
 				else
 					writeGroups[x] = nil
 				end
-			end
-			if x%savesPerRun == 0 then
-				coroutine.yield()
+				if x%savesPerRun == 0 then
+					coroutine.yield()
+				end
 			end
 			if timer.getTime() > lastUpdateTime then
 				lastUpdateTime = timer.getTime()
