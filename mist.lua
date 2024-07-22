@@ -35,7 +35,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 5
-mist.build = 126
+mist.build = 127
 
 -- forward declaration of log shorthand
 local log
@@ -1072,6 +1072,10 @@ do -- the main scope
 
 					newTable.units[unitId].type = unitData:getTypeName()
 					newTable.units[unitId].unitId = tonumber(unitData:getID())
+					
+					if unitData:getPlayerName() ~= "" and not mist.DBs.MEunitsByName[newTable.units[unitId].unitName] then
+						newTable.dynamicSlot = timer.getTime()
+					end
 
 
 					newTable.units[unitId].groupName = newTable.groupName
@@ -1092,7 +1096,11 @@ do -- the main scope
 							mistAddedObjects[index] = nil
 						end
 						if found == false then
-							newTable.units[unitId].skill = "High"
+							if newTable.dynamicSlot then
+								newTable.units[unitId].skill = "Client"
+							else
+								newTable.units[unitId].skill = "High"
+							end
 							newTable.units[unitId].alt_type = "BARO"
 						end
 						if newTable.units[unitId].alt_type == "RADIO" then -- raw postition MSL was grabbed for group, but spawn is AGL, so re-offset it
@@ -1155,6 +1163,7 @@ do -- the main scope
 		newTable.timeAdded = timer.getAbsTime() -- only on the dynGroupsAdded table. For other reference, see start time
 		--mist.debug.dumpDBs()
 		--end
+		--dbLog:warn(newTable)
 		--dbLog:info('endDbUpdate')
 		return newTable
 	end
@@ -1342,6 +1351,13 @@ do -- the main scope
 				--dbLog:info('byId')
 				mist.DBs.unitsById[tonumber(newUnitData.unitId)] = ldeepCopy(newUnitData)
 			end
+			
+			if newTable.dynamicSlot then
+				mist.DBs.humansByName[newTable.units[1].unitName] = ldeepCopy(newUnitData)
+				if newUnitData.unitId then 
+					mist.DBs.humansById[newTable.units[1].unitId] = ldeepCopy(newUnitData)
+				end
+			end
 			mist.DBs.unitsByName[newUnitData.unitName] = ldeepCopy(newUnitData)
 		end
 		-- this is a really annoying DB to populate. Gotta create new tables in case its missing
@@ -1384,6 +1400,9 @@ do -- the main scope
 		--dbLog:info('add to dynGroups')
 		mist.DBs.dynGroupsAdded[#mist.DBs.dynGroupsAdded + 1] = ldeepCopy(newTable)
 		--dbLog:info('clear entry')
+		
+
+		
 		updateChecker[newTable.name] = nil
 		--dbLog:info('return')
 		return true
@@ -1437,14 +1456,15 @@ do -- the main scope
 		-- dont need to add units spawned in at the start of the mission if mist is loaded in init line
 		if event.id == world.event.S_EVENT_BIRTH and timer.getTime0() < timer.getAbsTime() then
 
-			if Object.getCategory(event.initiator) == 1 and not Unit.getPlayerName(event.initiator) then -- simple player check, will need to later check to see if unit was spawned with a player in a flight
+			if Object.getCategory(event.initiator) == 1  then 
 				--log:info('Object is a Unit')
-				if Unit.getGroup(event.initiator) then
+				local g =  Unit.getGroup(event.initiator)
+				if g and event.initiator:getPlayerName() ~= "" and not mist.DBs.MEunitsByName[event.initiator:getName()] then
 				--	log:info(Unit.getGroup(event.initiator):getName())
-                    local g = Unit.getGroup(event.initiator)
-					if not tempSpawnedGroups[g:getName()] then
-						--log:info('added')
-						tempSpawnedGroups[g:getName()] = {type = 'group', gp = g}
+					local gName = g:getName()
+					if not tempSpawnedGroups[gName] then
+						--log:warn('addedTo tempSpawnedGroups: $1', gName)
+						tempSpawnedGroups[gName] = {type = 'group', gp = g}
 						tempSpawnGroupsCounter = tempSpawnGroupsCounter + 1
 					end
 				else
@@ -4800,6 +4820,9 @@ do -- group functions scope
 			highNum = secondNum
 		end
 		local total = 1
+		if highNum > 50 then
+			return math.random(lowNum, highNum)
+		end
 		if math.abs(highNum - lowNum + 1) < 50 then -- if total values is less than 50
 			total = math.modf(50/math.abs(highNum - lowNum + 1)) -- make x copies required to be above 50
 		end
