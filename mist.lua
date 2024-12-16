@@ -4470,13 +4470,14 @@ do -- group functions scope
 				newGroupData.units[unitNum].x = unitData.x + diff.x
 				newGroupData.units[unitNum].y = unitData.y + diff.y
 			end
-			if point then
+			
+			-- Set the altitude if it isn't set already and we don't use the one from the cloned template.
+			if point and (not newGroupData.units[unitNum].alt or not vars.useTemplateAltitude) then
 				if (newGroupData.category == 'plane' or newGroupData.category == 'helicopter')	then
                     if point.z and point.y > 0 and point.y > land.getHeight({newGroupData.units[unitNum].x, newGroupData.units[unitNum].y}) + 10 then
 						newGroupData.units[unitNum].alt = point.y
 						--log:info('far enough from ground')
 					else
-						
 						if newGroupData.category == 'plane' then
 							--log:info('setNewAlt')
 							newGroupData.units[unitNum].alt = land.getHeight({newGroupData.units[unitNum].x, newGroupData.units[unitNum].y}) + math.random(300, 9000)
