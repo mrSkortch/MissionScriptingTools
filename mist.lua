@@ -35,7 +35,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 5
-mist.build = 128
+mist.build = "128-DYNSLOTS-01"
 
 -- forward declaration of log shorthand
 local log
@@ -1072,13 +1072,25 @@ do -- the main scope
 
 					newTable.units[unitId].type = unitData:getTypeName()
 					newTable.units[unitId].unitId = tonumber(unitData:getID())
-					
-					local pName = unitData:getPlayerName()
-					--log:warn("'$1'", pName)
-					if (pName and pName ~= "") and not mist.DBs.MEunitsByName[newTable.units[unitId].unitName] then
-						newTable.dynamicSlot = timer.getTime()
-					end
 
+					local pName = unitData:getPlayerName()
+					--log:warn("pName: '$1'", pName)
+					local unitName = newTable.units[unitId].unitName
+					--log:warn("unitName: '$1'", unitName)
+					--log:warn("mist.DBs.MEunitsByName[unitName]: '$1'", mist.DBs.MEunitsByName[unitName])
+					if (pName and pName ~= "") and not mist.DBs.MEunitsByName[unitName] then
+						newTable.dynamicSlot = timer.getTime()
+						if not mist.DBs.humansById[unitId] then
+							mist.DBs.humansById[unitId] = newTable.units[unitId]
+							--log:info("added human by id: $1", unitId)
+							--log:info("mist.DBs.humansById: $1", mist.DBs.humansById)
+						end
+						if not mist.DBs.humansByName[unitName] then
+							mist.DBs.humansByName[unitName] = newTable.units[unitId]
+							--log:info("added human by name: $1", unitName)
+							--log:info("mist.DBs.humansByName: $1", mist.DBs.humansByName)
+						end
+					end
 
 					newTable.units[unitId].groupName = newTable.groupName
 					newTable.units[unitId].groupId = newTable.groupId
@@ -1088,7 +1100,7 @@ do -- the main scope
 					newTable.units[unitId].country = newTable.country
 					local found = false
 					for index, data in pairs(mistAddedObjects) do
-						if mist.stringMatch(data.name, newTable.units[unitId].unitName) == true then
+						if mist.stringMatch(data.name, unitName) == true then
 							found = true
 							newTable.units[unitId].livery_id = data.livery_id
 							newTable.units[unitId].skill = data.skill
