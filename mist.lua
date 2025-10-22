@@ -29,6 +29,7 @@ Official Releases <https://github.com/mrSkortch/MissionScriptingTools/tree/maste
 @author Speed
 @author Grimes
 @author lukrop
+@Tobias00723 (TGFB)
 ]]
 mist = {}
 
@@ -1708,7 +1709,6 @@ do -- the main scope
 	-- You shouldn't call this function.
 	function mist.main()
 		timer.scheduleFunction(mist.main, {}, timer.getTime() + 0.01)	--reschedule first in case of Lua error
-
 		updateTenthSecond = updateTenthSecond + 1
 		if updateTenthSecond == 20 then
 			updateTenthSecond = 0
@@ -3971,12 +3971,7 @@ function mist.getPointAtDistanceOnPath(p, dist, r, rtn)
     end
     for i = 1, #path do
         if i + 1 <= #path then 
-            nextPoint = path[i+1]
-            if topo then 
-                l = mist.utils.get3DDist(path[i], path[i+1]) + l
-            else
-                l = mist.utils.get2DDist(path[i], path[i+1]) + l
-            end
+            l = mist.utils.get2DDist(path[i], path[i+1]) + l
         end
         if l > dist then
             local diff = dist
@@ -4424,7 +4419,67 @@ do -- group functions scope
              ---- old
 			for i = 1, 100	do
 				newCoord = mist.getRandPointInCircle(point, radius, innerRadius)
-				if vars.anyTerrain or mist.isTerrainValid(newCoord, validTerrain)  then
+				local All_units_Valid = true
+				for j, unit in pairs(newGroupData.units) do
+					local diff_unit = {
+						x = (newCoord.x + (unit.x - newGroupData.units[1].x)), 
+						y = (newCoord.y + (unit.y - newGroupData.units[1].y))
+					}					
+					
+					local volS = {
+						id = world.VolumeType.SPHERE,
+						params = {
+						  point = {
+							x = diff_unit.x,
+							y = land.getHeight(diff_unit),
+							z = diff_unit.y
+						  },
+						  radius = 2
+						}
+					  }
+					  
+					local function ifFound(foundItem, val)
+						--local foundUnits[#foundUnits + 1] = foundItem:getName()
+						--trigger.action.outText("trig", 5)
+						return true
+					end
+					
+					local invalids = world.searchObjects({5 , 3 , 1}, volS, ifFound)
+
+					local distanceToZone = mist.utils.get2DDist(diff_unit, point)
+					local invalids_zone = false
+
+					if distanceToZone >= radius then
+						invalids_zone = true
+					end
+
+					if mist.isTerrainValid(diff_unit, validTerrain) == false or invalids_zone or invalids > 0 then
+						All_units_Valid = false
+						
+						if invalids > 0 then
+                            --TODO ADD mist_debug log inegration
+							log:info("Failed to place terrain (Object)")
+							--trigger.action.outText("Failed terrain (Object)", 5)
+							--trigger.action.outText("invalids :" .. invalids, 5)	
+						elseif invalids_zone then
+							--TODO ADD mist_debug log inegration
+                            log:info("Failed to place terrain (zone)")
+							--trigger.action.outText("Failed terrain (Zone)", 5)
+						else
+							--TODO ADD mist_debug log inegration
+                            log:info("Failed to place terrain")
+							--trigger.action.outText("Failed terrain", 5)
+						end
+
+						--trigger.action.outText("X :" .. diff_unit.x, 5)	
+						--trigger.action.outText("Z :" .. diff_unit.y, 5)
+						
+
+						break
+					end
+				end
+
+				if vars.anyTerrain or All_units_Valid then
 					origCoord = mist.utils.deepCopy(newCoord)
 					diff = {x = (newCoord.x - newGroupData.units[1].x), y = (newCoord.y - newGroupData.units[1].y)}
 					valid = true
@@ -4836,6 +4891,7 @@ do -- group functions scope
 			lowNum = firstNum
 			highNum = secondNum
 		end
+		if math.abs(highNum - lowNum + 1) == 0 then return 0 end
 		local total = 1
 		if highNum > 50 then
 			return math.random(lowNum, highNum)
@@ -5189,7 +5245,7 @@ do -- mist.util scope
 			if vec.alt and not y then
 				y = vec.alt
 			elseif not y then
-				y = 0
+				y = land.getHeight(vec)
 			end
 			return {x = vec.x, y = y, z = vec.y}
 		else
@@ -5901,11 +5957,13 @@ do -- mist.debug scope
 		if lfs and io then
 			local fdir = lfs.writedir() .. [[Logs\]] .. fname
 			local f = io.open(fdir, 'w')
-			f:write(fcn(unpack(fcnVars, 1, table.maxn(fcnVars))))
-			f:close()
-			log:info('Wrote debug data to $1', fdir)
-			local errmsg = 'mist.debug.writeData wrote data to ' .. fdir
-			trigger.action.outText(errmsg, 10)
+			if f then
+				f:write(fcn(unpack(fcnVars, 1, table.maxn(fcnVars))))
+				f:close()
+				log:info('Wrote debug data to $1', fdir)
+				local errmsg = 'mist.debug.writeData wrote data to ' .. fdir
+				trigger.action.outText(errmsg, 10)
+			end
 		else
 			local errmsg = 'Error: insufficient libraries to run mist.debug.writeData, you must disable the sanitization of the io and lfs libraries in ./Scripts/MissionScripting.lua'
 			log:alert(errmsg)
@@ -7823,12 +7881,11 @@ do
             if mist.DBs.markList[e.idx] then
                mist.DBs.markList[e.idx].text = e.text
             end
-        elseif  world.event.S_EVENT_MARK_REMOVE == e.id and e.idx then
+        elseif world.event.S_EVENT_MARK_REMOVED == e.id and e.idx then
             if mist.DBs.markList[e.idx] then
                mist.DBs.markList[e.idx] = nil
             end
         end
-        
     end
     
     local function getMarkId(id)
