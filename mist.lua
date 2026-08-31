@@ -9575,6 +9575,7 @@ end
 
 -- initialize mist
 mist.init()
+trigger.action.setUserFlag("MiST_Loaded", true)
 env.info(('Mist version ' .. mist.majorVersion .. '.' .. mist.minorVersion .. '.' .. mist.build .. ' loaded.'))
 
 -- vim: noet:ts=2:sw=2
