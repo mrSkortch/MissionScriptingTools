@@ -34,8 +34,8 @@ mist = {}
 
 -- don't change these
 mist.majorVersion = 4
-mist.minorVersion = 5
-mist.build = 128
+mist.minorVersion = 6
+mist.build = 132
 
 -- forward declaration of log shorthand
 local log
@@ -47,6 +47,7 @@ local mistSettings = {
 	infoPopup = false,
 	logLevel = 'warn',
     dbLog = 'warn',
+	liveDBLevel = 3, -- 0 off, 1 only aliveUnits, 2 aliveUnits + deadUnits, 3 aliveUnits + deadUnits + removedAliveUnits
 }
 
 do -- the main scope
@@ -826,11 +827,11 @@ do -- the main scope
 							if zone.verticies then
 								local offset = {}
 								for i = 1, #zone.verticies do
-									table.insert(offset, {dist = mist.utils.get2DDist(uRef.point, zone.verticies[i]), heading = mist.getHeadingPoints(uRef.point, zone.verticies[i]) + uRef.heading})
+									table.insert(offset, {dist = mist.utils.get2DDist(uRef.point, zone.verticies[i]), heading = mist.utils.getHeadingPoints(uRef.point, zone.verticies[i]) + uRef.heading})
 								end
 								zone.offset = offset
 							else
-								zone.offset = {dist = mist.utils.get2DDist(uRef.point, zone.point), heading = mist.getHeadingPoints(uRef.point, zone.point) + uRef.heading}
+								zone.offset = {dist = mist.utils.get2DDist(uRef.point, zone.point), heading = mist.utils.getHeadingPoints(uRef.point, zone.point) + uRef.heading}
 							end
 						end
 					end
@@ -864,50 +865,52 @@ do -- the main scope
 					key = tostring(original_key) .. ' #' .. tostring(key_ind)
 					key_ind = key_ind + 1
 				end
-
-				if mist.DBs.aliveUnits and mist.DBs.aliveUnits[val.object.id_] then
-					----dbLog:info('object found in alive_units')
-					val.objectData = mist.utils.deepCopy(mist.DBs.aliveUnits[val.object.id_])
-					local pos = Object.getPosition(val.object)
-					if pos then
-						val.objectPos = pos.p
-					end
-					val.objectType = mist.DBs.aliveUnits[val.object.id_].category
-
-				elseif mist.DBs.removedAliveUnits and mist.DBs.removedAliveUnits[val.object.id_] then	-- it didn't exist in alive_units, check old_alive_units
-					----dbLog:info('object found in old_alive_units')
-					val.objectData = mist.utils.deepCopy(mist.DBs.removedAliveUnits[val.object.id_])
-					local pos = Object.getPosition(val.object)
-					if pos then
-						val.objectPos = pos.p
-					end
-					val.objectType = mist.DBs.removedAliveUnits[val.object.id_].category
-
-				else	--attempt to determine if static object...
-					----dbLog:info('object not found in alive units or old alive units')
-					local pos = Object.getPosition(val.object)
-					if pos then
-						local static_found = false
-						for ind, static in pairs(mist.DBs.unitsByCat.static) do
-							if ((pos.p.x - static.point.x)^2 + (pos.p.z - static.point.y)^2)^0.5 < 0.1 then --really, it should be zero...
-								--dbLog:info('correlated dead static object to position')
-								val.objectData = static
-								val.objectPos = pos.p
-								val.objectType = 'static'
-								static_found = true
-								break
+				
+				local res, pos = pcall(Object.getPosition, val.object)
+				
+				--log:echo("$1  $2", cRes, cat)
+				if res == true and pos  then
+					val.typeName = Object.getTypeName(val.object)
+					valid = true
+					val.objectPos = pos.p
+					if mist.DBs.aliveUnits and mist.DBs.aliveUnits[val.object.id_] then
+						val.objectType = mist.DBs.aliveUnits[val.object.id_].category
+						val.objectData = mist.utils.deepCopy(mist.DBs.aliveUnits[val.object.id_])
+					elseif mist.DBs.removedAliveUnits and mist.DBs.removedAliveUnits[val.object.id_] then
+						val.objectType = mist.DBs.removedAliveUnits[val.object.id_].category
+						val.objectData = mist.utils.deepCopy(mist.DBs.removedAliveUnits[val.object.id_])
+					else
+						local cRes, cat = pcall(Object.getCategory, val.object)
+						if (cat and type(cat) == "number") and (cat == 3 or cat == 6) then
+							
+							local static_found = false
+							for ind, static in pairs(mist.DBs.unitsByCat.static) do
+								if ((pos.p.x - static.point.x)^2 + (pos.p.z - static.point.y)^2)^0.5 < 0.1 then --really, it should be zero...
+									--log:info('correlated dead static object to position')
+									--log:echo(static)
+									val.objectData = static
+									val.typeName = static.type
+									val.objectPos = pos.p
+									val.objectType = 'static'
+									static_found = true
+									break
+								end
 							end
-						end
-						if not static_found then
+						else
+								--log:warn("building")
 							val.objectPos = pos.p
 							val.objectType = 'building'
-                            val.typeName = Object.getTypeName(val.object)
+							
+							
+							--log:echo(name)
 						end
-					else
-						val.objectType = 'unknown'
 					end
+					rawset(t, key, val)
+				else
+					--log:echo(pos)
 				end
-				rawset(t, key, val)
+
+				
 			end
 
 			setmetatable(mist.DBs.deadObjects, mt)
@@ -928,7 +931,7 @@ do -- the main scope
 	end
 
 	local function updateAliveUnits()	-- coroutine function
-        --log:warn("updateALiveUnits")
+		--log:warn("updateALiveUnits")
 		local lalive_units = mist.DBs.aliveUnits -- local references for faster execution
 		local lunits = mist.DBs.unitsByNum
 		local ldeepcopy = mist.utils.deepCopy
@@ -946,7 +949,7 @@ do -- the main scope
 				if lunits[i].category ~= 'static' then -- can't get statics with Unit.getByName :(
 					local unit = lUnit.getByName(lunits[i].unitName)
 					if unit and unit:isExist() == true then
-						----dbLog:info("unit named $1 alive!", lunits[i].unitName) -- spammy
+						--dbLog:info("unit named $1 alive!", lunits[i].unitName) -- spammy
 						local pos = unit:getPosition()
 						local newtbl = ldeepcopy(lunits[i])
 						if pos then
@@ -966,7 +969,10 @@ do -- the main scope
 			-- All units updated, remove any "alive" units that were not updated- they are dead!
 			for unit_id, unit in pairs(lalive_units) do
 				if not updatedUnits[unit_id] then
-					lremovedAliveUnits[unit_id] = unit
+					--dbLog:echo("unitDead: $1", unit_id)
+					if mistSettings.liveDBLevel >= 3 then
+						lremovedAliveUnits[unit_id] = unit
+					end
 					lalive_units[unit_id] = nil
 				end
 			end
@@ -1464,6 +1470,21 @@ do -- the main scope
 			--dbLog:info('endUpdateTables')
 		end
 	end
+	
+	local function delayedSpawnedGroup(event)
+		local g =  Unit.getGroup(event.initiator)
+		if g and event.initiator:getPlayerName() ~= "" and not mist.DBs.MEunitsByName[event.initiator:getName()] then
+		--	log:info(Unit.getGroup(event.initiator):getName())
+			local gName = g:getName()
+			if not tempSpawnedGroups[gName] then
+				--log:warn('addedTo tempSpawnedGroups: $1', gName)
+				tempSpawnedGroups[gName] = {type = 'group', gp = g}
+				tempSpawnGroupsCounter = tempSpawnGroupsCounter + 1
+			end
+		else
+			log:error('Group not accessible by unit in event handler. This is a DCS bug')
+		end
+	end
 
 	local function groupSpawned(event)
 		-- dont need to add units spawned in at the start of the mission if mist is loaded in init line
@@ -1471,18 +1492,7 @@ do -- the main scope
 
 			if Object.getCategory(event.initiator) == 1  then 
 				--log:info('Object is a Unit')
-				local g =  Unit.getGroup(event.initiator)
-				if g and event.initiator:getPlayerName() ~= "" and not mist.DBs.MEunitsByName[event.initiator:getName()] then
-				--	log:info(Unit.getGroup(event.initiator):getName())
-					local gName = g:getName()
-					if not tempSpawnedGroups[gName] then
-						--log:warn('addedTo tempSpawnedGroups: $1', gName)
-						tempSpawnedGroups[gName] = {type = 'group', gp = g}
-						tempSpawnGroupsCounter = tempSpawnGroupsCounter + 1
-					end
-				else
-					log:error('Group not accessible by unit in event handler. This is a DCS bug')
-				end
+				timer.scheduleFunction(delayedSpawnedGroup, event, event.time + 0.5)
 			elseif Object.getCategory(event.initiator) == 3 or Object.getCategory(event.initiator) == 6 then
 				--log:info('staticSpawnEvent')
 				--log:info(event)
@@ -1538,7 +1548,9 @@ do -- the main scope
 
 	-- Event handler to start creating the dead_objects table
 	local function addDeadObject(event)
-		if event.id == world.event.S_EVENT_DEAD or event.id == world.event.S_EVENT_CRASH then
+		
+		if mistSettings.liveDBLevel >= 2 and (event.id == world.event.S_EVENT_DEAD or event.id == world.event.S_EVENT_CRASH) then
+			--log:echo(event)
 			if event.initiator and event.initiator.id_ and event.initiator.id_ > 0 then
 
 				local id = event.initiator.id_	-- initial ID, could change if there is a duplicate id_ already dead.
@@ -1547,67 +1559,13 @@ do -- the main scope
 				local original_id = id	--only for duplicate runtime IDs.
 				local id_ind = 1
 				while mist.DBs.deadObjects[id] do
-					--log:info('duplicate runtime id of previously dead object id: $1', id)
+					log:info('duplicate runtime id of previously dead object id: $1', id)
 					id = tostring(original_id) .. ' #' .. tostring(id_ind)
 					id_ind = id_ind + 1
 				end
-				local valid
-				if mist.DBs.aliveUnits and mist.DBs.aliveUnits[val.object.id_] then
-					--log:info('object found in alive_units')
-					val.objectData = mist.utils.deepCopy(mist.DBs.aliveUnits[val.object.id_])
-					if Object.isExist(val.object) then 
-						local pos = Object.getPosition(val.object)
-						if pos then
-							val.objectPos = pos.p
-						end
-						val.objectType = mist.DBs.aliveUnits[val.object.id_].category
-						--[[if mist.DBs.activeHumans[Unit.getName(val.object)] then
-						--trigger.action.outText('remove via death: ' .. Unit.getName(val.object),20)
-							mist.DBs.activeHumans[Unit.getName(val.object)] = nil
-						end]]
-						valid = true
-					end
-				elseif mist.DBs.removedAliveUnits and mist.DBs.removedAliveUnits[val.object.id_] then	-- it didn't exist in alive_units, check old_alive_units
-					--log:info('object found in old_alive_units')
-					val.objectData = mist.utils.deepCopy(mist.DBs.removedAliveUnits[val.object.id_])
-					if Object.isExist(val.object) then  
-						local pos = Object.getPosition(val.object)
-						if pos then
-							val.objectPos = pos.p
-						end
-						val.objectType = mist.DBs.removedAliveUnits[val.object.id_].category
-						valid = true
-					end
-				else	--attempt to determine if static object...
-					--log:info('object not found in alive units or old alive units')
-					if Object.isExist(val.object) then 
-						local pos = Object.getPosition(val.object)
-						if pos then
-							local static_found = false
-							for ind, static in pairs(mist.DBs.unitsByCat.static) do
-								if ((pos.p.x - static.point.x)^2 + (pos.p.z - static.point.y)^2)^0.5 < 0.1 then --really, it should be zero...
-									--log:info('correlated dead static object to position')
-									val.objectData = static
-									val.objectPos = pos.p
-									val.objectType = 'static'
-									static_found = true
-									break
-								end
-							end
-							if not static_found then
-								val.objectPos = pos.p
-								val.objectType = 'building'
-								val.typeName = Object.getTypeName(val.object)
-							end
-						else
-							val.objectType = 'unknown'
-						end
-						valid = true
-					end
-				end
-				if valid then
-					mist.DBs.deadObjects[id] = val
-				end
+				mist.DBs.deadObjects[id] = val
+	
+
 			end
 		end
 	end
@@ -1694,7 +1652,7 @@ do -- the main scope
 		mist.addEventHandler(addDeadObject)
         
         log:warn('Init time: $1', timer.getTime())
-
+		trigger.action.setUserFlag("MiST_Loaded", true)
 		-- call main the first time therafter it reschedules itself.
 		mist.main()
 		--log:msg('MIST version $1.$2.$3 loaded', mist.majorVersion, mist.minorVersion, mist.build)
@@ -1727,18 +1685,20 @@ do -- the main scope
 		end
 
 		--updating alive units
-		updateAliveUnitsCounter = updateAliveUnitsCounter + 1
-		if updateAliveUnitsCounter == 5 then
-			updateAliveUnitsCounter = 0
+		if mistSettings.liveDBLevel > 0 then
+			updateAliveUnitsCounter = updateAliveUnitsCounter + 1
+			if updateAliveUnitsCounter == 5 then
+				updateAliveUnitsCounter = 0
 
-			if not coroutines.updateAliveUnits then
-				coroutines.updateAliveUnits = coroutine.create(updateAliveUnits)
-			end
+				if not coroutines.updateAliveUnits then
+					coroutines.updateAliveUnits = coroutine.create(updateAliveUnits)
+				end
 
-			coroutine.resume(coroutines.updateAliveUnits)
+				coroutine.resume(coroutines.updateAliveUnits)
 
-			if coroutine.status(coroutines.updateAliveUnits) == 'dead' then
-				coroutines.updateAliveUnits = nil
+				if coroutine.status(coroutines.updateAliveUnits) == 'dead' then
+					coroutines.updateAliveUnits = nil
+				end
 			end
 		end
         
@@ -3418,6 +3378,134 @@ function mist.shape.segmentIntersect(seg1, seg2)
     end
       -- point of intersection
       return true, {x = segA[1].x + t1*dx1, y = segA[1].y + t1*dy1}
+end
+
+function mist.searchArea(vars)		-- from grayflag
+	--log:warn(vars)
+	--[[
+		zoneName		adds the zone names as a sphere at ground level
+		point			table of points for which to search at, forces ground level
+		searchVols		custom search volume entry. (will default to sphere at ground level if not specified)
+		radius			radius in meters, defaults to 500
+		objectType		category of object to search for	defaults to 1 (units)
+		flagString      search string within typeNames
+		searchFor		specific list of typeNames
+		poly			checks a polygon to see if the object is in the search area. 
+		debug 			will mark returned objects on F10 map with a marker and object type as the string
+	]]
+	local points = vars.searchVols or {}
+	local radius = vars.radius or 500
+	local objectType = vars.objectType or 1
+	local flagStr = {}
+	local point = {}
+	if vars.point then
+		if vars.point[1] then
+			for i = 1, #vars.point do
+				table.insert(point, mist.utils.makeVec3GL(vars.point[i]))
+			end
+		else
+			table.insert(point, mist.utils.makeVec3GL(vars.point))
+		end
+		for i = 1, #point do
+			 local volS = { id = world.VolumeType.SPHERE,  params = {point = point[i], radius = radius}}
+			 table.insert(points, volS)
+		end
+	end
+
+	if vars.zoneName then
+		local zones = {}
+		if type(vars.zoneName) == "table" then
+			for ind, zName in pairs(vars.zoneNames) do
+				table.insert(zones, zName)			
+			end
+		
+		else
+			zones = {vars.zoneName}
+		end
+		for i = 1, #zones do
+			if mist.DBs.zonesByName[zones[i]] then
+				local ref = mist.DBs.zonesByName[zones[i]]
+				local volS = { id = world.VolumeType.SPHERE,  params = {point = mist.utils.makeVec3GL(ref.pont), radius = ref.radius}}
+				table.insert(points, volS)
+			end
+
+		end
+	end
+	if vars.flagString then
+		if type(vars.flagString) == "table" then
+			for i = 1, #vars.flagString do
+				table.insert(flagStr, string.lower(vars.flagString[i]))			
+			end		
+		else
+			flagStr = {vars.flagString}
+		end
+	end
+    
+	local objs = {}
+	
+	local checkPoints = {}
+    
+	
+	local filteredOut = {}
+	local filteredIn = {}
+	local flagged = {}
+	local flagTypes = {}
+	local filter = false
+	if vars.searchFor and vars.searchFor[1] then
+		filter = true
+		for i = 1, #vars.searchFor do
+			filteredIn[vars.searchFor[i]] = true
+		end
+	end
+    local function ifFound(obj)
+        if obj then
+			--log:warn(obj:getTypeName())
+			local oPoint = obj:getPoint()
+			if (vars.poly and mist.pointInPolygon(oPoint, vars.poly)) or not vars.poly then
+				local oType = obj:getTypeName()
+				local oName = obj:getName()
+				local added = false
+				if filteredIn[oType] then	-- accept it
+					objs[oName] = obj
+					added = true
+				elseif filter == false and not filteredOut[oType] then
+					added = true
+					
+					if added == true then
+						objs[oName] = obj
+						filteredIn[oType] = true
+					end
+					if #flagStr > 0 and not flagged[oName] then
+						for i = 1, #flagStr do
+							if string.find(oType, flagStr[i]) then
+								flagged[oName] = obj
+								break
+							end
+						end
+					end
+				end
+				if vars.debug and added == true then
+					mist.debug.mark(obj:getTypeName(), oPoint)
+				end
+			end
+        end
+    end
+    --log:warn("doSearch")
+	if #points > 0 then 
+		for i = 1, #points do
+			world.searchObjects(objectType, points[i], ifFound) -- search area for objects
+		end
+	end
+	local objsIndexed = {}
+	for oName, oData in pairs(objs) do
+		table.insert(objsIndexed, oData)
+	end
+	local flaggedIndex = {}
+	for oName, oData in pairs(flagged) do
+		table.insert(flaggedIndex, oData)
+	end
+	
+	return objsIndexed, flaggedIndex
 end
 
 
@@ -5680,7 +5768,7 @@ function mist.utils.tableShowSorted(tbls, v)
 			if #sorted > 0 then
 				local found = false
 				for i = 1, #sorted do
-					if byteCompare(indS, tostring(sorted[i].ind)) == true then
+					if byteCompare(string.lower(indS), string.lower(tostring(sorted[i].ind))) == true then
 						index = i 
 						break
 					end
@@ -9292,6 +9380,332 @@ do -- group tasks scope
             return mist.utils.get2DDist(point, ref.point) < ref.radius
         end
     end
+	
+	function mist.lineSimplify(points, dist)
+		local exludeDist = dist or 5000
+		local exclude = {}
+		local function  DouglasPeucker(pointList, epsilon)
+			local sp = pointList[1]
+			local dp = pointList[2]
+			local dmax = 0
+			local index = 0
+			if dp-sp > 2 then
+				for i = sp + 1 , dp -1 do
+					if not exclude[i] then
+						local d = mist.utils.get2DDist(points[i], mist.shape.getPointOnSegment(points[i], {points[sp], points[dp]}))
+						if d > dmax then
+							index = i
+							dmax = d
+						end
+					end
+				end
+			end
+			if dmax > epsilon then
+				exclude[index] = true 
+				DouglasPeucker({sp, index}, epsilon)
+				DouglasPeucker({index, dp}, epsilon)
+			end
+		end
+		DouglasPeucker({1, #points}, exludeDist)
+		local simp = {}
+		for i = 1, #points do
+			if not exclude[i] then
+				table.insert(simp, points[i])
+				--if #simp-1 > 0 then
+					--mist.marker.add({mType = "arrow", color = {0, 0, 1}, lineType = 1, points = {simp[#simp], simp[#simp-1]}})
+				--end
+			end
+		end
+		--log:echo("$1 : $2", #points, #simp)
+		return simp
+	end
+
+end
+
+do
+	-- https://www.redblobgames.com/grids/hexagons/
+	--[[ Due to how DCS handles coordinates I swapped the two main coordinates used with hexagons q and r. All examples from that page are in qrs. I'm using rqs 
+	
+	uses "pointy top" hexagon orientation 
+	
+	r cooresponds to x axis (north-south)
+	q corresponds to "y axis" but it isn't strictly east-west because it exists on a slight diagonal
+	
+	Primarily added as util functions used by Grayflag to abstract spacial calculations related to coalition land ownership, threats, and AI navigation
+	
+	]]
+	
+	mist.hex = {}
+	
+	local hexRadius = 10000
+	local hexIter = math.rad(360/6)
+	
+	function mist.hex.getRadius()
+		return mist.utils.deepCopy(hexRadius)
+	end
+	
+	function mist.hex.setRadius(r)
+		hexRadius = r
+	end
+	
+	
+	
+	function mist.hex.to(r, q, s)
+		assert(not (math.floor (0.5 + q + r + s) ~= 0), "r + q + s must be 0")
+		return {q = q, r = r, s = s}
+	end
+	local dirInit = { mist.hex.to(0, 1, -1), mist.hex.to(-1, 1, 0), mist.hex.to(-1, 0, 1), mist.hex.to(0, -1, 1), mist.hex.to(1, -1, 0), mist.hex.to(1, 0, -1),  mist.hex.to(0, -1, 1)}
+	mist.hex.directions = mist.utils.deepCopy(dirInit)
+	for i = 6, 1, -1 do
+		--table.insert(mist.hex.directions, dirInit[i])--mist.hex.directions[1-i] = mist.utils.deepCopy(dirInit[i])
+	end
+
+	function mist.hex.add (a, b)
+		return mist.hex.to( a.r + b.r, a.q + b.q, a.s + b.s)
+	end
+
+	function mist.hex.subtract (a, b)
+		return mist.hex.to(a.r - b.r, a.q - b.q, a.s - b.s)
+	end
+
+	function mist.hex.scale (a, k)
+		return mist.hex.to( a.r * k, a.q * k, a.s * k)
+	end
+
+	function mist.hex.rotate_left (a)				-- might need to swap 
+		return mist.hex.to(-a.s, -a.q, -a.r)
+	end
+
+	function mist.hex.rotate_right (a)			-- might need to swap 
+		return mist.hex.to(-a.r, -a.s, -a.q)
+	end
+
+
+	function mist.hex.direction(direction)
+		if mist.hex.directions[direction] then
+			return mist.hex.directions[direction]
+		end
+	end
+
+	function mist.hex.neighbor (hex, direction)
+		local dirHex = mist.hex.direction(direction)
+		if dirHex then
+			return mist.hex.add(hex, dirHex)
+		
+		end
+	end
+
+	function mist.hex.getNeighborCount(hex, visited)
+		local count = 0
+		for i = 1, 6 do
+			local nHex = mist.hex.neighbor(hex, i)
+			if nHex and not visited[mist.hex.hash(nHex)] then
+				count = count + 1
+			end
+		end
+		
+		return count
+	end
+
+	mist.hex.diagonals = { mist.hex.to(1, -2, 1), mist.hex.to(2, -1, -1), mist.hex.to(1, 1, -2), mist.hex.to(-1, 2, -1), mist.hex.to(-2, 1, 1), mist.hex.to(-1, -1, 2)}
+	function mist.hex.diagonalNeighbor (hex, direction)
+		return mist.hex.add(hex, mist.hex.diagonals[1+direction])
+	end
+
+
+	function mist.hex.length (hex)
+		return math.floor((math.abs(hex.q) + math.abs(hex.r) + math.abs(hex.s)) / 2)
+	end
+
+	function mist.hex.distance (a, b)
+		return mist.hex.length(mist.hex.subtract(a, b))
+	end
+
+	function mist.hex.round (h)
+		local qi = math.floor(math.floor (0.5 + h.q))
+		local ri = math.floor(math.floor (0.5 + h.r))
+		local si = math.floor(math.floor (0.5 + h.s))
+		local q_diff = math.abs(qi - h.q)
+		local r_diff = math.abs(ri - h.r)
+		local s_diff = math.abs(si - h.s)
+		if qi == 0 and ri == 0 and si == 0 then
+			return {r = 0, q = 0, s = 0}
+		elseif q_diff > r_diff and q_diff > s_diff then
+			qi = (ri*-1) - si
+		else
+			if r_diff > s_diff then
+				ri = -qi - si
+			else
+				si = -qi - ri
+			end
+		end
+		return mist.hex.to(ri, qi, si)
+	end
+
+	function mist.hex.lerp (a, b, t)
+		return mist.hex.to(a.r * (1.0 - t) + b.r * t, a.q * (1.0 - t) + b.q * t, a.s * (1.0 - t) + b.s * t)
+	end
+
+
+	function mist.hex.cubeScale(hex, factor)
+		return  mist.hex.axialToCube({q = hex.q * factor, r = hex.r * factor, s = hex.s * factor})
+	end
+	function mist.hex.cubeRing(center, radius)			-- TODO breakout on match 
+		local results = {}
+		local curHex = mist.hex.add(center, mist.hex.cubeScale(mist.hex.direction(5), radius))	--- note dont change 5. This apparently is the axis the coord system uses. 
+		--log:warn(curHex)
+		--drawHex(mist.hex.makeVec3(curHex), {0, 0, 1, 0.5})
+		results[mist.hex.hash(curHex)] = curHex
+		for i = 1, 6 do
+		
+			for j = 1, radius do
+				curHex = mist.hex.neighbor(curHex, i)
+				--mist.marker.add({mType = "text", point = mist.hex.makeVec3(curHex), text = mist.hex.hash(curHex)})
+				--log:warn(curHex)
+				if mist.hex.distance(center, curHex) <= radius  then
+					--drawHex(mist.hex.makeVec3(curHex), {0, 1/j, 0, 0.5})
+					results[mist.hex.hash(curHex)] = curHex
+				end
+				
+
+
+			end
+		
+		end
+		return results
+	end
+
+	function mist.hex.cubeSpiral(center, radius)		-- TODO breakout on match
+		local results = {[mist.hex.hash(center)] = center}
+		for i = 1, radius do
+			local ring = mist.hex.cubeRing(center, i)
+			
+			for hexName, hexval in pairs(ring) do
+				results[hexName] = hexval
+			end
+				
+		end
+		return results
+		
+	end
+
+	function mist.hex.lineDraw (a, b)
+		local N = mist.hex.distance(a, b)
+		local a_nudge = mist.hex.to( a.r + 1e-06, a.q + 1e-06, a.s - 2e-06)
+		local b_nudge = mist.hex.to(b.r + 1e-06, b.q + 1e-06,  b.s - 2e-06)
+		local results = {}
+		local step = 1.0 / math.max(N, 1)
+		for i = 0, N do
+			table.insert(results, mist.hex.round(mist.hex.lerp(a_nudge, b_nudge, step * i)))
+		end
+		return results
+	end
+
+
+	function mist.hex.cubeToAxial(cube)
+		local q = cube.q
+		local r = cube.r
+		return {q = q, r = r}
+	end
+
+	function mist.hex.axialToCube(hex)
+		local q = hex.q
+		local r = hex.r
+		local s = -q-r
+		return {q = q, r = r, s = s}
+	end
+
+	function mist.hex.pointToHex(point, radius)
+		local radiusUse = radius or hexRadius
+		local x = point.z or point.y
+		local y = point.x
+		local q = (math.sqrt(3)/3 * x  -  1/3 * y) / radiusUse
+		local r = (2/3 * y) / radiusUse
+		
+		return mist.hex.round({q = q, r = r, s = -q-r})
+
+	end
+
+
+
+
+	function mist.hex.makeVec2(hex, radius)
+		local radiusUse = radius or hexRadius
+		hex =  mist.hex.round(hex)
+		local y = radiusUse * ((math.sqrt(3) * hex.q)  +  (math.sqrt(3)/2 * hex.r))
+		local x = radiusUse * (3/2 * hex.r)
+		return mist.utils.deepCopy({x = x, y = y})
+	end
+	function mist.hex.makeVec3(hex, radius)
+		local radiusUse = radius or hexRadius
+		local y = radiusUse * ((math.sqrt(3) * hex.q)  +  (math.sqrt(3)/2 * hex.r))
+		local x = radiusUse * (3/2 * hex.r)
+		return mist.utils.deepCopy({x = x, z = y, y = 0})
+	end
+	function mist.hex.makeVec3GL(hex, o, radius )
+		local radiusUse = radius or hexRadius
+		local offset = o or 0
+		local z = radiusUse * ((math.sqrt(3) * hex.q)  +  (math.sqrt(3)/2 * hex.r))
+		local x = radiusUse * (3/2 * hex.r)
+		local y = land.getHeight({x = x, y = z}) + offset
+		return {x = x, y = y, z = z}
+	end
+
+	function mist.hex.hash(tbl)
+		local s = tostring(tbl.r) .. " " .. tostring(tbl.q)
+		if tbl.s then
+			s = s .. " " .. tostring(tbl.s)
+		end
+		return s
+	end
+
+	function mist.hex.hashToHex(s)	-- convrt hash string to a hex. 
+
+		local commands = {}
+		for w in string.gmatch(s, "%-?%d+") do
+			table.insert(commands, tonumber(w))
+		end
+		
+		local hexVal = {}
+		hexVal.r = commands[1]
+		hexVal.q = commands[2]
+		hexVal.s = commands[3]
+		
+		return hexVal
+	end
+	
+	function mist.hex.draw(p, v)
+		--log:echo(p)
+		--mist.debug.mark("hex", p)
+		local vars = v or {}
+		local point 
+		if type(p) == "string" then
+			point = mist.hex.makeVec2(mist.hex.hashToHex(p))
+		elseif type(p) == "table" then
+			if p.x then
+				point = mist.utils.makeVec2(p)
+			elseif p.q then
+				point = mist.hex.makeVec2(p)
+			end
+		end
+		local radiusUse = vars.radius or hexRadius
+		local coords = {}
+		for j = 1, 6 do
+			local theta = hexIter*j
+			--log:info(theta)
+			
+			local corner = mist.projectPoint(point, radiusUse, theta)
+			table.insert(coords, corner)
+			--mist.marker.add({mType = "text", text = j, point = corner})
+		end
+		
+		local hexDraw = {mType = 7, points = coords}
+		for key, val in pairs(vars) do
+			hexDraw[key] = val
+		end
+		
+		return mist.marker.add(hexDraw)
+	end
 
 end
 
