@@ -35,7 +35,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 6
-mist.build = 132
+mist.build = 133
 
 -- forward declaration of log shorthand
 local log
@@ -9705,6 +9705,152 @@ do
 		end
 		
 		return mist.marker.add(hexDraw)
+	end
+	
+	function mist.hex.getFromRoute(p, fill)
+		local points = mist.utils.deepCopy(p)
+		local avg = mist.getAvgPoint(points)
+		table.insert(points, points[1])
+		local drawn = {}
+		local indexed = {}
+		local meta = {count = 0, maxR = 0, minR = 100000000}
+		
+		--drawHex(mist.hex.makeVec2(mist.hex.pointToHex(avg)), {1, 1, 1, 0.3})
+		
+		for i = 1, #points-1 do
+			--mist.marker.add({mType = "line", points = {points[i], points[i+1]}})
+			local res = mist.hex.lineDraw(mist.hex.pointToHex(points[i]), mist.hex.pointToHex(points[i+1]))
+			for j = 1, #res do
+				local hash = mist.hex.hash(res[j])
+				
+				if not drawn[hash] then
+					drawn[hash] = res[j]
+					table.insert(indexed, res[j])
+					local point = mist.hex.makeVec2(res[j])
+					--drawHex(point)
+					--mist.marker.add({mType = "text", text = hash, point = point })
+					meta.count = meta.count + 1
+				end
+				
+				
+			end
+			
+			--log:echo(res)
+		end
+		local row = {}
+		if fill then
+			local poly = mist.utils.deepCopy(drawn)
+			
+			for hexName, hex in pairs(poly) do
+				if not row[hex.r] then
+					row[hex.r] = {maxQ = 0, minQ = math.huge}
+				end
+				if hex.q > row[hex.r].maxQ then
+					row[hex.r].maxQ = mist.utils.deepCopy(hex.q)
+				end
+				if hex.q < row[hex.r].minQ then
+					row[hex.r].minQ = mist.utils.deepCopy(hex.q)
+				end
+				row[hex.r][hex.q] = hex
+				
+				if hex.r > meta.maxR then
+					meta.maxR = mist.utils.deepCopy(hex.r)
+				end
+				if  hex.r < meta.minR then
+					meta.minR = mist.utils.deepCopy(hex.r)
+				end
+
+			end
+			
+			for rIndex, rData in pairs(row) do
+				local skip = {}
+				local draws = {}
+				local crosses = 0
+				local lastClear
+				for i = rData.minQ+1, rData.maxQ-1 do
+					local newHex = {q = i, r = rIndex, s = -rIndex-i}
+					local hash = mist.hex.hash(newHex)
+					local hexPoint = mist.hex.makeVec2(newHex)
+					if (not drawn[hash]) and mist.pointInPolygon(hexPoint, p) then			--- still think there is a faster way than checking old point in polygon, but whatever. 
+						row[rIndex][newHex.q] = newHex
+						drawn[hash] = newHex
+						--drawHex(hexPoint, {0, 1, 0, 0.5})
+						--mist.marker.add({mType = "text", text = hash, point = hexPoint })
+						meta.count = meta.count + 1
+					end
+				end
+				
+			end
+			meta.row = row
+			--return {hexes = drawn, meta = meta}
+		end
+		if drawn["0 0 -0"] then
+			drawn["0 0 0"] = {r = 0, q = 0, s = 0}
+			drawn["0 0 -0"] = nil 
+		end
+		
+		return drawn
+
+	end
+	
+	function mist.hex.aStar(s, d, b)
+		local blocked = b or {}
+		local destHash = mist.hex.hash(d)
+		local startHash = mist.hex.hash(s)
+		local check = {{hex = s, d = 0, c = 0, hash = startHash}}
+		local visited = {[startHash] = {hex = s, d = 0, c = 0, hash = startHash, nBlock = {}}}
+		
+		
+		local function hurVec(p1, p2)
+			return mist.utils.get2DDist(mist.hex.makeVec3(p1), mist.hex.makeVec3(p2))
+		end
+		
+		local costRadius = mist.hex.getRadius()
+		
+		
+		local count = 0
+		while #check > 0 do
+			local fHex = check[1]
+			count = count + 1
+			if count > 5000 then
+				return "FAIL", count
+			end
+			for x = 1, 6 do
+				local hex = mist.hex.neighbor(fHex.hex, x)
+				local hash = mist.hex.hash(hex)
+				if blocked[hash] then
+					table.insert(visited[fHex.hash].nBlock, hex)
+				end
+
+				if not visited[hash] and not blocked[hash] then
+					--local cost = visited[fHex.hash].c + 1 	-- "score"
+					-- if blocked[hash] then -- add entry to fHex in visited stating it has a blocking neighbor. Would be used for simplification of the route. 
+					
+					local cost = hurVec(d, hex)/costRadius + fHex.c
+					local add = {hex = hex, d = fHex.d + 1, f = fHex.hex, hash = hash, c = cost, nBlock = {}}
+					visited[hash] = add
+					for i = 1, #check do
+						if cost < check[i].c then
+							table.insert(check, i, add)
+							break
+						elseif i == #check then
+							table.insert(check, add)
+							break
+						end
+					end
+					
+				end
+				if destHash == hash then
+					return visited, checks 
+				end
+			end
+			for i = 1, #check do
+				if fHex.hash == check[i].hash then
+					table.remove(check, i)
+					break
+				end
+			end
+		end
 	end
 
 end
