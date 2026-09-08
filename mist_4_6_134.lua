@@ -35,7 +35,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 6
-mist.build = 133
+mist.build = 134
 
 -- forward declaration of log shorthand
 local log
@@ -1492,7 +1492,7 @@ do -- the main scope
 
 			if Object.getCategory(event.initiator) == 1  then 
 				--log:info('Object is a Unit')
-				timer.scheduleFunction(delayedSpawnedGroup, event, event.time + 0.5)
+				timer.scheduleFunction(delayedSpawnedGroup, event, event.time + 1.1)
 			elseif Object.getCategory(event.initiator) == 3 or Object.getCategory(event.initiator) == 6 then
 				--log:info('staticSpawnEvent')
 				--log:info(event)
@@ -9809,48 +9809,80 @@ do
 		
 		
 		local count = 0
-		while #check > 0 do
-			local fHex = check[1]
-			count = count + 1
-			if count > 5000 then
-				return "FAIL", count
-			end
-			for x = 1, 6 do
-				local hex = mist.hex.neighbor(fHex.hex, x)
-				local hash = mist.hex.hash(hex)
-				if blocked[hash] then
-					table.insert(visited[fHex.hash].nBlock, hex)
+		local function astar()
+			while #check > 0 do
+				local fHex = check[1]
+				count = count + 1
+				if count > 5000 then
+					return "FAIL", count
 				end
-
-				if not visited[hash] and not blocked[hash] then
-					--local cost = visited[fHex.hash].c + 1 	-- "score"
-					-- if blocked[hash] then -- add entry to fHex in visited stating it has a blocking neighbor. Would be used for simplification of the route. 
-					
-					local cost = hurVec(d, hex)/costRadius + fHex.c
-					local add = {hex = hex, d = fHex.d + 1, f = fHex.hex, hash = hash, c = cost, nBlock = {}}
-					visited[hash] = add
-					for i = 1, #check do
-						if cost < check[i].c then
-							table.insert(check, i, add)
-							break
-						elseif i == #check then
-							table.insert(check, add)
-							break
-						end
+				for x = 1, 6 do
+					local hex = mist.hex.neighbor(fHex.hex, x)
+					local hash = mist.hex.hash(hex)
+					if blocked[hash] then
+						table.insert(visited[fHex.hash].nBlock, hex)
 					end
-					
+
+					if not visited[hash] and not blocked[hash] then
+						--local cost = visited[fHex.hash].c + 1 	-- "score"
+						-- if blocked[hash] then -- add entry to fHex in visited stating it has a blocking neighbor. Would be used for simplification of the route. 
+						
+						local cost = hurVec(d, hex)/costRadius + fHex.c
+						local add = {hex = hex, d = fHex.d + 1, f = fHex.hex, hash = hash, c = cost, nBlock = {}}
+						visited[hash] = add
+						for i = 1, #check do
+							if cost < check[i].c then
+								table.insert(check, i, add)
+								break
+							elseif i == #check then
+								table.insert(check, add)
+								break
+							end
+						end
+						
+					end
+					if destHash == hash then
+						return visited, count 
+					end
 				end
-				if destHash == hash then
-					return visited, checks 
-				end
-			end
-			for i = 1, #check do
-				if fHex.hash == check[i].hash then
-					table.remove(check, i)
-					break
+				for i = 1, #check do
+					if fHex.hash == check[i].hash then
+						table.remove(check, i)
+						break
+					end
 				end
 			end
 		end
+		local status = astar()
+		if type(status) == "table" then
+			local route = {}
+			
+			local routePoints = {}
+			
+			local function getPathOptmized(hex)
+				local hashed = mist.hex.hash(hex)
+				--log:echo(status[hashed])
+				if status[hashed] and status[hashed].f then	
+					--log:echo(status[hashed].f)
+					--mist.marker.add({mType = "arrow", color = {0, 0, 1}, lineType = 1, points = {mist.hex.makeVec3(mist.hex.hashToHex(hashed)), mist.hex.makeVec3(status[hashed].f)}})
+					route[hashed] = true
+					table.insert(routePoints, 1, mist.hex.makeVec3(mist.hex.hashToHex(hashed)))
+					
+					--[[
+					if #status[hashed].nBlock > 0 then
+						local point =  mist.hex.makeVec3(mist.hex.hashToHex(hashed))
+						point.hash = hashed
+						--table.insert(routePoints, 1, point)
+					end
+					]]
+					getPathOptmized(status[hashed].f)
+				end
+			end
+			getPathOptmized(d)
+			return routePoints
+		
+		end
+		
 	end
 
 end
