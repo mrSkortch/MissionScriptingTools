@@ -35,7 +35,7 @@ mist = {}
 -- don't change these
 mist.majorVersion = 4
 mist.minorVersion = 6
-mist.build = 134
+mist.build = 135
 
 -- forward declaration of log shorthand
 local log
@@ -7911,7 +7911,7 @@ do
             if mist.DBs.markList[e.idx] then
                mist.DBs.markList[e.idx].text = e.text
             end
-        elseif  world.event.S_EVENT_MARK_REMOVE == e.id and e.idx then
+        elseif  world.event.S_EVENT_MARK_REMOVED == e.id and e.idx then
             if mist.DBs.markList[e.idx] then
                mist.DBs.markList[e.idx] = nil
             end
